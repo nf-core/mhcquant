@@ -19,16 +19,26 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/openmspeptidequant --mzmls '*_R{1,2}.fastq.gz' --fasta -profile standard,docker
+    nextflow run nf-core/openmspeptidequant --mzmls '*.mzML' --fasta '*.fasta' -profile standard,docker
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes)
+      --mzmls                       Path to input data (must be surrounded with quotes)
       --fasta                       Path to Fasta reference
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: standard, conda, docker, singularity, awsbatch, test
 
     Options:
-      --singleEnd                   Specifies that the input is single end reads
+      --precursor_mass_tolerance    Mass tolerance of precursor mass (ppm)
+      --fragment_mass_tolerance     Mass tolerance of fragment mass bin (ppm)
+      --fragment_bin_offset         Offset of fragment mass bin (Comet specific parameter)
+      --fdr_threshold               Threshold for FDR filtering
+      --fdr_level                   Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
+      --digest_mass_range           Mass range of peptides considered for matching
+      --activation_method           Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
+      --enzyme                      Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
+      --number_mods                 Maximum number of modifications of PSMs
+      --fixed_mods                  Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
+      --variable_mods               Variable modifications ('Oxidation (M)', see OpenMS modifications)
 
     Other options:
       --outdir                      The output directory where the results will be saved
