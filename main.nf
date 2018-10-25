@@ -52,6 +52,29 @@ def helpMessage() {
 }
 
 
+//set directories
+pwd_path = "/Users/bichmann/Projects/Replicate_Workflow/NextFlow"
+openms_path = "/Users/bichmann/Programs/OpenMS/OpenMS_build/bin"
+results_path = "${pwd_path}/results"
+comet_executable_path = "/Users/bichmann/Programs/OpenMS/OpenMS/THIRDPARTY/MacOS/64bit/Comet/comet.exe"
+percolator_executable_path = "/Users/bichmann/Programs/OpenMS/OpenMS/THIRDPARTY/MacOS/64bit/Percolator/percolator"
+
+
+
+// fasta database
+params.fasta = "${pwd_path}/HUMAN_2014.fasta"
+fastafile = file(params.fasta)
+
+
+
+// mzml files
+params.mzmlfiles = "${pwd_path}/*.mzML"
+mzml_files = Channel
+                .fromPath(params.mzmlfiles)
+                .map { file -> tuple(file.baseName, file) }
+                .into {mzmlfiles_search ; mzmlfiles_align}
+
+
 / Parameters
 params.num_threads = 5
 
