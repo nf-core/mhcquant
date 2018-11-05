@@ -70,15 +70,6 @@ params.outdir = params.outdir ?: { log.warn "No output directory provided. Will 
 
 
 
-
-// mzml files
-params.mzmlfiles = "${pwd_path}/*.mzML"
-mzml_files = Channel
-                .fromPath(params.mzmlfiles)
-                .map { file -> tuple(file.baseName, file) }
-                .into {mzmlfiles_search ; mzmlfiles_align}
-
-
 / Parameters
 params.num_threads = 5
 
@@ -100,15 +91,11 @@ params.enzyme = 'unspecific cleavage'
 params.fixed_mods = ''
 params.variable_mods = 'Oxidation (M)'
 
+
 /*
  * SET UP CONFIGURATION VARIABLES
  */
 
-// Show help emssage
-if (params.help){
-    helpMessage()
-    exit 0
-}
 
 // Configurable variables
 params.name = false
@@ -117,11 +104,6 @@ params.plaintext_email = false
 
 output_docs = file("$baseDir/docs/output.md")
 
-// Validate inputs
-if ( params.fasta ){
-    fasta = file(params.fasta)
-    if( !fasta.exists() ) exit 1, "Fasta file not found: ${params.fasta}"
-}
 
 // AWSBatch sanity checking
 if(workflow.profile == 'awsbatch'){
