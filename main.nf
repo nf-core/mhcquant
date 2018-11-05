@@ -51,19 +51,23 @@ def helpMessage() {
     """.stripIndent()
 }
 
+/*
+ * SET UP CONFIGURATION VARIABLES
+ */
 
-//set directories
-pwd_path = "/Users/bichmann/Projects/Replicate_Workflow/NextFlow"
-openms_path = "/Users/bichmann/Programs/OpenMS/OpenMS_build/bin"
-results_path = "${pwd_path}/results"
-comet_executable_path = "/Users/bichmann/Programs/OpenMS/OpenMS/THIRDPARTY/MacOS/64bit/Comet/comet.exe"
-percolator_executable_path = "/Users/bichmann/Programs/OpenMS/OpenMS/THIRDPARTY/MacOS/64bit/Percolator/percolator"
+// Show help emssage
+if (params.help){
+    helpMessage()
+    exit 0
+}
 
 
+// Validate inputs
+params.mzmls ?: params.mzmlPaths ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+params.fasta ?: params.fastaPath ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
+params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
-// fasta database
-params.fasta = "${pwd_path}/HUMAN_2014.fasta"
-fastafile = file(params.fasta)
+
 
 
 
