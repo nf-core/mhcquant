@@ -248,7 +248,7 @@ process generate_decoy_database {
      
     script:
      """
-     ${openms_path}/DecoyDatabase  -in ${fastafile} -out ${fastafile.baseName}_decoy.fasta -decoy_string DECOY_ -decoy_string_position prefix
+     DecoyDatabase  -in ${fastafile} -out ${fastafile.baseName}_decoy.fasta -decoy_string DECOY_ -decoy_string_position prefix
      """
 }
 
@@ -268,7 +268,7 @@ process db_search_comet {
 
     script:
      """
-     ${openms_path}/CometAdapter -comet_executable ${comet_executable_path} -in ${mzml_file} -out ${mzmlID}.idXML -threads ${params.num_threads} -database ${fasta_decoy} -precursor_mass_tolerance ${params.pmt} -fragment_bin_tolerance ${params.fmt} -fragment_bin_offset ${params.fbo} -num_hits ${params.num_hits} -digest_mass_range ${params.dmr} -max_variable_mods_in_peptide ${params.maxmod} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activ_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
+     CometAdapter -comet_executable ${comet_executable_path} -in ${mzml_file} -out ${mzmlID}.idXML -threads ${params.num_threads} -database ${fasta_decoy} -precursor_mass_tolerance ${params.pmt} -fragment_bin_tolerance ${params.fmt} -fragment_bin_offset ${params.fbo} -num_hits ${params.num_hits} -digest_mass_range ${params.dmr} -max_variable_mods_in_peptide ${params.maxmod} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activ_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
      """
 
 }
@@ -289,7 +289,7 @@ process index_peptides {
 
     script:
      """
-     ${openms_path}/PeptideIndexer -in ${id_file} -out ${ID_idx}_idx.idXML -threads ${params.num_threads} -fasta ${fasta_decoy} -decoy_string DECOY -enzyme:specificity none
+     PeptideIndexer -in ${id_file} -out ${ID_idx}_idx.idXML -threads ${params.num_threads} -fasta ${fasta_decoy} -decoy_string DECOY -enzyme:specificity none
      """
 
 }
@@ -309,7 +309,7 @@ process calculate_fdr_for_idalignment {
 
     script:
      """
-     ${openms_path}/FalseDiscoveryRate -in ${id_file_idx} -out ${ID_idx_fdr}_fdr.idXML -threads ${params.num_threads}
+     FalseDiscoveryRate -in ${id_file_idx} -out ${ID_idx_fdr}_fdr.idXML -threads ${params.num_threads}
      """
 
 }
@@ -329,7 +329,7 @@ process filter_fdr_for_idalignment {
 
     script:
      """
-     ${openms_path}/IDFilter -in ${id_file_idx_fdr} -out ${ID_idx_fdr_filtered}_filtered.idXML -threads ${params.num_threads} -score:pep 0.05  -remove_decoys
+     IDFilter -in ${id_file_idx_fdr} -out ${ID_idx_fdr_filtered}_filtered.idXML -threads ${params.num_threads} -score:pep 0.05  -remove_decoys
      """
 
 }
@@ -350,7 +350,7 @@ process align_ids {
     script:
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
      """
-     ${openms_path}/MapAlignerIdentification -in $id_names -trafo_out $out_names
+     MapAlignerIdentification -in $id_names -trafo_out $out_names
      """
 
 }
@@ -371,7 +371,7 @@ process align_mzml_files {
 
     script:
      """
-     ${openms_path}/MapRTTransformer -in ${mzml_file_align} -trafo_in ${id_file_trafo} -out ${mzmlID_align}_aligned.mzML -threads ${params.num_threads}
+     MapRTTransformer -in ${mzml_file_align} -trafo_in ${id_file_trafo} -out ${mzmlID_align}_aligned.mzML -threads ${params.num_threads}
      """
 
 }
@@ -392,7 +392,7 @@ process align_idxml_files {
 
     script:
      """
-     ${openms_path}/MapRTTransformer -in ${idxml_file_align} -trafo_in ${idxml_file_trafo} -out ${ID_align}_aligned.idXML -threads ${params.num_threads}
+     MapRTTransformer -in ${idxml_file_align} -trafo_in ${idxml_file_trafo} -out ${ID_align}_aligned.idXML -threads ${params.num_threads}
      """
 
 }
@@ -413,7 +413,7 @@ process merge_aligned_idxml_files {
     
     script:
      """
-     ${openms_path}/IDMerger -in $ids_aligned -out all_ids_merged.idXML -threads ${params.num_threads}  -annotate_file_origin
+     IDMerger -in $ids_aligned -out all_ids_merged.idXML -threads ${params.num_threads}  -annotate_file_origin
      """
 
 }
@@ -433,7 +433,7 @@ process extract_psm_features_for_percolator {
 
     script:
      """
-     ${openms_path}/PSMFeatureExtractor -in ${id_file_merged} -out ${ID_psm}_psm.idXML -threads ${params.num_threads} 
+     PSMFeatureExtractor -in ${id_file_merged} -out ${ID_psm}_psm.idXML -threads ${params.num_threads} 
      """
 
 }
@@ -453,7 +453,7 @@ process run_percolator {
 
     script:
      """
-     ${openms_path}/PercolatorAdapter -in ${id_file_psm} -out ${ID_perc}_psm_perc.idXML -threads ${params.num_threads} -enzyme no_enzyme -percolator_executable ${percolator_executable_path}
+     PercolatorAdapter -in ${id_file_psm} -out ${ID_perc}_psm_perc.idXML -threads ${params.num_threads} -enzyme no_enzyme -percolator_executable ${percolator_executable_path}
      """
 
 }
@@ -473,7 +473,7 @@ process filter_q_value {
 
     script:
      """
-     ${openms_path}/IDFilter -in ${id_file_perc} -out ${ID_perc_filtered}_psm_perc_filtered.idXML -threads ${params.num_threads} -score:pep 9999  -remove_decoys
+     IDFilter -in ${id_file_perc} -out ${ID_perc_filtered}_psm_perc_filtered.idXML -threads ${params.num_threads} -score:pep 9999  -remove_decoys
      """
 
 }
@@ -494,7 +494,7 @@ process quantify_identifications_targeted {
 
     script:
      """
-     ${openms_path}/FeatureFinderIdentification -in ${mzml_quant} -id ${id_file_quant} -out ${FEAT_quant}.featureXML -threads ${params.num_threads}
+     FeatureFinderIdentification -in ${mzml_quant} -id ${id_file_quant} -out ${FEAT_quant}.featureXML -threads ${params.num_threads}
      """
 
 }
@@ -514,7 +514,7 @@ process link_extracted_features {
     
     script:
      """
-     ${openms_path}/FeatureLinkerUnlabeledKD -in $feautres -out 'all_features_merged.consensusXML' -threads ${params.num_threads}
+     FeatureLinkerUnlabeledKD -in $feautres -out 'all_features_merged.consensusXML' -threads ${params.num_threads}
      """
 
 }
@@ -534,7 +534,7 @@ process resolve_conflicts {
 
     script:
      """
-     ${openms_path}/IDConflictResolver -in ${consensus} -out ${CONS}_resolved.consensusXML -threads ${params.num_threads}
+     IDConflictResolver -in ${consensus} -out ${CONS}_resolved.consensusXML -threads ${params.num_threads}
      """
 
 }
@@ -554,7 +554,7 @@ process export_text {
 
     script:
      """
-     ${openms_path}/TextExporter -in ${consensus_resolved} -out ${CONS_resolved}.csv -threads ${params.num_threads} -id:add_hit_metavalues 0 -id:add_metavalues 0 -id:peptides_only
+     TextExporter -in ${consensus_resolved} -out ${CONS_resolved}.csv -threads ${params.num_threads} -id:add_hit_metavalues 0 -id:add_metavalues 0 -id:peptides_only
      """
 
 }
