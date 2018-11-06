@@ -1,4 +1,4 @@
-# nf-core/openmspeptidequant
+# ![nf-core/openmspeptidequant](https://raw.githubusercontent.com/nf-core/openmspeptidequant/master/docs/images/openmspeptidequant_logo.png)
 **Identify and quantify peptides from mass spectrometry raw data**
 
 [![Build Status](https://travis-ci.org/nf-core/openmspeptidequant.svg?branch=master)](https://travis-ci.org/nf-core/openmspeptidequant)
