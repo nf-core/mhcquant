@@ -39,8 +39,14 @@ def helpMessage() {
       --number_mods                 Maximum number of modifications of PSMs
       --fixed_mods                  Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
       --variable_mods               Variable modifications ('Oxidation (M)', see OpenMS modifications)
+      --num_hits                    Number of reported hits
+      --centroided                  Specify whether mzml data is peak picked or not ("True", "False")
+      --pick_ms_levels              The ms level used for peak picking (eg. 1, 2)
+      --prec_charge                 Precursor charge (eg. "2:3")
+
 
     Other options:
+      --num_thread                  The number of threads used for execution
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -74,19 +80,20 @@ params.outdir = params.outdir ?: { log.warn "No output directory provided. Will 
  */
 params.num_threads = 5
 
-params.fmt = 0.02
-params.pmt = 5
-params.fbo = 0
-params.fdr = 0.01
-params.maxmod = 3
+params.fragment_mass_tolerance = 0.02
+params.precursor_mass_tolerance = 5
+params.fragment_bin_offset = 0
+params.fdr_threshold = 0.01
+params.fdr_level = 'peptide-level-fdrs'
+params.number_mods = 3
 
 params.num_hits = 1
-params.dmr = "800:2500"
-params.msLevels = 2
+params.digest_mass_range = "800:2500"
+params.pick_ms_levels = 2
 params.centroided = "False"
 
 params.prec_charge = '2:3'
-params.activ_method = 'ALL'
+params.activation_method = 'ALL'
 
 params.enzyme = 'unspecific cleavage'
 params.fixed_mods = ''
@@ -133,7 +140,7 @@ if( workflow.profile == 'awsbatch') {
 Channel
     .from( params.mzmls )
     .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-    .into { input_mzmls }
+    .into { input_mzmls, input_mzmls_align }
 
 
 /*
@@ -351,7 +358,7 @@ process align_mzml_files {
 
     input:
      set ID_trafo_mzml, file(id_file_trafo) from id_files_trafo_mzml
-     set mzmlID_align, file(mzml_file_align) from mzmlfiles_align
+     set mzmlID_align, file(mzml_file_align) from input_mzmls_align
 
     output:
      set mzmlID_align, file("${mzmlID_align}_aligned.mzML") into mzml_files_aligned
