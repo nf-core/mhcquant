@@ -111,13 +111,6 @@ if(workflow.profile == 'awsbatch'){
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
 
-//
-// NOTE - THIS IS NOT USED IN THIS PIPELINE, EXAMPLE ONLY
-// If you want to use the above in a process, define the following:
-//   input:
-//   file fasta from fasta
-//
-
 
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
@@ -132,29 +125,31 @@ if( workflow.profile == 'awsbatch') {
     if(!workflow.workDir.startsWith('s3:') || !params.outdir.startsWith('s3:')) exit 1, "Workdir or Outdir not on S3 - specify S3 Buckets for each to run on AWSBatch!"
 }
 
+
 /*
- * Create a channel for input read files
+ * Create a channel for input mzml files
  */
- if(params.readPaths){
-     if(params.singleEnd){
-         Channel
-             .from(params.readPaths)
-             .map { row -> [ row[0], [file(row[1][0])]] }
-             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-             .into { read_files_fastqc; read_files_trimming }
-     } else {
-         Channel
-             .from(params.readPaths)
-             .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-             .into { read_files_fastqc; read_files_trimming }
-     }
- } else {
+if(params.mzmlPaths){
      Channel
-         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nIf this is single-end data, please specify --singleEnd on the command line." }
-         .into { read_files_fastqc; read_files_trimming }
- }
+         .from( params.mzmlPaths )
+         .map { row -> [ row[0], [file(row[1][0])]] }
+         .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
+         .into { input_mzmls}
+} else {
+     Channel
+         .from( params.mzmls )
+         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+         .into { input_mzmls }
+}
+
+
+/*
+ * Create a channel for input fasta file
+ */
+Channel
+    .from( params.mzmlPaths )
+    .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+    .into { input_fasta}
 
 
 // Header log info
@@ -242,7 +237,7 @@ process generate_decoy_database {
     publishDir "${results_path}/"
 
     input:
-     file fastafile
+     file fastafile from input_fasta
     output:
      file "${fastafile.baseName}_decoy.fasta" into fastafile_decoy
      
