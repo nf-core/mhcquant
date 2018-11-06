@@ -69,8 +69,9 @@ params.outdir = params.outdir ?: { log.warn "No output directory provided. Will 
 
 
 
-
-/ Parameters
+/*
+ * Define the default parameters
+ */
 params.num_threads = 5
 
 params.fmt = 0.02
@@ -129,18 +130,10 @@ if( workflow.profile == 'awsbatch') {
 /*
  * Create a channel for input mzml files
  */
-if(params.mzmlPaths){
-     Channel
-         .from( params.mzmlPaths )
-         .map { row -> [ row[0], [file(row[1][0])]] }
-         .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-         .into { input_mzmls}
-} else {
-     Channel
-         .from( params.mzmls )
-         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-         .into { input_mzmls }
-}
+Channel
+    .from( params.mzmls )
+    .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+    .into { input_mzmls }
 
 
 /*
@@ -166,9 +159,8 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/openmspeptidequant'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Reads']        = params.reads
+summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
-summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -239,7 +231,7 @@ process generate_decoy_database {
     input:
      file fastafile from input_fasta
     output:
-     file "${fastafile.baseName}_decoy.fasta" into fastafile_decoy
+     file "${fastafile.baseName}_decoy.fasta" into {fastafile_decoy_1, fastafile_decoy_2}
      
     script:
      """
@@ -255,8 +247,8 @@ process db_search_comet {
     publishDir "${results_path}/"
  
     input:
-     set mzmlID, file(mzml_file) from mzmlfiles_search
-     file fasta_decoy from fastafile_decoy
+     set mzmlID, file(mzml_file) from input_mzmls
+     file fasta_decoy from fastafile_decoy_1
 
     output:
      set mzmlID, file("${mzmlID}.idXML") into id_files
@@ -277,7 +269,7 @@ process index_peptides {
  
     input:
      set ID_idx, file(id_file) from id_files
-     file fasta_decoy from fastafile_decoy
+     file fasta_decoy from fastafile_decoy_2
 
     output:
      set ID_idx, file("${ID_idx}_idx.idXML") into id_files_idx, id_files_idx_original
