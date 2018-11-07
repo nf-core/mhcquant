@@ -19,21 +19,34 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/openmspeptidequant --reads '*_R{1,2}.fastq.gz' -profile standard,docker
+    nextflow run nf-core/openmspeptidequant --mzmls '*.mzML' --fasta '*.fasta' -profile standard,docker
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes)
-      --genome                      Name of iGenomes reference
+      --mzmls                       Path to input data (must be surrounded with quotes)
+      --fasta                       Path to Fasta reference
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: standard, conda, docker, singularity, awsbatch, test
 
     Options:
-      --singleEnd                   Specifies that the input is single end reads
+      --precursor_mass_tolerance    Mass tolerance of precursor mass (ppm)
+      --fragment_mass_tolerance     Mass tolerance of fragment mass bin (ppm)
+      --fragment_bin_offset         Offset of fragment mass bin (Comet specific parameter)
+      --fdr_threshold               Threshold for FDR filtering
+      --fdr_level                   Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
+      --digest_mass_range           Mass range of peptides considered for matching
+      --activation_method           Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
+      --enzyme                      Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
+      --number_mods                 Maximum number of modifications of PSMs
+      --fixed_mods                  Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
+      --variable_mods               Variable modifications ('Oxidation (M)', see OpenMS modifications)
+      --num_hits                    Number of reported hits
+      --centroided                  Specify whether mzml data is peak picked or not ("True", "False")
+      --pick_ms_levels              The ms level used for peak picking (eg. 1, 2)
+      --prec_charge                 Precursor charge (eg. "2:3")
 
-    References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --fasta                       Path to Fasta reference
 
     Other options:
+      --num_thread                  The number of threads used for execution
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -54,32 +67,57 @@ if (params.help){
     exit 0
 }
 
+
+// Validate inputs
+params.mzmls ?: params.mzmlPaths ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+params.fasta ?: params.fastaPath ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
+params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
+
+
+
+/*
+ * Define the default parameters
+ */
+params.num_threads = 5
+
+params.fragment_mass_tolerance = 0.02
+params.precursor_mass_tolerance = 5
+params.fragment_bin_offset = 0
+params.fdr_threshold = 0.01
+params.fdr_level = 'peptide-level-fdrs'
+params.number_mods = 3
+
+params.num_hits = 1
+params.digest_mass_range = "800:2500"
+params.pick_ms_levels = 2
+params.centroided = "False"
+
+params.prec_charge = '2:3'
+params.activation_method = 'ALL'
+
+params.enzyme = 'unspecific cleavage'
+params.fixed_mods = ''
+params.variable_mods = 'Oxidation (M)'
+
+
+/*
+ * SET UP CONFIGURATION VARIABLES
+ */
+
+
 // Configurable variables
 params.name = false
-params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
-params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
 params.plaintext_email = false
 
-multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 
-// Validate inputs
-if ( params.fasta ){
-    fasta = file(params.fasta)
-    if( !fasta.exists() ) exit 1, "Fasta file not found: ${params.fasta}"
-}
+
 // AWSBatch sanity checking
 if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
-//
-// NOTE - THIS IS NOT USED IN THIS PIPELINE, EXAMPLE ONLY
-// If you want to use the above in a process, define the following:
-//   input:
-//   file fasta from fasta
-//
 
 
 // Has the run name been specified by the user?
@@ -95,29 +133,23 @@ if( workflow.profile == 'awsbatch') {
     if(!workflow.workDir.startsWith('s3:') || !params.outdir.startsWith('s3:')) exit 1, "Workdir or Outdir not on S3 - specify S3 Buckets for each to run on AWSBatch!"
 }
 
+
 /*
- * Create a channel for input read files
+ * Create a channel for input mzml files
  */
- if(params.readPaths){
-     if(params.singleEnd){
-         Channel
-             .from(params.readPaths)
-             .map { row -> [ row[0], [file(row[1][0])]] }
-             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-             .into { read_files_fastqc; read_files_trimming }
-     } else {
-         Channel
-             .from(params.readPaths)
-             .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-             .into { read_files_fastqc; read_files_trimming }
-     }
- } else {
-     Channel
-         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nIf this is single-end data, please specify --singleEnd on the command line." }
-         .into { read_files_fastqc; read_files_trimming }
- }
+Channel
+    .from( params.mzmls )
+    .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+    .into { input_mzmls, input_mzmls_align }
+
+
+/*
+ * Create a channel for input fasta file
+ */
+Channel
+    .from( params.mzmlPaths )
+    .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+    .into { input_fasta}
 
 
 // Header log info
@@ -134,9 +166,8 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/openmspeptidequant'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Reads']        = params.reads
+summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
-summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -198,72 +229,328 @@ process get_software_versions {
 }
 
 
-
 /*
- * STEP 1 - FastQC
+ * STEP 1 - generate reversed decoy database
  */
-process fastqc {
-    tag "$name"
-    publishDir "${params.outdir}/fastqc", mode: 'copy',
-        saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
+process generate_decoy_database {
+    publishDir "${results_path}/"
 
     input:
-    set val(name), file(reads) from read_files_fastqc
-
+     file fastafile from input_fasta
     output:
-    file "*_fastqc.{zip,html}" into fastqc_results
-
+     file "${fastafile.baseName}_decoy.fasta" into {fastafile_decoy_1, fastafile_decoy_2}
+     
     script:
-    """
-    fastqc -q $reads
-    """
+     """
+     DecoyDatabase  -in ${fastafile} -out ${fastafile.baseName}_decoy.fasta -decoy_string DECOY_ -decoy_string_position prefix
+     """
 }
 
 
-
 /*
- * STEP 2 - MultiQC
+ * STEP 2 - run comet database search
  */
-process multiqc {
-    publishDir "${params.outdir}/MultiQC", mode: 'copy'
-
+process db_search_comet {
+    publishDir "${results_path}/"
+ 
     input:
-    file multiqc_config
-    file ('fastqc/*') from fastqc_results.collect()
-    file ('software_versions/*') from software_versions_yaml
-    file workflow_summary from create_workflow_summary(summary)
+     set mzmlID, file(mzml_file) from input_mzmls
+     file fasta_decoy from fastafile_decoy_1
 
     output:
-    file "*multiqc_report.html" into multiqc_report
-    file "*_data"
+     set mzmlID, file("${mzmlID}.idXML") into id_files
 
     script:
-    rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-    rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-    """
-    multiqc -f $rtitle $rfilename --config $multiqc_config .
-    """
+     """
+     CometAdapter -comet_executable ${comet_executable_path} -in ${mzml_file} -out ${mzmlID}.idXML -threads ${params.num_threads} -database ${fasta_decoy} -precursor_mass_tolerance ${params.pmt} -fragment_bin_tolerance ${params.fmt} -fragment_bin_offset ${params.fbo} -num_hits ${params.num_hits} -digest_mass_range ${params.dmr} -max_variable_mods_in_peptide ${params.maxmod} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activ_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
+     """
+
 }
 
 
-
 /*
- * STEP 3 - Output Description HTML
+ * STEP 3 - index decoy and target hits
  */
-process output_documentation {
-    tag "$prefix"
-    publishDir "${params.outdir}/Documentation", mode: 'copy'
-
+process index_peptides {
+    publishDir "${results_path}/"
+ 
     input:
-    file output_docs
+     set ID_idx, file(id_file) from id_files
+     file fasta_decoy from fastafile_decoy_2
 
     output:
-    file "results_description.html"
+     set ID_idx, file("${ID_idx}_idx.idXML") into id_files_idx, id_files_idx_original
 
     script:
-    """
-    markdown_to_html.r $output_docs results_description.html
-    """
+     """
+     PeptideIndexer -in ${id_file} -out ${ID_idx}_idx.idXML -threads ${params.num_threads} -fasta ${fasta_decoy} -decoy_string DECOY -enzyme:specificity none
+     """
+
+}
+
+
+/*
+ * STEP 4 - calculate fdr for id based alignment
+ */
+process calculate_fdr_for_idalignment {
+    publishDir "${results_path}/"
+ 
+    input:
+     set ID_idx_fdr, file(id_file_idx) from id_files_idx
+
+    output:
+     set ID_idx_fdr, file("${ID_idx_fdr}_fdr.idXML") into id_files_idx_fdr
+
+    script:
+     """
+     FalseDiscoveryRate -in ${id_file_idx} -out ${ID_idx_fdr}_fdr.idXML -threads ${params.num_threads}
+     """
+
+}
+
+
+/*
+ * STEP 5 - filter fdr for id based alignment
+ */
+process filter_fdr_for_idalignment {
+    publishDir "${results_path}/"
+ 
+    input:
+     set ID_idx_fdr_filtered, file(id_file_idx_fdr) from id_files_idx_fdr
+
+    output:
+     set ID_idx_fdr_filtered, file("${ID_idx_fdr_filtered}_filtered.idXML") into id_files_idx_fdr_filtered
+
+    script:
+     """
+     IDFilter -in ${id_file_idx_fdr} -out ${ID_idx_fdr_filtered}_filtered.idXML -threads ${params.num_threads} -score:pep 0.05  -remove_decoys
+     """
+
+}
+
+
+/*
+ * STEP 6 - compute alignment rt transformation
+ */
+process align_ids {
+   publishDir "${results_path}/"
+
+    input:
+     file id_names from id_files_idx_fdr_filtered.collect{it[1]}
+
+    output:
+     file '*.trafoXML' into id_files_trafo_mzml, id_files_trafo_idxml
+
+    script:
+     def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
+     """
+     MapAlignerIdentification -in $id_names -trafo_out $out_names
+     """
+
+}
+
+
+/*
+ * STEP 7 - align mzML files using trafoXMLs
+ */
+process align_mzml_files {
+    publishDir "${results_path}/"
+
+    input:
+     set ID_trafo_mzml, file(id_file_trafo) from id_files_trafo_mzml
+     set mzmlID_align, file(mzml_file_align) from input_mzmls_align
+
+    output:
+     set mzmlID_align, file("${mzmlID_align}_aligned.mzML") into mzml_files_aligned
+
+    script:
+     """
+     MapRTTransformer -in ${mzml_file_align} -trafo_in ${id_file_trafo} -out ${mzmlID_align}_aligned.mzML -threads ${params.num_threads}
+     """
+
+}
+
+
+/*
+ * STEP 8 - align unfiltered idXMLfiles using trafoXMLs
+ */
+process align_idxml_files {
+    publishDir "${results_path}/"
+
+    input:
+     set ID_trafo_idxml, file(idxml_file_trafo) from id_files_trafo_idxml
+     set ID_align, file(idxml_file_align) from id_files_idx_original
+
+    output:
+     set ID_align, file("${ID_align}_aligned.idXML") into idxml_files_aligned
+
+    script:
+     """
+     MapRTTransformer -in ${idxml_file_align} -trafo_in ${idxml_file_trafo} -out ${ID_align}_aligned.idXML -threads ${params.num_threads}
+     """
+
+}
+
+
+/*
+ * STEP 9 - merge aligned idXMLfiles
+ */
+process merge_aligned_idxml_files {
+    publishDir "${results_path}/"
+
+    input:
+     //stdin idxml_files_aligned.collect()
+     file ids_aligned from idxml_files_aligned.flatMap().buffer( size: 2 ).collect{ it[1] }
+
+    output:
+     file "all_ids_merged.idXML" into id_merged
+    
+    script:
+     """
+     IDMerger -in $ids_aligned -out all_ids_merged.idXML -threads ${params.num_threads}  -annotate_file_origin
+     """
+
+}
+
+
+/*
+ * STEP 10 - extract PSM features for Percolator
+ */
+process extract_psm_features_for_percolator {
+    publishDir "${results_path}/"
+ 
+    input:
+     set ID_psm, file(id_file_merged) from id_merged.map { file -> tuple(file.baseName, file)}
+
+    output:
+     set ID_psm, file("${ID_psm}_psm.idXML") into id_files_merged_psm
+
+    script:
+     """
+     PSMFeatureExtractor -in ${id_file_merged} -out ${ID_psm}_psm.idXML -threads ${params.num_threads} 
+     """
+
+}
+
+
+/*
+ * STEP 11 - run Percolator
+ */
+process run_percolator {
+    publishDir "${results_path}/"
+ 
+    input:
+     set ID_perc, file(id_file_psm) from id_files_merged_psm
+
+    output:
+     set ID_perc, file("${ID_perc}_psm_perc.idXML") into id_files_merged_psm_perc
+
+    script:
+     """
+     PercolatorAdapter -in ${id_file_psm} -out ${ID_perc}_psm_perc.idXML -threads ${params.num_threads} -enzyme no_enzyme -percolator_executable ${percolator_executable_path}
+     """
+
+}
+
+
+/*
+ * STEP 12 - filter by percolator q-value
+ */
+process filter_q_value {
+    publishDir "${results_path}/"
+ 
+    input:
+     set ID_perc_filtered, file(id_file_perc) from id_files_merged_psm_perc
+
+    output:
+     set ID_perc_filtered, file("${ID_perc_filtered}_psm_perc_filtered.idXML") into id_files_merged_psm_perc_filtered
+
+    script:
+     """
+     IDFilter -in ${id_file_perc} -out ${ID_perc_filtered}_psm_perc_filtered.idXML -threads ${params.num_threads} -score:pep 9999  -remove_decoys
+     """
+
+}
+
+
+/*
+ * STEP 13 - quantify identifications using targeted feature extraction
+ */
+process quantify_identifications_targeted {
+    publishDir "${results_path}/"
+ 
+    input:
+     set ID_quant, file(id_file_quant) from id_files_merged_psm_perc_filtered.first()
+     set FEAT_quant, file(mzml_quant) from mzml_files_aligned
+
+    output:
+     set FEAT_quant, file("${FEAT_quant}.featureXML") into feature_files
+
+    script:
+     """
+     FeatureFinderIdentification -in ${mzml_quant} -id ${id_file_quant} -out ${FEAT_quant}.featureXML -threads ${params.num_threads}
+     """
+
+}
+
+
+/*
+ * STEP 14 - link extracted features
+ */
+process link_extracted_features {
+    publishDir "${results_path}/"
+
+    input:
+     file feautres from feature_files.collect{it[1]}
+
+    output:
+     file "all_features_merged.consensusXML" into consensus_file
+    
+    script:
+     """
+     FeatureLinkerUnlabeledKD -in $feautres -out 'all_features_merged.consensusXML' -threads ${params.num_threads}
+     """
+
+}
+
+
+/*
+ * STEP 15 - resolve conflicting ids matching to the same feature
+ */
+process resolve_conflicts {
+    publishDir "${results_path}/"
+ 
+    input:
+     set CONS, file(consensus) from consensus_file.map { file -> tuple(file.baseName, file)}
+
+    output:
+     set CONS, file("${CONS}_resolved.consensusXML") into consensus_file_resolved
+
+    script:
+     """
+     IDConflictResolver -in ${consensus} -out ${CONS}_resolved.consensusXML -threads ${params.num_threads}
+     """
+
+}
+
+
+/*
+ * STEP 16 - export all information as text to csv
+ */
+process export_text {
+    publishDir "${results_path}/"
+ 
+    input:
+     set CONS_resolved, file(consensus_resolved) from consensus_file_resolved
+
+    output:
+     set CONS_resolved, file("${CONS_resolved}.csv") into consensus_text
+
+    script:
+     """
+     TextExporter -in ${consensus_resolved} -out ${CONS_resolved}.csv -threads ${params.num_threads} -id:add_hit_metavalues 0 -id:add_metavalues 0 -id:peptides_only
+     """
+
 }
 
 
