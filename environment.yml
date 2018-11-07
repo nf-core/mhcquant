@@ -6,3 +6,4 @@ channels:
 dependencies:
   - openms=2.3
   - percolator
+  - comet-ms
