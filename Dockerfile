@@ -1,4 +1,5 @@
 FROM nfcore/base
+MAINTAINER Leon Bichmann <leon.bichmann@informatik.uni-tuebingen.de>
 LABEL description="Docker image containing all requirements for nf-core/openmspeptidequant pipeline"
 
 COPY environment.yml /
