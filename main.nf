@@ -69,8 +69,8 @@ if (params.help){
 
 
 // Validate inputs
-params.mzmls ?: params.mzmlPaths ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
-params.fasta ?: params.fastaPath ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
+params.mzmls = params.mzmls ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+params.fasta = params.fasta ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
 
@@ -140,14 +140,14 @@ if( workflow.profile == 'awsbatch') {
 Channel
     .from( params.mzmls )
     .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-    .into { input_mzmls, input_mzmls_align }
+    .into { input_mzmls; input_mzmls_align }
 
 
 /*
  * Create a channel for input fasta file
  */
 Channel
-    .from( params.mzmlPaths )
+    .from( params.fasta )
     .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
     .into { input_fasta}
 
@@ -238,7 +238,7 @@ process generate_decoy_database {
     input:
      file fastafile from input_fasta
     output:
-     file "${fastafile.baseName}_decoy.fasta" into {fastafile_decoy_1, fastafile_decoy_2}
+     file "${fastafile.baseName}_decoy.fasta" into fastafile_decoy_1, fastafile_decoy_2
      
     script:
      """
