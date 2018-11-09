@@ -4,5 +4,6 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - percolator
+  - openms=2.4
+  - percolator=3.1
   - comet-ms
