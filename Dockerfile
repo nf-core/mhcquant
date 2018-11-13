@@ -3,6 +3,9 @@ MAINTAINER Leon Bichmann <leon.bichmann@informatik.uni-tuebingen.de>
 LABEL description="Docker image containing all requirements for nf-core/openmspeptidequant pipeline"
 
 COPY environment.yml /
-RUN conda env create -f environment.yml && conda clean -a
+COPY environment-percolator.yml /
+RUN conda env create -f /environment.yml && conda clean -a
+RUN conda env create -f /environment-percolator.yml && conda clean -a
+RUN conda install --name quickfix percolator=3.1
 ENV PATH /opt/conda/envs/nf-core-openmspeptidequant-1.0dev/bin:$PATH
-
+ENV PATH /opt/conda/envs/nf-core-openmspeptidequant-percolator-1.0dev/bin:$PATH
