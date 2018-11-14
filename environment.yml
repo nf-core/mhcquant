@@ -5,4 +5,4 @@ channels:
   - defaults
 dependencies:
   - openms=2.4
-  - comet-ms
+  - comet-ms=2016013
