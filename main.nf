@@ -138,7 +138,7 @@ if( workflow.profile == 'awsbatch') {
  * Create a channel for input mzml files
  */
 Channel
-    .from( params.mzmls )
+    .fromPath( params.mzmls )
     .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
     .into { input_mzmls; input_mzmls_align }
 
@@ -147,7 +147,7 @@ Channel
  * Create a channel for input fasta file
  */
 Channel
-    .from( params.fasta )
+    .fromPath( params.fasta )
     .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
     .into { input_fasta}
 
@@ -211,32 +211,13 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
 
 /*
- * Parse software version numbers
- */
-process get_software_versions {
-
-    output:
-    file 'software_versions_mqc.yaml' into software_versions_yaml
-
-    script:
-    """
-    echo $workflow.manifest.version > v_pipeline.txt
-    echo $workflow.nextflow.version > v_nextflow.txt
-    fastqc --version > v_fastqc.txt
-    multiqc --version > v_multiqc.txt
-    scrape_software_versions.py > software_versions_mqc.yaml
-    """
-}
-
-
-/*
  * STEP 1 - generate reversed decoy database
  */
 process generate_decoy_database {
-    publishDir "${results_path}/"
 
     input:
      file fastafile from input_fasta
+
     output:
      file "${fastafile.baseName}_decoy.fasta" into fastafile_decoy_1, fastafile_decoy_2
      
@@ -251,7 +232,6 @@ process generate_decoy_database {
  * STEP 2 - run comet database search
  */
 process db_search_comet {
-    publishDir "${results_path}/"
  
     input:
      set mzmlID, file(mzml_file) from input_mzmls
@@ -262,7 +242,7 @@ process db_search_comet {
 
     script:
      """
-     CometAdapter -comet_executable ${comet_executable_path} -in ${mzml_file} -out ${mzmlID}.idXML -threads ${params.num_threads} -database ${fasta_decoy} -precursor_mass_tolerance ${params.pmt} -fragment_bin_tolerance ${params.fmt} -fragment_bin_offset ${params.fbo} -num_hits ${params.num_hits} -digest_mass_range ${params.dmr} -max_variable_mods_in_peptide ${params.maxmod} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activ_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
+     CometAdapter  -in ${mzmlID} -out ${mzmlID}.idXML -threads ${params.num_threads} -database ${fasta_decoy} -precursor_mass_tolerance ${params.precursor_mass_tolerance} -fragment_bin_tolerance ${params.fragment_mass_tolerance} -fragment_bin_offset ${params.fragment_bin_offset} -num_hits ${params.num_hits} -digest_mass_range ${params.digest_mass_range} -max_variable_mods_in_peptide ${params.number_mods} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activ_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
      """
 
 }
@@ -436,6 +416,8 @@ process extract_psm_features_for_percolator {
 /*
  * STEP 11 - run Percolator
  */
+
+///To Do: add peptide level variable
 process run_percolator {
     publishDir "${results_path}/"
  
@@ -447,7 +429,7 @@ process run_percolator {
 
     script:
      """
-     PercolatorAdapter -in ${id_file_psm} -out ${ID_perc}_psm_perc.idXML -threads ${params.num_threads} -enzyme no_enzyme -percolator_executable ${percolator_executable_path}
+     PercolatorAdapter -in ${id_file_psm} -out ${ID_perc}_psm_perc.idXML -threads ${params.num_threads} -enzyme no_enzyme 
      """
 
 }
