@@ -234,15 +234,15 @@ process generate_decoy_database {
 process db_search_comet {
  
     input:
-     set mzmlID, file(mzml_file) from input_mzmls
+     file mzml_file from input_mzmls
      file fasta_decoy from fastafile_decoy_1
 
     output:
-     set mzmlID, file("${mzmlID}.idXML") into id_files
+     file "${mzml_file.baseName}.idXML" into id_files
 
     script:
      """
-     CometAdapter  -in ${mzmlID} -out ${mzmlID}.idXML -threads ${params.num_threads} -database ${fasta_decoy} -precursor_mass_tolerance ${params.precursor_mass_tolerance} -fragment_bin_tolerance ${params.fragment_mass_tolerance} -fragment_bin_offset ${params.fragment_bin_offset} -num_hits ${params.num_hits} -digest_mass_range ${params.digest_mass_range} -max_variable_mods_in_peptide ${params.number_mods} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activ_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
+     CometAdapter  -in ${mzml_file} -out ${mzml_file.baseName}.idXML -threads ${params.num_threads} -database ${fasta_decoy} -precursor_mass_tolerance ${params.precursor_mass_tolerance} -fragment_bin_tolerance ${params.fragment_mass_tolerance} -fragment_bin_offset ${params.fragment_bin_offset} -num_hits ${params.num_hits} -digest_mass_range ${params.digest_mass_range} -max_variable_mods_in_peptide ${params.number_mods} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activation_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
      """
 
 }
