@@ -219,7 +219,7 @@ process generate_decoy_database {
      file fastafile from input_fasta
 
     output:
-     file "${fastafile.baseName}_decoy.fasta" into fastafile_decoy_1, fastafile_decoy_2
+     file "${fastafile.baseName}_decoy.fasta" into (fastafile_decoy_1, fastafile_decoy_2)
      
     script:
      """
@@ -260,7 +260,7 @@ process index_peptides {
      file fasta_decoy from fastafile_decoy_2.first()
 
     output:
-     file "${id_file.baseName}_idx.idXML" into id_files_idx, id_files_idx_original
+     file "${id_file.baseName}_idx.idXML" into (id_files_idx, id_files_idx_original)
 
     script:
      """
@@ -320,7 +320,7 @@ process align_ids {
      file id_names from id_files_idx_fdr_filtered.collect{it}
 
     output:
-     file '*.trafoXML' into id_files_trafo_mzml, id_files_trafo_idxml
+     file '*.trafoXML' into (id_files_trafo_mzml, id_files_trafo_idxml)
 
     script:
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
@@ -338,7 +338,7 @@ process align_mzml_files {
     publishDir "${params.outdir}/"
 
     input:
-     file id_file_trafo from id_files_trafo_mzml
+     file id_file_trafo from id_files_trafo_mzml.flatten()
      file mzml_file_align from input_mzmls_align
 
     output:
@@ -359,7 +359,7 @@ process align_idxml_files {
     publishDir "${params.outdir}/"
 
     input:
-     file idxml_file_trafo from id_files_trafo_idxml
+     file idxml_file_trafo from id_files_trafo_idxml.flatten()
      file idxml_file_align from id_files_idx_original
 
     output:
@@ -380,8 +380,7 @@ process merge_aligned_idxml_files {
     publishDir "${params.outdir}/"
 
     input:
-     //stdin idxml_files_aligned.collect()
-     file ids_aligned from idxml_files_aligned.collect{ it }
+     file ids_aligned from idxml_files_aligned.collect{it}
 
     output:
      file "all_ids_merged.idXML" into id_merged
@@ -401,7 +400,7 @@ process extract_psm_features_for_percolator {
     publishDir "${params.outdir}/"
  
     input:
-     file id_file_merged from id_merged.map { file -> tuple(file.baseName, file)}
+     file id_file_merged from id_merged
 
     output:
      file "${id_file_merged.baseName}_psm.idXML" into id_files_merged_psm
@@ -430,7 +429,7 @@ process run_percolator {
 
     script:
      """
-     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -threads ${params.num_threads} -enzyme no_enzyme 
+     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -trainFDR 0.05 -testFDR 0.05 -threads ${params.num_threads} -enzyme no_enzyme 
      """
 
 }
@@ -504,7 +503,7 @@ process resolve_conflicts {
     publishDir "${params.outdir}/"
  
     input:
-     file consensus from consensus_file.map { file -> tuple(file.baseName, file)}
+     file consensus from consensus_file
 
     output:
      file "${consensus.baseName}_resolved.consensusXML" into consensus_file_resolved
