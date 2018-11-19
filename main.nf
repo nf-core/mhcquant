@@ -506,7 +506,7 @@ process resolve_conflicts {
      file consensus from consensus_file
 
     output:
-     file "${consensus.baseName}_resolved.consensusXML" into consensus_file_resolved
+     file "${consensus.baseName}_resolved.consensusXML" into (consensus_file_resolved, consensus_file_resolved_2)
 
     script:
      """
@@ -536,6 +536,24 @@ process export_text {
 }
 
 
+/*
+ * STEP 17 - export all information as mzTab
+ */
+process export_mztab {
+    publishDir "${params.outdir}/"
+
+    input:
+     file consensus_resolved_2 from consensus_file_resolved_2
+
+    output:
+     file "${consensus_resolved_2.baseName}.csv" into consensus_mztab
+
+    script:
+     """
+     MzTabExporter -in ${consensus_resolved_2} -out ${consensus_resolved_2.baseName}.mzTab -threads ${params.num_threads}
+     """
+
+}
 
 /*
  * Completion e-mail notification
