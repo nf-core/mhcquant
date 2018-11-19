@@ -49,7 +49,6 @@
     * [`--max_cpus`](#--max_cpus)
     * [`--plaintext_emails`](#--plaintext_emails)
     * [`--sampleLevel`](#--sampleLevel)
-    * [`--multiqc_config`](#--multiqc_config)
 
 
 ## General Nextflow info
@@ -95,6 +94,25 @@ This version number will be logged in reports when you run the pipeline, so that
 
 ## Main Arguments
 
+### `--mzmls`
+Use this to specify the location of your input mzML files. For example:
+
+```bash
+--mzmls 'path/to/data/*.mzML'
+```
+
+Please note the following requirements:
+
+1. The path must be enclosed in quotes
+2. The path must have at least one `*` wildcard character
+
+### `--fasta`
+If you prefer, you can specify the full path to your fasta input protein database when you run the pipeline:
+
+```bash
+--fasta '[path to Fasta protein database]'
+```
+
 ### `-profile`
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
 
@@ -117,25 +135,6 @@ Use this parameter to choose a configuration profile. Profiles can give configur
     * Includes links to test data so needs no other parameters
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
-
-### `--mzmls`
-Use this to specify the location of your input mzML files. For example:
-
-```bash
---mzmls 'path/to/data/*.mzML'
-```
-
-Please note the following requirements:
-
-1. The path must be enclosed in quotes
-2. The path must have at least one `*` wildcard character
-
-### `--fasta`
-If you prefer, you can specify the full path to your fasta input protein database when you run the pipeline:
-
-```bash
---fasta '[path to Fasta protein database]'
-```
 
 ## Job Resources
 ### Automatic resubmission
@@ -180,11 +179,25 @@ Specify the path to a specific config file (this is a core NextFlow command).
 
 **NB:** Single hyphen (core Nextflow option)
 
+Note - you can use this to override defaults. For example, you can specify a config file using `-c` that contains the following:
+
+### `--max_memory`
+Use to set a top-limit for the default memory requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_memory '8.GB'``
+
+### `--max_time`
+Use to set a top-limit for the default time requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_time '2.h'`
+
+### `--max_cpus`
+Use to set a top-limit for the default CPU requirement for each process.
+Should be a string in the format integer-unit. eg. `--max_cpus 1`
+
+### `--plaintext_email`
+Set to receive plain-text e-mails instead of HTML formatted.
+
 
 ## Optional Arguments
-
-### `--num_threads`
-Specify the number of threads used for running each step in the pipeline. (eg. 5)
 
 ### `--fragment_mass_tolerance`
 Specify the fragment mass tolerance used for the comet database search. For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)
@@ -230,4 +243,7 @@ Specify which fixed modifications should be applied to the database search (eg. 
  
 ### `--variable_mods`
 Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
+
+### `--num_threads`
+Specify the number of threads used for running each step in the pipeline. (eg. 5)
 
