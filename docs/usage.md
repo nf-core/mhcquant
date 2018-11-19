@@ -136,6 +136,58 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
+
+## Optional Arguments
+
+### `--fragment_mass_tolerance`
+Specify the fragment mass tolerance used for the comet database search. For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)
+
+### `--precursor_mass_tolerance`
+Specify the precursor mass tolerance used for the comet database search. For High-Resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)
+
+### `--fragment_bin_offset`
+Specify the fragment bin offset used for the comet database search. For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)
+
+### `--fdr_threshold`
+Specify the false discovery rate threshold at which peptide hits should be selected. (eg. 0.01)
+
+### `--fdr_level`
+Specify the level at which the false discovery rate should be computed. 'peptide-level-fdrs' is recommended. ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
+
+### `--number_mods`
+Specify the maximum number of modifications that should be contained in a peptide sequence match. (eg. 3)
+
+### `--num_hits`
+Specify the number of hits that should be reported for each spectrum. (eg. 1)
+
+### `--digest_mass_range`
+Specify the mass range that peptides should fullfill to be considered for peptide spectrum matching. (eg. 800:2500)
+
+### `--pick_ms_levels`
+If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)
+
+### `--centroided`
+Choose whether the specified ms_level in pick_ms_levels is centroided or not. ("True", "False")
+
+### `--prec_charge`
+Specifiy the precursor charge range that peptides should fullfill to be considered for peptide spectrum matching. (eg. "2:3")
+
+### `--activation method`
+Specify which fragmentation method was used in the MS acquisition ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
+
+### `--enzyme`
+Specify which enzymatic restriction should be applied ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
+
+### `--fixed_mods`
+Specify which fixed modifications should be applied to the database search (eg. '' or 'Carbamidomethyl (C)', see OpenMS modifications)
+
+### `--variable_mods`
+Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
+
+### `--num_threads`
+Specify the number of threads used for running each step in the pipeline. (eg. 5)
+
+
 ## Job Resources
 ### Automatic resubmission
 Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
@@ -195,55 +247,4 @@ Should be a string in the format integer-unit. eg. `--max_cpus 1`
 
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
-
-
-## Optional Arguments
-
-### `--fragment_mass_tolerance`
-Specify the fragment mass tolerance used for the comet database search. For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)
-
-### `--precursor_mass_tolerance`
-Specify the precursor mass tolerance used for the comet database search. For High-Resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)
-
-### `--fragment_bin_offset`
-Specify the fragment bin offset used for the comet database search. For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)
-
-### `--fdr_threshold`
-Specify the false discovery rate threshold at which peptide hits should be selected. (eg. 0.01)
-
-### `--fdr_level`
-Specify the level at which the false discovery rate should be computed. 'peptide-level-fdrs' is recommended. ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
-
-### `--number_mods`
-Specify the maximum number of modifications that should be contained in a peptide sequence match. (eg. 3)
-
-### `--num_hits`
-Specify the number of hits that should be reported for each spectrum. (eg. 1)
-
-### `--digest_mass_range`
-Specify the mass range that peptides should fullfill to be considered for peptide spectrum matching. (eg. 800:2500)                                                                
-
-### `--pick_ms_levels`
-If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)                                                                      
-
-### `--centroided`
-Choose whether the specified ms_level in pick_ms_levels is centroided or not. ("True", "False")
-
-### `--prec_charge`
-Specifiy the precursor charge range that peptides should fullfill to be considered for peptide spectrum matching. (eg. "2:3")
-
-### `--activation method`
-Specify which fragmentation method was used in the MS acquisition ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
-
-### `--enzyme`
-Specify which enzymatic restriction should be applied ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
-
-### `--fixed_mods`
-Specify which fixed modifications should be applied to the database search (eg. '' or 'Carbamidomethyl (C)', see OpenMS modifications)
- 
-### `--variable_mods`
-Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
-
-### `--num_threads`
-Specify the number of threads used for running each step in the pipeline. (eg. 5)
 
