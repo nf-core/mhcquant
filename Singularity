@@ -7,6 +7,7 @@ Bootstrap:docker
 
 %environment
     PATH=/opt/conda/envs/nf-core-openmspeptidequant-1.0dev/bin:$PATH
+    PATH=/opt/conda/envs/nf-core-openmspeptidequant-percolator-1.0dev/bin:$PATH
     export PATH
 
 %files
@@ -14,4 +15,5 @@ Bootstrap:docker
 
 %post
     /opt/conda/bin/conda env create -f /environment.yml
+    /opt/conda/bin/conda env create -f /environment-percolator.yml
     /opt/conda/bin/conda clean -a

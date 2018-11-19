@@ -1,4 +1,4 @@
-# nf-core/openmspeptidequant
+# ![nf-core/openmspeptidequant](https://raw.githubusercontent.com/nf-core/openmspeptidequant/master/docs/images/openmspeptidequant_logo.png)
 **Identify and quantify peptides from mass spectrometry raw data**
 
 [![Build Status](https://travis-ci.org/nf-core/openmspeptidequant.svg?branch=master)](https://travis-ci.org/nf-core/openmspeptidequant)
@@ -8,6 +8,8 @@
 [![Docker](https://img.shields.io/docker/automated/nfcore/openmspeptidequant.svg)](https://hub.docker.com/r/nfcore/openmspeptidequant)
 ![Singularity Container available](
 https://img.shields.io/badge/singularity-available-7E4C74.svg)
+
+# STILL UNDER DEVELOPMENT
 
 ### Introduction
 nfcore/openmspeptidequant is a bioinformatics analysis pipeline used for quantitative processing of data dependant (DDA) peptidomics data.

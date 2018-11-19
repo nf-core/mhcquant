@@ -78,7 +78,6 @@ params.outdir = params.outdir ?: { log.warn "No output directory provided. Will 
 /*
  * Define the default parameters
  */
-params.num_threads = 5
 
 params.fragment_mass_tolerance = 0.02
 params.precursor_mass_tolerance = 5
@@ -243,7 +242,7 @@ process db_search_comet {
 
     script:
      """
-     CometAdapter  -in ${mzml_file} -out ${mzml_file.baseName}.idXML -threads ${params.num_threads} -database ${fasta_decoy} -precursor_mass_tolerance ${params.precursor_mass_tolerance} -fragment_bin_tolerance ${params.fragment_mass_tolerance} -fragment_bin_offset ${params.fragment_bin_offset} -num_hits ${params.num_hits} -digest_mass_range ${params.digest_mass_range} -max_variable_mods_in_peptide ${params.number_mods} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activation_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
+     CometAdapter  -in ${mzml_file} -out ${mzml_file.baseName}.idXML -threads ${task.cpus} -database ${fasta_decoy} -precursor_mass_tolerance ${params.precursor_mass_tolerance} -fragment_bin_tolerance ${params.fragment_mass_tolerance} -fragment_bin_offset ${params.fragment_bin_offset} -num_hits ${params.num_hits} -digest_mass_range ${params.digest_mass_range} -max_variable_mods_in_peptide ${params.number_mods} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activation_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
      """
 
 }
@@ -264,7 +263,7 @@ process index_peptides {
 
     script:
      """
-     PeptideIndexer -in ${id_file} -out ${id_file.baseName}_idx.idXML -threads ${params.num_threads} -fasta ${fasta_decoy} -decoy_string DECOY -enzyme:specificity none
+     PeptideIndexer -in ${id_file} -out ${id_file.baseName}_idx.idXML -threads ${task.cpus} -fasta ${fasta_decoy} -decoy_string DECOY -enzyme:specificity none
      """
 
 }
@@ -284,7 +283,7 @@ process calculate_fdr_for_idalignment {
 
     script:
      """
-     FalseDiscoveryRate -in ${id_file_idx} -out ${id_file_idx.baseName}_fdr.idXML -threads ${params.num_threads}
+     FalseDiscoveryRate -in ${id_file_idx} -out ${id_file_idx.baseName}_fdr.idXML -threads ${task.cpus}
      """
 
 }
@@ -304,7 +303,7 @@ process filter_fdr_for_idalignment {
 
     script:
      """
-     IDFilter -in ${id_file_idx_fdr} -out ${id_file_idx_fdr.baseName}_filtered.idXML -threads ${params.num_threads} -score:pep 0.05  -remove_decoys
+     IDFilter -in ${id_file_idx_fdr} -out ${id_file_idx_fdr.baseName}_filtered.idXML -threads ${task.cpus} -score:pep 0.05  -remove_decoys
      """
 
 }
@@ -346,7 +345,7 @@ process align_mzml_files {
 
     script:
      """
-     MapRTTransformer -in ${mzml_file_align} -trafo_in ${id_file_trafo} -out ${mzml_file_align.baseName}_aligned.mzML -threads ${params.num_threads}
+     MapRTTransformer -in ${mzml_file_align} -trafo_in ${id_file_trafo} -out ${mzml_file_align.baseName}_aligned.mzML -threads ${task.cpus}
      """
 
 }
@@ -367,7 +366,7 @@ process align_idxml_files {
 
     script:
      """
-     MapRTTransformer -in ${idxml_file_align} -trafo_in ${idxml_file_trafo} -out ${idxml_file_align.baseName}_aligned.idXML -threads ${params.num_threads}
+     MapRTTransformer -in ${idxml_file_align} -trafo_in ${idxml_file_trafo} -out ${idxml_file_align.baseName}_aligned.idXML -threads ${task.cpus}
      """
 
 }
@@ -387,7 +386,7 @@ process merge_aligned_idxml_files {
     
     script:
      """
-     IDMerger -in $ids_aligned -out all_ids_merged.idXML -threads ${params.num_threads}  -annotate_file_origin
+     IDMerger -in $ids_aligned -out all_ids_merged.idXML -threads ${task.cpus}  -annotate_file_origin
      """
 
 }
@@ -407,7 +406,7 @@ process extract_psm_features_for_percolator {
 
     script:
      """
-     PSMFeatureExtractor -in ${id_file_merged} -out ${id_file_merged.baseName}_psm.idXML -threads ${params.num_threads} 
+     PSMFeatureExtractor -in ${id_file_merged} -out ${id_file_merged.baseName}_psm.idXML -threads ${task.cpus} 
      """
 
 }
@@ -429,7 +428,7 @@ process run_percolator {
 
     script:
      """
-     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -trainFDR 0.05 -testFDR 0.05 -threads ${params.num_threads} -enzyme no_enzyme 
+     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -trainFDR 0.05 -testFDR 0.05 -threads ${task.cpus} -enzyme no_enzyme 
      """
 
 }
@@ -449,7 +448,7 @@ process filter_q_value {
 
     script:
      """
-     IDFilter -in ${id_file_perc} -out ${id_file_perc.baseName}_psm_perc_filtered.idXML -threads ${params.num_threads} -score:pep 9999  -remove_decoys
+     IDFilter -in ${id_file_perc} -out ${id_file_perc.baseName}_psm_perc_filtered.idXML -threads ${task.cpus} -score:pep 9999  -remove_decoys
      """
 
 }
@@ -470,7 +469,7 @@ process quantify_identifications_targeted {
 
     script:
      """
-     FeatureFinderIdentification -in ${mzml_quant} -id ${id_file_quant} -out ${mzml_quant.baseName}.featureXML -threads ${params.num_threads}
+     FeatureFinderIdentification -in ${mzml_quant} -id ${id_file_quant} -out ${mzml_quant.baseName}.featureXML -threads ${task.cpus}
      """
 
 }
@@ -490,7 +489,7 @@ process link_extracted_features {
     
     script:
      """
-     FeatureLinkerUnlabeledKD -in $feautres -out 'all_features_merged.consensusXML' -threads ${params.num_threads}
+     FeatureLinkerUnlabeledKD -in $feautres -out 'all_features_merged.consensusXML' -threads ${task.cpus}
      """
 
 }
@@ -510,7 +509,7 @@ process resolve_conflicts {
 
     script:
      """
-     IDConflictResolver -in ${consensus} -out ${consensus.baseName}_resolved.consensusXML -threads ${params.num_threads}
+     IDConflictResolver -in ${consensus} -out ${consensus.baseName}_resolved.consensusXML -threads ${task.cpus}
      """
 
 }
@@ -530,7 +529,7 @@ process export_text {
 
     script:
      """
-     TextExporter -in ${consensus_resolved} -out ${consensus_resolved.baseName}.csv -threads ${params.num_threads} -id:add_hit_metavalues 0 -id:add_metavalues 0 -id:peptides_only
+     TextExporter -in ${consensus_resolved} -out ${consensus_resolved.baseName}.csv -threads ${task.cpus} -id:add_hit_metavalues 0 -id:add_metavalues 0 -id:peptides_only
      """
 
 }
@@ -550,7 +549,7 @@ process export_mztab {
 
     script:
      """
-     MzTabExporter -in ${feature_file_2} -out ${feature_file_2.baseName}.mzTab -threads ${params.num_threads}
+     MzTabExporter -in ${feature_file_2} -out ${feature_file_2.baseName}.mzTab -threads ${task.cpus}
      """
 
 }
