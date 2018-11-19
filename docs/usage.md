@@ -47,8 +47,7 @@
     * [`--max_memory`](#--max_memory)
     * [`--max_time`](#--max_time)
     * [`--max_cpus`](#--max_cpus)
-    * [`--plaintext_emails`](#--plaintext_emails)
-    * [`--sampleLevel`](#--sampleLevel)
+    * [`--plaintext_email`](#--plaintext_email)
 
 
 ## General Nextflow info
