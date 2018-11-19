@@ -12,11 +12,25 @@
         * [`awsbatch`](#awsbatch)
         * [`standard`](#standard)
         * [`none`](#none)
-    * [`--reads`](#--reads)
-    * [`--singleEnd`](#--singleend)
-* [Reference Genomes](#reference-genomes)
-    * [`--genome`](#--genome)
+    * [`--mzmls`](#--mzmls)
     * [`--fasta`](#--fasta)
+* [Optional arguments](#optional-arguments)
+    * [`--fragment_mass_tolerance'](#--fragment_mass_tolerance)
+    * [`--precursor_mass_tolerance`](#--precursor_mass_tolerance)
+    * [`--fragment_bin_offset`](#--fragment_bin_offset)
+    * [`--fdr_threshold`](#--fdr_threshold)
+    * [`--fdr_level`](#--fdr_level)
+    * [`--number_mods`](#--number_mods)
+    * [`--num_hits`](#--num_hits)
+    * [`--digest_mass_range`](#--digest_mass_range)
+    * [`--pick_ms_levels`](#--pick_ms_levels)
+    * [`--centroided`](#--centroided)
+    * [`--prec_charge`](#--prec_charge)
+    * [`--digest_mass_range`](#--digest_mass_range)
+    * [`--activation_method`](#--activation_method)
+    * [`--enzyme`](#--enzyme)
+    * [`--fixed_mods`](#--fixed_mods)
+    * [`--variable_mods`](#--variable_mods)
 * [Job Resources](#job-resources)
 * [Automatic resubmission](#automatic-resubmission)
 * [Custom resource requests](#custom-resource-requests)
@@ -33,9 +47,7 @@
     * [`--max_memory`](#--max_memory)
     * [`--max_time`](#--max_time)
     * [`--max_cpus`](#--max_cpus)
-    * [`--plaintext_emails`](#--plaintext_emails)
-    * [`--sampleLevel`](#--sampleLevel)
-    * [`--multiqc_config`](#--multiqc_config)
+    * [`--plaintext_email`](#--plaintext_email)
 
 
 ## General Nextflow info
@@ -81,6 +93,25 @@ This version number will be logged in reports when you run the pipeline, so that
 
 ## Main Arguments
 
+### `--mzmls`
+Use this to specify the location of your input mzML files. For example:
+
+```bash
+--mzmls 'path/to/data/*.mzML'
+```
+
+Please note the following requirements:
+
+1. The path must be enclosed in quotes
+2. The path must have at least one `*` wildcard character
+
+### `--fasta`
+If you prefer, you can specify the full path to your fasta input protein database when you run the pipeline:
+
+```bash
+--fasta '[path to Fasta protein database]'
+```
+
 ### `-profile`
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
 
@@ -104,72 +135,57 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
-### `--reads`
-Use this to specify the location of your input FastQ files. For example:
 
-```bash
---reads 'path/to/data/sample_*_{1,2}.fastq'
-```
+## Optional Arguments
 
-Please note the following requirements:
+### `--fragment_mass_tolerance`
+Specify the fragment mass tolerance used for the comet database search. For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)
 
-1. The path must be enclosed in quotes
-2. The path must have at least one `*` wildcard character
-3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.
+### `--precursor_mass_tolerance`
+Specify the precursor mass tolerance used for the comet database search. For High-Resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)
 
-If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
+### `--fragment_bin_offset`
+Specify the fragment bin offset used for the comet database search. For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)
 
-### `--singleEnd`
-By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+### `--fdr_threshold`
+Specify the false discovery rate threshold at which peptide hits should be selected. (eg. 0.01)
 
-```bash
---singleEnd --reads '*.fastq'
-```
+### `--fdr_level`
+Specify the level at which the false discovery rate should be computed. 'peptide-level-fdrs' is recommended. ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
 
-It is not possible to run a mixture of single-end and paired-end files in one run.
+### `--number_mods`
+Specify the maximum number of modifications that should be contained in a peptide sequence match. (eg. 3)
 
+### `--num_hits`
+Specify the number of hits that should be reported for each spectrum. (eg. 1)
 
-## Reference Genomes
+### `--digest_mass_range`
+Specify the mass range that peptides should fullfill to be considered for peptide spectrum matching. (eg. 800:2500)
 
-The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
+### `--pick_ms_levels`
+If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)
 
-### `--genome` (using iGenomes)
-There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.
+### `--centroided`
+Choose whether the specified ms_level in pick_ms_levels is centroided or not. ("True", "False")
 
-You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
+### `--prec_charge`
+Specifiy the precursor charge range that peptides should fullfill to be considered for peptide spectrum matching. (eg. "2:3")
 
-* Human
-  * `--genome GRCh37`
-* Mouse
-  * `--genome GRCm38`
-* _Drosophila_
-  * `--genome BDGP6`
-* _S. cerevisiae_
-  * `--genome 'R64-1-1'`
+### `--activation method`
+Specify which fragmentation method was used in the MS acquisition ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
 
-> There are numerous others - check the config file for more.
+### `--enzyme`
+Specify which enzymatic restriction should be applied ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
 
-Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
+### `--fixed_mods`
+Specify which fixed modifications should be applied to the database search (eg. '' or 'Carbamidomethyl (C)', see OpenMS modifications)
 
-The syntax for this reference configuration is as follows:
+### `--variable_mods`
+Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
 
-```nextflow
-params {
-  genomes {
-    'GRCh37' {
-      fasta   = '<path to the genome fasta file>' // Used if no star index given
-    }
-    // Any number of additional genomes, key is used with --genome
-  }
-}
-```
+### `--num_threads`
+Specify the number of threads used for running each step in the pipeline. (eg. 5)
 
-### `--fasta`
-If you prefer, you can specify the full path to your reference genome when you run the pipeline:
-
-```bash
---fasta '[path to Fasta reference]'
-```
 
 ## Job Resources
 ### Automatic resubmission
@@ -216,10 +232,6 @@ Specify the path to a specific config file (this is a core NextFlow command).
 
 Note - you can use this to override defaults. For example, you can specify a config file using `-c` that contains the following:
 
-```nextflow
-process.$multiqc.module = []
-```
-
 ### `--max_memory`
 Use to set a top-limit for the default memory requirement for each process.
 Should be a string in the format integer-unit. eg. `--max_memory '8.GB'``
@@ -235,5 +247,3 @@ Should be a string in the format integer-unit. eg. `--max_cpus 1`
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
 
-### `--multiqc_config`
-Specify a path to a custom MultiQC configuration file.
