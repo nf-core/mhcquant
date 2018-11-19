@@ -10,7 +10,12 @@
 https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
 ### Introduction
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
+nfcore/openmspeptidequant is a bioinformatics analysis pipeline used for quantitative processing of data dependant (DDA) peptidomics data.
+
+The workflow is based on the OpenMS C++ framework for computational mass spectrometry. mzML raw files serve as inputs and a database search (Comet) is performed based on a given input protein database. FDR rescoring is applied using Percolator 3.0 based on a competitive target-decoy approach (reversed decoys). For label free quantification all input files undergo identification based retention time alignment (MapAlignerIdentification), and targeted feature extraction (FeatureFinderIdentification)
+
+The pipeline is built using Nextflow, a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
+
 
 
 ### Documentation

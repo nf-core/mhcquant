@@ -466,7 +466,7 @@ process quantify_identifications_targeted {
      file mzml_quant from mzml_files_aligned
 
     output:
-     file "${mzml_quant.baseName}.featureXML" into feature_files
+     file "${mzml_quant.baseName}.featureXML" into (feature_files, feature_files_2)
 
     script:
      """
@@ -543,14 +543,14 @@ process export_mztab {
     publishDir "${params.outdir}/"
 
     input:
-     file consensus_resolved_2 from consensus_file_resolved_2
+     file feature_file_2 from consensus_file_resolved_2
 
     output:
-     file "${consensus_resolved_2.baseName}.csv" into consensus_mztab
+     file "${feature_file_2.baseName}.mzTab" into features_mztab
 
     script:
      """
-     MzTabExporter -in ${consensus_resolved_2} -out ${consensus_resolved_2.baseName}.mzTab -threads ${params.num_threads}
+     MzTabExporter -in ${feature_file_2} -out ${feature_file_2.baseName}.mzTab -threads ${params.num_threads}
      """
 
 }
