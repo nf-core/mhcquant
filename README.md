@@ -9,8 +9,6 @@
 ![Singularity Container available](
 https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
-# STILL UNDER DEVELOPMENT
-
 ### Introduction
 nfcore/openmspeptidequant is a bioinformatics analysis pipeline used for quantitative processing of data dependant (DDA) peptidomics data.
 
@@ -19,8 +17,6 @@ It was specifically designed to analyse immunopeptidomics data, which deals with
 The workflow is based on the OpenMS C++ framework for computational mass spectrometry. RAW files (mzML) serve as inputs and a database search (Comet) is performed based on a given input protein database. FDR rescoring is applied using Percolator 3.0 based on a competitive target-decoy approach (reversed decoys). For label free quantification all input files undergo identification based retention time alignment (MapAlignerIdentification), and targeted feature extraction matching ids between runs (FeatureFinderIdentification).
 
 The pipeline is built using Nextflow, a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
-
-
 
 ### Documentation
 The nf-core/openmspeptidequant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
