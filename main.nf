@@ -460,7 +460,7 @@ process quantify_identifications_targeted {
     publishDir "${params.outdir}/"
  
     input:
-     file id_file_quant from id_files_merged_psm_perc_filtered.first()
+     file id_file_quant from id_files_merged_psm_perc_filtered
      file mzml_quant from mzml_files_aligned
 
     output:
