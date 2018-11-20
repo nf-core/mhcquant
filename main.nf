@@ -46,7 +46,6 @@ def helpMessage() {
 
 
     Other options:
-      --num_thread                  The number of threads used for execution
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -84,6 +83,7 @@ params.precursor_mass_tolerance = 5
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
+fdr_level = '-' + params.fdr_level
 params.number_mods = 3
 
 params.num_hits = 1
@@ -222,7 +222,6 @@ process generate_decoy_database {
      
     script:
      """
-     echo fastafile
      DecoyDatabase  -in ${fastafile} -out ${fastafile.baseName}_decoy.fasta -decoy_string DECOY_ -decoy_string_position prefix
      """
 }
@@ -428,7 +427,7 @@ process run_percolator {
 
     script:
      """
-     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -trainFDR 0.05 -testFDR 0.05 -threads ${task.cpus} -enzyme no_enzyme 
+     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -trainFDR 0.05 -testFDR 0.05 -threads ${task.cpus} -enzyme no_enzyme $fdr_level 
      """
 
 }
