@@ -12,9 +12,15 @@
 
 def helpMessage() {
     log.info"""
-    =========================================
-     nf-core/openmspeptidequant v${workflow.manifest.version}
-    =========================================
+    =======================================================
+                                              ,--./,-.
+              ___     __   __   __   ___     /,-._.--~\'
+        |\\ | |__  __ /  ` /  \\ |__) |__         }  {
+        | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
+                                              `._,._,\'
+
+     nf-core/openmspeptidequant : v${workflow.manifest.version}
+    =======================================================
     Usage:
 
     The typical command for running the pipeline is as follows:
