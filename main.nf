@@ -154,7 +154,7 @@ Channel
 Channel
     .fromPath( params.fasta )
     .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-    .into { input_fasta}
+    .set { input_fasta}
 
 
 // Header log info
