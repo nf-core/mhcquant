@@ -15,7 +15,7 @@
     * [`--mzmls`](#--mzmls)
     * [`--fasta`](#--fasta)
 * [Optional arguments](#optional-arguments)
-    * [`--fragment_mass_tolerance'](#--fragment_mass_tolerance)
+    * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
     * [`--precursor_mass_tolerance`](#--precursor_mass_tolerance)
     * [`--fragment_bin_offset`](#--fragment_bin_offset)
     * [`--fdr_threshold`](#--fdr_threshold)
@@ -47,13 +47,7 @@
     * [`--max_memory`](#--max_memory)
     * [`--max_time`](#--max_time)
     * [`--max_cpus`](#--max_cpus)
-<<<<<<< HEAD
     * [`--plaintext_email`](#--plaintext_email)
-=======
-    * [`--plaintext_emails`](#--plaintext_emails)
-    * [`--sampleLevel`](#--sampleLevel)
-    * [`--multiqc_config`](#--multiqc_config)
->>>>>>> TEMPLATE
 
 
 ## General Nextflow info
@@ -133,6 +127,12 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 * `conda`
     * A generic configuration profile to be used with [conda](https://conda.io/docs/)
     * Pulls most software from [Bioconda](https://bioconda.github.io/)
+* `binac`
+    * A profile for the BinAC cluster at the University of Tübingen 
+    * Pulls software from Docker Hub via Singularity
+* `cfc`
+    * A profile for the Core Facility Cluster (CFC) at QBiC Tübingen
+    * Pulls software from Docker Hub via Singularity
 * `awsbatch`
     * A generic configuration profile to be used with AWS Batch.
 * `test`
@@ -188,10 +188,6 @@ Specify which fixed modifications should be applied to the database search (eg. 
 
 ### `--variable_mods`
 Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
-
-### `--num_threads`
-Specify the number of threads used for running each step in the pipeline. (eg. 5)
-
 
 ## Job Resources
 ### Automatic resubmission
