@@ -1,4 +1,4 @@
-name: nf-core-openmspeptidequant-1.0dev
+name: nf-core-openmspeptidequant-1.0
 channels:
   - bioconda
   - conda-forge
