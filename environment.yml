@@ -4,5 +4,5 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - openms=2.4
+  - openms=2.4.0
   - comet-ms=2016013
