@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         nf-core/openmspeptidequant
+                         nf-core/mhcquant
 ========================================================================================
- nf-core/openmspeptidequant Analysis Pipeline.
+ nf-core/mhcquant Analysis Pipeline.
  #### Homepage / Documentation
- https://github.com/nf-core/openmspeptidequant
+ https://github.com/nf-core/mhcquant
 ----------------------------------------------------------------------------------------
 */
 
@@ -19,13 +19,13 @@ def helpMessage() {
         | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
                                               `._,._,\'
 
-     nf-core/openmspeptidequant : v${workflow.manifest.version}
+     nf-core/mhcquant : v${workflow.manifest.version}
     =======================================================
     Usage:
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/openmspeptidequant --mzmls '*.mzML' --fasta '*.fasta' -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' -profile standard,docker
 
     Mandatory arguments:
       --mzmls                       Path to input data (must be surrounded with quotes)
@@ -165,10 +165,10 @@ log.info """=======================================================
     | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
                                           `._,._,\'
 
-nf-core/openmspeptidequant v${workflow.manifest.version}"
+nf-core/mhcquant v${workflow.manifest.version}"
 ======================================================="""
 def summary = [:]
-summary['Pipeline Name']  = 'nf-core/openmspeptidequant'
+summary['Pipeline Name']  = 'nf-core/mhcquant'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
@@ -200,10 +200,10 @@ def create_workflow_summary(summary) {
 
     def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
     yaml_file.text  = """
-    id: 'nf-core-openmspeptidequant-summary'
+    id: 'nf-core-mhcquant-summary'
     description: " - this information is collected when the pipeline is started."
-    section_name: 'nf-core/openmspeptidequant Workflow Summary'
-    section_href: 'https://github.com/nf-core/openmspeptidequant'
+    section_name: 'nf-core/mhcquant Workflow Summary'
+    section_href: 'https://github.com/nf-core/mhcquant'
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
@@ -565,9 +565,9 @@ process export_mztab {
 workflow.onComplete {
 
     // Set up the e-mail variables
-    def subject = "[nf-core/openmspeptidequant] Successful: $workflow.runName"
+    def subject = "[nf-core/mhcquant] Successful: $workflow.runName"
     if(!workflow.success){
-      subject = "[nf-core/openmspeptidequant] FAILED: $workflow.runName"
+      subject = "[nf-core/mhcquant] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -615,11 +615,11 @@ workflow.onComplete {
           if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
           // Try to send HTML e-mail using sendmail
           [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-core/openmspeptidequant] Sent summary e-mail to $params.email (sendmail)"
+          log.info "[nf-core/mhcquant] Sent summary e-mail to $params.email (sendmail)"
         } catch (all) {
           // Catch failures and try with plaintext
           [ 'mail', '-s', subject, params.email ].execute() << email_txt
-          log.info "[nf-core/openmspeptidequant] Sent summary e-mail to $params.email (mail)"
+          log.info "[nf-core/mhcquant] Sent summary e-mail to $params.email (mail)"
         }
     }
 
@@ -633,6 +633,6 @@ workflow.onComplete {
     def output_tf = new File( output_d, "pipeline_report.txt" )
     output_tf.withWriter { w -> w << email_txt }
 
-    log.info "[nf-core/openmspeptidequant] Pipeline Complete"
+    log.info "[nf-core/mhcquant] Pipeline Complete"
 
 }

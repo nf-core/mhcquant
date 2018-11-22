@@ -1,4 +1,4 @@
-# nf-core/openmspeptidequant: Configuration for other clusters
+# nf-core/mhcquant: Configuration for other clusters
 
 It is entirely possible to run this pipeline on other clusters, though you will need to set up your own config file so that the pipeline knows how to work with your cluster.
 
@@ -35,15 +35,15 @@ To run the pipeline, several software packages are required. How you satisfy the
 Please see the [`installation documentation`](../installation.md) for how to run using the below as a one-off. These instructions are about configuring a config file for repeated use.
 
 ### Docker
-Docker is a great way to run nf-core/openmspeptidequant, as it manages all software installations and allows the pipeline to be run in an identical software environment across a range of systems.
+Docker is a great way to run nf-core/mhcquant, as it manages all software installations and allows the pipeline to be run in an identical software environment across a range of systems.
 
-Nextflow has [excellent integration](https://www.nextflow.io/docs/latest/docker.html) with Docker, and beyond installing the two tools, not much else is required - nextflow will automatically fetch the [nfcore/openmspeptidequant](https://hub.docker.com/r/nfcore/openmspeptidequant/) image that we have created and is hosted at dockerhub at run time.
+Nextflow has [excellent integration](https://www.nextflow.io/docs/latest/docker.html) with Docker, and beyond installing the two tools, not much else is required - nextflow will automatically fetch the [nfcore/mhcquant](https://hub.docker.com/r/nfcore/mhcquant/) image that we have created and is hosted at dockerhub at run time.
 
 To add docker support to your own config file, add the following:
 
 ```nextflow
 docker.enabled = true
-process.container = "nfcore/openmspeptidequant"
+process.container = "nfcore/mhcquant"
 ```
 
 Note that the dockerhub organisation name annoyingly can't have a hyphen, so is `nfcore` and not `nf-core`.
@@ -57,7 +57,7 @@ To specify singularity usage in your pipeline config file, add the following:
 
 ```nextflow
 singularity.enabled = true
-process.container = "shub://nf-core/openmspeptidequant"
+process.container = "shub://nf-core/mhcquant"
 ```
 
 If you intend to run the pipeline offline, nextflow will not be able to automatically download the singularity image for you.
@@ -66,14 +66,14 @@ Instead, you'll have to do this yourself manually first, transfer the image file
 First, pull the image file where you have an internet connection:
 
 ```bash
-singularity pull --name nf-core-openmspeptidequant.simg shub://nf-core/openmspeptidequant
+singularity pull --name nf-core-mhcquant.simg shub://nf-core/mhcquant
 ```
 
 Then transfer this file and point the config file to the image:
 
 ```nextflow
 singularity.enabled = true
-process.container = "/path/to/nf-core-openmspeptidequant.simg"
+process.container = "/path/to/nf-core-mhcquant.simg"
 ```
 
 

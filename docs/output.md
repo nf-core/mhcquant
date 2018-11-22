@@ -1,4 +1,4 @@
-# nf-core/openmspeptidequant: Output
+# nf-core/mhcquant: Output
 
 This document describes the output produced by the pipeline
 

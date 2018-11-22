@@ -2,12 +2,12 @@ From:nfcore/base
 Bootstrap:docker
 
 %labels
-    DESCRIPTION Singularity image containing all requirements for the nf-core/openmspeptidequant pipeline
+    DESCRIPTION Singularity image containing all requirements for the nf-core/mhcquant pipeline
     VERSION 1.0.0
 
 %environment
-    PATH=/opt/conda/envs/nf-core-openmspeptidequant-1.0.0/bin:$PATH
-    PATH=/opt/conda/envs/nf-core-openmspeptidequant-percolator-1.0dev/bin:$PATH
+    PATH=/opt/conda/envs/nf-core-mhcquant-1.0.0/bin:$PATH
+    PATH=/opt/conda/envs/nf-core-mhcquant-percolator-1.0dev/bin:$PATH
     export PATH
 
 %files
