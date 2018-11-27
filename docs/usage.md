@@ -1,4 +1,4 @@
-# nf-core/openmspeptidequant: Usage
+# nf-core/mhcquant: Usage
 
 ## Table of contents
 
@@ -15,7 +15,7 @@
     * [`--mzmls`](#--mzmls)
     * [`--fasta`](#--fasta)
 * [Optional arguments](#optional-arguments)
-    * [`--fragment_mass_tolerance'](#--fragment_mass_tolerance)
+    * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
     * [`--precursor_mass_tolerance`](#--precursor_mass_tolerance)
     * [`--fragment_bin_offset`](#--fragment_bin_offset)
     * [`--fdr_threshold`](#--fdr_threshold)
@@ -47,13 +47,7 @@
     * [`--max_memory`](#--max_memory)
     * [`--max_time`](#--max_time)
     * [`--max_cpus`](#--max_cpus)
-<<<<<<< HEAD
     * [`--plaintext_email`](#--plaintext_email)
-=======
-    * [`--plaintext_emails`](#--plaintext_emails)
-    * [`--sampleLevel`](#--sampleLevel)
-    * [`--multiqc_config`](#--multiqc_config)
->>>>>>> TEMPLATE
 
 
 ## General Nextflow info
@@ -68,7 +62,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/openmspeptidequant --reads '*_R{1,2}.fastq.gz' -profile standard,docker
+nextflow run nf-core/mhcquant --reads '*_R{1,2}.fastq.gz' -profile standard,docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -86,13 +80,13 @@ results         # Finished results (configurable, see below)
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull nf-core/openmspeptidequant
+nextflow pull nf-core/mhcquant
 ```
 
 ### Reproducibility
 It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/openmspeptidequant releases page](https://github.com/nf-core/openmspeptidequant/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
+First, go to the [nf-core/mhcquant releases page](https://github.com/nf-core/mhcquant/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
@@ -126,13 +120,19 @@ Use this parameter to choose a configuration profile. Profiles can give configur
     * Runs locally and expects all software to be installed and available on the `PATH`.
 * `docker`
     * A generic configuration profile to be used with [Docker](http://docker.com/)
-    * Pulls software from dockerhub: [`nfcore/openmspeptidequant`](http://hub.docker.com/r/nfcore/openmspeptidequant/)
+    * Pulls software from dockerhub: [`nfcore/mhcquant`](http://hub.docker.com/r/nfcore/mhcquant/)
 * `singularity`
     * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
     * Pulls software from singularity-hub
 * `conda`
     * A generic configuration profile to be used with [conda](https://conda.io/docs/)
     * Pulls most software from [Bioconda](https://bioconda.github.io/)
+* `binac`
+    * A profile for the BinAC cluster at the University of Tübingen 
+    * Pulls software from Docker Hub via Singularity
+* `cfc`
+    * A profile for the Core Facility Cluster (CFC) at QBiC Tübingen
+    * Pulls software from Docker Hub via Singularity
 * `awsbatch`
     * A generic configuration profile to be used with AWS Batch.
 * `test`
@@ -188,10 +188,6 @@ Specify which fixed modifications should be applied to the database search (eg. 
 
 ### `--variable_mods`
 Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
-
-### `--num_threads`
-Specify the number of threads used for running each step in the pipeline. (eg. 5)
-
 
 ## Job Resources
 ### Automatic resubmission
