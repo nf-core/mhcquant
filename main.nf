@@ -1,25 +1,31 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         nf-core/openmspeptidequant
+                         nf-core/mhcquant
 ========================================================================================
- nf-core/openmspeptidequant Analysis Pipeline.
+ nf-core/mhcquant Analysis Pipeline.
  #### Homepage / Documentation
- https://github.com/nf-core/openmspeptidequant
+ https://github.com/nf-core/mhcquant
 ----------------------------------------------------------------------------------------
 */
 
 
 def helpMessage() {
     log.info"""
-    =========================================
-     nf-core/openmspeptidequant v${workflow.manifest.version}
-    =========================================
+    =======================================================
+                                              ,--./,-.
+              ___     __   __   __   ___     /,-._.--~\'
+        |\\ | |__  __ /  ` /  \\ |__) |__         }  {
+        | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
+                                              `._,._,\'
+
+     nf-core/mhcquant : v${workflow.manifest.version}
+    =======================================================
     Usage:
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/openmspeptidequant --mzmls '*.mzML' --fasta '*.fasta' -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' -profile standard,docker
 
     Mandatory arguments:
       --mzmls                       Path to input data (must be surrounded with quotes)
@@ -46,7 +52,6 @@ def helpMessage() {
 
 
     Other options:
-      --num_thread                  The number of threads used for execution
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -84,6 +89,7 @@ params.precursor_mass_tolerance = 5
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
+fdr_level = '-' + params.fdr_level
 params.number_mods = 3
 
 params.num_hits = 1
@@ -148,7 +154,7 @@ Channel
 Channel
     .fromPath( params.fasta )
     .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-    .into { input_fasta}
+    .set { input_fasta}
 
 
 // Header log info
@@ -159,10 +165,10 @@ log.info """=======================================================
     | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
                                           `._,._,\'
 
-nf-core/openmspeptidequant v${workflow.manifest.version}"
+nf-core/mhcquant v${workflow.manifest.version}"
 ======================================================="""
 def summary = [:]
-summary['Pipeline Name']  = 'nf-core/openmspeptidequant'
+summary['Pipeline Name']  = 'nf-core/mhcquant'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
@@ -194,10 +200,10 @@ def create_workflow_summary(summary) {
 
     def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
     yaml_file.text  = """
-    id: 'nf-core-openmspeptidequant-summary'
+    id: 'nf-core-mhcquant-summary'
     description: " - this information is collected when the pipeline is started."
-    section_name: 'nf-core/openmspeptidequant Workflow Summary'
-    section_href: 'https://github.com/nf-core/openmspeptidequant'
+    section_name: 'nf-core/mhcquant Workflow Summary'
+    section_href: 'https://github.com/nf-core/mhcquant'
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
@@ -222,7 +228,6 @@ process generate_decoy_database {
      
     script:
      """
-     echo fastafile
      DecoyDatabase  -in ${fastafile} -out ${fastafile.baseName}_decoy.fasta -decoy_string DECOY_ -decoy_string_position prefix
      """
 }
@@ -428,7 +433,7 @@ process run_percolator {
 
     script:
      """
-     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -trainFDR 0.05 -testFDR 0.05 -threads ${task.cpus} -enzyme no_enzyme 
+     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -trainFDR 0.05 -testFDR 0.05 -threads ${task.cpus} -enzyme no_enzyme $fdr_level 
      """
 
 }
@@ -461,7 +466,7 @@ process quantify_identifications_targeted {
     publishDir "${params.outdir}/"
  
     input:
-     file id_file_quant from id_files_merged_psm_perc_filtered.first()
+     file id_file_quant from id_files_merged_psm_perc_filtered
      file mzml_quant from mzml_files_aligned
 
     output:
@@ -560,9 +565,9 @@ process export_mztab {
 workflow.onComplete {
 
     // Set up the e-mail variables
-    def subject = "[nf-core/openmspeptidequant] Successful: $workflow.runName"
+    def subject = "[nf-core/mhcquant] Successful: $workflow.runName"
     if(!workflow.success){
-      subject = "[nf-core/openmspeptidequant] FAILED: $workflow.runName"
+      subject = "[nf-core/mhcquant] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -610,11 +615,11 @@ workflow.onComplete {
           if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
           // Try to send HTML e-mail using sendmail
           [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-core/openmspeptidequant] Sent summary e-mail to $params.email (sendmail)"
+          log.info "[nf-core/mhcquant] Sent summary e-mail to $params.email (sendmail)"
         } catch (all) {
           // Catch failures and try with plaintext
           [ 'mail', '-s', subject, params.email ].execute() << email_txt
-          log.info "[nf-core/openmspeptidequant] Sent summary e-mail to $params.email (mail)"
+          log.info "[nf-core/mhcquant] Sent summary e-mail to $params.email (mail)"
         }
     }
 
@@ -628,6 +633,6 @@ workflow.onComplete {
     def output_tf = new File( output_d, "pipeline_report.txt" )
     output_tf.withWriter { w -> w << email_txt }
 
-    log.info "[nf-core/openmspeptidequant] Pipeline Complete"
+    log.info "[nf-core/mhcquant] Pipeline Complete"
 
 }

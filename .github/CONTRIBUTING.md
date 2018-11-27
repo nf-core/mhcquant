@@ -1,22 +1,22 @@
-# nf-core/openmspeptidequant: Contributing Guidelines
+# nf-core/mhcquant: Contributing Guidelines
 
-Hi there! Many thanks for taking an interest in improving nf-core/openmspeptidequant.
+Hi there! Many thanks for taking an interest in improving nf-core/mhcquant.
 
-We try to manage the required tasks for nf-core/openmspeptidequant using GitHub issues, you probably came to this page when creating one. Please use the pre-filled template to save time.
+We try to manage the required tasks for nf-core/mhcquant using GitHub issues, you probably came to this page when creating one. Please use the pre-filled template to save time.
 
 However, don't be put off by this template - other more general issues and suggestions are welcome! Contributions to the code are even more welcome ;)
 
-> If you need help using or modifying nf-core/openmspeptidequant then the best place to go is the Gitter chatroom where you can ask us questions directly: https://gitter.im/nf-core/Lobby
+> If you need help using or modifying nf-core/mhcquant then the best place to go is the Gitter chatroom where you can ask us questions directly: https://gitter.im/nf-core/Lobby
 
 ## Contribution workflow
-If you'd like to write some code for nf-core/openmspeptidequant, the standard workflow
+If you'd like to write some code for nf-core/mhcquant, the standard workflow
 is as follows:
 
 1. Check that there isn't already an issue about your idea in the
-   [nf-core/openmspeptidequant issues](https://github.com/nf-core/openmspeptidequant/issues) to avoid
+   [nf-core/mhcquant issues](https://github.com/nf-core/mhcquant/issues) to avoid
    duplicating work.
     * If there isn't one already, please create one so that others know you're working on this
-2. Fork the [nf-core/openmspeptidequant repository](https://github.com/nf-core/openmspeptidequant) to your GitHub account
+2. Fork the [nf-core/mhcquant repository](https://github.com/nf-core/mhcquant) to your GitHub account
 3. Make the necessary changes / additions within your forked repository
 4. Submit a Pull Request against the `dev` branch and wait for the code to be reviewed and merged.
 
@@ -42,4 +42,4 @@ If there are any failures then the automated tests fail.
 These tests are run both with the latest available version of Nextflow and also the minimum required version that is stated in the pipeline code.
 
 ## Getting help
-For further information/help, please consult the [nf-core/openmspeptidequant documentation](https://github.com/nf-core/openmspeptidequant#documentation) and don't hesitate to get in touch on [Gitter](https://gitter.im/nf-core/Lobby)
+For further information/help, please consult the [nf-core/mhcquant documentation](https://github.com/nf-core/mhcquant#documentation) and don't hesitate to get in touch on [Slack](https://nf-core-invite.herokuapp.com/)

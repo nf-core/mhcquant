@@ -1,6 +1,6 @@
-# nf-core/openmspeptidequant: Documentation
+# nf-core/mhcquant: Documentation
 
-The nf-core/openmspeptidequant documentation is split into the following files:
+The nf-core/mhcquant documentation is split into the following files:
 
 1. [Installation](installation.md)
 2. [Running the pipeline](usage.md)

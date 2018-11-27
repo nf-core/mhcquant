@@ -1,18 +1,17 @@
-# ![nf-core/openmspeptidequant](https://raw.githubusercontent.com/nf-core/openmspeptidequant/master/docs/images/openmspeptidequant_logo.png)
+# ![nf-core/mhcquant](https://raw.githubusercontent.com/nf-core/mhcquant/master/docs/images/mhcquant_logo.png)
 **Identify and quantify peptides from mass spectrometry raw data**
 
-[![Build Status](https://travis-ci.org/nf-core/openmspeptidequant.svg?branch=master)](https://travis-ci.org/nf-core/openmspeptidequant)
+[![Build Status](https://travis-ci.org/nf-core/mhcquant.svg?branch=master)](https://travis-ci.org/nf-core/mhcquant)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
-[![Docker](https://img.shields.io/docker/automated/nfcore/openmspeptidequant.svg)](https://hub.docker.com/r/nfcore/openmspeptidequant)
+[![Docker](https://img.shields.io/docker/automated/nfcore/mhcquant.svg)](https://hub.docker.com/r/nfcore/mhcquant)
 ![Singularity Container available](
 https://img.shields.io/badge/singularity-available-7E4C74.svg)
-
-# STILL UNDER DEVELOPMENT
+[![Slack Status](https://nf-core-invite.herokuapp.com/badge.svg)](https://nf-core-invite.herokuapp.com)
 
 ### Introduction
-nfcore/openmspeptidequant is a bioinformatics analysis pipeline used for quantitative processing of data dependant (DDA) peptidomics data.
+nfcore/mhcquant is a bioinformatics analysis pipeline used for quantitative processing of data dependant (DDA) peptidomics data.
 
 It was specifically designed to analyse immunopeptidomics data, which deals with the analysis of affinity purified, unspecifically cleaved peptides that have recently been discussed intensively in the context of cancer vaccines. (https://www.nature.com/articles/ncomms13404)
 
@@ -20,10 +19,8 @@ The workflow is based on the OpenMS C++ framework for computational mass spectro
 
 The pipeline is built using Nextflow, a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
 
-
-
 ### Documentation
-The nf-core/openmspeptidequant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
+The nf-core/mhcquant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
 1. [Installation](docs/installation.md)
 2. Pipeline configuration
