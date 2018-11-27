@@ -8,6 +8,7 @@
 [![Docker](https://img.shields.io/docker/automated/nfcore/mhcquant.svg)](https://hub.docker.com/r/nfcore/mhcquant)
 ![Singularity Container available](
 https://img.shields.io/badge/singularity-available-7E4C74.svg)
+[![Slack Status](https://nf-core-invite.herokuapp.com/badge.svg)](https://nf-core-invite.herokuapp.com)
 
 ### Introduction
 nfcore/mhcquant is a bioinformatics analysis pipeline used for quantitative processing of data dependant (DDA) peptidomics data.
