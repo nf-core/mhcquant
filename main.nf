@@ -34,6 +34,8 @@ def helpMessage() {
                                     Available: standard, conda, docker, singularity, awsbatch, test
 
     Options:
+      --peptide_min_length          Minimum peptide length for filtering
+      --peptide_max_length          Maximum peptide length for filtering
       --precursor_mass_tolerance    Mass tolerance of precursor mass (ppm)
       --fragment_mass_tolerance     Mass tolerance of fragment mass bin (ppm)
       --fragment_bin_offset         Offset of fragment mass bin (Comet specific parameter)
@@ -49,7 +51,11 @@ def helpMessage() {
       --centroided                  Specify whether mzml data is peak picked or not ("True", "False")
       --pick_ms_levels              The ms level used for peak picking (eg. 1, 2)
       --prec_charge                 Precursor charge (eg. "2:3")
+      --spectrum_batch_size         Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
+    Binding Predictions:
+      --run_prediction              Whether a affinity prediction using MHCFlurry should be run on the results (Check if alleles are supported)
+      --alleles                     Path to file including allele information
 
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -84,6 +90,8 @@ params.outdir = params.outdir ?: { log.warn "No output directory provided. Will 
  * Define the default parameters
  */
 
+params.peptide_min_length = 8
+params.peptide_max_length = 12
 params.fragment_mass_tolerance = 0.02
 params.precursor_mass_tolerance = 5
 params.fragment_bin_offset = 0
@@ -103,7 +111,9 @@ params.activation_method = 'ALL'
 params.enzyme = 'unspecific cleavage'
 params.fixed_mods = ''
 params.variable_mods = 'Oxidation (M)'
+params.spectrum_batch_size = 500
 
+params.run_prediction = "True"
 
 /*
  * SET UP CONFIGURATION VARIABLES
@@ -157,6 +167,16 @@ Channel
     .set { input_fasta}
 
 
+/*
+ * Create a channel for input alleles file
+ */
+if( params.run_prediction == 'True'){
+    Channel
+        .fromPath( params.alleles )
+        .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
+        .into { input_alleles}
+}
+
 // Header log info
 log.info """=======================================================
                                           ,--./,-.
@@ -173,6 +193,7 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
+summary['Alleles']    = params.alleles
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -247,7 +268,7 @@ process db_search_comet {
 
     script:
      """
-     CometAdapter  -in ${mzml_file} -out ${mzml_file.baseName}.idXML -threads ${task.cpus} -database ${fasta_decoy} -precursor_mass_tolerance ${params.precursor_mass_tolerance} -fragment_bin_tolerance ${params.fragment_mass_tolerance} -fragment_bin_offset ${params.fragment_bin_offset} -num_hits ${params.num_hits} -digest_mass_range ${params.digest_mass_range} -max_variable_mods_in_peptide ${params.number_mods} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activation_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}'
+     CometAdapter  -in ${mzml_file} -out ${mzml_file.baseName}.idXML -threads ${task.cpus} -database ${fasta_decoy} -precursor_mass_tolerance ${params.precursor_mass_tolerance} -fragment_bin_tolerance ${params.fragment_mass_tolerance} -fragment_bin_offset ${params.fragment_bin_offset} -num_hits ${params.num_hits} -digest_mass_range ${params.digest_mass_range} -max_variable_mods_in_peptide ${params.number_mods} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} -activation_method ${params.activation_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}' -spectrum_batch_size ${params.spectrum_batch_size}
      """
 
 }
@@ -453,7 +474,7 @@ process filter_q_value {
 
     script:
      """
-     IDFilter -in ${id_file_perc} -out ${id_file_perc.baseName}_psm_perc_filtered.idXML -threads ${task.cpus} -score:pep 9999  -remove_decoys
+     IDFilter -in ${id_file_perc} -out ${id_file_perc.baseName}_psm_perc_filtered.idXML -threads ${task.cpus} -score:pep 9999  -remove_decoys -length '${params.peptide_min_length}:${params.peptide_max_length}'
      """
 
 }
@@ -558,6 +579,28 @@ process export_mztab {
      """
 
 }
+
+
+/*
+ * STEP 18 - If specified predict peptides using MHCFlurry
+ */
+process predict_peptides {
+    input:
+     file mztab_file from features_mztab
+     file allotypes from input_alleles
+
+    output:
+     file "predicted_peptides.csv" into predicted_peptides
+
+    when:
+     params.run_prediction == 'True'
+
+    script:
+     """
+     /opt/conda/envs/nf-core-openmspeptidequant-1.0dev/bin/python mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} 'predicted_peptides.csv'
+     """
+}
+
 
 /*
  * Completion e-mail notification
