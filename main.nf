@@ -597,7 +597,7 @@ process predict_peptides {
 
     script:
      """
-     /opt/conda/envs/nf-core-openmspeptidequant-1.0dev/bin/python mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} 'predicted_peptides.csv'
+     python mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} 'predicted_peptides.csv'
      """
 }
 
