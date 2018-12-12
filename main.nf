@@ -25,7 +25,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --alleles 'alleles.tsv' -profile standard,docker
 
     Mandatory arguments:
       --mzmls                       Path to input data (must be surrounded with quotes)
@@ -193,7 +193,7 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
-summary['Alleles']    = params.alleles
+summary['Alleles']      = params.alleles
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time

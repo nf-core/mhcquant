@@ -6,4 +6,5 @@ channels:
 dependencies:
   - openms=2.4.0
   - comet-ms=2016013
+  - python
   - mhcflurry
