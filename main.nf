@@ -103,7 +103,7 @@ params.number_mods = 3
 params.num_hits = 1
 params.digest_mass_range = "800:2500"
 params.pick_ms_levels = 2
-params.centroided = "False"
+params.centroided = "True"
 
 params.prec_charge = '2:3'
 params.activation_method = 'ALL'
@@ -152,10 +152,17 @@ if( workflow.profile == 'awsbatch') {
 /*
  * Create a channel for input mzml files
  */
-Channel
-    .fromPath( params.mzmls )
-    .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-    .into { input_mzmls; input_mzmls_align }
+if( params.centroided == 'False') {
+    Channel
+        .fromPath( params.mzmls )
+        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+        .into { input_mzmls_unpicked }
+} else {
+    Channel
+        .fromPath( params.mzmls )
+        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+        .into { input_mzmls; input_mzmls_align }
+}
 
 
 /*
@@ -250,6 +257,27 @@ process generate_decoy_database {
     script:
      """
      DecoyDatabase  -in ${fastafile} -out ${fastafile.baseName}_decoy.fasta -decoy_string DECOY_ -decoy_string_position prefix
+     """
+}
+
+
+/*
+ * STEP 1.5 - Optional: Run Peak Picking as Preprocessing
+ */
+process peak_picking {
+
+    input:
+     file mzml_unpicked from input_mzmls_unpicked
+
+    output:
+     file "${mzml_unpicked.baseName}.mzML" (into input_mzmls, input_mzmls_align)
+
+    when:
+     params.centroided == 'False'
+
+    script:
+     """
+     PeakPickerHighRes -in ${mzml_unpicked} -out ${mzml_unpicked.baseName}.mzML -ms_levels ${params.pick_ms_levels}
      """
 }
 
