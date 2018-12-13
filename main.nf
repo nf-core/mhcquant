@@ -277,7 +277,7 @@ process peak_picking {
 
     script:
      """
-     PeakPickerHighRes -in ${mzml_unpicked} -out ${mzml_unpicked.baseName}.mzML -ms_levels ${params.pick_ms_levels}
+     PeakPickerHiRes -in ${mzml_unpicked} -out ${mzml_unpicked.baseName}.mzML -ms_levels ${params.pick_ms_levels}
      """
 }
 
