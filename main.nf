@@ -162,6 +162,8 @@ if( params.centroided == 'False') {
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
         .into { input_mzmls; input_mzmls_align }
+
+    input_mzmls_unpicked = Channel.create()
 }
 
 
@@ -270,7 +272,7 @@ process peak_picking {
      file mzml_unpicked from input_mzmls_unpicked
 
     output:
-     file "${mzml_unpicked.baseName}.mzML" (into input_mzmls, input_mzmls_align)
+     file "${mzml_unpicked.baseName}.mzML" into (input_mzmls, input_mzmls_align)
 
     when:
      params.centroided == 'False'
