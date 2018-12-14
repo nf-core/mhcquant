@@ -152,18 +152,23 @@ if( workflow.profile == 'awsbatch') {
 /*
  * Create a channel for input mzml files
  */
-if( params.centroided == 'False') {
+if( params.centroided != "True") {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
         .into { input_mzmls_unpicked }
+
+    input_mzmls = Channel.empty()
+    input_mzmls_align = Channel.empty()
+
 } else {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
         .into { input_mzmls; input_mzmls_align }
 
-    input_mzmls_unpicked = Channel.create()
+    input_mzmls_unpicked = Channel.empty()
+    input_mzmls_align_unpicked = Channel.empty()
 }
 
 
@@ -203,6 +208,7 @@ summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
 summary['Alleles']      = params.alleles
+summary['Centroided']   = params.centroided
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -246,6 +252,21 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
 
 /*
+ * STEP 0 - Fetch MHCFlurry Class 1 prediction models
+ */
+process fetch_mhcflurry_models {
+
+    when:
+     params.run_prediction == 'True'
+
+    script:
+     """
+     mhcflurry-downloads fetch models_class1
+     """
+}
+
+
+/*
  * STEP 1 - generate reversed decoy database
  */
 process generate_decoy_database {
@@ -258,7 +279,10 @@ process generate_decoy_database {
      
     script:
      """
-     DecoyDatabase  -in ${fastafile} -out ${fastafile.baseName}_decoy.fasta -decoy_string DECOY_ -decoy_string_position prefix
+     DecoyDatabase  -in ${fastafile} \\
+                    -out ${fastafile.baseName}_decoy.fasta \\
+                    -decoy_string DECOY_ \\
+                    -decoy_string_position prefix
      """
 }
 
@@ -272,14 +296,16 @@ process peak_picking {
      file mzml_unpicked from input_mzmls_unpicked
 
     output:
-     file "${mzml_unpicked.baseName}.mzML" into (input_mzmls, input_mzmls_align)
+     file "${mzml_unpicked.baseName}.mzML" into (input_mzmls_picked, input_mzmls_align_picked)
 
     when:
-     params.centroided == 'False'
+     params.centroided != "True"
 
     script:
      """
-     PeakPickerHiRes -in ${mzml_unpicked} -out ${mzml_unpicked.baseName}.mzML -ms_levels ${params.pick_ms_levels}
+     PeakPickerHiRes -in ${mzml_unpicked} \\
+                     -out ${mzml_unpicked.baseName}.mzML \\
+                     -algorithm:ms_levels ${params.pick_ms_levels}
      """
 }
 
@@ -290,7 +316,7 @@ process peak_picking {
 process db_search_comet {
  
     input:
-     file mzml_file from input_mzmls
+     file mzml_file from input_mzmls.mix(input_mzmls_picked)
      file fasta_decoy from fastafile_decoy_1.first()
 
     output:
@@ -298,12 +324,24 @@ process db_search_comet {
 
     script:
      """
-     CometAdapter  -in ${mzml_file} -out ${mzml_file.baseName}.idXML -threads ${task.cpus} -database ${fasta_decoy} //
-     -precursor_mass_tolerance ${params.precursor_mass_tolerance} -fragment_bin_tolerance ${params.fragment_mass_tolerance} //
-     -fragment_bin_offset ${params.fragment_bin_offset} -num_hits ${params.num_hits} -digest_mass_range ${params.digest_mass_range} //
-     -max_variable_mods_in_peptide ${params.number_mods} -allowed_missed_cleavages 0 -precursor_charge ${params.prec_charge} //
-     -activation_method ${params.activation_method} -use_NL_ions true -variable_modifications '${params.variable_mods}' //
-     -fixed_modifications ${params.fixed_mods} -enzyme '${params.enzyme}' -spectrum_batch_size ${params.spectrum_batch_size}
+     CometAdapter  -in ${mzml_file} \\
+                   -out ${mzml_file.baseName}.idXML \\
+                   -threads ${task.cpus} \\
+                   -database ${fasta_decoy} \\
+                   -precursor_mass_tolerance ${params.precursor_mass_tolerance} \\
+                   -fragment_bin_tolerance ${params.fragment_mass_tolerance} \\
+                   -fragment_bin_offset ${params.fragment_bin_offset} \\
+                   -num_hits ${params.num_hits} \\
+                   -digest_mass_range ${params.digest_mass_range} \\
+                   -max_variable_mods_in_peptide ${params.number_mods} \\
+                   -allowed_missed_cleavages 0 \\
+                   -precursor_charge ${params.prec_charge} \\
+                   -activation_method ${params.activation_method} \\
+                   -use_NL_ions true \\
+                   -variable_modifications '${params.variable_mods}' \\
+                   -fixed_modifications ${params.fixed_mods} \\
+                   -enzyme '${params.enzyme}' \\
+                   -spectrum_batch_size ${params.spectrum_batch_size}
      """
 
 }
@@ -324,7 +362,12 @@ process index_peptides {
 
     script:
      """
-     PeptideIndexer -in ${id_file} -out ${id_file.baseName}_idx.idXML -threads ${task.cpus} -fasta ${fasta_decoy} -decoy_string DECOY -enzyme:specificity none
+     PeptideIndexer -in ${id_file} \\
+                    -out ${id_file.baseName}_idx.idXML \\
+                    -threads ${task.cpus} \\
+                    -fasta ${fasta_decoy} \\
+                    -decoy_string DECOY \\
+                    -enzyme:specificity none
      """
 
 }
@@ -344,7 +387,9 @@ process calculate_fdr_for_idalignment {
 
     script:
      """
-     FalseDiscoveryRate -in ${id_file_idx} -out ${id_file_idx.baseName}_fdr.idXML -threads ${task.cpus}
+     FalseDiscoveryRate -in ${id_file_idx} \\
+                        -out ${id_file_idx.baseName}_fdr.idXML \\
+                        -threads ${task.cpus}
      """
 
 }
@@ -364,7 +409,11 @@ process filter_fdr_for_idalignment {
 
     script:
      """
-     IDFilter -in ${id_file_idx_fdr} -out ${id_file_idx_fdr.baseName}_filtered.idXML -threads ${task.cpus} -score:pep 0.05  -remove_decoys
+     IDFilter -in ${id_file_idx_fdr} \\
+              -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
+              -threads ${task.cpus} \\
+              -score:pep 0.05  \\
+              -remove_decoys
      """
 
 }
@@ -385,7 +434,8 @@ process align_ids {
     script:
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
      """
-     MapAlignerIdentification -in $id_names -trafo_out $out_names
+     MapAlignerIdentification -in $id_names \\
+                              -trafo_out $out_names
      """
 
 }
@@ -399,14 +449,17 @@ process align_mzml_files {
 
     input:
      file id_file_trafo from id_files_trafo_mzml.flatten()
-     file mzml_file_align from input_mzmls_align
+     file mzml_file_align from input_mzmls_align.mix(input_mzmls_align_picked)
 
     output:
      file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
 
     script:
      """
-     MapRTTransformer -in ${mzml_file_align} -trafo_in ${id_file_trafo} -out ${mzml_file_align.baseName}_aligned.mzML -threads ${task.cpus}
+     MapRTTransformer -in ${mzml_file_align} \\
+                      -trafo_in ${id_file_trafo} \\
+                      -out ${mzml_file_align.baseName}_aligned.mzML \\
+                      -threads ${task.cpus}
      """
 
 }
@@ -427,7 +480,10 @@ process align_idxml_files {
 
     script:
      """
-     MapRTTransformer -in ${idxml_file_align} -trafo_in ${idxml_file_trafo} -out ${idxml_file_align.baseName}_aligned.idXML -threads ${task.cpus}
+     MapRTTransformer -in ${idxml_file_align} \\
+                      -trafo_in ${idxml_file_trafo} \\
+                      -out ${idxml_file_align.baseName}_aligned.idXML \\
+                      -threads ${task.cpus}
      """
 
 }
@@ -447,7 +503,10 @@ process merge_aligned_idxml_files {
     
     script:
      """
-     IDMerger -in $ids_aligned -out all_ids_merged.idXML -threads ${task.cpus}  -annotate_file_origin
+     IDMerger -in $ids_aligned \\
+              -out all_ids_merged.idXML \\
+              -threads ${task.cpus}  \\
+              -annotate_file_origin
      """
 
 }
@@ -467,7 +526,9 @@ process extract_psm_features_for_percolator {
 
     script:
      """
-     PSMFeatureExtractor -in ${id_file_merged} -out ${id_file_merged.baseName}_psm.idXML -threads ${task.cpus} 
+     PSMFeatureExtractor -in ${id_file_merged} \\
+                         -out ${id_file_merged.baseName}_psm.idXML \\
+                         -threads ${task.cpus} 
      """
 
 }
@@ -489,7 +550,13 @@ process run_percolator {
 
     script:
      """
-     PercolatorAdapter -in ${id_file_psm} -out ${id_file_psm.baseName}_psm_perc.idXML -trainFDR 0.05 -testFDR 0.05 -threads ${task.cpus} -enzyme no_enzyme $fdr_level 
+     PercolatorAdapter -in ${id_file_psm} \\
+                       -out ${id_file_psm.baseName}_psm_perc.idXML \\
+                       -trainFDR 0.05 \\
+                       -testFDR 0.05 \\
+                       -threads ${task.cpus} \\
+                       -enzyme no_enzyme \\
+                       $fdr_level 
      """
 
 }
@@ -509,8 +576,12 @@ process filter_q_value {
 
     script:
      """
-     IDFilter -in ${id_file_perc} -out ${id_file_perc.baseName}_psm_perc_filtered.idXML -threads ${task.cpus} //
-     -score:pep 9999  -remove_decoys -length '${params.peptide_min_length}:${params.peptide_max_length}'
+     IDFilter -in ${id_file_perc} \\
+              -out ${id_file_perc.baseName}_psm_perc_filtered.idXML \\
+              -threads ${task.cpus} \\
+              -score:pep ${params.fdr_threshold} \\
+              -remove_decoys \\
+              -length '${params.peptide_min_length}:${params.peptide_max_length}'
      """
 
 }
@@ -531,7 +602,10 @@ process quantify_identifications_targeted {
 
     script:
      """
-     FeatureFinderIdentification -in ${mzml_quant} -id ${id_file_quant} -out ${mzml_quant.baseName}.featureXML -threads ${task.cpus}
+     FeatureFinderIdentification -in ${mzml_quant} \\
+                                 -id ${id_file_quant} \\
+                                 -out ${mzml_quant.baseName}.featureXML \\
+                                 -threads ${task.cpus}
      """
 
 }
@@ -551,7 +625,9 @@ process link_extracted_features {
     
     script:
      """
-     FeatureLinkerUnlabeledKD -in $feautres -out 'all_features_merged.consensusXML' -threads ${task.cpus}
+     FeatureLinkerUnlabeledKD -in $feautres \\
+                              -out 'all_features_merged.consensusXML' \\
+                              -threads ${task.cpus}
      """
 
 }
@@ -571,7 +647,9 @@ process resolve_conflicts {
 
     script:
      """
-     IDConflictResolver -in ${consensus} -out ${consensus.baseName}_resolved.consensusXML -threads ${task.cpus}
+     IDConflictResolver -in ${consensus} \\
+                        -out ${consensus.baseName}_resolved.consensusXML \\
+                        -threads ${task.cpus}
      """
 
 }
@@ -591,8 +669,12 @@ process export_text {
 
     script:
      """
-     TextExporter -in ${consensus_resolved} -out ${consensus_resolved.baseName}.csv -threads ${task.cpus} //
-     -id:add_hit_metavalues 0 -id:add_metavalues 0 -id:peptides_only
+     TextExporter -in ${consensus_resolved} \\
+                  -out ${consensus_resolved.baseName}.csv \\
+                  -threads ${task.cpus} \\
+                  -id:add_hit_metavalues 0 \\
+                  -id:add_metavalues 0 \\
+                  -id:peptides_only
      """
 
 }
@@ -612,7 +694,9 @@ process export_mztab {
 
     script:
      """
-     MzTabExporter -in ${feature_file_2} -out ${feature_file_2.baseName}.mzTab -threads ${task.cpus}
+     MzTabExporter -in ${feature_file_2} \\
+                   -out ${feature_file_2.baseName}.mzTab \\
+                   -threads ${task.cpus}
      """
 
 }
