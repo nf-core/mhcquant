@@ -156,7 +156,7 @@ if( params.centroided != "True") {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-        .into { input_mzmls_unpicked }
+        .set { input_mzmls_unpicked }
 
     input_mzmls = Channel.empty()
     input_mzmls_align = Channel.empty()
@@ -188,7 +188,7 @@ if( params.run_prediction == 'True'){
     Channel
         .fromPath( params.alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
-        .into { input_alleles}
+        .set { input_alleles}
 }
 
 // Header log info
@@ -207,6 +207,7 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
+summary['Predictions']  = params.run_prediction
 summary['Alleles']      = params.alleles
 summary['Centroided']   = params.centroided
 summary['Max Memory']   = params.max_memory
