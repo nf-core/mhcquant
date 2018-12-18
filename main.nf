@@ -707,19 +707,21 @@ process export_mztab {
  * STEP 18 - If specified predict peptides using MHCFlurry
  */
 process predict_peptides {
+    publishDir "${params.outdir}/"
+
     input:
      file mztab_file from features_mztab
      file allotypes from input_alleles
 
     output:
-     file "predicted_peptides.csv" into predicted_peptides
+     file "*predicted_peptides.csv" into predicted_peptides
 
     when:
      params.run_prediction == 'True'
 
     script:
      """
-     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} 'predicted_peptides.csv'
+     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides.csv
      """
 }
 
