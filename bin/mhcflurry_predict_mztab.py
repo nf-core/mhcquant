@@ -11,6 +11,8 @@ alleles=op.read().split("\n")
 op.close()
 
 alleles=[a for a in alleles if a in supported_alleles]
+if alleles==[]:
+   print "submitted alleles are not supported or formatting of input.tsv is not correct!"
 
 #read identified peptides
 mztab=open(sys.argv[-2])
@@ -20,7 +22,6 @@ seqs=[l.split()[1] for l in mztab_read if l.startswith("PEP")]
 seqs_new=list(set(seqs))
 
 #call mhcflurry
-#subprocess.call("mhcflurry-predict --peptides {p} --alleles {a} --out {o}".format(p=" ".join(seqs_new), a=" ".join(alleles), o=sys.argv[-1]))
 for allele in alleles:
    predictor = Class1AffinityPredictor.load()
    df_pred=predictor.predict_to_dataframe(allele=allele, peptides=seqs_new)
