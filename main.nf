@@ -719,7 +719,6 @@ process predict_peptides {
 
     script:
      """
-     #!/usr/bin/env python
      mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} 'predicted_peptides.csv'
      """
 }

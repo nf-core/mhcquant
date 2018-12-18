@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from mhcflurry import Class1AffinityPredictor
 import sys
 
