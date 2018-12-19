@@ -14,7 +14,12 @@
         * [`none`](#none)
     * [`--mzmls`](#--mzmls)
     * [`--fasta`](#--fasta)
+* [Optional binding predicion](#optional-binding-prediction)
+    * [`--run_prediction`](#--run_prediction)
+    * [`--alleles`](#--alleles)
 * [Optional arguments](#optional-arguments)
+    * [`--peptide_min_length`](#--peptide_min_length)
+    * [`--peptide_max_length`](#--peptide_max_length)
     * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
     * [`--precursor_mass_tolerance`](#--precursor_mass_tolerance)
     * [`--fragment_bin_offset`](#--fragment_bin_offset)
@@ -31,6 +36,7 @@
     * [`--enzyme`](#--enzyme)
     * [`--fixed_mods`](#--fixed_mods)
     * [`--variable_mods`](#--variable_mods)
+    * [`--spectrum_batch_size`](#--spectrum_batch_size)
 * [Job Resources](#job-resources)
 * [Automatic resubmission](#automatic-resubmission)
 * [Custom resource requests](#custom-resource-requests)
@@ -62,7 +68,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/mhcquant --reads '*_R{1,2}.fastq.gz' -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' -profile standard,docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -141,8 +147,19 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
+## Optional binding prediction
+### `--run_prediction`
+Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
+
+### `--alleles`
+Specify a .tsv file containing the alleles of your probes. (line separated)
 
 ## Optional Arguments
+### `--peptide_min_length`
+Specify the minimum length of peptides considered after processing
+
+### `--peptide_max_length`
+Specify the maximum length of peptides considered after processing
 
 ### `--fragment_mass_tolerance`
 Specify the fragment mass tolerance used for the comet database search. For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)
@@ -188,6 +205,9 @@ Specify which fixed modifications should be applied to the database search (eg. 
 
 ### `--variable_mods`
 Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
+
+### `--spectrum_batch_size`
+Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
 ## Job Resources
 ### Automatic resubmission
