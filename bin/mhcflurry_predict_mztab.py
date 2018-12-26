@@ -1,4 +1,4 @@
-#!/opt/conda/envs/nf-core-mhcquant-1.1.0/bin/python
+#!/usr/bin/env python
 from mhcflurry import Class1AffinityPredictor
 import sys
 
