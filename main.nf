@@ -253,21 +253,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
 
 /*
- * STEP 0 - Fetch MHCFlurry Class 1 prediction models
- */
-process fetch_mhcflurry_models {
-
-    when:
-     params.run_prediction == 'True'
-
-    script:
-     """
-     mhcflurry-downloads fetch models_class1
-     """
-}
-
-
-/*
  * STEP 1 - generate reversed decoy database
  */
 process generate_decoy_database {
