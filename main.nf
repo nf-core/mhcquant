@@ -706,6 +706,7 @@ process predict_peptides {
 
     script:
      """
+     mhcflurry-downloads fetch models_class1
      mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides.csv
      """
 }
