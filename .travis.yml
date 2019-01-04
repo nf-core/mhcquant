@@ -11,9 +11,9 @@ before_install:
   # PRs to master are only ok if coming from dev branch
   - '[ $TRAVIS_PULL_REQUEST = "false" ] || [ $TRAVIS_BRANCH != "master" ] || ([ $TRAVIS_PULL_REQUEST_SLUG = $TRAVIS_REPO_SLUG ] && [ $TRAVIS_PULL_REQUEST_BRANCH = "dev" ])'
   # Pull the docker image first so the test doesn't wait for this
-  - docker pull nfcore/mhcquant
+  - docker pull nfcore/mhcquant:dev
   # Fake the tag locally so that the pipeline runs properly
-  - docker tag nfcore/mhcquant nfcore/mhcquant:1.1.0
+  - docker tag nfcore/mhcquant:dev nfcore/mhcquant:1.1.0
 
 install:
   # Install Nextflow
@@ -34,4 +34,4 @@ script:
   # Lint the pipeline code
   - nf-core lint ${TRAVIS_BUILD_DIR}
   # Run the pipeline with the test profile
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker
+  - travis_wait 35 nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker

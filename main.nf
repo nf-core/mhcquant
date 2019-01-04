@@ -253,17 +253,21 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
 
 /*
- * STEP 0 - Fetch MHCFlurry Class 1 prediction models
+ * STEP 0 - Output Description HTML
  */
-process fetch_mhcflurry_models {
+process output_documentation {
+    publishDir "${params.outdir}/Documentation", mode: 'copy'
 
-    when:
-     params.run_prediction == 'True'
+    input:
+    file output_docs
+
+    output:
+    file "results_description.html"
 
     script:
-     """
-     mhcflurry-downloads fetch models_class1
-     """
+    """
+    markdown_to_html.r $output_docs results_description.html
+    """
 }
 
 
@@ -707,20 +711,22 @@ process export_mztab {
  * STEP 18 - If specified predict peptides using MHCFlurry
  */
 process predict_peptides {
+    publishDir "${params.outdir}/"
+
     input:
      file mztab_file from features_mztab
      file allotypes from input_alleles
 
     output:
-     file "predicted_peptides.csv" into predicted_peptides
+     file "*predicted_peptides.csv" into predicted_peptides
 
     when:
      params.run_prediction == 'True'
 
     script:
      """
-     #!/usr/bin/env python
-     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} 'predicted_peptides.csv'
+     mhcflurry-downloads fetch models_class1
+     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides.csv
      """
 }
 
