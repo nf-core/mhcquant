@@ -4,6 +4,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - conda-forge::r-rmarkdown=1.10
   - openms=2.4.0
   - comet-ms=2016013
   - python=2.7.15
