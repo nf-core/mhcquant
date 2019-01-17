@@ -25,7 +25,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --alleles 'alleles.tsv' -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' -profile standard,docker
 
     Mandatory arguments:
       --mzmls                       Path to input data (must be surrounded with quotes)
@@ -132,9 +132,23 @@ params.inlude_proteins_from_vcf = "True"
 params.variant_annotation_style = "SNPEFF"
 params.variant_reference = "GRCH38"
 params.variant_indel_filter = "False"
+if (params.variant_indel_filter=="True") {
+variant_indel_filter="-fINDEL"
+} else {
+variant_indel_filter=""
+}
 params.variant_frameshift_filter = "False"
+if (params.variant_frameshift_filter=="True") {
+variant_frameshift_filter="-fFS"
+} else {
+variant_frameshift_filter=""
+}
 params.variant_snp_filter = "False"
-
+if (params.variant_snp_filter=="True") {
+variant_snp_filter="-fSNP"
+} else {
+variant_snp_filter=""
+}
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -332,7 +346,7 @@ process generate_proteins_from_vcf {
 
     script:
      """
-     vcf2fasta.py -v ${vcf_file} -t ${variant_annotation_style} -r ${variant_reference} -f ${fasta_file_vcf} -o ${fasta_file_vcf.baseName}_added_vcf.fasta ${variant_indel_filter} ${variant_snp_filter} ${variant_frameshift_filter}
+     vcf2fasta.py -v ${vcf_file} -t ${params.variant_annotation_style} -r ${params.variant_reference} -f ${fasta_file_vcf} -o ${fasta_file_vcf.baseName}_added_vcf.fasta ${variant_indel_filter} ${variant_snp_filter} ${variant_frameshift_filter}
      """
 }
 
