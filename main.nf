@@ -317,7 +317,7 @@ process output_documentation {
 /*
  * STEP 0.5 - If specified translate variants to proteins and include in reference fasta
  */
-process predict_peptides {
+process generate_proteins_from_vcf {
     publishDir "${params.outdir}/"
 
     input:
