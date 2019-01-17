@@ -54,8 +54,17 @@ def helpMessage() {
       --spectrum_batch_size         Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
     Binding Predictions:
-      --run_prediction              Whether a affinity prediction using MHCFlurry should be run on the results (Check if alleles are supported)
+      --run_prediction              Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported ("True", "False")
       --alleles                     Path to file including allele information
+
+    Variants:
+      --include_proteins_from_vcf   Whether to use a provided vcf file to generate proteins and include them in the database search ("True", "False")
+      --vcf                         Path to vcf file
+      --variant_annotation_style    Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")
+      --variant_reference           Specify reference genome used for variant annotation ("GRCH37","GRCH38")
+      --variant_indel_filter        Remove insertions and deletions from vcf ("True", "False")
+      --variant_frameshift_filter   Remove insertions and deltionns causing frameshifts from vcf ("True", "False")
+      --variant_snp_filter          Remove snps from vcf ("True", "False")
 
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -90,6 +99,7 @@ params.outdir = params.outdir ?: { log.warn "No output directory provided. Will 
  * Define the default parameters
  */
 
+//MS params
 params.peptide_min_length = 8
 params.peptide_max_length = 12
 params.fragment_mass_tolerance = 0.02
@@ -113,7 +123,17 @@ params.fixed_mods = ''
 params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
+//prediction params
 params.run_prediction = "True"
+
+
+//variant params
+params.inlude_proteins_from_vcf = "True"
+params.variant_annotation_style = "SNPEFF"
+params.variant_reference = "GRCH38"
+params.variant_indel_filter = "False"
+params.variant_frameshift_filter = "False"
+params.variant_snp_filter = "False"
 
 /*
  * SET UP CONFIGURATION VARIABLES
@@ -175,11 +195,22 @@ if( params.centroided != "True") {
 /*
  * Create a channel for input fasta file
  */
-Channel
-    .fromPath( params.fasta )
-    .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-    .set { input_fasta}
+if( params.include_proteins_from_vcf == "True") {
+    Channel
+        .fromPath( params.fasta )
+        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+        .set { input_fasta_vcf}
 
+    input_fasta = Channel.empty()
+
+} else {
+    Channel
+        .fromPath( params.fasta )
+        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+        .set { input_fasta}
+
+    input_fasta_vcf = Channel.empty()
+}
 
 /*
  * Create a channel for input alleles file
@@ -189,6 +220,17 @@ if( params.run_prediction == 'True'){
         .fromPath( params.alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
         .set { input_alleles}
+}
+
+
+/*
+ * Create a channel for input alleles file
+ */
+if( params.include_proteins_from_vcf == 'True'){
+    Channel
+        .fromPath( params.vcf )
+        .ifEmpty { exit 1, "params.vcf was empty - no input file supplied" }
+        .set { input_vcf}
 }
 
 // Header log info
@@ -209,6 +251,7 @@ summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
 summary['Predictions']  = params.run_prediction
 summary['Alleles']      = params.alleles
+summary['Variants']     = params.vcf
 summary['Centroided']   = params.centroided
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
@@ -272,12 +315,35 @@ process output_documentation {
 
 
 /*
+ * STEP 0.5 - If specified translate variants to proteins and include in reference fasta
+ */
+process predict_peptides {
+    publishDir "${params.outdir}/"
+
+    input:
+     file fasta_file_vcf from input_fasta_vcf
+     file vcf_file from input_vcf
+
+    output:
+     file "${fasta_file_vcf.baseName}_added_vcf.fasta" into appended_fasta
+
+    when:
+     params.include_proteins_from_vcf == 'True'
+
+    script:
+     """
+     vcf2fasta.py -v ${vcf_file} -t ${variant_annotation_style} -r ${variant_reference} -f ${fasta_file_vcf} -o ${fasta_file_vcf.baseName}_added_vcf.fasta ${variant_indel_filter} ${variant_snp_filter} ${variant_frameshift_filter}
+     """
+}
+
+
+/*
  * STEP 1 - generate reversed decoy database
  */
 process generate_decoy_database {
 
     input:
-     file fastafile from input_fasta
+     file fastafile from input_fasta.mix(appended_fasta)
 
     output:
      file "${fastafile.baseName}_decoy.fasta" into (fastafile_decoy_1, fastafile_decoy_2)
