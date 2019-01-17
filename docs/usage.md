@@ -17,6 +17,14 @@
 * [Optional binding predicion](#optional-binding-prediction)
     * [`--run_prediction`](#--run_prediction)
     * [`--alleles`](#--alleles)
+* [Optional variant translation](#optional-variant_translation)
+    * [`--include_proteins_from_vcf`](#--include_proteins_from_vcf)
+    * [`--vcf`](#--vcf)
+    * [`--variant_annotation_style`](#--variant_annotation_style)
+    * [`--variant_reference`](#--variant_reference)
+    * [`--variant_indel_filter`](#--variant_indel_filter)
+    * [`--variant_frameshift_filter`](#--variant_frameshift_filter)
+    * [`--variant_snp_filter`](#--variant_snp_filter)
 * [Optional arguments](#optional-arguments)
     * [`--peptide_min_length`](#--peptide_min_length)
     * [`--peptide_max_length`](#--peptide_max_length)
@@ -153,6 +161,28 @@ Set to 'True' or 'False' depending on whether binding predictions using the tool
 
 ### `--alleles`
 Specify a .tsv file containing the alleles of your probes. (line separated)
+
+## Optional variant translation
+### `--include_proteins_from_vcf`
+Set to 'True' or 'False' depending on whether variants should be translated to proteins and included into your fasta for database search.
+
+### `--vcf`
+Specify a .vcf file containing the information about genomic variants.
+
+### `--variant_annotation_style`
+Specify style of tool used for variant annotation - currently supported: "SNPEFF", "VEP", "ANNOVAR"
+
+### `--variant_reference`
+Specify genomic reference used for variant annotation: "GRCH37", "GRCH38"
+
+### `--variant_indel_filter`
+Specify whether insertions and deletions should not be considered for variant translation
+
+### `--variant_frameshift_filter`
+Specify whether frameshifts should not be considered for variant translation
+
+### `--variant_snp_filter`
+Specify whether snps should not be considered for variant translation
 
 ## Optional Arguments
 ### `--peptide_min_length`
