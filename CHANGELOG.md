@@ -1,5 +1,14 @@
 # nf-core/mhcquant: Changelog
 
+## v1.2.0 nf-core/mhcquant "Golden Eagle" - 2019/01/04
+
+### `Added`
+Fred2 dependency
+vcf parser and translation to proteins
+
+### `Fixed`
+...
+
 ## v1.1.0 nf-core/mhcquant "Black Crow" - 2019/01/04
 
 ### `Added`
