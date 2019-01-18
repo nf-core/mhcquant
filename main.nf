@@ -48,23 +48,23 @@ def helpMessage() {
       --fixed_mods                  Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
       --variable_mods               Variable modifications ('Oxidation (M)', see OpenMS modifications)
       --num_hits                    Number of reported hits
-      --centroided                  Specify whether mzml data is peak picked or not (True, False)
+      --centroided                  Specify whether mzml data is peak picked or not (true, false)
       --pick_ms_levels              The ms level used for peak picking (eg. 1, 2)
       --prec_charge                 Precursor charge (eg. "2:3")
       --spectrum_batch_size         Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
     Binding Predictions:
-      --run_prediction              Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (True, False)
+      --run_prediction              Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
       --alleles                     Path to file including allele information
 
     Variants:
-      --include_proteins_from_vcf   Whether to use a provided vcf file to generate proteins and include them in the database search (True, False)
+      --include_proteins_from_vcf   Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)
       --vcf                         Path to vcf file
       --variant_annotation_style    Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")
       --variant_reference           Specify reference genome used for variant annotation ("GRCH37","GRCH38")
-      --variant_indel_filter        Remove insertions and deletions from vcf (True, False)
-      --variant_frameshift_filter   Remove insertions and deltionns causing frameshifts from vcf (True, False)
-      --variant_snp_filter          Remove snps from vcf (True, False)
+      --variant_indel_filter        Remove insertions and deletions from vcf (true, false)
+      --variant_frameshift_filter   Remove insertions and deltionns causing frameshifts from vcf (true, false)
+      --variant_snp_filter          Remove snps from vcf (true, false)
 
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -113,7 +113,7 @@ params.number_mods = 3
 params.num_hits = 1
 params.digest_mass_range = "800:2500"
 params.pick_ms_levels = 2
-params.centroided = True
+params.centroided = true
 
 params.prec_charge = '2:3'
 params.activation_method = 'ALL'
@@ -124,26 +124,26 @@ params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
 //prediction params
-params.run_prediction = True
+params.run_prediction = true
 
 
 //variant params
-params.inlude_proteins_from_vcf = True
+params.inlude_proteins_from_vcf = true
 params.variant_annotation_style = "SNPEFF"
 params.variant_reference = "GRCH38"
-params.variant_indel_filter = False
+params.variant_indel_filter = false
 if (params.variant_indel_filter) {
 variant_indel_filter="-fINDEL"
 } else {
 variant_indel_filter=""
 }
-params.variant_frameshift_filter = False
+params.variant_frameshift_filter = false
 if (params.variant_frameshift_filter) {
 variant_frameshift_filter="-fFS"
 } else {
 variant_frameshift_filter=""
 }
-params.variant_snp_filter = False
+params.variant_snp_filter = false
 if (params.variant_snp_filter) {
 variant_snp_filter="-fSNP"
 } else {
