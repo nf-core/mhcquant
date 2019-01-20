@@ -127,7 +127,7 @@ params.spectrum_batch_size = 500
 
 //prediction params
 params.run_prediction = true
-params.refine_fdr_on_predicted_subset = true
+params.refine_fdr_on_predicted_subset = false
 params.subset_affinity_threshold = 500
 
 //variant params
