@@ -33,7 +33,7 @@ def helpMessage() {
       -profile                          Configuration profile to use. Can use multiple (comma separated)
                                         Available: standard, conda, docker, singularity, awsbatch, test
 
-    Options:
+    Mass Spectrometry Search:
       --peptide_min_length              Minimum peptide length for filtering
       --peptide_max_length              Maximum peptide length for filtering
       --precursor_mass_tolerance        Mass tolerance of precursor mass (ppm)
@@ -55,7 +55,8 @@ def helpMessage() {
 
     Binding Predictions:
       --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
-      --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset the search space and refine the fdr (true, false)
+      --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
+      --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
       --alleles                         Path to file including allele information
 
     Variants:
@@ -127,6 +128,7 @@ params.spectrum_batch_size = 500
 //prediction params
 params.run_prediction = true
 params.refine_fdr_on_predicted_subset = true
+params.subset_affinity_threshold = 500
 
 //variant params
 params.inlude_proteins_from_vcf = true
@@ -769,7 +771,7 @@ process predict_psms {
     script:
      """
      mhcflurry-downloads fetch models_class1
-     mhcflurry_predict_mztab_for_filtering.py ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} peptide_filter.idXML
+     mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} peptide_filter.idXML
      """
 }
 
