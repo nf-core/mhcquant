@@ -1,4 +1,4 @@
-name: nf-core-mhcquant-1.1.0
+name: nf-core-mhcquant-1.2.0
 channels:
   - bioconda
   - conda-forge
@@ -9,3 +9,4 @@ dependencies:
   - comet-ms=2016013
   - python=2.7.15
   - mhcflurry=1.2.2
+  - fred2=2.0.3

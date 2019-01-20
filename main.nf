@@ -25,46 +25,57 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --alleles 'alleles.tsv' -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' -profile standard,docker
 
     Mandatory arguments:
-      --mzmls                       Path to input data (must be surrounded with quotes)
-      --fasta                       Path to Fasta reference
-      -profile                      Configuration profile to use. Can use multiple (comma separated)
-                                    Available: standard, conda, docker, singularity, awsbatch, test
+      --mzmls                           Path to input data (must be surrounded with quotes)
+      --fasta                           Path to Fasta reference
+      -profile                          Configuration profile to use. Can use multiple (comma separated)
+                                        Available: standard, conda, docker, singularity, awsbatch, test
 
-    Options:
-      --peptide_min_length          Minimum peptide length for filtering
-      --peptide_max_length          Maximum peptide length for filtering
-      --precursor_mass_tolerance    Mass tolerance of precursor mass (ppm)
-      --fragment_mass_tolerance     Mass tolerance of fragment mass bin (ppm)
-      --fragment_bin_offset         Offset of fragment mass bin (Comet specific parameter)
-      --fdr_threshold               Threshold for FDR filtering
-      --fdr_level                   Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
-      --digest_mass_range           Mass range of peptides considered for matching
-      --activation_method           Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
-      --enzyme                      Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
-      --number_mods                 Maximum number of modifications of PSMs
-      --fixed_mods                  Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
-      --variable_mods               Variable modifications ('Oxidation (M)', see OpenMS modifications)
-      --num_hits                    Number of reported hits
-      --centroided                  Specify whether mzml data is peak picked or not ("True", "False")
-      --pick_ms_levels              The ms level used for peak picking (eg. 1, 2)
-      --prec_charge                 Precursor charge (eg. "2:3")
-      --spectrum_batch_size         Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+    Mass Spectrometry Search:
+      --peptide_min_length              Minimum peptide length for filtering
+      --peptide_max_length              Maximum peptide length for filtering
+      --precursor_mass_tolerance        Mass tolerance of precursor mass (ppm)
+      --fragment_mass_tolerance         Mass tolerance of fragment mass bin (ppm)
+      --fragment_bin_offset             Offset of fragment mass bin (Comet specific parameter)
+      --fdr_threshold                   Threshold for FDR filtering
+      --fdr_level                       Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
+      --digest_mass_range               Mass range of peptides considered for matching
+      --activation_method               Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
+      --enzyme                          Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
+      --number_mods                     Maximum number of modifications of PSMs
+      --fixed_mods                      Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
+      --variable_mods                   Variable modifications ('Oxidation (M)', see OpenMS modifications)
+      --num_hits                        Number of reported hits
+      --centroided                      Specify whether mzml data is peak picked or not (true, false)
+      --pick_ms_levels                  The ms level used for peak picking (eg. 1, 2)
+      --prec_charge                     Precursor charge (eg. "2:3")
+      --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
     Binding Predictions:
-      --run_prediction              Whether a affinity prediction using MHCFlurry should be run on the results (Check if alleles are supported)
-      --alleles                     Path to file including allele information
+      --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
+      --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
+      --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
+      --alleles                         Path to file including allele information
+
+    Variants:
+      --include_proteins_from_vcf       Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)
+      --vcf                             Path to vcf file
+      --variant_annotation_style        Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")
+      --variant_reference               Specify reference genome used for variant annotation ("GRCH37","GRCH38")
+      --variant_indel_filter            Remove insertions and deletions from vcf (true, false)
+      --variant_frameshift_filter       Remove insertions and deltionns causing frameshifts from vcf (true, false)
+      --variant_snp_filter              Remove snps from vcf (true, false)
 
     Other options:
-      --outdir                      The output directory where the results will be saved
-      --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+      --outdir                          The output directory where the results will be saved
+      --email                           Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      -name                             Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
     AWSBatch options:
-      --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion                   The AWS Region for your AWS Batch job to run on
+      --awsqueue                        The AWSBatch JobQueue that needs to be set when running on AWSBatch
+      --awsregion                       The AWS Region for your AWS Batch job to run on
     """.stripIndent()
 }
 
@@ -90,6 +101,7 @@ params.outdir = params.outdir ?: { log.warn "No output directory provided. Will 
  * Define the default parameters
  */
 
+//MS params
 params.peptide_min_length = 8
 params.peptide_max_length = 12
 params.fragment_mass_tolerance = 0.02
@@ -103,7 +115,7 @@ params.number_mods = 3
 params.num_hits = 1
 params.digest_mass_range = "800:2500"
 params.pick_ms_levels = 2
-params.centroided = "True"
+params.centroided = true
 
 params.prec_charge = '2:3'
 params.activation_method = 'ALL'
@@ -113,8 +125,33 @@ params.fixed_mods = ''
 params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
-params.run_prediction = "True"
+//prediction params
+params.run_prediction = true
+params.refine_fdr_on_predicted_subset = false
+params.subset_affinity_threshold = 500
 
+//variant params
+params.inlude_proteins_from_vcf = true
+params.variant_annotation_style = "SNPEFF"
+params.variant_reference = "GRCH38"
+params.variant_indel_filter = false
+if (params.variant_indel_filter) {
+variant_indel_filter="-fINDEL"
+} else {
+variant_indel_filter=""
+}
+params.variant_frameshift_filter = false
+if (params.variant_frameshift_filter) {
+variant_frameshift_filter="-fFS"
+} else {
+variant_frameshift_filter=""
+}
+params.variant_snp_filter = false
+if (params.variant_snp_filter) {
+variant_snp_filter="-fSNP"
+} else {
+variant_snp_filter=""
+}
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -152,7 +189,7 @@ if( workflow.profile == 'awsbatch') {
 /*
  * Create a channel for input mzml files
  */
-if( params.centroided != "True") {
+if( !params.centroided) {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
@@ -175,21 +212,48 @@ if( params.centroided != "True") {
 /*
  * Create a channel for input fasta file
  */
-Channel
-    .fromPath( params.fasta )
-    .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-    .set { input_fasta}
+if( params.include_proteins_from_vcf) {
+    Channel
+        .fromPath( params.fasta )
+        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+        .set { input_fasta_vcf}
+
+    input_fasta = Channel.empty()
+
+} else {
+    Channel
+        .fromPath( params.fasta )
+        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+        .set { input_fasta}
+
+    input_fasta_vcf = Channel.empty()
+}
 
 
 /*
  * Create a channel for input alleles file
  */
-if( params.run_prediction == 'True'){
+if( params.run_prediction){
     Channel
         .fromPath( params.alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
-        .set { input_alleles}
+        .into { input_alleles; input_alleles_refine}
 }
+
+
+/*
+ * Create a channel for input vcf file
+ */
+if( params.include_proteins_from_vcf){
+    Channel
+        .fromPath( params.vcf )
+        .ifEmpty { exit 1, "params.vcf was empty - no input file supplied" }
+        .set { input_vcf}
+} else {
+
+    input_vcf = Channel.empty()
+}
+
 
 // Header log info
 log.info """=======================================================
@@ -208,7 +272,9 @@ summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
 summary['Predictions']  = params.run_prediction
+summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
 summary['Alleles']      = params.alleles
+summary['Variants']     = params.vcf
 summary['Centroided']   = params.centroided
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
@@ -272,12 +338,35 @@ process output_documentation {
 
 
 /*
+ * STEP 0.5 - If specified translate variants to proteins and include in reference fasta
+ */
+process generate_proteins_from_vcf {
+    publishDir "${params.outdir}/"
+
+    input:
+     file fasta_file_vcf from input_fasta_vcf
+     file vcf_file from input_vcf
+
+    output:
+     file "${fasta_file_vcf.baseName}_added_vcf.fasta" into appended_fasta
+
+    when:
+     params.include_proteins_from_vcf
+
+    script:
+     """
+     variants2fasta.py -v ${vcf_file} -t ${params.variant_annotation_style} -r ${params.variant_reference} -f ${fasta_file_vcf} -o ${fasta_file_vcf.baseName}_added_vcf.fasta ${variant_indel_filter} ${variant_snp_filter} ${variant_frameshift_filter}
+     """
+}
+
+
+/*
  * STEP 1 - generate reversed decoy database
  */
 process generate_decoy_database {
 
     input:
-     file fastafile from input_fasta
+     file fastafile from input_fasta.mix(appended_fasta)
 
     output:
      file "${fastafile.baseName}_decoy.fasta" into (fastafile_decoy_1, fastafile_decoy_2)
@@ -304,7 +393,7 @@ process peak_picking {
      file "${mzml_unpicked.baseName}.mzML" into (input_mzmls_picked, input_mzmls_align_picked)
 
     when:
-     params.centroided != "True"
+     !params.centroided
 
     script:
      """
@@ -356,7 +445,6 @@ process db_search_comet {
  * STEP 3 - index decoy and target hits
  */
 process index_peptides {
-    publishDir "${params.outdir}/"
  
     input:
      file id_file from id_files
@@ -382,7 +470,6 @@ process index_peptides {
  * STEP 4 - calculate fdr for id based alignment
  */
 process calculate_fdr_for_idalignment {
-    publishDir "${params.outdir}/"
  
     input:
      file id_file_idx from id_files_idx
@@ -404,7 +491,6 @@ process calculate_fdr_for_idalignment {
  * STEP 5 - filter fdr for id based alignment
  */
 process filter_fdr_for_idalignment {
-    publishDir "${params.outdir}/"
  
     input:
      file id_file_idx_fdr from id_files_idx_fdr
@@ -428,7 +514,6 @@ process filter_fdr_for_idalignment {
  * STEP 6 - compute alignment rt transformation
  */
 process align_ids {
-   publishDir "${params.outdir}/"
 
     input:
      file id_names from id_files_idx_fdr_filtered.collect{it}
@@ -450,7 +535,6 @@ process align_ids {
  * STEP 7 - align mzML files using trafoXMLs
  */
 process align_mzml_files {
-    publishDir "${params.outdir}/"
 
     input:
      file id_file_trafo from id_files_trafo_mzml.flatten()
@@ -474,7 +558,6 @@ process align_mzml_files {
  * STEP 8 - align unfiltered idXMLfiles using trafoXMLs
  */
 process align_idxml_files {
-    publishDir "${params.outdir}/"
 
     input:
      file idxml_file_trafo from id_files_trafo_idxml.flatten()
@@ -498,7 +581,6 @@ process align_idxml_files {
  * STEP 9 - merge aligned idXMLfiles
  */
 process merge_aligned_idxml_files {
-    publishDir "${params.outdir}/"
 
     input:
      file ids_aligned from idxml_files_aligned.collect{it}
@@ -521,13 +603,13 @@ process merge_aligned_idxml_files {
  * STEP 10 - extract PSM features for Percolator
  */
 process extract_psm_features_for_percolator {
-    publishDir "${params.outdir}/"
+    publishDir "${params.outdir}/Intermediate_Results/"
  
     input:
      file id_file_merged from id_merged
 
     output:
-     file "${id_file_merged.baseName}_psm.idXML" into id_files_merged_psm
+     file "${id_file_merged.baseName}_psm.idXML" into (id_files_merged_psm, id_files_merged_psm_refine, id_files_merged_psm_refine_2)
 
     script:
      """
@@ -542,21 +624,19 @@ process extract_psm_features_for_percolator {
 /*
  * STEP 11 - run Percolator
  */
-
-///To Do: add peptide level variable
 process run_percolator {
-    publishDir "${params.outdir}/"
+    publishDir "${params.outdir}/Intermediate_Results/"
  
     input:
      file id_file_psm from id_files_merged_psm
 
     output:
-     file "${id_file_psm.baseName}_psm_perc.idXML" into id_files_merged_psm_perc
+     file "${id_file_psm.baseName}_perc.idXML" into id_files_merged_psm_perc
 
     script:
      """
      PercolatorAdapter -in ${id_file_psm} \\
-                       -out ${id_file_psm.baseName}_psm_perc.idXML \\
+                       -out ${id_file_psm.baseName}_perc.idXML \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -threads ${task.cpus} \\
@@ -570,19 +650,208 @@ process run_percolator {
 /*
  * STEP 12 - filter by percolator q-value
  */
-process filter_q_value {
-    publishDir "${params.outdir}/"
+process filter_by_q_value {
+    publishDir "${params.outdir}/Intermediate_Results/"
  
     input:
      file id_file_perc from id_files_merged_psm_perc
 
     output:
-     file "${id_file_perc.baseName}_psm_perc_filtered.idXML" into id_files_merged_psm_perc_filtered
+     file "${id_file_perc.baseName}_filtered.idXML" into id_files_merged_psm_perc_filtered
+
+    when:
+     !params.refine_fdr_on_predicted_subset
 
     script:
      """
      IDFilter -in ${id_file_perc} \\
-              -out ${id_file_perc.baseName}_psm_perc_filtered.idXML \\
+              -out ${id_file_perc.baseName}_filtered.idXML \\
+              -threads ${task.cpus} \\
+              -score:pep ${params.fdr_threshold} \\
+              -remove_decoys \\
+              -length '${params.peptide_min_length}:${params.peptide_max_length}'
+     """
+
+}
+
+
+/*
+ * STEP 12.0 - option refine_fdr_on_predicted_subset: filter by percolator q-value
+ */
+process filter_by_q_value {
+    publishDir "${params.outdir}/Intermediate_Results/"
+    
+    input:
+     file id_file_perc from id_files_merged_psm_perc
+    
+    output:
+     file "${id_file_perc.baseName}_filtered.idXML" into id_files_merged_psm_perc_filtered_refine
+
+    when:
+     params.refine_fdr_on_predicted_subset
+    
+    script:
+     """
+     IDFilter -in ${id_file_perc} \\
+              -out ${id_file_perc.baseName}_filtered.idXML \\
+              -threads ${task.cpus} \\
+              -score:pep ${params.fdr_threshold} \\
+              -remove_decoys \\
+              -length '${params.peptide_min_length}:${params.peptide_max_length}'
+     """
+
+}
+
+
+/*
+ * STEP 12.1 - option refine_fdr_on_predicted_subset: export filtered percolator results as mztab
+ */
+process export_mztab_perc {
+
+    input:
+     file percolator_mztab from id_files_merged_psm_perc_filtered_refine
+
+    output:
+     file "${percolator_mztab.baseName}.mzTab" into percolator_ids_mztab
+
+    when:
+     params.refine_fdr_on_predicted_subset
+
+    script:
+     """
+     MzTabExporter -in ${percolator_mztab} \\
+                   -out ${percolator_mztab.baseName}.mzTab \\
+                   -threads ${task.cpus}
+     """
+
+}
+
+
+/*
+ * STEP 12.2 - option refine_fdr_on_predicted_subset: export psm results as mztab
+ */
+process export_mztab_psm {
+
+    input:
+     file psm_mztab from id_files_merged_psm_refine
+
+    output:
+     file "${psm_mztab.baseName}.mzTab" into psm_ids_mztab
+
+    when:
+     params.refine_fdr_on_predicted_subset
+
+    script:
+     """
+     MzTabExporter -in ${psm_mztab} \\
+                   -out ${psm_mztab.baseName}.mzTab \\
+                   -threads ${task.cpus}
+     """
+
+}
+
+
+/*
+ * STEP 12.3 - option refine_fdr_on_predicted_subset: predict psm results using mhcflurry to shrink search space
+ */
+process predict_psms {
+    publishDir "${params.outdir}/Intermediate_Results/"
+
+    input:
+     file perc_mztab_file from percolator_ids_mztab
+     file psm_mztab_file from psm_ids_mztab
+     file allotypes_refine from input_alleles_refine
+
+    output:
+     file "peptide_filter.idXML" into peptide_filter
+
+    when:
+     params.refine_fdr_on_predicted_subset
+
+    script:
+     """
+     mhcflurry-downloads fetch models_class1
+     mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} peptide_filter.idXML
+     """
+}
+
+
+/*
+ * STEP 12.4 - option refine_fdr_on_predicted_subset: filter psm results by shrinked search space
+ */
+process filter_psms_by_predictions {
+    publishDir "${params.outdir}/Intermediate_Results/"
+    
+    input:
+     file id_file_psm_filtered from id_files_merged_psm_refine_2
+     file peptide_filter_file from peptide_filter
+
+    output:
+     file "${id_file_psm_filtered.baseName}_pred_filtered.idXML" into id_files_merged_psm_pred_filtered
+
+    when:
+     params.refine_fdr_on_predicted_subset    
+
+    script:
+     """
+     IDFilter -in ${id_file_psm_filtered} \\
+              -out ${id_file_psm_filtered.baseName}_pred_filtered.idXML \\
+              -whitelist:ignore_modifications \\
+              -whitelist:peptides ${peptide_filter_file}\\
+              -threads ${task.cpus} \\
+     """
+
+}
+
+
+/*
+ * STEP 12.5 - option refine_fdr_on_predicted_subset: recompute percolator fdr on shrinked search space
+ */
+process run_percolator_on_predicted_subset {
+    publishDir "${params.outdir}/Intermediate_Results/"
+
+    input:
+     file id_file_psm_subset from id_files_merged_psm_pred_filtered
+
+    output:
+     file "${id_file_psm_subset.baseName}_perc.idXML" into id_files_merged_psm_pred_perc
+
+    when:
+     params.refine_fdr_on_predicted_subset
+
+    script:
+     """
+     PercolatorAdapter -in ${id_file_psm_subset} \\
+                       -out ${id_file_psm_subset.baseName}_perc.idXML \\
+                       -trainFDR 0.05 \\
+                       -testFDR 0.05 \\
+                       -threads ${task.cpus} \\
+                       -enzyme no_enzyme \\
+                       $fdr_level
+     """
+
+}
+
+
+/*
+ * STEP 12.6 - option refine_fdr_on_predicted_subset: filter results by refined fdr
+ */
+process filter_refined_q_value {
+    publishDir "${params.outdir}/Intermediate_Results/"
+     
+    input:
+     file id_file_perc_pred from id_files_merged_psm_pred_perc
+     
+    output:
+     file "${id_file_perc_pred.baseName}_filtered.idXML" into id_files_merged_psm_pred_perc_filtered
+
+    when:
+     params.refine_fdr_on_predicted_subset     
+
+    script:
+     """      
+     IDFilter -in ${id_file_perc_pred} \\
+              -out ${id_file_perc_pred.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
@@ -596,10 +865,10 @@ process filter_q_value {
  * STEP 13 - quantify identifications using targeted feature extraction
  */
 process quantify_identifications_targeted {
-    publishDir "${params.outdir}/"
+    publishDir "${params.outdir}/Intermediate_Results/"
  
     input:
-     file id_file_quant from id_files_merged_psm_perc_filtered
+     file id_file_quant from id_files_merged_psm_perc_filtered.mix(id_files_merged_psm_pred_perc_filtered).first()
      file mzml_quant from mzml_files_aligned
 
     output:
@@ -620,7 +889,6 @@ process quantify_identifications_targeted {
  * STEP 14 - link extracted features
  */
 process link_extracted_features {
-    publishDir "${params.outdir}/"
 
     input:
      file feautres from feature_files.collect{it}
@@ -642,7 +910,6 @@ process link_extracted_features {
  * STEP 15 - resolve conflicting ids matching to the same feature
  */
 process resolve_conflicts {
-    publishDir "${params.outdir}/"
  
     input:
      file consensus from consensus_file
@@ -721,7 +988,7 @@ process predict_peptides {
      file "*predicted_peptides.csv" into predicted_peptides
 
     when:
-     params.run_prediction == 'True'
+     params.run_prediction
 
     script:
      """
@@ -799,6 +1066,10 @@ workflow.onComplete {
     def output_d = new File( "${params.outdir}/Documentation/" )
     if( !output_d.exists() ) {
       output_d.mkdirs()
+    }
+    def output_ir = new File( "${params.outdir}/Intermediate_Results/" )
+    if( !output_ir.exists() ) {
+      output_ir.mkdirs()
     }
     def output_hf = new File( output_d, "pipeline_report.html" )
     output_hf.withWriter { w -> w << email_html }
