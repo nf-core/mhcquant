@@ -1,4 +1,4 @@
-name: nf-core-mhcquant-percolator-1.0dev
+name: nf-core-mhcquant-percolator-1.2.0
 channels:
   - bioconda
   - conda-forge

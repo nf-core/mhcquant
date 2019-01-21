@@ -7,17 +7,14 @@
 * [Updating the pipeline](#updating-the-pipeline)
 * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
+    * [`--mzmls`](#--mzmls)
+    * [`--fasta`](#--fasta)
     * [`-profile`](#-profile-single-dash)
         * [`docker`](#docker)
         * [`awsbatch`](#awsbatch)
         * [`standard`](#standard)
         * [`none`](#none)
-    * [`--mzmls`](#--mzmls)
-    * [`--fasta`](#--fasta)
-* [Optional binding predicion](#optional-binding-prediction)
-    * [`--run_prediction`](#--run_prediction)
-    * [`--alleles`](#--alleles)
-* [Optional arguments](#optional-arguments)
+* [Mass Spectrometry Search](#Mass Spectrometry Search)
     * [`--peptide_min_length`](#--peptide_min_length)
     * [`--peptide_max_length`](#--peptide_max_length)
     * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
@@ -37,6 +34,19 @@
     * [`--fixed_mods`](#--fixed_mods)
     * [`--variable_mods`](#--variable_mods)
     * [`--spectrum_batch_size`](#--spectrum_batch_size)
+* [Optional binding predicion](#optional-binding-prediction)
+    * [`--run_prediction`](#--run_prediction)
+    * [`--refine_fdr_on_predicted_subset`](#--refine_fdr_on_predicted_subset)
+    * [`--affinity_threshold_subset`](#--affinity_threshold_subset)
+    * [`--alleles`](#--alleles)
+* [Optional variant translation](#optional-variant_translation)
+    * [`--include_proteins_from_vcf`](#--include_proteins_from_vcf)
+    * [`--vcf`](#--vcf)
+    * [`--variant_annotation_style`](#--variant_annotation_style)
+    * [`--variant_reference`](#--variant_reference)
+    * [`--variant_indel_filter`](#--variant_indel_filter)
+    * [`--variant_frameshift_filter`](#--variant_frameshift_filter)
+    * [`--variant_snp_filter`](#--variant_snp_filter)
 * [Job Resources](#job-resources)
 * [Automatic resubmission](#automatic-resubmission)
 * [Custom resource requests](#custom-resource-requests)
@@ -68,7 +78,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' -profile standard,docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -147,14 +157,7 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 * `none`
     * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
-## Optional binding prediction
-### `--run_prediction`
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
-
-### `--alleles`
-Specify a .tsv file containing the alleles of your probes. (line separated)
-
-## Optional Arguments
+## Mass Spectrometry Search
 ### `--peptide_min_length`
 Specify the minimum length of peptides considered after processing
 
@@ -208,6 +211,41 @@ Specify which variable modifications should be applied to the database search (e
 
 ### `--spectrum_batch_size`
 Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+
+## Optional binding prediction
+### `--run_prediction`
+Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
+
+### `--refine_fdr_on_predicted_subset`
+Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Check whether your alleles are supported by mhcflurry)
+
+### `--affinity_threshold_subset`
+Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)
+
+### `--alleles`
+Specify a .tsv file containing the alleles of your probes. (line separated)
+
+## Optional variant translation
+### `--include_proteins_from_vcf`
+Set to 'True' or 'False' depending on whether variants should be translated to proteins and included into your fasta for database search.
+
+### `--vcf`
+Specify a .vcf file containing the information about genomic variants.
+
+### `--variant_annotation_style`
+Specify style of tool used for variant annotation - currently supported: "SNPEFF", "VEP", "ANNOVAR"
+
+### `--variant_reference`
+Specify genomic reference used for variant annotation: "GRCH37", "GRCH38"
+
+### `--variant_indel_filter`
+Specify whether insertions and deletions should not be considered for variant translation
+
+### `--variant_frameshift_filter`
+Specify whether frameshifts should not be considered for variant translation
+
+### `--variant_snp_filter`
+Specify whether snps should not be considered for variant translation
 
 ## Job Resources
 ### Automatic resubmission
