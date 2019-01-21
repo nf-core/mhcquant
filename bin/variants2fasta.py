@@ -211,7 +211,7 @@ def main():
 
 
         #concatenate fasta file with fasta reference
-        op=open(args.output)
+        op=open(args.output.replace('.fasta','_vcf.fasta'))
         opr1=op.read()
         op.close()
 
