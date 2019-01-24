@@ -7,7 +7,7 @@ Bootstrap:docker
 
 %environment
     PATH=/opt/conda/envs/nf-core-mhcquant-1.2.1/bin:$PATH
-    PATH=/opt/conda/envs/nf-core-mhcquant-percolator-1.0dev/bin:$PATH
+    PATH=/opt/conda/envs/nf-core-mhcquant-percolator-1.2.1/bin:$PATH
     export PATH
 
 %files
