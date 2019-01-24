@@ -1,5 +1,10 @@
 # nf-core/mhcquant: Changelog
 
+## v1.2.1 nf-core/mhcquant "Golden Eagle" - 2019/01/24
+
+### `Fixed`
+process identical names bug
+
 ## v1.2.0 nf-core/mhcquant "Golden Eagle" - 2019/01/19
 
 ### `Added`
