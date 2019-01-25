@@ -25,7 +25,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' --include_proteins_from_vcf --run_prediction -profile standard,docker
 
     Mandatory arguments:
       --mzmls                           Path to input data (must be surrounded with quotes)
@@ -115,7 +115,7 @@ params.number_mods = 3
 params.num_hits = 1
 params.digest_mass_range = "800:2500"
 params.pick_ms_levels = 2
-params.centroided = true
+params.centroided = false
 
 params.prec_charge = '2:3'
 params.activation_method = 'ALL'
@@ -126,12 +126,12 @@ params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
 //prediction params
-params.run_prediction = true
+params.run_prediction = false
 params.refine_fdr_on_predicted_subset = false
 params.subset_affinity_threshold = 500
 
 //variant params
-params.inlude_proteins_from_vcf = true
+params.inlude_proteins_from_vcf = fase
 params.variant_annotation_style = "SNPEFF"
 params.variant_reference = "GRCH38"
 params.variant_indel_filter = false

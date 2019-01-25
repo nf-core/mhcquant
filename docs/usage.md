@@ -14,7 +14,7 @@
         * [`awsbatch`](#awsbatch)
         * [`standard`](#standard)
         * [`none`](#none)
-* [Mass Spectrometry Search](#Mass Spectrometry Search)
+* [Mass Spectrometry Search](#Mass-Spectrometry-Search)
     * [`--peptide_min_length`](#--peptide_min_length)
     * [`--peptide_max_length`](#--peptide_max_length)
     * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
@@ -230,7 +230,7 @@ Specify a .tsv file containing the alleles of your probes. (line separated)
 Set to 'True' or 'False' depending on whether variants should be translated to proteins and included into your fasta for database search.
 
 ### `--vcf`
-Specify a .vcf file containing the information about genomic variants.
+Specify a .vcf file containing the information about genomic variants (vcf < v.4.2).
 
 ### `--variant_annotation_style`
 Specify style of tool used for variant annotation - currently supported: "SNPEFF", "VEP", "ANNOVAR"
