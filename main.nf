@@ -678,7 +678,7 @@ process filter_by_q_value {
 /*
  * STEP 12.0 - option refine_fdr_on_predicted_subset: filter by percolator q-value
  */
-process filter_by_q_value {
+process filter_by_q_value_first {
     publishDir "${params.outdir}/Intermediate_Results/"
     
     input:
