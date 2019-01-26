@@ -131,7 +131,7 @@ params.refine_fdr_on_predicted_subset = false
 params.subset_affinity_threshold = 500
 
 //variant params
-params.inlude_proteins_from_vcf = fase
+params.inlude_proteins_from_vcf = false
 params.variant_annotation_style = "SNPEFF"
 params.variant_reference = "GRCH38"
 params.variant_indel_filter = false
