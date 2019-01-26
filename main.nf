@@ -238,7 +238,13 @@ if( params.run_prediction){
         .fromPath( params.alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
         .into { input_alleles; input_alleles_refine}
+} else {
+
+    input_alleles = Channel.empty()
+    input_alleles_refine = Channel.empty()
 }
+
+
 
 
 /*
