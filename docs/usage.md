@@ -26,7 +26,7 @@
     * [`--num_hits`](#--num_hits)
     * [`--digest_mass_range`](#--digest_mass_range)
     * [`--pick_ms_levels`](#--pick_ms_levels)
-    * [`--centroided`](#--centroided)
+    * [`--run_centroidisation`](#--run_centroidisation)
     * [`--prec_charge`](#--prec_charge)
     * [`--digest_mass_range`](#--digest_mass_range)
     * [`--activation_method`](#--activation_method)
@@ -191,7 +191,7 @@ Specify the mass range that peptides should fullfill to be considered for peptid
 ### `--pick_ms_levels`
 If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)
 
-### `--centroided`
+### `--run_centroidisation`
 Choose whether the specified ms_level in pick_ms_levels is centroided or not. ("True", "False")
 
 ### `--prec_charge`

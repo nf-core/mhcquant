@@ -48,7 +48,7 @@ def helpMessage() {
       --fixed_mods                      Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
       --variable_mods                   Variable modifications ('Oxidation (M)', see OpenMS modifications)
       --num_hits                        Number of reported hits
-      --centroided                      Specify whether mzml data is peak picked or not (true, false)
+      --run_centroidisation             Specify whether mzml data is peak picked or not (true, false)
       --pick_ms_levels                  The ms level used for peak picking (eg. 1, 2)
       --prec_charge                     Precursor charge (eg. "2:3")
       --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
@@ -115,7 +115,7 @@ params.number_mods = 3
 params.num_hits = 1
 params.digest_mass_range = "800:2500"
 params.pick_ms_levels = 2
-params.centroided = false
+params.run_centroidisation = false
 
 params.prec_charge = '2:3'
 params.activation_method = 'ALL'
@@ -189,7 +189,7 @@ if( workflow.profile == 'awsbatch') {
 /*
  * Create a channel for input mzml files
  */
-if( !params.centroided) {
+if( params.run_centroidisation) {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
@@ -281,7 +281,7 @@ summary['Predictions']  = params.run_prediction
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
 summary['Alleles']      = params.alleles
 summary['Variants']     = params.vcf
-summary['Centroided']   = params.centroided
+summary['Centroidisation'] = params.run_centroidisation
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -399,7 +399,7 @@ process peak_picking {
      file "${mzml_unpicked.baseName}.mzML" into (input_mzmls_picked, input_mzmls_align_picked)
 
     when:
-     !params.centroided
+     params.run_centroidisation
 
     script:
      """
