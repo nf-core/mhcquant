@@ -19,13 +19,13 @@ The workflow is based on the OpenMS C++ framework for computational mass spectro
 
 The pipeline is built using Nextflow, a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
 
-### Documentation
-The nf-core/mhcquant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
-
 ### Run
 ```
 nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --run_prediction -profile standard,docker
 ```
+
+### Documentation
+The nf-core/mhcquant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
 1. [Installation](docs/installation.md)
 2. Pipeline configuration
