@@ -3,11 +3,11 @@ Bootstrap:docker
 
 %labels
     DESCRIPTION Singularity image containing all requirements for the nf-core/mhcquant pipeline
-    VERSION 1.2.1
+    VERSION 1.2.2
 
 %environment
-    PATH=/opt/conda/envs/nf-core-mhcquant-1.2.1/bin:$PATH
-    PATH=/opt/conda/envs/nf-core-mhcquant-percolator-1.2.1/bin:$PATH
+    PATH=/opt/conda/envs/nf-core-mhcquant-1.2.2/bin:$PATH
+    PATH=/opt/conda/envs/nf-core-mhcquant-percolator-1.2.2/bin:$PATH
     export PATH
 
 %files
