@@ -14,7 +14,7 @@
         * [`awsbatch`](#awsbatch)
         * [`standard`](#standard)
         * [`none`](#none)
-* [Mass Spectrometry Search](#Mass Spectrometry Search)
+* [Mass Spectrometry Search](#Mass-Spectrometry-Search)
     * [`--peptide_min_length`](#--peptide_min_length)
     * [`--peptide_max_length`](#--peptide_max_length)
     * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
@@ -26,7 +26,7 @@
     * [`--num_hits`](#--num_hits)
     * [`--digest_mass_range`](#--digest_mass_range)
     * [`--pick_ms_levels`](#--pick_ms_levels)
-    * [`--centroided`](#--centroided)
+    * [`--run_centroidisation`](#--run_centroidisation)
     * [`--prec_charge`](#--prec_charge)
     * [`--digest_mass_range`](#--digest_mass_range)
     * [`--activation_method`](#--activation_method)
@@ -78,7 +78,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --run_prediction -profile standard,docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -191,7 +191,7 @@ Specify the mass range that peptides should fullfill to be considered for peptid
 ### `--pick_ms_levels`
 If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)
 
-### `--centroided`
+### `--run_centroidisation`
 Choose whether the specified ms_level in pick_ms_levels is centroided or not. ("True", "False")
 
 ### `--prec_charge`
@@ -230,7 +230,7 @@ Specify a .tsv file containing the alleles of your probes. (line separated)
 Set to 'True' or 'False' depending on whether variants should be translated to proteins and included into your fasta for database search.
 
 ### `--vcf`
-Specify a .vcf file containing the information about genomic variants.
+Specify a .vcf file containing the information about genomic variants (vcf < v.4.2).
 
 ### `--variant_annotation_style`
 Specify style of tool used for variant annotation - currently supported: "SNPEFF", "VEP", "ANNOVAR"

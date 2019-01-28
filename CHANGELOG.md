@@ -1,5 +1,12 @@
 # nf-core/mhcquant: Changelog
 
+## v1.2.2 nf-core/mhcquant "Golden Eagle" - 2019/01/24
+
+### `Fixed`
+default params to false
+change on centroidisation parameter
+small changes on docu
+
 ## v1.2.1 nf-core/mhcquant "Golden Eagle" - 2019/01/24
 
 ### `Fixed`
