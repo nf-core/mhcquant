@@ -1,5 +1,10 @@
 # nf-core/mhcquant: Changelog
 
+## v1.2.3 nf-core/mhcquant "Golden Eagle" - 2019/02/02
+
+### `Fixed`
+filter out uncommon aminoacids U,X,B,J,Z
+
 ## v1.2.2 nf-core/mhcquant "Golden Eagle" - 2019/01/24
 
 ### `Fixed`
