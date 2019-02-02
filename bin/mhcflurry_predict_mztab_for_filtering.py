@@ -25,7 +25,7 @@ mztab_read=mztab.readlines()
 mztab.close()
 seqs=[l.split()[1] for l in mztab_read if l.startswith("PSM") if l.split()[1] not in seqs_new_smaller_qval]
 seqs_new_greater_qval=list(set(seqs))
-seqs_new_greater_qval=[s for s in seqs_new_greater_qval if 7<len(s)<13]
+seqs_new_greater_qval=[s for s in seqs_new_greater_qval if 7<len(s)<13 and not 'U' in l and not 'X' in l and not 'Z' in l and not 'J' in l and not 'B' in l]
 
 #call mhcflurry
 #subprocess.call("mhcflurry-predict --peptides {p} --alleles {a} --out {o}".format(p=" ".join(seqs_new), a=" ".join(alleles), o=sys.argv[-1]))
