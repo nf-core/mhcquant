@@ -11,9 +11,6 @@ To start using the nf-core/mhcquant pipeline, follow the steps below:
     * [Software deps: Docker and Singularity](#31-software-deps-docker-and-singularity)
     * [Software deps: Bioconda](#32-software-deps-bioconda)
     * [Configuration profiles](#33-configuration-profiles)
-4. [Reference genomes](#4-reference-genomes)
-5. [Appendices](#appendices)
-    * [Running on UPPMAX](#running-on-uppmax)
 
 ## 1) Install NextFlow
 Nextflow runs on most POSIX systems (Linux, Mac OSX etc). It can be installed by running the following commands:
@@ -101,15 +98,3 @@ The pipeline ships with a conda environment file and nextflow has built-in suppo
 To use it first ensure that you have conda installed (we recommend [miniconda](https://conda.io/miniconda.html)), then follow the same pattern as above and use the flag `-profile standard,conda`
 
 
-## Appendices
-
-#### Running on UPPMAX
-To run the pipeline on the [Swedish UPPMAX](https://www.uppmax.uu.se/) clusters (`rackham`, `irma`, `bianca` etc), use the command line flag `-profile uppmax`. This tells Nextflow to submit jobs using the SLURM job executor with Singularity for software dependencies.
-
-Note that you will need to specify your UPPMAX project ID when running a pipeline. To do this, use the command line flag `--project <project_ID>`. The pipeline will exit with an error message if you try to run it pipeline with the default UPPMAX config profile without a project.
-
-**Optional Extra:** To avoid having to specify your project every time you run Nextflow, you can add it to your personal Nextflow config file instead. Add this line to `~/.nextflow/config`:
-
-```nextflow
-params.project = 'project_ID' // eg. b2017123
-```
