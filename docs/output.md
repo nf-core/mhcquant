@@ -10,7 +10,9 @@ The final output of the pipeline should include the following files:
 
 ## mzTab
 
-[mzTab](http://www.psidev.info/mztab) is a light-weight format to report mass spectrometry search results. It provides all important information about idenfied peptide hits and is compatible with the PRIDE Archive - proteomics data repository.
+[mzTab](http://www.psidev.info/mztab) is a light-weight format to report mass spectrometry search results. It provides all important information about idenfied peptide hits and is compatible with the PRIDE Archive - proteomics data repository:
+
+Griss, J. et al. The mzTab Data Exchange Format: Communicating Mass-spectrometry-based Proteomics and Metabolomics Experimental Results to a Wider Audience. Mol Cell Proteomics 13, 2765–2775 (2014).
 
 ## csv
 
@@ -49,3 +51,11 @@ Each row index is represented by a label describing its content:
 #PEPTIDE        rt      mz      score   rank    sequence        charge  aa_before       aa_after        score_type      search_identifier       accessions      FFId_category   fea
 ```
 #PEPTIDE contains information about peptide hits that were identified and correspond to the consensus features described one row above.
+
+## Predictions
+
+The prediction output is a comma separated table (csv) for each allele, listing each peptide sequence and its corresponding predicted affinity scores:
+
+```bash
+peptide   allele   prediction   prediction_low   prediction_high   prediction_percentile
+```

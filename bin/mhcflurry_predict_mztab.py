@@ -18,7 +18,7 @@ if alleles==[]:
 mztab=open(sys.argv[-2])
 mztab_read=mztab.readlines()
 mztab.close()
-seqs=[l.split()[1] for l in mztab_read if l.startswith("PEP")]
+seqs=[l.split()[1] for l in mztab_read if l.startswith("PEP") and not 'U' in l and not 'X' in l and not 'Z' in l and not 'J' in l and not 'B' in l]
 seqs_new=list(set(seqs))
 
 #call mhcflurry
