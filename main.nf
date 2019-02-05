@@ -713,6 +713,7 @@ process filter_by_q_value_first {
  * STEP 12.1 - option refine_fdr_on_predicted_subset: export filtered percolator results as mztab
  */
 process export_mztab_perc {
+    publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
      file percolator_mztab from id_files_merged_psm_perc_filtered_refine
@@ -737,6 +738,7 @@ process export_mztab_perc {
  * STEP 12.2 - option refine_fdr_on_predicted_subset: export psm results as mztab
  */
 process export_mztab_psm {
+    publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
      file psm_mztab from id_files_merged_psm_refine

@@ -34,7 +34,7 @@ for allele in alleles:
    print allele
    predictor = Class1AffinityPredictor.load()
    df_pred=predictor.predict_to_dataframe(allele=allele, peptides=seqs_new_greater_qval)
-   seqs_filtered+=df_pred[df_pred['prediction']<=sys.argv[-5]]['peptide'].values.tolist()
+   seqs_filtered+=df_pred[df_pred['prediction']<=float(sys.argv[-5])]['peptide'].values.tolist()
 
 #merge sequence lists and append decoys
 seqs_new_all=list(set(seqs_new_smaller_qval+seqs_filtered))

@@ -1,5 +1,10 @@
 # nf-core/mhcquant: Changelog
 
+## v1.2.4 nf-core/mhcquant "Golden Eagle" - 2019/02/02
+
+### `Fixed`
+fixed refine_fdr_on_predicted_subset float error
+
 ## v1.2.3 nf-core/mhcquant "Golden Eagle" - 2019/02/02
 
 ### `Fixed`
