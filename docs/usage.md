@@ -25,10 +25,10 @@
     * [`--number_mods`](#--number_mods)
     * [`--num_hits`](#--num_hits)
     * [`--digest_mass_range`](#--digest_mass_range)
+    * [`--feature_mapping_tolerance`](#--feature_mapping_tolerance)
     * [`--pick_ms_levels`](#--pick_ms_levels)
     * [`--run_centroidisation`](#--run_centroidisation)
     * [`--prec_charge`](#--prec_charge)
-    * [`--digest_mass_range`](#--digest_mass_range)
     * [`--activation_method`](#--activation_method)
     * [`--enzyme`](#--enzyme)
     * [`--fixed_mods`](#--fixed_mods)
@@ -187,6 +187,9 @@ Specify the number of hits that should be reported for each spectrum. (eg. 1)
 
 ### `--digest_mass_range`
 Specify the mass range that peptides should fullfill to be considered for peptide spectrum matching. (eg. 800:2500)
+
+### `--feature_mapping_tolerance`
+Specify a RT tolerance (sec) used to match ms2 peptide identification to ms1 features. (eg. 30)
 
 ### `--pick_ms_levels`
 If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)

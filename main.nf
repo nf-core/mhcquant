@@ -48,6 +48,7 @@ def helpMessage() {
       --fixed_mods                      Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
       --variable_mods                   Variable modifications ('Oxidation (M)', see OpenMS modifications)
       --num_hits                        Number of reported hits
+      --feature_mapping_tolerance       RT tolerance (sec) to map ms2 peptide identifications to ms1 features
       --run_centroidisation             Specify whether mzml data is peak picked or not (true, false)
       --pick_ms_levels                  The ms level used for peak picking (eg. 1, 2)
       --prec_charge                     Precursor charge (eg. "2:3")
@@ -123,6 +124,7 @@ params.activation_method = 'ALL'
 params.enzyme = 'unspecific cleavage'
 params.fixed_mods = ''
 params.variable_mods = 'Oxidation (M)'
+params.feature_mapping_tolerance = 30
 params.spectrum_batch_size = 500
 
 //prediction params
@@ -887,6 +889,7 @@ process quantify_identifications_targeted {
      FeatureFinderIdentification -in ${mzml_quant} \\
                                  -id ${id_file_quant} \\
                                  -out ${mzml_quant.baseName}.featureXML \\
+                                 -detect:mapping_tolerance ${params.feature_mapping_tolerance} \\
                                  -threads ${task.cpus}
      """
 
