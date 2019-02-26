@@ -1,15 +1,5 @@
 # nf-core/mhcquant: Changelog
 
-## v1.2.6 nf-core/mhcquant "Golden Eagle" - 2019/02/11
-
-### `Fixed`
-new param: feature_mapping_tolerance
-
-## v1.2.5 nf-core/mhcquant "Golden Eagle" - 2019/02/02
-
-### `Fixed`
-binac short to tiny queue
-
 ## v1.2.4 nf-core/mhcquant "Golden Eagle" - 2019/02/02
 
 ### `Fixed`
