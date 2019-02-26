@@ -1,4 +1,4 @@
-name: nf-core-mhcquant-1.2.4
+name: nf-core-mhcquant-1.2.5
 channels:
   - bioconda
   - conda-forge

@@ -1,5 +1,10 @@
 # nf-core/mhcquant: Changelog
 
+## v1.2.5 nf-core/mhcquant "Golden Eagle" - 2019/02/26
+
+### `Fixed`
+sort channels by basename
+
 ## v1.2.4 nf-core/mhcquant "Golden Eagle" - 2019/02/02
 
 ### `Fixed`

@@ -543,8 +543,8 @@ process align_ids {
 process align_mzml_files {
 
     input:
-     file id_file_trafo from id_files_trafo_mzml.flatten()
-     file mzml_file_align from input_mzmls_align.mix(input_mzmls_align_picked)
+     file id_file_trafo from id_files_trafo_mzml.flatten().collectFile( sort: { it.baseName } ).flatten()
+     file mzml_file_align from input_mzmls_align.mix(input_mzmls_align_picked).collectFile( sort: { it.baseName } ).flatten()
 
     output:
      file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
@@ -566,8 +566,8 @@ process align_mzml_files {
 process align_idxml_files {
 
     input:
-     file idxml_file_trafo from id_files_trafo_idxml.flatten()
-     file idxml_file_align from id_files_idx_original
+     file idxml_file_trafo from id_files_trafo_idxml.flatten().collectFile( sort: { it.baseName } ).flatten()
+     file idxml_file_align from id_files_idx_original.collectFile( sort: { it.baseName } ).flatten()
 
     output:
      file "${idxml_file_align.baseName}_aligned.idXML" into idxml_files_aligned
