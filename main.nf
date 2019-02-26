@@ -537,14 +537,18 @@ process align_ids {
 }
 
 
+id_files_trafo_mzml.flatten()
+ .join(input_mzmls_align.mix(input_mzmls_align_picked))
+ .set{ mz_alignment }
+
+
 /*
  * STEP 7 - align mzML files using trafoXMLs
  */
 process align_mzml_files {
 
     input:
-     file id_file_trafo from id_files_trafo_mzml.flatten().collectFile( sort: { it.baseName } ).flatten()
-     file mzml_file_align from input_mzmls_align.mix(input_mzmls_align_picked).collectFile( sort: { it.baseName } ).flatten()
+     set align_mz, file(id_file_trafo), file(mzml_file_align) from mz_alignment
 
     output:
      file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
@@ -560,14 +564,18 @@ process align_mzml_files {
 }
 
 
+id_files_trafo_idxml.flatten()
+ .join(id_files_idx_original)
+ .set{ id_alignment }
+
+
 /*
  * STEP 8 - align unfiltered idXMLfiles using trafoXMLs
  */
 process align_idxml_files {
 
     input:
-     file idxml_file_trafo from id_files_trafo_idxml.flatten().collectFile( sort: { it.baseName } ).flatten()
-     file idxml_file_align from id_files_idx_original.collectFile( sort: { it.baseName } ).flatten()
+     set align_id, file(idxml_file_trafo), file(idxml_file_align) from id_alignment
 
     output:
      file "${idxml_file_align.baseName}_aligned.idXML" into idxml_files_aligned
