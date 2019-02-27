@@ -4,6 +4,7 @@
 
 ### `Fixed`
 sort channels by basename
+fixed psm-level-fdrs
 
 ## v1.2.4 nf-core/mhcquant "Golden Eagle" - 2019/02/02
 

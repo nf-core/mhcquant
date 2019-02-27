@@ -109,7 +109,11 @@ params.precursor_mass_tolerance = 5
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
+if (params.fdr_level=='psm-level-fdrs'){
+fdr_level = ''
+}else{
 fdr_level = '-' + params.fdr_level
+}
 params.number_mods = 3
 
 params.num_hits = 1
@@ -537,18 +541,13 @@ process align_ids {
 }
 
 
-id_files_trafo_mzml.flatten()
- .join(input_mzmls_align.mix(input_mzmls_align_picked))
- .set{ mz_alignment }
-
-
 /*
  * STEP 7 - align mzML files using trafoXMLs
  */
 process align_mzml_files {
 
     input:
-     set align_mz, file(id_file_trafo), file(mzml_file_align) from mz_alignment
+     set align_mz, file(id_file_trafo), file(mzml_file_align) from id_files_trafo_mzml.join(input_mzmls_align.mix(input_mzmls_align_picked))
 
     output:
      file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
@@ -564,18 +563,13 @@ process align_mzml_files {
 }
 
 
-id_files_trafo_idxml.flatten()
- .join(id_files_idx_original)
- .set{ id_alignment }
-
-
 /*
  * STEP 8 - align unfiltered idXMLfiles using trafoXMLs
  */
 process align_idxml_files {
 
     input:
-     set align_id, file(idxml_file_trafo), file(idxml_file_align) from id_alignment
+     set align_id, file(idxml_file_trafo), file(idxml_file_align) from id_files_trafo_idxml.join(id_files_idx_original)
 
     output:
      file "${idxml_file_align.baseName}_aligned.idXML" into idxml_files_aligned
