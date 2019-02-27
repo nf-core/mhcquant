@@ -529,7 +529,7 @@ process align_ids {
      file id_names from id_files_idx_fdr_filtered.collect{it}
 
     output:
-     file '*.trafoXML' into (id_files_trafo_mzml, id_files_trafo_idxml)
+     file '*.trafoXML' into id_files_trafo
 
     script:
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
@@ -540,6 +540,16 @@ process align_ids {
 
 }
 
+input_mzmls_align
+ .mix(input_mzmls_align_picked)
+ .collectFile( sort: { it.baseName } )
+ .set{input_mzmls_combined}
+
+id_files_trafo
+ .flatten()
+ .collectFile( sort: { it.baseName } )
+ .into{trafo_sorted_mzml; trafo_sorted_id}
+
 
 /*
  * STEP 7 - align mzML files using trafoXMLs
@@ -547,7 +557,8 @@ process align_ids {
 process align_mzml_files {
 
     input:
-     set align_mz, file(id_file_trafo), file(mzml_file_align) from id_files_trafo_mzml.join(input_mzmls_align.mix(input_mzmls_align_picked))
+     file id_file_trafo from trafo_sorted_mzml
+     file mzml_file_align from input_mzmls_combined
 
     output:
      file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
@@ -569,7 +580,8 @@ process align_mzml_files {
 process align_idxml_files {
 
     input:
-     set align_id, file(idxml_file_trafo), file(idxml_file_align) from id_files_trafo_idxml.join(id_files_idx_original)
+     file idxml_file_trafo from trafo_sorted_id
+     file idxml_file_align from id_files_idx_original
 
     output:
      file "${idxml_file_align.baseName}_aligned.idXML" into idxml_files_aligned
