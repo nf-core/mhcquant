@@ -108,6 +108,7 @@ params.fragment_mass_tolerance = 0.02
 params.precursor_mass_tolerance = 5
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
+params.fdr_level = 'peptide-level-fdrs'
 fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
 params.number_mods = 3
 
