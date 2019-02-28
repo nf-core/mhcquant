@@ -109,11 +109,7 @@ params.precursor_mass_tolerance = 5
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
-if (params.fdr_level=='psm-level-fdrs'){
-fdr_level = ''
-}else{
-fdr_level = '-' + params.fdr_level
-}
+fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
 params.number_mods = 3
 
 params.num_hits = 1
