@@ -83,7 +83,7 @@ def helpMessage() {
  * SET UP CONFIGURATION VARIABLES
  */
 
-// Show help emssage
+// Show help message
 if (params.help){
     helpMessage()
     exit 0
@@ -109,7 +109,11 @@ params.precursor_mass_tolerance = 5
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
+if (params.fdr_level=='psm-level-fdrs'){
+fdr_level = ''
+}else{
 fdr_level = '-' + params.fdr_level
+}
 params.number_mods = 3
 
 params.num_hits = 1
@@ -525,7 +529,7 @@ process align_ids {
      file id_names from id_files_idx_fdr_filtered.collect{it}
 
     output:
-     file '*.trafoXML' into (id_files_trafo_mzml, id_files_trafo_idxml)
+     file '*.trafoXML' into id_files_trafo
 
     script:
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
@@ -536,6 +540,16 @@ process align_ids {
 
 }
 
+input_mzmls_align
+ .mix(input_mzmls_align_picked)
+ .collectFile( sort: { it.baseName } )
+ .set{input_mzmls_combined}
+
+id_files_trafo
+ .flatten()
+ .collectFile( sort: { it.baseName } )
+ .into{trafo_sorted_mzml; trafo_sorted_id}
+
 
 /*
  * STEP 7 - align mzML files using trafoXMLs
@@ -543,8 +557,8 @@ process align_ids {
 process align_mzml_files {
 
     input:
-     file id_file_trafo from id_files_trafo_mzml.flatten()
-     file mzml_file_align from input_mzmls_align.mix(input_mzmls_align_picked)
+     file id_file_trafo from trafo_sorted_mzml
+     file mzml_file_align from input_mzmls_combined
 
     output:
      file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
@@ -566,7 +580,7 @@ process align_mzml_files {
 process align_idxml_files {
 
     input:
-     file idxml_file_trafo from id_files_trafo_idxml.flatten()
+     file idxml_file_trafo from trafo_sorted_id
      file idxml_file_align from id_files_idx_original
 
     output:
