@@ -541,6 +541,10 @@ input_mzmls_align
  .collectFile( sort: { it.baseName } )
  .set{input_mzmls_combined}
 
+id_files_idx_original
+ .collectFile( sort: { it.baseName } )
+ .set{input_ids_sorted}
+
 id_files_trafo
  .flatten()
  .collectFile( sort: { it.baseName } )
@@ -577,7 +581,7 @@ process align_idxml_files {
 
     input:
      file idxml_file_trafo from trafo_sorted_id
-     file idxml_file_align from id_files_idx_original
+     file idxml_file_align from input_ids_sorted
 
     output:
      file "${idxml_file_align.baseName}_aligned.idXML" into idxml_files_aligned
