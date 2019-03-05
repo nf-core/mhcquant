@@ -33,6 +33,7 @@
     * [`--enzyme`](#--enzyme)
     * [`--fixed_mods`](#--fixed_mods)
     * [`--variable_mods`](#--variable_mods)
+    * [`--max_rt_alignment_shift`](#--max_rt_alignment_shift)
     * [`--spectrum_batch_size`](#--spectrum_batch_size)
 * [Optional binding predicion](#optional-binding-prediction)
     * [`--run_prediction`](#--run_prediction)
@@ -208,6 +209,9 @@ Specify which fixed modifications should be applied to the database search (eg. 
 
 ### `--variable_mods`
 Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
+
+### `--max_rt_alignment_shift`
+Set a maximum retention time shift for the linear rt alignment
 
 ### `--spectrum_batch_size`
 Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
