@@ -1,5 +1,11 @@
 # nf-core/mhcquant: Changelog
 
+## v1.2.6 nf-core/mhcquant "Golden Eagle" - 2019/03/05
+
+### `Fixed`
+linear retention time alignment
+refine_fdr README
+
 ## v1.2.5 nf-core/mhcquant "Golden Eagle" - 2019/02/26
 
 ### `Fixed`
