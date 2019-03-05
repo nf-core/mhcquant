@@ -21,7 +21,7 @@ The pipeline is built using Nextflow, a workflow tool to run tasks across multip
 
 ### Run
 ```
-nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --run_prediction -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --run_prediction --refine_fdr_on_predicted_subset -profile standard,docker
 ```
 
 ### Documentation

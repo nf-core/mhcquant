@@ -25,7 +25,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' --include_proteins_from_vcf --run_prediction -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' --include_proteins_from_vcf --run_prediction --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
       --mzmls                           Path to input data (must be surrounded with quotes)
@@ -51,6 +51,7 @@ def helpMessage() {
       --run_centroidisation             Specify whether mzml data is peak picked or not (true, false)
       --pick_ms_levels                  The ms level used for peak picking (eg. 1, 2)
       --prec_charge                     Precursor charge (eg. "2:3")
+      --max_rt_alignment_shift          Maximal retention time shift (sec) resulting from linear alignment      
       --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
     Binding Predictions:
@@ -509,7 +510,7 @@ process filter_fdr_for_idalignment {
      IDFilter -in ${id_file_idx_fdr} \\
               -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
-              -score:pep 0.05  \\
+              -score:pep 0.05 \\
               -remove_decoys
      """
 
@@ -531,7 +532,9 @@ process align_ids {
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
      """
      MapAlignerIdentification -in $id_names \\
-                              -trafo_out $out_names
+                              -trafo_out $out_names \\
+                              -model:type linear \\
+                              -algorithm:max_rt_shift ${params.max_rt_alignment_shift}
      """
 
 }
