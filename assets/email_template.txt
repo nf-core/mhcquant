@@ -1,13 +1,13 @@
 ========================================
- nf-core/openmspeptidequant v${version}
+ nf-core/mhcquant v${version}
 ========================================
 Run Name: $runName
 
 <% if (success){
-    out << "## nf-core/openmspeptidequant execution completed successfully! ##"
+    out << "## nf-core/mhcquant execution completed successfully! ##"
 } else {
     out << """####################################################
-## nf-core/openmspeptidequant execution completed unsuccessfully! ##
+## nf-core/mhcquant execution completed unsuccessfully! ##
 ####################################################
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -15,23 +15,6 @@ The full error message was:
 ${errorReport}
 """
 } %>
-
-
-<% if (!success){
-    out << """####################################################
-## nf-core/openmspeptidequant execution completed unsuccessfully! ##
-####################################################
-The exit status of the task that caused the workflow execution to fail was: $exitStatus.
-The full error message was:
-
-${errorReport}
-"""
-} else {
-    out << "## nf-core/openmspeptidequant execution completed successfully! ##"
-}
-%>
-
-
 
 
 The workflow was completed at $dateComplete (duration: $duration)
@@ -47,5 +30,5 @@ Pipeline Configuration:
 <% out << summary.collect{ k,v -> " - $k: $v" }.join("\n") %>
 
 --
-nf-core/openmspeptidequant
-https://github.com/nf-core/openmspeptidequant
+nf-core/mhcquant
+https://github.com/nf-core/mhcquant

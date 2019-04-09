@@ -1,4 +1,4 @@
-# nf-core/openmspeptidequant: Changelog
+# nf-core/mhcquant: Changelog
 
-## v1.0dev - <date>
-Initial release of nf-core/openmspeptidequant, created with the [nf-core](http://nf-co.re/) template.
+## v1.2.6 - [date]
+Initial release of nf-core/mhcquant, created with the [nf-core](http://nf-co.re/) template.

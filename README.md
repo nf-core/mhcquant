@@ -1,34 +1,30 @@
-# ![nf-core/openmspeptidequant](https://raw.githubusercontent.com/nf-core/openmspeptidequant/master/docs/images/openmspeptidequant_logo.png)
-**Identify and quantify peptides from mass spectrometry raw data**
+# nf-core/mhcquant
 
-[![Build Status](https://travis-ci.org/nf-core/openmspeptidequant.svg?branch=master)](https://travis-ci.org/nf-core/openmspeptidequant)
+**Identify and quantify peptides from mass spectrometry raw data**.
+
+[![Build Status](https://travis-ci.com/nf-core/mhcquant.svg?branch=master)](https://travis-ci.com/nf-core/mhcquant)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
-[![Docker](https://img.shields.io/docker/automated/nfcore/openmspeptidequant.svg)](https://hub.docker.com/r/nfcore/openmspeptidequant)
-![Singularity Container available](
-https://img.shields.io/badge/singularity-available-7E4C74.svg)
+[![Docker](https://img.shields.io/docker/automated/nfcore/mhcquant.svg)](https://hub.docker.com/r/nfcore/mhcquant)
 
-# STILL UNDER DEVELOPMENT
-
-### Introduction
-nfcore/openmspeptidequant is a bioinformatics analysis pipeline used for quantitative processing of data dependant (DDA) peptidomics data.
-
-It was specifically designed to analyse immunopeptidomics data, which deals with the analysis of affinity purified, unspecifically cleaved peptides that have recently been discussed intensively in the context of cancer vaccines. (https://www.nature.com/articles/ncomms13404)
-
-The workflow is based on the OpenMS C++ framework for computational mass spectrometry. RAW files (mzML) serve as inputs and a database search (Comet) is performed based on a given input protein database. FDR rescoring is applied using Percolator 3.0 based on a competitive target-decoy approach (reversed decoys). For label free quantification all input files undergo identification based retention time alignment (MapAlignerIdentification), and targeted feature extraction matching ids between runs (FeatureFinderIdentification).
-
-The pipeline is built using Nextflow, a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
+## Introduction
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
 
+## Documentation
+The nf-core/mhcquant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
-### Documentation
-The nf-core/openmspeptidequant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
-
-1. [Installation](docs/installation.md)
+1. [Installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
-    * [Local installation](docs/configuration/local.md)
-    * [Adding your own system](docs/configuration/adding_your_own.md)
+    * [Local installation](https://nf-co.re/usage/local_installation)
+    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
+    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](docs/troubleshooting.md)
+5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+
+<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
+
+## Credits
+nf-core/mhcquant was originally written by Leon Bichmann.

@@ -1,7 +1,0 @@
-name: nf-core-openmspeptidequant-percolator-1.0dev
-channels:
-  - bioconda
-  - conda-forge
-  - defaults
-dependencies:
-  - percolator=3.1
