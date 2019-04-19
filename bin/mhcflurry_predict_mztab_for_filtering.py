@@ -7,7 +7,7 @@ import sys
 console = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
-LOG = logging.getLogger("MHCFlurry Predict mztab")
+LOG = logging.getLogger("MHCFlurry Predict mztab for filtering")
 LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
