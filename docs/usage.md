@@ -226,6 +226,11 @@ Set to 'True' or 'False' depending on whether binding predictions using the tool
 ### `--affinity_threshold_subset`
 Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)
 
+### '--resolve_neoepitopes'
+Set to 'True' or 'False' depending on whether or not neoepitopes should be reported. If specified as 'True', it will automatically enable '--run_prediction'.
+Neoepitopes will be resolved by determining unique peptides found in the mass spectrometry data and possible neoepitopes from the vcf file.
+By default a csv report containing all alleles and found neoepitopes is created.
+
 ### `--alleles`
 Specify a .tsv file containing the alleles of your probes. (line separated)
 
