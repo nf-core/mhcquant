@@ -16,7 +16,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -m, --method {netmhc,smmpmbec,syfpeithi,netmhcpan,netctlpan,smm,tepitopepan,arb,pickpocket,epidemix,netmhcii,netmhciipan,comblibsidney,unitope,hammer,svmhc,bimas},
                         The name of the prediction method
-  -v VCF, --vcf VCF     Path to the vcf input file
+  -v, --vcf VCF     Path to the vcf input file
   -t, --type {VEP,ANNOVAR, SNPEFF}
                         Type of annotation tool used (Variant Effect
                         Predictor, ANNOVAR exonic gene annotation, SnpEff)

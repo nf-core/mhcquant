@@ -58,6 +58,7 @@ def helpMessage() {
       --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
       --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
       --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
+      --resolve_neoepitopes             Whether neoepitopes should be resolved
       --alleles                         Path to file including allele information
 
     Variants:
@@ -130,6 +131,10 @@ params.spectrum_batch_size = 500
 params.run_prediction = false
 params.refine_fdr_on_predicted_subset = false
 params.subset_affinity_threshold = 500
+params.resolve_neoepitopes = false
+if (params.resolve_neoepitopes)  {
+    params.run_prediction = true
+}
 
 //variant params
 params.inlude_proteins_from_vcf = false
@@ -238,11 +243,12 @@ if( params.run_prediction){
     Channel
         .fromPath( params.alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
-        .into { input_alleles; input_alleles_refine}
+        .into { input_alleles; input_alleles_refine; input_alleles_neoepitope}
 } else {
 
     input_alleles = Channel.empty()
     input_alleles_refine = Channel.empty()
+    input_alleles_neoepitope = Channel.empty()
 }
 
 
@@ -255,10 +261,11 @@ if( params.include_proteins_from_vcf){
     Channel
         .fromPath( params.vcf )
         .ifEmpty { exit 1, "params.vcf was empty - no input file supplied" }
-        .set { input_vcf}
+        .into { input_vcf; input_vcf_neoepitope}
 } else {
 
     input_vcf = Channel.empty()
+    input_vcf_neoepitope = Channel.empty()
 }
 
 
@@ -323,7 +330,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
    return yaml_file
 }
-
 
 /*
  * STEP 0 - Output Description HTML
@@ -1021,6 +1027,54 @@ process predict_peptides {
      """
      mhcflurry-downloads --quiet fetch models_class1
      mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides.csv
+     """
+}
+
+/*
+ * STEP 19 - Predict all possible neoepitopes from vcf
+ */
+process predict_possible_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file alleles_file from input_alleles_neoepitope
+     file vcf_file from input_vcf_neoepitope
+
+    output:
+     file "vcf_neoepitopes.csv" into possible_neoepitopes
+    
+    when:
+     params.run_prediction
+     params.resolve_neoepitopes
+
+    script:
+     """
+     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -a ${alleles_file} -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o vcf_neoepitopes.csv
+     """
+}
+
+/*
+ * STEP 20 - Resolve found neoepitopes
+ */
+process Resolve_found_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file peptides from predicted_peptides
+     file neoepitopes from possible_neoepitopes
+
+    output:
+     file "found_neoepitopes.csv" into predicted_neoepitopes
+    
+    when:
+     params.run_prediction
+     params.resolve_neoepitopes
+
+    script:
+     """
+     found_neoepitopes.py -n ${neoepitopes} -p ${peptides} -f csv -o found_neoepitopes
      """
 }
 
