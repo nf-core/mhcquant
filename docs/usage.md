@@ -7,10 +7,9 @@
 * [Table of contents](#table-of-contents)
 * [Introduction](#introduction)
 * [Running the pipeline](#running-the-pipeline)
-  * [Updating the pipeline](#updating-the-pipeline)
-  * [Reproducibility](#reproducibility)
+    * [Updating the pipeline](#updating-the-pipeline)
+    * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
-<<<<<<< HEAD
     * [`--mzmls`](#--mzmls)
     * [`--fasta`](#--fasta)
     * [`-profile`](#-profile-single-dash)
@@ -32,7 +31,6 @@
     * [`--pick_ms_levels`](#--pick_ms_levels)
     * [`--run_centroidisation`](#--run_centroidisation)
     * [`--prec_charge`](#--prec_charge)
-    * [`--digest_mass_range`](#--digest_mass_range)
     * [`--activation_method`](#--activation_method)
     * [`--enzyme`](#--enzyme)
     * [`--fixed_mods`](#--fixed_mods)
@@ -59,21 +57,6 @@
     * [`-awsbatch`](#-awsbatch)
     * [`--awsqueue`](#--awsqueue)
     * [`--awsregion`](#--awsregion)
-=======
-  * [`-profile`](#-profile)
-  * [`--reads`](#--reads)
-  * [`--singleEnd`](#--singleend)
-* [Reference genomes](#reference-genomes)
-  * [`--genome` (using iGenomes)](#--genome-using-igenomes)
-  * [`--fasta`](#--fasta)
-  * [`--igenomesIgnore`](#--igenomesignore)
-* [Job resources](#job-resources)
-  * [Automatic resubmission](#automatic-resubmission)
-  * [Custom resource requests](#custom-resource-requests)
-* [AWS Batch specific parameters](#aws-batch-specific-parameters)
-  * [`--awsqueue`](#--awsqueue)
-  * [`--awsregion`](#--awsregion)
->>>>>>> f3b3a6f
 * [Other command line parameters](#other-command-line-parameters)
   * [`--outdir`](#--outdir)
   * [`--email`](#--email)
@@ -90,6 +73,7 @@
   * [`--multiqc_config`](#--multiqc_config)
 <!-- TOC END -->
 
+## General Nextflow info
 
 ## Introduction
 Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
@@ -100,17 +84,11 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
-
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 
-```bash
-<<<<<<< HEAD
+```
 nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --run_prediction -profile standard,docker
-=======
-nextflow run nf-core/mhcquant --reads '*_R{1,2}.fastq.gz' -profile docker
->>>>>>> f3b3a6f
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -141,6 +119,24 @@ This version number will be logged in reports when you run the pipeline, so that
 
 ## Main arguments
 
+### `--mzmls`
+Use this to specify the location of your input mzML files. For example:
+
+```
+--mzmls 'path/to/data/*.mzML'
+```
+
+Please note the following requirements:
+1. The path must be enclosed in quotes
+2. The path must have at least one `*` wildcard character
+
+### `--fasta`
+If you prefer, you can specify the full path to your fasta input protein database when you run the pipeline:
+
+```
+--fasta '[path to Fasta protein database]'
+```
+
 ### `-profile`
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile docker` - the order of arguments is important!
 
@@ -161,118 +157,60 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
 
-<!-- TODO nf-core: Document required command line parameters -->
-
-### `--reads`
-Use this to specify the location of your input FastQ files. For example:
-
-```bash
---reads 'path/to/data/sample_*_{1,2}.fastq'
-```
-
-<<<<<<< HEAD
-### `-profile`
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
-
-* `standard`
-    * The default profile, used if `-profile` is not specified at all.
-    * Runs locally and expects all software to be installed and available on the `PATH`.
-* `docker`
-    * A generic configuration profile to be used with [Docker](http://docker.com/)
-    * Pulls software from dockerhub: [`nfcore/mhcquant`](http://hub.docker.com/r/nfcore/mhcquant/)
-* `singularity`
-    * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-    * Pulls software from singularity-hub
-* `conda`
-    * A generic configuration profile to be used with [conda](https://conda.io/docs/)
-    * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `binac`
-    * A profile for the BinAC cluster at the University of Tübingen 
-    * Pulls software from Docker Hub via Singularity
-* `cfc`
-    * A profile for the Core Facility Cluster (CFC) at QBiC Tübingen
-    * Pulls software from Docker Hub via Singularity
-* `awsbatch`
-    * A generic configuration profile to be used with AWS Batch.
-* `test`
-    * A profile with a complete configuration for automated testing
-    * Includes links to test data so needs no other parameters
-* `none`
-    * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
 
 ## Mass Spectrometry Search
+
 ### `--peptide_min_length`
 Specify the minimum length of peptides considered after processing
 
 ### `--peptide_max_length`
 Specify the maximum length of peptides considered after processing
-=======
-Please note the following requirements:
 
-1. The path must be enclosed in quotes
-2. The path must have at least one `*` wildcard character
-3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.
+### `--fragment_mass_tolerance`
+Specify the fragment mass tolerance used for the comet database search. For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)
 
-If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
->>>>>>> f3b3a6f
+### `--precursor_mass_tolerance`
+Specify the precursor mass tolerance used for the comet database search. For High-Resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)
 
-### `--singleEnd`
-By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
+### `--fragment_bin_offset`
+Specify the fragment bin offset used for the comet database search. For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)
 
-```bash
---singleEnd --reads '*.fastq'
-```
+### `--fdr_threshold`
+Specify the false discovery rate threshold at which peptide hits should be selected. (eg. 0.01)
 
-It is not possible to run a mixture of single-end and paired-end files in one run.
+### `--fdr_level`
+Specify the level at which the false discovery rate should be computed. 'peptide-level-fdrs' is recommended. ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
 
+### `--number_mods`
+Specify the maximum number of modifications that should be contained in a peptide sequence match. (eg. 3)
 
-## Reference genomes
+### `--num_hits`
+Specify the number of hits that should be reported for each spectrum. (eg. 1)
 
-The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
+### `--digest_mass_range`
+Specify the mass range that peptides should fullfill to be considered for peptide spectrum matching. (eg. 800:2500)
 
-### `--genome` (using iGenomes)
-There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.
+### `--pick_ms_levels`
+If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)
 
-You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
-
-* Human
-  * `--genome GRCh37`
-* Mouse
-  * `--genome GRCm38`
-* _Drosophila_
-  * `--genome BDGP6`
-* _S. cerevisiae_
-  * `--genome 'R64-1-1'`
-
-<<<<<<< HEAD
 ### `--run_centroidisation`
 Choose whether the specified ms_level in pick_ms_levels is centroided or not. ("True", "False")
-=======
-> There are numerous others - check the config file for more.
->>>>>>> f3b3a6f
 
-Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
+### `--prec_charge`
+Specifiy the precursor charge range that peptides should fullfill to be considered for peptide spectrum matching. (eg. "2:3")
 
-The syntax for this reference configuration is as follows:
+### `--activation method`
+Specify which fragmentation method was used in the MS acquisition ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
 
-<!-- TODO nf-core: Update reference genome example according to what is needed -->
+### `--enzyme`
+Specify which enzymatic restriction should be applied ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
 
-```nextflow
-params {
-  genomes {
-    'GRCh37' {
-      fasta   = '<path to the genome fasta file>' // Used if no star index given
-    }
-    // Any number of additional genomes, key is used with --genome
-  }
-}
-```
+### `--fixed_mods`
+Specify which fixed modifications should be applied to the database search (eg. '' or 'Carbamidomethyl (C)', see OpenMS modifications)
 
-<!-- TODO nf-core: Describe reference path flags -->
-### `--fasta`
-If you prefer, you can specify the full path to your reference genome when you run the pipeline:
+### `--variable_mods`
+Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
 
-<<<<<<< HEAD
 ### `--max_rt_alignment_shift`
 Set a maximum retention time shift for the linear rt alignment
 

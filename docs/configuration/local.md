@@ -10,6 +10,7 @@ Nextflow has [excellent integration](https://www.nextflow.io/docs/latest/docker.
 First, install docker on your system: [Docker Installation Instructions](https://docs.docker.com/engine/installation/)
 
 Then, simply run the analysis pipeline:
+
 ```
 nextflow run nf-core/mhcquant --mzmls '<path to your mzML files>' --fasta '<path to your fasta database>' --'<other options>' -profile docker 
 ```
