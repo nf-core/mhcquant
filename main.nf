@@ -11,16 +11,7 @@
 
 
 def helpMessage() {
-    log.info"""
-    =======================================================
-                                              ,--./,-.
-              ___     __   __   __   ___     /,-._.--~\'
-        |\\ | |__  __ /  ` /  \\ |__) |__         }  {
-        | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
-                                              `._,._,\'
-
-     nf-core/mhcquant : v${workflow.manifest.version}
-    =======================================================
+    log.info nfcoreHeader()
     Usage:
 
     The typical command for running the pipeline is as follows:
@@ -90,6 +81,10 @@ if (params.help){
     exit 0
 }
 
+// Check if genome exists in the config file
+if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+    exit 1, "The provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
+}
 
 // Validate inputs
 params.mzmls = params.mzmls ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
@@ -166,13 +161,6 @@ params.plaintext_email = false
 output_docs = file("$baseDir/docs/output.md")
 
 
-// AWSBatch sanity checking
-if(workflow.profile == 'awsbatch'){
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-    if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
-}
-
-
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
 custom_runName = params.name
@@ -180,15 +168,20 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
   custom_runName = workflow.runName
 }
 
-// Check workDir/outdir paths to be S3 buckets if running on AWSBatch
-// related: https://github.com/nextflow-io/nextflow/issues/813
+
 if( workflow.profile == 'awsbatch') {
-    if(!workflow.workDir.startsWith('s3:') || !params.outdir.startsWith('s3:')) exit 1, "Workdir or Outdir not on S3 - specify S3 Buckets for each to run on AWSBatch!"
+  // AWSBatch sanity checking
+  if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+  // Check outdir paths to be S3 buckets if running on AWSBatch
+  // related: https://github.com/nextflow-io/nextflow/issues/813
+  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+  // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
 
 /*
- * Create a channel for input mzml files
+ * Create a channel for input read files
  */
 if( params.run_centroidisation) {
     Channel
@@ -263,15 +256,7 @@ if( params.include_proteins_from_vcf){
 
 
 // Header log info
-log.info """=======================================================
-                                          ,--./,-.
-          ___     __   __   __   ___     /,-._.--~\'
-    |\\ | |__  __ /  ` /  \\ |__) |__         }  {
-    | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
-                                          `._,._,\'
-
-nf-core/mhcquant v${workflow.manifest.version}"
-======================================================="""
+log.info nfcoreHeader() 
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/mhcquant'
 summary['Pipeline Version'] = workflow.manifest.version
@@ -297,17 +282,25 @@ summary['Working dir']    = workflow.workDir
 summary['Output dir']     = params.outdir
 summary['Script dir']     = workflow.projectDir
 summary['Config Profile'] = workflow.profile
-if(workflow.profile == 'awsbatch'){
-   summary['AWS Region'] = params.awsregion
-   summary['AWS Queue'] = params.awsqueue
-}
-if(params.email) summary['E-mail Address'] = params.email
-log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
-log.info "========================================="
 
+if(workflow.profile == 'awsbatch'){
+   summary['AWS Region']    = params.awsregion
+   summary['AWS Queue']     = params.awsqueue
+}
+summary['Config Profile'] = workflow.profile
+if(params.config_profile_description) summary['Config Description'] = params.config_profile_description
+if(params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
+if(params.config_profile_url)         summary['Config URL']         = params.config_profile_url
+if(params.email) {
+  summary['E-mail Address']  = params.email
+}
+log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
+log.info "\033[2m----------------------------------------------------\033[0m"
+
+// Check the hostnames against configured profiles
+checkHostname()
 
 def create_workflow_summary(summary) {
-
     def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
     yaml_file.text  = """
     id: 'nf-core-mhcquant-summary'
@@ -564,7 +557,8 @@ process align_mzml_files {
      file mzml_file_align from input_mzmls_combined
 
     output:
-     file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
+    file 'software_versions_mqc.yaml' into software_versions_yaml
+    file "software_versions.csv"
 
     script:
      """
@@ -601,12 +595,12 @@ process align_idxml_files {
 
 
 /*
- * STEP 9 - merge aligned idXMLfiles
+ * STEP 1 - FastQC
  */
 process merge_aligned_idxml_files {
 
     input:
-     file ids_aligned from idxml_files_aligned.collect{it}
+     set val(name), file(reads) from read_files_fastqc
 
     output:
      file "all_ids_merged.idXML" into id_merged
@@ -948,7 +942,6 @@ process resolve_conflicts {
                         -out ${consensus.baseName}_resolved.consensusXML \\
                         -threads ${task.cpus}
      """
-
 }
 
 
@@ -957,13 +950,13 @@ process resolve_conflicts {
  */
 process export_text {
     publishDir "${params.outdir}/"
- 
+
     input:
      file consensus_resolved from consensus_file_resolved
 
     output:
      file "${consensus_resolved.baseName}.csv" into consensus_text
-
+    
     script:
      """
      TextExporter -in ${consensus_resolved} \\
@@ -973,7 +966,6 @@ process export_text {
                   -id:add_metavalues 0 \\
                   -id:peptides_only
      """
-
 }
 
 
@@ -1052,6 +1044,7 @@ workflow.onComplete {
     if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
     if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
     if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
@@ -1068,7 +1061,7 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
@@ -1088,7 +1081,7 @@ workflow.onComplete {
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/Documentation/" )
+    def output_d = new File( "${params.outdir}/pipeline_info/" )
     if( !output_d.exists() ) {
       output_d.mkdirs()
     }
@@ -1101,6 +1094,67 @@ workflow.onComplete {
     def output_tf = new File( output_d, "pipeline_report.txt" )
     output_tf.withWriter { w -> w << email_txt }
 
-    log.info "[nf-core/mhcquant] Pipeline Complete"
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_red = params.monochrome_logs ? '' : "\033[0;31m";
 
+    if (workflow.stats.ignoredCountFmt > 0 && workflow.success) {
+      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
+      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCountFmt} ${c_reset}"
+      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCountFmt} ${c_reset}"
+    }
+
+    if(workflow.success){
+        log.info "${c_purple}[nf-core/mhcquant]${c_green} Pipeline completed successfully${c_reset}"
+    } else {
+        checkHostname()
+        log.info "${c_purple}[nf-core/mhcquant]${c_red} Pipeline completed with errors${c_reset}"
+    }
+
+}
+
+
+def nfcoreHeader(){
+    // Log colors ANSI codes
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_black = params.monochrome_logs ? '' : "\033[0;30m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
+    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_white = params.monochrome_logs ? '' : "\033[0;37m";
+
+    return """    ${c_dim}----------------------------------------------------${c_reset}
+                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
+    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
+    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
+    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
+                                            ${c_green}`._,._,\'${c_reset}
+    ${c_purple}  nf-core/mhcquant v${workflow.manifest.version}${c_reset}
+    ${c_dim}----------------------------------------------------${c_reset}
+    """.stripIndent()
+}
+
+def checkHostname(){
+    def c_reset = params.monochrome_logs ? '' : "\033[0m"
+    def c_white = params.monochrome_logs ? '' : "\033[0;37m"
+    def c_red = params.monochrome_logs ? '' : "\033[1;91m"
+    def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
+    if(params.hostnames){
+        def hostname = "hostname".execute().text.trim()
+        params.hostnames.each { prof, hnames ->
+            hnames.each { hname ->
+                if(hostname.contains(hname) && !workflow.profile.contains(prof)){
+                    log.error "====================================================\n" +
+                            "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
+                            "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
+                            "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
+                            "============================================================"
+                }
+            }
+        }
+    }
 }

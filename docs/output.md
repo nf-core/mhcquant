@@ -9,13 +9,11 @@ The final output of the pipeline should include the following files:
 * [csv](#csv) - aggregate csv report, containing all information about peptide identification and quantification results
 
 ## mzTab
-
 [mzTab](http://www.psidev.info/mztab) is a light-weight format to report mass spectrometry search results. It provides all important information about idenfied peptide hits and is compatible with the PRIDE Archive - proteomics data repository:
 
 Griss, J. et al. The mzTab Data Exchange Format: Communicating Mass-spectrometry-based Proteomics and Metabolomics Experimental Results to a Wider Audience. Mol Cell Proteomics 13, 2765–2775 (2014).
 
 ## csv
-
 The csv output file is a table containing all information extracted from a database search throughout the pipeline. See the OpenMS or PSI documentation for more information about annotated scores and format (http://ftp.mi.fu-berlin.de/pub/OpenMS/release1.9-documentation/html/TOPP_TextExporter.html).
 
 Each row index is represented by a label describing its content:
@@ -25,12 +23,10 @@ Each row index is represented by a label describing its content:
 ```
 #MAP contains information about the different mzML files that were provided initially
 
-
 ```bash
 #RUN    run_id  score_type      score_direction date_time       search_engine_version   parameters
 ```
 #RUN contains information about the search that was performed on each run
-
 
 ```bash
 #PROTEIN        score   rank    accession       protein_description     coverage        sequence
@@ -47,7 +43,7 @@ Each row index is represented by a label describing its content:
 ```
 #CONSENSUS contains information about precursor features that were identified in multiple runs (eg. run 1-3 in this case)
 
-```
+```bash
 #PEPTIDE        rt      mz      score   rank    sequence        charge  aa_before       aa_after        score_type      search_identifier       accessions      FFId_category   fea
 ```
 #PEPTIDE contains information about peptide hits that were identified and correspond to the consensus features described one row above.
