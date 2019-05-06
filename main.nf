@@ -781,6 +781,7 @@ process export_mztab_psm {
  */
 process predict_psms {
     publishDir "${params.outdir}/Intermediate_Results/"
+    echo true
 
     input:
      file perc_mztab_file from percolator_ids_mztab

@@ -25,7 +25,7 @@ alleles=[a for a in alleles if a in supported_alleles]
 
 if unsupported_alleles:
        for allele in unsupported_alleles:
-              LOG.warning("Allele: " + allele + "is not supported by MHCFlurry!")
+              LOG.warning("Allele: " + allele + " is not supported by MHCFlurry!")
 if not alleles:
    LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
 
