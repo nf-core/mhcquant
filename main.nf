@@ -781,6 +781,7 @@ process export_mztab_psm {
  */
 process predict_psms {
     publishDir "${params.outdir}/Intermediate_Results/"
+    echo true
 
     input:
      file perc_mztab_file from percolator_ids_mztab
@@ -1004,6 +1005,7 @@ process export_mztab {
  */
 process predict_peptides {
     publishDir "${params.outdir}/"
+    echo true
 
     input:
      file mztab_file from features_mztab
@@ -1017,7 +1019,7 @@ process predict_peptides {
 
     script:
      """
-     mhcflurry-downloads fetch models_class1
+     mhcflurry-downloads --quiet fetch models_class1
      mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides.csv
      """
 }
