@@ -58,7 +58,6 @@ def helpMessage() {
       --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
       --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
       --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
-      --resolve_neoepitopes             Whether neoepitopes should be resolved
       --alleles                         Path to file including allele information
 
     Variants:
@@ -131,10 +130,6 @@ params.spectrum_batch_size = 500
 params.run_prediction = false
 params.refine_fdr_on_predicted_subset = false
 params.subset_affinity_threshold = 500
-params.resolve_neoepitopes = false
-if (params.resolve_neoepitopes)  {
-    params.run_prediction = true
-}
 
 //variant params
 params.inlude_proteins_from_vcf = false
@@ -176,7 +171,6 @@ if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
-
 
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
@@ -994,7 +988,7 @@ process export_mztab {
      file feature_file_2 from consensus_file_resolved_2
 
     output:
-     file "${feature_file_2.baseName}.mzTab" into features_mztab
+     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes
 
     script:
      """
@@ -1045,8 +1039,7 @@ process predict_possible_neoepitopes {
      file "vcf_neoepitopes.csv" into possible_neoepitopes
     
     when:
-     params.run_prediction
-     params.resolve_neoepitopes
+     params.vcf.length() > 0
 
     script:
      """
@@ -1062,19 +1055,18 @@ process Resolve_found_neoepitopes {
     echo true
 
     input:
-     file peptides from predicted_peptides
+     file mztab from features_mztab_neoepitopes
      file neoepitopes from possible_neoepitopes
 
     output:
-     file "found_neoepitopes.csv" into predicted_neoepitopes
+     file "found_neoepitopes.pep" into predicted_neoepitopes
     
     when:
-     params.run_prediction
-     params.resolve_neoepitopes
+     params.vcf.length() > 0
 
     script:
      """
-     found_neoepitopes.py -n ${neoepitopes} -p ${peptides} -f csv -o found_neoepitopes
+     found_neoepitopes.py -n ${neoepitopes} -m ${mztab} -o found_neoepitopes
      """
 }
 

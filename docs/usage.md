@@ -226,11 +226,6 @@ Set to 'True' or 'False' depending on whether binding predictions using the tool
 ### `--affinity_threshold_subset`
 Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)
 
-### '--resolve_neoepitopes'
-Set to 'True' or 'False' depending on whether or not neoepitopes should be reported. If specified as 'True', it will automatically enable '--run_prediction'.
-Neoepitopes will be resolved by determining unique peptides found in the mass spectrometry data and possible neoepitopes from the vcf file.
-By default a csv report containing all alleles and found neoepitopes is created.
-
 ### `--alleles`
 Specify a .tsv file containing the alleles of your probes. (line separated)
 
@@ -239,7 +234,7 @@ Specify a .tsv file containing the alleles of your probes. (line separated)
 Set to 'True' or 'False' depending on whether variants should be translated to proteins and included into your fasta for database search.
 
 ### `--vcf`
-Specify a .vcf file containing the information about genomic variants (vcf < v.4.2).
+Specify a .vcf file containing the information about genomic variants (vcf < v.4.2). If a vcf file is specified, neoepitopes will also automatically be resolved.
 
 ### `--variant_annotation_style`
 Specify style of tool used for variant annotation - currently supported: "SNPEFF", "VEP", "ANNOVAR"

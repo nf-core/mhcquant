@@ -16,7 +16,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -m, --method {netmhc,smmpmbec,syfpeithi,netmhcpan,netctlpan,smm,tepitopepan,arb,pickpocket,epidemix,netmhcii,netmhciipan,comblibsidney,unitope,hammer,svmhc,bimas},
                         The name of the prediction method
-  -v, --vcf VCF     Path to the vcf input file
+  -v VCF, --vcf VCF     Path to the vcf input file
   -t, --type {VEP,ANNOVAR, SNPEFF}
                         Type of annotation tool used (Variant Effect
                         Predictor, ANNOVAR exonic gene annotation, SnpEff)
@@ -38,6 +38,8 @@ optional arguments:
   -fFS, --filterFSINDEL
                         Filter frameshift INDELs
   -fSNP, --filterSNP    Filter SNPs
+  -bind, --predict_bindings
+                        Whether to predict bindings or not
   -o OUTPUT, --output OUTPUT
                         Path to the output file
 
@@ -231,15 +233,22 @@ def main():
     )
 
     model.add_argument(
+        '-etk', '--etk',
+        action="store_true",
+        help=argparse.SUPPRESS
+    )
+
+    model.add_argument(
+        '-bind', '--predict_bindings',
+        action="store_true",
+        help='Predict bindings'
+    )
+
+    model.add_argument(
         '-o', '--output',
         type=str,
         required=True,
         help='Path to the output file'
-    )
-    model.add_argument(
-        '-etk', '--etk',
-        action="store_true",
-        help=argparse.SUPPRESS
     )
 
     args = model.parse_args()
@@ -298,7 +307,7 @@ def main():
                 else:
                     transcript_to_genes[trans_id] = 'None'
 
-    # else: generate protein sequences from given HGNC IDs and than epitopes
+    # else: generate protein sequences from given HGNC IDs and then epitopes
     else:
         proteins = []
         with open(args.proteins, "r") as f:
@@ -316,37 +325,60 @@ def main():
     # read in allele list
     alleles = read_lines(args.alleles, in_type=Allele)
 
-    result = EpitopePredictorFactory(args.method).predict(epitopes, alleles=alleles)
+    # predict bindings for all found neoepitopes
+    if args.predict_bindings:
+        result = EpitopePredictorFactory(args.method).predict(epitopes, alleles=alleles)
 
-    with open(args.output, "w") as f:
-        alleles = result.columns
-        var_column = " Variants" if args.vcf is not None else ""
-        f.write("Sequence\tMethod\t" + "\t".join(a.name for a in alleles) + "\tAntigen ID\t" + var_column + "\n")
-        for index, row in result.iterrows():
-            p = index[0]
-            method = index[1]
-            proteins = ",".join(
-                set([transcript_to_genes[prot.transcript_id.split(":FRED2")[0]] for prot in p.get_all_proteins()]))
-            vars_str = ""
-
-            if args.vcf is not None:
-                vars_str = "\t" + "|".join(set(prot_id.split(":FRED2")[0] + ":" + ",".join(
-                    repr(v) for v in set(p.get_variants_by_protein(prot_id)))
-                                               for prot_id in p.proteins.iterkeys()
-                                               if p.get_variants_by_protein(prot_id)))
-
-            f.write(str(p) + "\t" + method + "\t" + "\t".join(
-                "%.3f" % row[a] for a in alleles) + "\t" + proteins + vars_str + "\n")
-
-    if args.etk:
-        with open(args.output.rsplit(".", 1)[0] + "_etk.tsv", "w") as g:
+        with open(args.output, "w") as f:
             alleles = result.columns
-            g.write("Alleles:\t" + "\t".join(a.name for a in alleles) + "\n")
+            var_column = " Variants" if args.vcf is not None else ""
+            f.write("Sequence\tMethod\t" + "\t".join(a.name for a in alleles) + "\tAntigen ID\t" + var_column + "\n")
             for index, row in result.iterrows():
                 p = index[0]
-                proteins = " ".join(
+                method = index[1]
+                proteins = ",".join(
                     set([transcript_to_genes[prot.transcript_id.split(":FRED2")[0]] for prot in p.get_all_proteins()]))
-                g.write(str(p) + "\t" + "\t".join("%.3f" % row[a] for a in alleles) + "\t" + proteins + "\n")
+                vars_str = ""
+
+                if args.vcf is not None:
+                    vars_str = "\t" + "|".join(set(prot_id.split(":FRED2")[0] + ":" + ",".join(
+                        repr(v) for v in set(p.get_variants_by_protein(prot_id)))
+                                                   for prot_id in p.proteins.iterkeys()
+                                                   if p.get_variants_by_protein(prot_id)))
+
+                f.write(str(p) + "\t" + method + "\t" + "\t".join(
+                    "%.3f" % row[a] for a in alleles) + "\t" + proteins + vars_str + "\n")
+
+        if args.etk:
+            with open(args.output.rsplit(".", 1)[0] + "_etk.tsv", "w") as g:
+                alleles = result.columns
+                g.write("Alleles:\t" + "\t".join(a.name for a in alleles) + "\n")
+                for index, row in result.iterrows():
+                    p = index[0]
+                    proteins = " ".join(
+                        set([transcript_to_genes[prot.transcript_id.split(":FRED2")[0]] for prot in p.get_all_proteins()]))
+                    g.write(str(p) + "\t" + "\t".join("%.3f" % row[a] for a in alleles) + "\t" + proteins + "\n")
+    # don't predict bindings!
+    # different output format!
+    else:
+        with open(args.output, "w") as f:
+            var_column = " Variants" if args.vcf is not None else ""
+            f.write("Sequence\tAntigen ID\t" + var_column + "\n")
+
+            for epitope in epitopes:
+                p = epitope
+                proteins = ",".join(
+                    set([transcript_to_genes[prot.transcript_id.split(":FRED2")[0]] for prot in p.get_all_proteins()]))
+                vars_str = ""
+
+                if args.vcf is not None:
+                    vars_str = "\t" + "|".join(set(prot_id.split(":FRED2")[0] + ":" + ",".join(
+                        repr(v) for v in set(p.get_variants_by_protein(prot_id)))
+                                                   for prot_id in p.proteins.iterkeys()
+                                                   if p.get_variants_by_protein(prot_id)))
+
+                f.write(str(p) + "\t" + proteins + vars_str + "\n")
+
     return 0
 
 

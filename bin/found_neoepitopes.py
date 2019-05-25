@@ -4,6 +4,7 @@ Commandline tool for extracting unique neoepitopes generated from MHCFlurry pred
 and the FRED2 vcf_neoepitope_predictor.py script.
 
 usage: found_neoepitopes.py [-h]
+                                -m MZTAB
                                 -n NEOEPITOPES
                                 -p PREDICTED_PEPTIDES
                                [-f FILEFORMAT {raw, csv, json}]
@@ -13,7 +14,10 @@ Neoepitope prediction for TargetInsepctor.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -n, --neoepitopes NEOEPITOPES     Path to the neoepitopes input file
+  -m, --mztab           MZTAB
+                        Path to the mzab file
+  -n, --neoepitopes NEOEPITOPES
+                        Path to the neoepitopes input file
   -p, --predicted_peptides PEPTIDES
                         Path to numerous files containing predicted peptides by MHCFlurry
   -f, --file_format {raw, csv, json}
@@ -39,6 +43,23 @@ LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
 
+def parse_mztab(identified_peptides_file):
+    """
+    parses an mztab file and returns all identified proteins
+
+    :param identified_peptides_file: path to the mztab file
+    :return: identified proteins
+    """
+    mztab = open(identified_peptides_file)
+    mztab_read = mztab.readlines()
+    mztab.close()
+    seqs = [l.split()[1] for l in mztab_read if
+            l.startswith("PEP") and not 'U' in l and not 'X' in l and not 'Z' in l and not 'J' in l and not 'B' in l]
+    seqs_new = list(set(seqs))
+
+    return seqs_new
+
+
 def parse_vcf_neoepitopes(neoepitope_file, alleles):
     """
     parses the output of the VCF neoepitope predictor script
@@ -48,6 +69,15 @@ def parse_vcf_neoepitopes(neoepitope_file, alleles):
     :return: dictionary of alleles to peptide sequences
     """
     HLA_allele_to_peptides = defaultdict(list)
+
+    if not alleles:
+        neoepitopes = []
+        with open(neoepitope_file) as tsvfile:
+            reader = csv.DictReader(tsvfile, dialect='excel-tab')
+            for row in reader:
+                neoepitopes.append(row['Sequence'])
+
+        return neoepitopes
 
     with open(neoepitope_file) as tsvfile:
         reader = csv.DictReader(tsvfile, dialect='excel-tab')
@@ -61,10 +91,9 @@ def parse_vcf_neoepitopes(neoepitope_file, alleles):
                 content[allele]
             except KeyError:
                 LOG.warning("Allele " + str(allele)
-                            + " was specified, but not found in the possible neoepitopes predicted from the vcf file."
-                            + " No neoepitopes will be resolved for allele " + allele)
+                            + " was specified, but not found in the possible neoepitopes predicted from the vcf file.")
                 alleles.remove(allele)
-                
+
         # allele with highest affinity score wins
         for row in reader:
             max_val = 0
@@ -105,7 +134,11 @@ def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
     :param found_neoepitopes: dictionary of alleles to peptide sequences
     :param file_format: json or csv or raw
     """
-    if file_format == "json":
+    # if only list (no bindings)
+    if file_format == 'pep':
+        with open(filepath + "." + file_format, 'w') as f:
+            f.write('\n'.join(str(line) for line in found_neoepitopes))
+    elif file_format == "json":
         json.dump(found_neoepitopes + "." + file_format, open(filepath, 'w'))
     elif file_format == "csv":
         dict_list = [found_neoepitopes]
@@ -129,14 +162,12 @@ def main():
         '-p', '--predicted_peptides',
         nargs='+',
         type=str,
-        required=True,
         help='One or more allele files containing predicted protein sequences'
     )
 
     model.add_argument(
         '-n', '--neoepitopes',
         type=str,
-        required=True,
         help='All possible predicted neoepitopes'
     )
 
@@ -148,6 +179,18 @@ def main():
     )
 
     model.add_argument(
+        '-m', '--mztab',
+        type=str,
+        help='Path to mztab file'
+    )
+
+    model.add_argument(
+        '-bind', '--predict_bindings',
+        action="store_true",
+        help='Whether bindings were predicted'
+    )
+
+    model.add_argument(
         '-o', '--output',
         type=str,
         required=True,
@@ -156,25 +199,36 @@ def main():
 
     args = model.parse_args()
 
-    # input files usually look like this: /path/to/A_01_01_predicted_peptides.csv
-    # remove any preceding and subsequent letters from the alleles
-    # result looks like: A*01:01
-    regex = re.compile("[a-zA-Z][_|*][0-9]{2}[_|:][0-9]{2}")
-    alleles = map(lambda x: x[:5].replace('_', ':') + x[5:],
-                  map(lambda x: x[:2].replace('_', '*') + x[2:],
-                      [regex.search(predicted_peptides_file).group() for predicted_peptides_file in
-                       args.predicted_peptides]))
+    if args.predict_bindings:
+        # input files usually look like this: /path/to/A_01_01_predicted_peptides.csv
+        # remove any preceding and subsequent letters from the alleles
+        # result looks like: A*01:01
+        regex = re.compile("[a-zA-Z][_|*][0-9]{2}[_|:][0-9]{2}")
+        alleles = map(lambda x: x[:5].replace('_', ':') + x[5:],
+                      map(lambda x: x[:2].replace('_', '*') + x[2:],
+                          [regex.search(predicted_peptides_file).group() for predicted_peptides_file in
+                           args.predicted_peptides]))
 
-    # get alleles to peptide sequences for all found epitopes and possible neoepitopes
-    predicted_vcf_neoepitopes = parse_vcf_neoepitopes(args.neoepitopes, alleles)
-    found_epitopes = parse_predicted_peptides(zip(args.predicted_peptides, alleles))
+        # get alleles to peptide sequences for all found epitopes and possible neoepitopes
+        predicted_vcf_neoepitopes = parse_vcf_neoepitopes(args.neoepitopes, alleles)
+        found_epitopes = parse_predicted_peptides(zip(args.predicted_peptides, alleles))
 
-    # build the intersection of all found epitopes and possible neoepitopes
-    found_neoepitopes = defaultdict(list)
-    for allele, sequences in found_epitopes.items():
-        found_neoepitopes[allele] = list(set(sequences) & set(predicted_vcf_neoepitopes[allele]))
+        # build the intersection of all found epitopes and possible neoepitopes
+        found_neoepitopes = defaultdict(list)
+        for allele, sequences in found_epitopes.items():
+            found_neoepitopes[allele] = list(set(sequences) & set(predicted_vcf_neoepitopes[allele]))
 
-    write_found_neoepitopes(args.output, found_neoepitopes, args.file_format)
+        write_found_neoepitopes(args.output, found_neoepitopes, args.file_format)
+
+    else:
+        # parse all identified peptides and possible neoepitopes
+        predicted_vcf_neoepitopes = parse_vcf_neoepitopes(args.neoepitopes, [])
+        identified_peptides = parse_mztab(args.mztab)
+
+        # build the intersection of all found epitopes and possible neoepitopes
+        found_neoepitopes = list(set(predicted_vcf_neoepitopes) & set(identified_peptides))
+
+        write_found_neoepitopes(args.output, found_neoepitopes, 'pep')
 
 
 if __name__ == "__main__":
