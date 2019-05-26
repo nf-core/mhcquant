@@ -7,7 +7,7 @@ usage: found_neoepitopes.py [-h]
                                 -m MZTAB
                                 -n NEOEPITOPES
                                 -p PREDICTED_PEPTIDES
-                               [-f FILEFORMAT {raw, csv, json}]
+                               [-f FILEFORMAT {raw, csv, json, pep}]
                                 -o OUTPUT
 
 Neoepitope prediction for TargetInsepctor.
@@ -20,7 +20,7 @@ optional arguments:
                         Path to the neoepitopes input file
   -p, --predicted_peptides PEPTIDES
                         Path to numerous files containing predicted peptides by MHCFlurry
-  -f, --file_format {raw, csv, json}
+  -f, --file_format {raw, csv, json, pep}
                         File format to report result in
   -o, --output OUTPUT
                         Path to the output file
