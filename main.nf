@@ -237,14 +237,14 @@ if( params.run_prediction){
     Channel
         .fromPath( params.alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
-        .into { input_alleles; input_alleles_refine; input_alleles_neoepitope}
+        .into { input_alleles; input_alleles_refine; input_alleles_neoepitope; input_alleles_neoepitope_binding}
 } else {
 
     input_alleles = Channel.empty()
     input_alleles_refine = Channel.empty()
     input_alleles_neoepitope = Channel.empty()
+    input_alleles_neoepitope_binding = Channel.empty()
 }
-
 
 
 
@@ -1059,7 +1059,7 @@ process Resolve_found_neoepitopes {
      file neoepitopes from possible_neoepitopes
 
     output:
-     file "found_neoepitopes.pep" into predicted_neoepitopes
+     file "found_neoepitopes.pep" into found_neoepitopes
     
     when:
      params.vcf.length() > 0
@@ -1070,6 +1070,30 @@ process Resolve_found_neoepitopes {
      """
 }
 
+/*
+ * STEP 21 - Predict binding affinites of neoepitopes
+ */
+process Predict_binding_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file allotypes from input_alleles_neoepitope_binding
+     file neoepitopes from found_neoepitopes
+
+    output:
+     file "*predicted_neoepitopes.csv" into predicted_neoepitopes
+    
+    when:
+     params.vcf.length() > 0
+     params.run_prediction
+
+    script:
+     """
+     mhcflurry-downloads --quiet fetch models_class1
+     neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes.csv
+     """
+}
 
 /*
  * Completion e-mail notification
