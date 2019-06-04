@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 """
-Commandline tool for extracting unique neoepitopes generated from MHCFlurry predictions
+Commandline tool for extracting unique neoepitopes from mztab files and the 
 and the FRED2 vcf_neoepitope_predictor.py script.
 
 usage: found_neoepitopes.py [-h]
                                 -m MZTAB
                                 -n NEOEPITOPES
-                                -p PREDICTED_PEPTIDES
                                [-f FILEFORMAT {raw, csv, json}]
                                 -o OUTPUT
 
@@ -18,8 +17,6 @@ optional arguments:
                         Path to the mzab file
   -n, --neoepitopes NEOEPITOPES
                         Path to the neoepitopes input file
-  -p, --predicted_peptides PEPTIDES
-                        Path to numerous files containing predicted peptides by MHCFlurry
   -f, --file_format {raw, csv, json}
                         File format to report result in
   -o, --output OUTPUT
@@ -38,7 +35,7 @@ from collections import defaultdict
 console = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
-LOG = logging.getLogger("Found Neoepitopes")
+LOG = logging.getLogger("Resolve Neoepitopes")
 LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
