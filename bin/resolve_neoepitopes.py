@@ -141,7 +141,7 @@ def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
 
 
 def main():
-    model = argparse.ArgumentParser(description='Neoepitope prediction for TargetInspector.')
+    model = argparse.ArgumentParser(description='Neoepitope resolvement from mztab and possible vcf determined neoepitopes.')
 
     model.add_argument(
         '-n', '--neoepitopes',
