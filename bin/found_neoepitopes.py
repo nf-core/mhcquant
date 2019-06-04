@@ -7,7 +7,7 @@ usage: found_neoepitopes.py [-h]
                                 -m MZTAB
                                 -n NEOEPITOPES
                                 -p PREDICTED_PEPTIDES
-                               [-f FILEFORMAT {raw, csv, json, pep}]
+                               [-f FILEFORMAT {raw, csv, json}]
                                 -o OUTPUT
 
 Neoepitope prediction for TargetInsepctor.
@@ -20,7 +20,7 @@ optional arguments:
                         Path to the neoepitopes input file
   -p, --predicted_peptides PEPTIDES
                         Path to numerous files containing predicted peptides by MHCFlurry
-  -f, --file_format {raw, csv, json, pep}
+  -f, --file_format {raw, csv, json}
                         File format to report result in
   -o, --output OUTPUT
                         Path to the output file
@@ -53,11 +53,17 @@ def parse_mztab(identified_peptides_file):
     mztab = open(identified_peptides_file)
     mztab_read = mztab.readlines()
     mztab.close()
-    seqs = [l.split()[1] for l in mztab_read if
-            l.startswith("PEP") and not 'U' in l and not 'X' in l and not 'Z' in l and not 'J' in l and not 'B' in l]
-    seqs_new = list(set(seqs))
 
-    return seqs_new
+    seq_geneIDs = defaultdict(str)
+    for line in mztab_read:
+        if line.startswith("PEP"):
+            content = line.split('\t')
+            seq = content[1]
+            geneID = content[2]
+            if not 'U' in seq and not 'X' in seq and not 'Z' in seq and not 'J' in seq and not 'B' in seq:
+                seq_geneIDs[seq] = geneID
+
+    return seq_geneIDs
 
 
 def parse_vcf_neoepitopes(neoepitope_file, alleles):
@@ -107,25 +113,6 @@ def parse_vcf_neoepitopes(neoepitope_file, alleles):
     return HLA_allele_to_peptides
 
 
-def parse_predicted_peptides(predicted_peptides):
-    """
-    parses the output of MHCFlurry
-
-    :param predicted_peptides: output file of MHCFlurry
-    :return: dictionary of alleles to peptide sequences
-    """
-    HLA_allele_to_peptides = defaultdict(list)
-
-    for index, file in enumerate(predicted_peptides):
-        with open(file[0], 'r') as csvfile:
-            reader = csv.DictReader(csvfile, delimiter=',')
-            current_allele = predicted_peptides[index][1]
-            for row in reader:
-                HLA_allele_to_peptides[current_allele].append(row['peptide'])
-
-    return HLA_allele_to_peptides
-
-
 def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
     """
     writes all unique neoepitopes to a specified file
@@ -137,16 +124,17 @@ def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
     # if only list (no bindings)
     if file_format == 'pep':
         with open(filepath + "." + file_format, 'w') as f:
-            f.write('\n'.join(str(line) for line in found_neoepitopes))
+            f.write('Peptide sequence' + '\t' + 'geneID')
+            f.write('\n'.join(str(seq) + '\t' + str(geneID) for seq, geneID in found_neoepitopes.items()))
     elif file_format == "json":
-        json.dump(found_neoepitopes + "." + file_format, open(filepath, 'w'))
+        json.dump(found_neoepitopes, open(filepath + '.' + file_format, 'w'))
     elif file_format == "csv":
-        dict_list = [found_neoepitopes]
-        with open(filepath + "." + file_format, 'w') as f:
-            writer = csv.DictWriter(f, dict_list[0].keys())
-            writer.writeheader()
-            for d in dict_list:
-                writer.writerow(d)
+        with open(filepath + '.' + file_format, 'w') as csv_file:
+            writer = csv.writer(csv_file)
+            header = ['Peptide sequence', 'geneID']
+            writer.writerow(header)
+            for seq, geneID in found_neoepitopes.items():
+                writer.writerow([seq, geneID])
     elif file_format == "raw":
         f = open(filepath + "." + file_format, "w")
         f.write(str(found_neoepitopes))
@@ -159,23 +147,9 @@ def main():
     model = argparse.ArgumentParser(description='Neoepitope prediction for TargetInspector.')
 
     model.add_argument(
-        '-p', '--predicted_peptides',
-        nargs='+',
-        type=str,
-        help='One or more allele files containing predicted protein sequences'
-    )
-
-    model.add_argument(
         '-n', '--neoepitopes',
         type=str,
         help='All possible predicted neoepitopes'
-    )
-
-    model.add_argument(
-        '-f', '--file_format',
-        type=str,
-        default="csv",
-        help='File format for output file'
     )
 
     model.add_argument(
@@ -185,9 +159,10 @@ def main():
     )
 
     model.add_argument(
-        '-bind', '--predict_bindings',
-        action="store_true",
-        help='Whether bindings were predicted'
+        '-f', '--file_format',
+        type=str,
+        default="csv",
+        help='File format for output file'
     )
 
     model.add_argument(
@@ -199,36 +174,15 @@ def main():
 
     args = model.parse_args()
 
-    if args.predict_bindings:
-        # input files usually look like this: /path/to/A_01_01_predicted_peptides.csv
-        # remove any preceding and subsequent letters from the alleles
-        # result looks like: A*01:01
-        regex = re.compile("[a-zA-Z][_|*][0-9]{2}[_|:][0-9]{2}")
-        alleles = map(lambda x: x[:5].replace('_', ':') + x[5:],
-                      map(lambda x: x[:2].replace('_', '*') + x[2:],
-                          [regex.search(predicted_peptides_file).group() for predicted_peptides_file in
-                           args.predicted_peptides]))
+    # parse all identified peptides and possible neoepitopes
+    predicted_vcf_neoepitopes = parse_vcf_neoepitopes(args.neoepitopes, [])
+    identified_peptides_to_geneIDs = parse_mztab(args.mztab)
 
-        # get alleles to peptide sequences for all found epitopes and possible neoepitopes
-        predicted_vcf_neoepitopes = parse_vcf_neoepitopes(args.neoepitopes, alleles)
-        found_epitopes = parse_predicted_peptides(zip(args.predicted_peptides, alleles))
+    # build the intersection of all found epitopes and possible neoepitopes
+    found_neoepitopes = list(set(predicted_vcf_neoepitopes) & set(identified_peptides_to_geneIDs.keys()))
+    found_neoepitopes_to_geneIDs = {k: v for k, v in identified_peptides_to_geneIDs.items() if k in found_neoepitopes}
 
-        # build the intersection of all found epitopes and possible neoepitopes
-        found_neoepitopes = defaultdict(list)
-        for allele, sequences in found_epitopes.items():
-            found_neoepitopes[allele] = list(set(sequences) & set(predicted_vcf_neoepitopes[allele]))
-
-        write_found_neoepitopes(args.output, found_neoepitopes, args.file_format)
-
-    else:
-        # parse all identified peptides and possible neoepitopes
-        predicted_vcf_neoepitopes = parse_vcf_neoepitopes(args.neoepitopes, [])
-        identified_peptides = parse_mztab(args.mztab)
-
-        # build the intersection of all found epitopes and possible neoepitopes
-        found_neoepitopes = list(set(predicted_vcf_neoepitopes) & set(identified_peptides))
-
-        write_found_neoepitopes(args.output, found_neoepitopes, 'pep')
+    write_found_neoepitopes(args.output, found_neoepitopes_to_geneIDs, args.file_format)
 
 
 if __name__ == "__main__":

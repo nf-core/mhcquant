@@ -1059,14 +1059,14 @@ process Resolve_found_neoepitopes {
      file neoepitopes from possible_neoepitopes
 
     output:
-     file "found_neoepitopes.pep" into found_neoepitopes
+     file "found_neoepitopes.csv" into found_neoepitopes
     
     when:
      params.vcf.length() > 0
 
     script:
      """
-     found_neoepitopes.py -n ${neoepitopes} -m ${mztab} -o found_neoepitopes
+     found_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes
      """
 }
 

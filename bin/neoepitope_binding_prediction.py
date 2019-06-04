@@ -1,7 +1,10 @@
 #!/usr/bin/env python
-from mhcflurry import Class1AffinityPredictor
+import pandas as pd
+import numpy as np
 import logging
 import sys
+
+from mhcflurry import Class1AffinityPredictor
 
 # logging setup
 console = logging.StreamHandler(sys.stdout)
@@ -35,11 +38,15 @@ if unsupported_alleles:
 if not alleles:
     LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
 
+flatten = lambda l: [item for sublist in l for item in sublist]
 # read identified peptides
-neoepitopes = [line.rstrip('\n') for line in open(sys.argv[-2])]
+neoepitopes = [line.rstrip('\n').strip().split(',') for line in open(sys.argv[-2])][1:]
+neoepitopes = flatten(neoepitopes)
+seqs_to_geneID = dict(zip(neoepitopes[::2], neoepitopes[1::2]))
 
 # call mhcflurry
 for allele in alleles:
     predictor = Class1AffinityPredictor.load()
-    df_pred = predictor.predict_to_dataframe(allele=allele, peptides=neoepitopes)
+    df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_to_geneID.keys())
+    df_pred.insert(1, 'geneID', pd.Series(np.array(seqs_to_geneID.values())))
     df_pred.to_csv(allele + '_' + sys.argv[-1])

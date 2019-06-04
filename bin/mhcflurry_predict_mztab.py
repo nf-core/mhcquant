@@ -1,7 +1,12 @@
 #!/usr/bin/env python
-from mhcflurry import Class1AffinityPredictor
+import argparse
 import logging
+import pandas as pd
+import numpy as np
 import sys
+
+from collections import defaultdict
+from mhcflurry import Class1AffinityPredictor
 
 #logging setup
 console = logging.StreamHandler(sys.stdout)
@@ -10,6 +15,28 @@ console.setFormatter(formatter)
 LOG = logging.getLogger("MHCFlurry Predict mztab")
 LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
+
+def parse_mztab(identified_peptides_file):
+       """
+       parses an mztab file and returns all identified proteins
+
+       :param identified_peptides_file: path to the mztab file
+       :return: identified proteins
+       """
+       mztab = open(identified_peptides_file)
+       mztab_read = mztab.readlines()
+       mztab.close()
+
+       seq_geneIDs = defaultdict(str)
+       for line in mztab_read:
+              if line.startswith("PEP"):
+                     content = line.split('\t')
+                     seq = content[1]
+                     geneID = content[2]
+                     if not 'U' in seq and not 'X' in seq and not 'Z' in seq and not 'J' in seq and not 'B' in seq:
+                            seq_geneIDs[seq] = geneID
+
+       return seq_geneIDs
 
 #List of alleles supported by mhcflurry
 supported_alleles = "A*01:01,A*02:01,A*02:02,A*02:03,A*02:05,A*02:06,A*02:07,A*02:11,A*02:12,A*02:16,A*02:17,A*02:19," \
@@ -35,16 +62,14 @@ if unsupported_alleles:
 if not alleles:
    LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
 
-#read identified peptides
-mztab=open(sys.argv[-2])
-mztab_read=mztab.readlines()
-mztab.close()
-seqs=[l.split()[1] for l in mztab_read if l.startswith("PEP") and not 'U' in l and not 'X' in l and not 'Z' in l and not 'J' in l and not 'B' in l]
-seqs_new=list(set(seqs))
+ # read identified peptides
+seqs_to_geneID = parse_mztab(sys.argv[-2])
 
-#call mhcflurry
+# call mhcflurry
 for allele in alleles:
-   predictor = Class1AffinityPredictor.load()
-   df_pred=predictor.predict_to_dataframe(allele=allele, peptides=seqs_new)
-   df_pred.to_csv(allele + '_' + sys.argv[-1])
+       predictor = Class1AffinityPredictor.load()
+       df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_to_geneID.keys())
+       df_pred.insert(1, 'geneID', pd.Series(np.array(seqs_to_geneID.values())))
+       df_pred.to_csv(allele + '_' + sys.argv[-1])
+
 
