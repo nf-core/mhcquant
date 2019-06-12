@@ -1039,7 +1039,7 @@ process predict_possible_neoepitopes {
      file "vcf_neoepitopes.csv" into possible_neoepitopes
     
     when:
-     params.vcf.length() > 0
+     params.include_proteins_from_vcf
 
     script:
      """
@@ -1062,11 +1062,11 @@ process Resolve_found_neoepitopes {
      file "found_neoepitopes.csv" into found_neoepitopes
     
     when:
-     params.vcf.length() > 0
+     params.include_proteins_from_vcf
 
     script:
      """
-     found_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes
      """
 }
 
@@ -1085,7 +1085,7 @@ process Predict_binding_neoepitopes {
      file "*predicted_neoepitopes.csv" into predicted_neoepitopes
     
     when:
-     params.vcf.length() > 0
+     params.include_proteins_from_vcf
      params.run_prediction
 
     script:
