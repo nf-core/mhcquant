@@ -177,6 +177,7 @@ def main():
 
     # build the intersection of all found epitopes and possible neoepitopes
     found_neoepitopes = list(set(predicted_vcf_neoepitopes) & set(identified_peptides_to_geneIDs.keys()))
+    LOG.info(str(len(found_neoepitopes)) + ' Neoepitopes were found. Examine "found_neoepitopes.csv" for details.')
     found_neoepitopes_to_geneIDs = {k: v for k, v in identified_peptides_to_geneIDs.items() if k in found_neoepitopes}
 
     write_found_neoepitopes(args.output, found_neoepitopes_to_geneIDs, args.file_format)
