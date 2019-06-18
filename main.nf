@@ -172,7 +172,6 @@ if(workflow.profile == 'awsbatch'){
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
 
-
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
 custom_runName = params.name
@@ -238,13 +237,14 @@ if( params.run_prediction){
     Channel
         .fromPath( params.alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
-        .into { input_alleles; input_alleles_refine}
+        .into { input_alleles; input_alleles_refine; input_alleles_neoepitope; input_alleles_neoepitope_binding}
 } else {
 
     input_alleles = Channel.empty()
     input_alleles_refine = Channel.empty()
+    input_alleles_neoepitope = Channel.empty()
+    input_alleles_neoepitope_binding = Channel.empty()
 }
-
 
 
 
@@ -255,10 +255,11 @@ if( params.include_proteins_from_vcf){
     Channel
         .fromPath( params.vcf )
         .ifEmpty { exit 1, "params.vcf was empty - no input file supplied" }
-        .set { input_vcf}
+        .into { input_vcf; input_vcf_neoepitope}
 } else {
 
     input_vcf = Channel.empty()
+    input_vcf_neoepitope = Channel.empty()
 }
 
 
@@ -323,7 +324,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
    return yaml_file
 }
-
 
 /*
  * STEP 0 - Output Description HTML
@@ -988,7 +988,7 @@ process export_mztab {
      file feature_file_2 from consensus_file_resolved_2
 
     output:
-     file "${feature_file_2.baseName}.mzTab" into features_mztab
+     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes
 
     script:
      """
@@ -1024,6 +1024,76 @@ process predict_peptides {
      """
 }
 
+/*
+ * STEP 19 - Predict all possible neoepitopes from vcf
+ */
+process predict_possible_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file alleles_file from input_alleles_neoepitope
+     file vcf_file from input_vcf_neoepitope
+
+    output:
+     file "vcf_neoepitopes.csv" into possible_neoepitopes
+    
+    when:
+     params.include_proteins_from_vcf
+
+    script:
+     """
+     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -a ${alleles_file} -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o vcf_neoepitopes.csv
+     """
+}
+
+/*
+ * STEP 20 - Resolve found neoepitopes
+ */
+process Resolve_found_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file mztab from features_mztab_neoepitopes
+     file neoepitopes from possible_neoepitopes
+
+    output:
+     file "found_neoepitopes.csv" into found_neoepitopes
+    
+    when:
+     params.include_proteins_from_vcf
+
+    script:
+     """
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes
+     """
+}
+
+/*
+ * STEP 21 - Predict binding affinites of neoepitopes
+ */
+process Predict_binding_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file allotypes from input_alleles_neoepitope_binding
+     file neoepitopes from found_neoepitopes
+
+    output:
+     file "*predicted_neoepitopes.csv" into predicted_neoepitopes
+    
+    when:
+     params.include_proteins_from_vcf
+     params.run_prediction
+
+    script:
+     """
+     mhcflurry-downloads --quiet fetch models_class1
+     neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes.csv
+     """
+}
 
 /*
  * Completion e-mail notification

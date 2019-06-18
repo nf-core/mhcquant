@@ -234,7 +234,7 @@ Specify a .tsv file containing the alleles of your probes. (line separated)
 Set to 'True' or 'False' depending on whether variants should be translated to proteins and included into your fasta for database search.
 
 ### `--vcf`
-Specify a .vcf file containing the information about genomic variants (vcf < v.4.2).
+Specify a .vcf file containing the information about genomic variants (vcf < v.4.2). If a vcf file is specified, neoepitopes will also automatically be resolved.
 
 ### `--variant_annotation_style`
 Specify style of tool used for variant annotation - currently supported: "SNPEFF", "VEP", "ANNOVAR"
