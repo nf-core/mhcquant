@@ -439,8 +439,8 @@ process db_search_comet {
                    -precursor_charge ${params.prec_charge} \\
                    -activation_method ${params.activation_method} \\
                    -use_NL_ions true \\
-                   -variable_modifications '${params.variable_mods}' \\
-                   -fixed_modifications ${params.fixed_mods} \\
+                   -variable_modifications ${params.variable_mods.tokenize(',').collect { "'${it}'" }.join(" ") } \\
+                   -fixed_modifications '${params.fixed_mods}' \\
                    -enzyme '${params.enzyme}' \\
                    -spectrum_batch_size ${params.spectrum_batch_size}
      """
