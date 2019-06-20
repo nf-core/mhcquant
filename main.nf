@@ -440,7 +440,7 @@ process db_search_comet {
                    -activation_method ${params.activation_method} \\
                    -use_NL_ions true \\
                    -variable_modifications ${params.variable_mods.tokenize(',').collect { "'${it}'" }.join(" ") } \\
-                   -fixed_modifications '${params.fixed_mods}' \\
+                   -fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")} \\
                    -enzyme '${params.enzyme}' \\
                    -spectrum_batch_size ${params.spectrum_batch_size}
      """
