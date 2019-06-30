@@ -95,7 +95,7 @@ if (params.help){
 params.mzmls = params.mzmls ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
 params.fasta = params.fasta ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
-
+params.mhcnuggets = params.mhcnuggets
 
 
 /*
@@ -262,6 +262,7 @@ if( params.include_proteins_from_vcf){
     input_vcf_neoepitope = Channel.empty()
 }
 
+mhcnuggets_to_predict = Channel.fromPath(params.mhcnuggets)
 
 // Header log info
 log.info """=======================================================
@@ -323,6 +324,21 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
     """.stripIndent()
 
    return yaml_file
+}
+
+process test {
+    publishDir "${params.outdir}/"
+
+    input:
+    file to_predict from mhcnuggets_to_predict
+
+    output:
+    file 'mhcnuggets_output'
+
+    script:
+    """
+    mhcnuggets_test.py --input ${to_predict} --output mhcnuggets_output
+    """
 }
 
 /*
@@ -573,7 +589,6 @@ process align_mzml_files {
                       -out ${mzml_file_align.baseName}_aligned.mzML \\
                       -threads ${task.cpus}
      """
-
 }
 
 
@@ -610,7 +625,7 @@ process merge_aligned_idxml_files {
 
     output:
      file "all_ids_merged.idXML" into id_merged
-    
+
     script:
      """
      IDMerger -in $ids_aligned \\
