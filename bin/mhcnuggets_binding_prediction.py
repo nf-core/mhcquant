@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# importing the predict module
 from mhcnuggets.src.predict import predict
 import argparse
 
@@ -41,16 +40,15 @@ supported_alleles_class_2 = ["HLA-DPA1*01:03-DPB1*02:01", "HLA-DPA1*01:03-DPB1*0
 flatten = lambda l: [item for sublist in l for item in sublist]
 
 
-def convert_alleles(alleles):
+def convert_alleles_mhcnuggets_format(alleles):
     return [allele.replace('*', '') for allele in alleles]
 
 
 def parse_alleles(filepath):
     with open(filepath, 'r') as f:
         # convert all alleles into mhcnuggets format
-        # no * or colons
         alleles = flatten([line.split('\n') for line in f])
-        supp_alleles = convert_alleles(list(set(alleles).intersection(supported_alleles_class_2)))
+        supp_alleles = convert_alleles_mhcnuggets_format(list(set(alleles).intersection(supported_alleles_class_2)))
 
         return supp_alleles
 
@@ -67,7 +65,7 @@ def main():
     model.add_argument(
         '-a', '--alleles',
         type=str,
-        help='mhcnuggets input'
+        help='class 2 alleles'
     )
 
     model.add_argument(

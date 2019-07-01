@@ -59,6 +59,7 @@ def helpMessage() {
       --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
       --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
       --alleles                         Path to file including allele information
+      --class_2_alleles                 Path to file including class 2 allele information
 
     Variants:
       --include_proteins_from_vcf       Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)
@@ -95,7 +96,6 @@ if (params.help){
 params.mzmls = params.mzmls ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
 params.fasta = params.fasta ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
-params.class_2_alleles = params.class_2_alleles
 
 
 /*
@@ -216,7 +216,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta_vcf}
+        .set { input_fasta_vcf }
 
     input_fasta = Channel.empty()
 
@@ -224,7 +224,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta}
+        .set { input_fasta }
 
     input_fasta_vcf = Channel.empty()
 }
@@ -246,7 +246,18 @@ if( params.run_prediction){
     input_alleles_neoepitope_binding = Channel.empty()
 }
 
+/*
+ * Create a channel for class 2 alleles file
+ */
+if( params.run_prediction){
+    Channel
+        .fromPath( params.class_2_alleles )
+        .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
+        .set { class_2_alleles }
+} else {
 
+    class_2_alleles = Channel.empty()
+}
 
 /*
  * Create a channel for input vcf file
@@ -261,8 +272,6 @@ if( params.include_proteins_from_vcf){
     input_vcf = Channel.empty()
     input_vcf_neoepitope = Channel.empty()
 }
-
-class_2_alleles = Channel.fromPath(params.class_2_alleles)
 
 // Header log info
 log.info """=======================================================
@@ -918,14 +927,14 @@ process quantify_identifications_targeted {
 process link_extracted_features {
 
     input:
-     file feautres from feature_files.collect{it}
+     file features from feature_files.collect{it}
 
     output:
      file "all_features_merged.consensusXML" into consensus_file
     
     script:
      """
-     FeatureLinkerUnlabeledKD -in $feautres \\
+     FeatureLinkerUnlabeledKD -in $features \\
                               -out 'all_features_merged.consensusXML' \\
                               -threads ${task.cpus}
      """
@@ -1060,7 +1069,7 @@ process Resolve_found_neoepitopes {
      file neoepitopes from possible_neoepitopes
 
     output:
-     file "found_neoepitopes.csv" into found_neoepitopes, mhcnuggets_neoepitopes
+     file "found_neoepitopes.csv" into found_neoepitopes, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
     
     when:
      params.include_proteins_from_vcf
@@ -1103,7 +1112,7 @@ process preprocess_mhcnuggets {
     publishDir "${params.outdir}/"
 
     input:
-    file neoepitopes from mhcnuggets_neoepitopes
+    file neoepitopes from mhcnuggets_neo_preprocessing
 
     output:
     file 'mhcnuggets_preprocessed' into preprocessed_mhcnuggets_neoepitopes
@@ -1132,6 +1141,26 @@ process mhcnuggets_class_2 {
     mhcnuggets_binding_prediction.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_class_2_peptides
     """
 }
+
+/*
+ * STEP 24 - Class 2 MHCNuggets Postprocessing
+ 
+process mhcnuggets_class_2 {
+    publishDir "${params.outdir}/"
+
+    input:
+    file neoepitopes from mhcnuggets_neo_postprocessing.collect{it}
+    file predicted_cl_2 from predicted_class_2
+
+    output:
+    file '*predicted_class_2_peptides' into predicted_class_2
+
+    script:
+    """
+    mhcnuggets_binding_prediction.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_class_2_peptides
+    """
+}
+*/
 
 /*
  * Completion e-mail notification
