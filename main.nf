@@ -95,7 +95,7 @@ if (params.help){
 params.mzmls = params.mzmls ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
 params.fasta = params.fasta ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
-params.mhcnuggets = params.mhcnuggets
+params.class_2_alleles = params.class_2_alleles
 
 
 /*
@@ -262,7 +262,7 @@ if( params.include_proteins_from_vcf){
     input_vcf_neoepitope = Channel.empty()
 }
 
-mhcnuggets_to_predict = Channel.fromPath(params.mhcnuggets)
+class_2_alleles = Channel.fromPath(params.class_2_alleles)
 
 // Header log info
 log.info """=======================================================
@@ -326,20 +326,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
    return yaml_file
 }
 
-process test {
-    publishDir "${params.outdir}/"
-
-    input:
-    file to_predict from mhcnuggets_to_predict
-
-    output:
-    file 'mhcnuggets_output'
-
-    script:
-    """
-    mhcnuggets_test.py --input ${to_predict} --output mhcnuggets_output
-    """
-}
 
 /*
  * STEP 0 - Output Description HTML
@@ -1074,7 +1060,7 @@ process Resolve_found_neoepitopes {
      file neoepitopes from possible_neoepitopes
 
     output:
-     file "found_neoepitopes.csv" into found_neoepitopes
+     file "found_neoepitopes.csv" into found_neoepitopes, mhcnuggets_neoepitopes
     
     when:
      params.include_proteins_from_vcf
@@ -1108,6 +1094,43 @@ process Predict_binding_neoepitopes {
      mhcflurry-downloads --quiet fetch models_class1
      neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes.csv
      """
+}
+
+/*
+ * STEP 22 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
+ */
+process preprocess_mhcnuggets {
+    publishDir "${params.outdir}/"
+
+    input:
+    file neoepitopes from mhcnuggets_neoepitopes
+
+    output:
+    file 'mhcnuggets_preprocessed' into preprocessed_mhcnuggets_neoepitopes
+
+    script:
+    """
+    preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output mhcnuggets_preprocessed
+    """
+}
+
+/*
+ * STEP 23 - Predict class 2 MHCNuggets
+ */
+process mhcnuggets_class_2 {
+    publishDir "${params.outdir}/"
+
+    input:
+    file preprocessed_neoepitopes from preprocessed_mhcnuggets_neoepitopes
+    file cl_2_alleles from class_2_alleles
+
+    output:
+    file '*predicted_class_2_peptides' into predicted_class_2
+
+    script:
+    """
+    mhcnuggets_binding_prediction.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_class_2_peptides
+    """
 }
 
 /*
