@@ -1136,7 +1136,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
     file cl_2_alleles from class_2_alleles
 
     output:
-    file '*predicted_class_2_peptides' into predicted_neoepitopes_class_2
+    file '*predicted_class_2_neoepitopes' into predicted_neoepitopes_class_2
 
     when:
      params.include_proteins_from_vcf
@@ -1144,7 +1144,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
 
     script:
     """
-    mhcnuggets_binding_prediction.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_class_2_peptides
+    mhcnuggets_binding_prediction.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_class_2_neoepitopes
     """
 }
 
@@ -1160,7 +1160,7 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
     file predicted_cl_2 from predicted_neoepitopes_class_2.collect{it}
 
     output:
-    file '*final' into postprocessed_predicted_neoepitopes_class_2
+    file '*annotated' into postprocessed_predicted_neoepitopes_class_2
 
     when:
      params.include_proteins_from_vcf

@@ -4,7 +4,7 @@ from collections import defaultdict
 
 
 def main():
-    model = argparse.ArgumentParser(description='Neoepitope prediction for TargetInspector.')
+    model = argparse.ArgumentParser(description='Postprocess Neoepitopes predicted by MHCNuggets')
 
     model.add_argument(
         '-i', '--input',
@@ -48,7 +48,7 @@ def main():
                 ic50 = split[1].strip()
                 neoepitope_to_geneID_ic50[neoepitope] = (geneID, ic50)
 
-            with open(prediction + 'final', 'w') as f:
+            with open(prediction + '_annotated', 'w') as f:
                 f.write('peptide,geneID,ic50\n')
                 for neoepitope, pair in neoepitope_to_geneID_ic50.items():
                     f.write(neoepitope + ',' + pair[0] + ',' + pair[1] + '\n')

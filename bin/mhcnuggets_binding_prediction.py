@@ -54,7 +54,7 @@ def parse_alleles(filepath):
 
 
 def main():
-    model = argparse.ArgumentParser(description='Neoepitope prediction for TargetInspector.')
+    model = argparse.ArgumentParser(description='MHCNuggets binding prediction')
 
     model.add_argument(
         '-i', '--input',
