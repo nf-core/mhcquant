@@ -23,7 +23,7 @@ def write_neoepitopes(neoepitopes, filepath):
 
 
 def main():
-    model = argparse.ArgumentParser(description='Neoepitope prediction for TargetInspector.')
+    model = argparse.ArgumentParser(description='Neoepitope preprocessing for mhcnuggets')
 
     model.add_argument(
         '-n', '--neoepitopes',
