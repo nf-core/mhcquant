@@ -82,7 +82,7 @@ def main():
         predict(class_='II',
                 peptides_path=args.input,
                 mhc=allele,
-                output=allele + '_class_2_' + args.output)
+                output=allele + args.output)
 
 
 if __name__ == '__main__':

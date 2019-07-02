@@ -1108,14 +1108,17 @@ process Predict_binding_neoepitopes {
 /*
  * STEP 22 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
  */
-process preprocess_mhcnuggets {
-    publishDir "${params.outdir}/"
+process preprocess_neoepitopes_mhcnuggets {
 
     input:
     file neoepitopes from mhcnuggets_neo_preprocessing
 
     output:
     file 'mhcnuggets_preprocessed' into preprocessed_mhcnuggets_neoepitopes
+
+    when:
+     params.include_proteins_from_vcf
+     params.run_prediction
 
     script:
     """
@@ -1126,15 +1129,18 @@ process preprocess_mhcnuggets {
 /*
  * STEP 23 - Predict class 2 MHCNuggets
  */
-process mhcnuggets_class_2 {
-    publishDir "${params.outdir}/"
+process predict_neoepitopes_mhcnuggets_class_2 {
 
     input:
     file preprocessed_neoepitopes from preprocessed_mhcnuggets_neoepitopes
     file cl_2_alleles from class_2_alleles
 
     output:
-    file '*predicted_class_2_peptides' into predicted_class_2
+    file '*predicted_class_2_peptides' into predicted_neoepitopes_class_2
+
+    when:
+     params.include_proteins_from_vcf
+     params.run_prediction
 
     script:
     """
@@ -1145,15 +1151,20 @@ process mhcnuggets_class_2 {
 /*
  * STEP 24 - Class 2 MHCNuggets Postprocessing
 */ 
-process postprocess_mhcnuggets_class_2 {
+process postprocess_neoepitopes_mhcnuggets_class_2 {
+
     publishDir "${params.outdir}/"
 
     input:
     file neoepitopes from mhcnuggets_neo_postprocessing
-    file predicted_cl_2 from predicted_class_2.collect{it}
+    file predicted_cl_2 from predicted_neoepitopes_class_2.collect{it}
 
     output:
-    file '*final' into final_mhcnuggets
+    file '*final' into postprocessed_predicted_neoepitopes_class_2
+
+    when:
+     params.include_proteins_from_vcf
+     params.run_prediction
 
     script:
     """
