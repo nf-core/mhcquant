@@ -43,15 +43,15 @@ def main():
             f.readline()
             for line in f:
                 split = line.split(',')
-                neoepitope = split[0]
-                geneID = neoepitope_to_geneID[neoepitope]
-                ic50 = split[1]
+                neoepitope = split[0].strip()
+                geneID = neoepitope_to_geneID[neoepitope].strip()
+                ic50 = split[1].strip()
                 neoepitope_to_geneID_ic50[neoepitope] = (geneID, ic50)
 
-            with open(prediction, 'w') as f:
+            with open(prediction + 'final', 'w') as f:
                 f.write('peptide,geneID,ic50\n')
                 for neoepitope, pair in neoepitope_to_geneID_ic50.items():
-                    f.write(neoepitope + ',' + pair[0] + ',' + pair[1])
+                    f.write(neoepitope + ',' + pair[0] + ',' + pair[1] + '\n')
 
 
 if __name__ == '__main__':

@@ -1144,23 +1144,23 @@ process mhcnuggets_class_2 {
 
 /*
  * STEP 24 - Class 2 MHCNuggets Postprocessing
- 
-process mhcnuggets_class_2 {
+*/ 
+process postprocess_mhcnuggets_class_2 {
     publishDir "${params.outdir}/"
 
     input:
-    file neoepitopes from mhcnuggets_neo_postprocessing.collect{it}
-    file predicted_cl_2 from predicted_class_2
+    file neoepitopes from mhcnuggets_neo_postprocessing
+    file predicted_cl_2 from predicted_class_2.collect{it}
 
     output:
-    file '*predicted_class_2_peptides' into predicted_class_2
+    file '*final' into final_mhcnuggets
 
     script:
     """
-    mhcnuggets_binding_prediction.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_class_2_peptides
+    postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
     """
 }
-*/
+
 
 /*
  * Completion e-mail notification
