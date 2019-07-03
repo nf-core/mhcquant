@@ -253,10 +253,11 @@ if( params.run_prediction){
     Channel
         .fromPath( params.class_2_alleles )
         .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
-        .set { class_2_alleles }
+        .into { class_2_alleles; peptides_class_2_alleles }
 } else {
 
     class_2_alleles = Channel.empty()
+    peptides_class_2_alleles = Channel.empty()
 }
 
 /*
@@ -998,7 +999,7 @@ process export_mztab {
      file feature_file_2 from consensus_file_resolved_2
 
     output:
-     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes
+     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes, mhcnuggets_mztab
 
     script:
      """
@@ -1035,7 +1036,72 @@ process predict_peptides {
 }
 
 /*
- * STEP 19 - Predict all possible neoepitopes from vcf
+ * STEP 19 - Preprocess found peptides for MHCNuggets prediction
+ */ 
+ process preprocess_peptides_mhcnuggets {
+
+    input:
+     file mztab_file from mhcnuggets_mztab
+
+    output:
+     file 'preprocessed_mhcnuggets_peptides' into preprocessed_mhcnuggets_peptides
+
+    when:
+     params.run_prediction
+
+    script:
+    """
+    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output preprocessed_mhcnuggets_peptides
+    """
+ }
+
+ /*
+ * STEP 20 - Predict found peptides using MHCNuggets
+ */ 
+ process predict_peptides_mhcnuggets {
+
+    input:
+     file preprocessed_peptides from preprocessed_mhcnuggets_peptides
+     file class_2_alleles from peptides_class_2_alleles
+
+    // FIX THIS
+    output:
+     file '*' into predicted_mhcnuggets_peptides
+
+    when:
+     params.run_prediction
+
+    // FIX THIS
+    script:
+    """
+    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output preprocessed_mhcnuggets_peptides
+    """
+ }
+
+ /*
+ * STEP 21 - Postprocess predicted MHCNuggets peptides
+  
+ process preprocess_peptides {
+
+    input:
+     file mztab_file from mhcnuggets_mztab
+     //file class_2_alleles from peptides_class_2_alleles
+
+    output:
+     file 'preprocessed_mhcnuggets_peptides' into preprocessed_mhcnuggets_peptides
+
+    when:
+     params.run_prediction
+
+    script:
+    """
+    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output preprocessed_mhcnuggets_peptides
+    """
+ }
+ */
+
+/*
+ * STEP 22 - Predict all possible neoepitopes from vcf
  */
 process predict_possible_neoepitopes {
     publishDir "${params.outdir}/"
@@ -1058,7 +1124,7 @@ process predict_possible_neoepitopes {
 }
 
 /*
- * STEP 20 - Resolve found neoepitopes
+ * STEP 23 - Resolve found neoepitopes
  */
 process Resolve_found_neoepitopes {
     publishDir "${params.outdir}/"
@@ -1081,7 +1147,7 @@ process Resolve_found_neoepitopes {
 }
 
 /*
- * STEP 21 - Predict binding affinites of neoepitopes
+ * STEP 24 - Predict binding affinites of neoepitopes
  */
 process Predict_binding_neoepitopes {
     publishDir "${params.outdir}/"
@@ -1106,7 +1172,7 @@ process Predict_binding_neoepitopes {
 }
 
 /*
- * STEP 22 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
+ * STEP 25 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
  */
 process preprocess_neoepitopes_mhcnuggets {
 
@@ -1127,7 +1193,7 @@ process preprocess_neoepitopes_mhcnuggets {
 }
 
 /*
- * STEP 23 - Predict class 2 MHCNuggets
+ * STEP 26 - Predict class 2 MHCNuggets
  */
 process predict_neoepitopes_mhcnuggets_class_2 {
 
@@ -1149,7 +1215,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
 }
 
 /*
- * STEP 24 - Class 2 MHCNuggets Postprocessing
+ * STEP 27 - Class 2 MHCNuggets Postprocessing
 */ 
 process postprocess_neoepitopes_mhcnuggets_class_2 {
 
