@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 import argparse
+import sys
+import logging
 from collections import defaultdict
 
+#logging setup
+console = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console.setFormatter(formatter)
+LOG = logging.getLogger("Postprocess Neoepitopes MHCNuggets")
+LOG.addHandler(console)
+LOG.setLevel(logging.INFO)
 
 def main():
     model = argparse.ArgumentParser(description='Postprocess Neoepitopes predicted by MHCNuggets')
@@ -17,12 +26,6 @@ def main():
         '-n', '--neoepitopes',
         type=str,
         help='neoepitopes file'
-    )
-
-    model.add_argument(
-        '-o', '--output',
-        type=str,
-        help='postprocessed output files'
     )
 
     args = model.parse_args()

@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 from mhcnuggets.src.predict import predict
 import argparse
+import logging
+import sys
+
+#logging setup
+console = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console.setFormatter(formatter)
+LOG = logging.getLogger("MHCNuggets Predict Peptides")
+LOG.addHandler(console)
+LOG.setLevel(logging.INFO)
 
 supported_alleles_class_2 = ["HLA-DPA1*01:03-DPB1*02:01", "HLA-DPA1*01:03-DPB1*03:01", "HLA-DPA1*01:03-DPB1*04:01",
                              "HLA-DPA1*01:03-DPB1*04:02", "HLA-DPA1*02:01-DPB1*01:01", "HLA-DPA1*02:01-DPB1*05:01",

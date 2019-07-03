@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 import argparse
+import logging
+import sys
+
+#logging setup
+console = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console.setFormatter(formatter)
+LOG = logging.getLogger("Preprocess Neoepitopes MHCNuggets")
+LOG.addHandler(console)
+LOG.setLevel(logging.INFO)
 
 
 def parse_neoepitopes(filepath):

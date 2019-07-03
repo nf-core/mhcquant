@@ -1066,14 +1066,14 @@ process predict_peptides_mhcflurry_class_1 {
      file class_2_alleles from peptides_class_2_alleles
 
     output:
-     file '*predicted_peptides_class_2' into predicted_mhcnuggets_peptides
+     file '*_predicted_peptides_class_2' into predicted_mhcnuggets_peptides
 
     when:
      params.run_prediction
 
     script:
     """
-    mhcnuggets_predict_peptides.py --input ${preprocessed_peptides} --alleles ${class_2_alleles} --output predicted_peptides_class_2
+    mhcnuggets_predict_peptides.py --input ${preprocessed_peptides} --alleles ${class_2_alleles} --output _predicted_peptides_class_2
     """
  }
 
@@ -1203,7 +1203,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
     file cl_2_alleles from class_2_alleles
 
     output:
-    file '*predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
+    file '*_predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
 
     when:
      params.include_proteins_from_vcf
@@ -1211,7 +1211,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
 
     script:
     """
-    mhcnuggets_predict_peptides.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_neoepitopes_class_2
+    mhcnuggets_predict_peptides.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output _predicted_neoepitopes_class_2
     """
 }
 

@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 import argparse
+import sys
+import logging
 from collections import defaultdict
+
+#logging setup
+console = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console.setFormatter(formatter)
+LOG = logging.getLogger("Postprocess Peptides MHCNuggets")
+LOG.addHandler(console)
+LOG.setLevel(logging.INFO)
 
 
 def main():
@@ -10,13 +20,13 @@ def main():
         '-i', '--input',
         type=str,
         nargs='*',
-        help='predicted class 2 neoepitopes'
+        help='predicted class 2 peptides'
     )
 
     model.add_argument(
         '-p', '--peptides_seq_ID',
         type=str,
-        help='neoepitopes file'
+        help='peptides to seq_ID csv file'
     )
 
     args = model.parse_args()
