@@ -1039,12 +1039,14 @@ process predict_peptides {
  * STEP 19 - Preprocess found peptides for MHCNuggets prediction
  */ 
  process preprocess_peptides_mhcnuggets {
+    publishDir "${params.outdir}/"
 
     input:
      file mztab_file from mhcnuggets_mztab
 
     output:
      file 'preprocessed_mhcnuggets_peptides' into preprocessed_mhcnuggets_peptides
+     file 'seq_to_geneIDs' into seq_to_geneIDs
 
     when:
      params.run_prediction
@@ -1057,48 +1059,48 @@ process predict_peptides {
 
  /*
  * STEP 20 - Predict found peptides using MHCNuggets
- */ 
+*/  
  process predict_peptides_mhcnuggets {
 
     input:
      file preprocessed_peptides from preprocessed_mhcnuggets_peptides
      file class_2_alleles from peptides_class_2_alleles
 
-    // FIX THIS
     output:
-     file '*' into predicted_mhcnuggets_peptides
+     file '*predicted_class_2_peptides' into predicted_mhcnuggets_peptides
 
     when:
      params.run_prediction
 
-    // FIX THIS
     script:
     """
-    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output preprocessed_mhcnuggets_peptides
+    mhcnuggets_predict_peptides.py --input ${preprocessed_peptides} --alleles ${class_2_alleles} --output predicted_class_2_peptides
     """
  }
+
 
  /*
  * STEP 21 - Postprocess predicted MHCNuggets peptides
-  
- process preprocess_peptides {
+ */ 
+ process postprocess_peptides_mhcnuggets {
+    publishDir "${params.outdir}/"
 
     input:
-     file mztab_file from mhcnuggets_mztab
-     //file class_2_alleles from peptides_class_2_alleles
+     file predicted_peptides from predicted_mhcnuggets_peptides.collect{it}
+     file protein_to_geneIDs from seq_to_geneIDs
 
     output:
-     file 'preprocessed_mhcnuggets_peptides' into preprocessed_mhcnuggets_peptides
+     file '*annotated' into postprocessed_peptides_mhcnuggets
 
     when:
      params.run_prediction
 
     script:
     """
-    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output preprocessed_mhcnuggets_peptides
+    postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_IDs ${protein_to_geneIDs}
     """
  }
- */
+ 
 
 /*
  * STEP 22 - Predict all possible neoepitopes from vcf

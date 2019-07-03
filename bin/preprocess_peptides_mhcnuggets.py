@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
+import logging
+import sys
+from collections import defaultdict
 
 #logging setup
 console = logging.StreamHandler(sys.stdout)
@@ -52,8 +55,14 @@ def main():
     seq_to_geneIDs = parse_mztab(args.mztab)
 
     # write just peptides new line formatted
-
+    with open(args.output, 'w') as f:
+        for protein in seq_to_geneIDs.keys():
+            f.write(protein + '\n')
+    
     # write seq to geneID in a suitable format (csv?)
+    with open('seq_to_geneIDs', 'w') as f:
+        for protein, geneID in seq_to_geneIDs.items():
+            f.write(protein + ',' + geneID + '\n')
 
 if __name__ == '__main__':
     main()
