@@ -1014,7 +1014,7 @@ process export_mztab {
 /*
  * STEP 18 - If specified predict peptides using MHCFlurry
  */
-process predict_peptides {
+process predict_peptides_mhcflurry_class_1 {
     publishDir "${params.outdir}/"
     echo true
 
@@ -1023,7 +1023,7 @@ process predict_peptides {
      file allotypes from input_alleles
 
     output:
-     file "*predicted_peptides.csv" into predicted_peptides
+     file "*predicted_peptides_class_1.csv" into predicted_peptides
 
     when:
      params.run_prediction
@@ -1031,22 +1031,21 @@ process predict_peptides {
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides.csv
+     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides_class_1.csv
      """
 }
 
 /*
- * STEP 19 - Preprocess found peptides for MHCNuggets prediction
+ * STEP 19 - Preprocess found peptides for MHCNuggets prediction class 2
  */ 
- process preprocess_peptides_mhcnuggets {
-    publishDir "${params.outdir}/"
-
+ process preprocess_peptides_mhcnuggets_class_2 {
+     
     input:
      file mztab_file from mhcnuggets_mztab
 
     output:
      file 'preprocessed_mhcnuggets_peptides' into preprocessed_mhcnuggets_peptides
-     file 'seq_to_geneIDs' into seq_to_geneIDs
+     file 'peptide_to_geneID' into peptide_to_geneID
 
     when:
      params.run_prediction
@@ -1058,46 +1057,46 @@ process predict_peptides {
  }
 
  /*
- * STEP 20 - Predict found peptides using MHCNuggets
+ * STEP 20 - Predict found peptides using MHCNuggets class 2
 */  
- process predict_peptides_mhcnuggets {
+ process predict_peptides_mhcnuggets_class_2 {
 
     input:
      file preprocessed_peptides from preprocessed_mhcnuggets_peptides
      file class_2_alleles from peptides_class_2_alleles
 
     output:
-     file '*predicted_class_2_peptides' into predicted_mhcnuggets_peptides
+     file '*predicted_peptides_class_2' into predicted_mhcnuggets_peptides
 
     when:
      params.run_prediction
 
     script:
     """
-    mhcnuggets_predict_peptides.py --input ${preprocessed_peptides} --alleles ${class_2_alleles} --output predicted_class_2_peptides
+    mhcnuggets_predict_peptides.py --input ${preprocessed_peptides} --alleles ${class_2_alleles} --output predicted_peptides_class_2
     """
  }
 
 
  /*
- * STEP 21 - Postprocess predicted MHCNuggets peptides
+ * STEP 21 - Postprocess predicted MHCNuggets peptides class 2
  */ 
- process postprocess_peptides_mhcnuggets {
+ process postprocess_peptides_mhcnuggets_class_2 {
     publishDir "${params.outdir}/"
 
     input:
      file predicted_peptides from predicted_mhcnuggets_peptides.collect{it}
-     file protein_to_geneIDs from seq_to_geneIDs
+     file peptide_to_geneID from peptide_to_geneID
 
     output:
-     file '*annotated' into postprocessed_peptides_mhcnuggets
+     file '*.csv' into postprocessed_peptides_mhcnuggets
 
     when:
      params.run_prediction
 
     script:
     """
-    postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_IDs ${protein_to_geneIDs}
+    postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID}
     """
  }
  
@@ -1151,7 +1150,7 @@ process Resolve_found_neoepitopes {
 /*
  * STEP 24 - Predict binding affinites of neoepitopes
  */
-process Predict_binding_neoepitopes {
+process Predict_neoepitopes_mhcflurry_class_1 {
     publishDir "${params.outdir}/"
     echo true
 
@@ -1160,7 +1159,7 @@ process Predict_binding_neoepitopes {
      file neoepitopes from found_neoepitopes
 
     output:
-     file "*predicted_neoepitopes.csv" into predicted_neoepitopes
+     file "*predicted_neoepitopes_class_1.csv" into predicted_neoepitopes
     
     when:
      params.include_proteins_from_vcf
@@ -1169,14 +1168,14 @@ process Predict_binding_neoepitopes {
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes.csv
+     mhcflurry_neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes_class_1.csv
      """
 }
 
 /*
  * STEP 25 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
  */
-process preprocess_neoepitopes_mhcnuggets {
+process preprocess_neoepitopes_mhcnuggets_class_2 {
 
     input:
     file neoepitopes from mhcnuggets_neo_preprocessing
@@ -1204,7 +1203,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
     file cl_2_alleles from class_2_alleles
 
     output:
-    file '*predicted_class_2_neoepitopes' into predicted_neoepitopes_class_2
+    file '*predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
 
     when:
      params.include_proteins_from_vcf
@@ -1212,7 +1211,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
 
     script:
     """
-    mhcnuggets_binding_prediction.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_class_2_neoepitopes
+    mhcnuggets_predict_peptides.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output predicted_neoepitopes_class_2
     """
 }
 
@@ -1220,7 +1219,6 @@ process predict_neoepitopes_mhcnuggets_class_2 {
  * STEP 27 - Class 2 MHCNuggets Postprocessing
 */ 
 process postprocess_neoepitopes_mhcnuggets_class_2 {
-
     publishDir "${params.outdir}/"
 
     input:
@@ -1228,7 +1226,7 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
     file predicted_cl_2 from predicted_neoepitopes_class_2.collect{it}
 
     output:
-    file '*annotated' into postprocessed_predicted_neoepitopes_class_2
+    file '*.csv' into postprocessed_predicted_neoepitopes_class_2
 
     when:
      params.include_proteins_from_vcf

@@ -48,7 +48,7 @@ def main():
                 ic50 = split[1].strip()
                 neoepitope_to_geneID_ic50[neoepitope] = (geneID, ic50)
 
-            with open(prediction + '_annotated', 'w') as f:
+            with open(prediction + '.csv', 'w') as f:
                 f.write('peptide,geneID,ic50\n')
                 for neoepitope, pair in neoepitope_to_geneID_ic50.items():
                     f.write(neoepitope + ',' + pair[0] + ',' + pair[1] + '\n')

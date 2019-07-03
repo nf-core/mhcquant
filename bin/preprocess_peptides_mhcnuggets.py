@@ -60,7 +60,7 @@ def main():
             f.write(protein + '\n')
     
     # write seq to geneID in a suitable format (csv?)
-    with open('seq_to_geneIDs', 'w') as f:
+    with open('peptide_to_geneID', 'w') as f:
         for protein, geneID in seq_to_geneIDs.items():
             f.write(protein + ',' + geneID + '\n')
 
