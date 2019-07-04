@@ -253,10 +253,10 @@ if( params.run_prediction){
     Channel
         .fromPath( params.class_2_alleles )
         .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
-        .into { class_2_alleles; peptides_class_2_alleles }
+        .into { nepepitopes_class_2_alleles; peptides_class_2_alleles }
 } else {
 
-    class_2_alleles = Channel.empty()
+    nepepitopes_class_2_alleles = Channel.empty()
     peptides_class_2_alleles = Channel.empty()
 }
 
@@ -293,6 +293,7 @@ summary['Fasta Ref']    = params.fasta
 summary['Predictions']  = params.run_prediction
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
 summary['Alleles']      = params.alleles
+summary['Class 2 Alelles'] = params.class_2_alleles
 summary['Variants']     = params.vcf
 summary['Centroidisation'] = params.run_centroidisation
 summary['Max Memory']   = params.max_memory
@@ -1148,7 +1149,7 @@ process Resolve_found_neoepitopes {
 }
 
 /*
- * STEP 24 - Predict binding affinites of neoepitopes
+ * STEP 24 - Predict class 1 neoepitopes MHCFlurry
  */
 process Predict_neoepitopes_mhcflurry_class_1 {
     publishDir "${params.outdir}/"
@@ -1200,7 +1201,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
 
     input:
     file preprocessed_neoepitopes from preprocessed_mhcnuggets_neoepitopes
-    file cl_2_alleles from class_2_alleles
+    file cl_2_alleles from nepepitopes_class_2_alleles
 
     output:
     file '*_predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
