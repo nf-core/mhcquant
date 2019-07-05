@@ -1016,7 +1016,7 @@ process export_mztab {
  * STEP 18 - If specified predict peptides using MHCFlurry
  */
 process predict_peptides_mhcflurry_class_1 {
-    publishDir "${params.outdir}/"
+    publishDir "${params.outdir}/class_1_bindings"
     echo true
 
     input:
@@ -1083,7 +1083,7 @@ process predict_peptides_mhcflurry_class_1 {
  * STEP 21 - Postprocess predicted MHCNuggets peptides class 2
  */ 
  process postprocess_peptides_mhcnuggets_class_2 {
-    publishDir "${params.outdir}/"
+    publishDir "${params.outdir}/class_2_bindings"
 
     input:
      file predicted_peptides from predicted_mhcnuggets_peptides.collect{it}
@@ -1152,7 +1152,7 @@ process Resolve_found_neoepitopes {
  * STEP 24 - Predict class 1 neoepitopes MHCFlurry
  */
 process Predict_neoepitopes_mhcflurry_class_1 {
-    publishDir "${params.outdir}/"
+    publishDir "${params.outdir}/class_1_bindings"
     echo true
 
     input:
@@ -1220,7 +1220,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
  * STEP 27 - Class 2 MHCNuggets Postprocessing
 */ 
 process postprocess_neoepitopes_mhcnuggets_class_2 {
-    publishDir "${params.outdir}/"
+    publishDir "${params.outdir}/class_2_bindings"
 
     input:
     file neoepitopes from mhcnuggets_neo_postprocessing
