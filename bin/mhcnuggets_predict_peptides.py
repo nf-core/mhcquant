@@ -67,7 +67,7 @@ def main():
     model = argparse.ArgumentParser(description='MHCNuggets binding prediction')
 
     model.add_argument(
-        '-i', '--input',
+        '-p', '--peptides',
         type=str,
         help='mhcnuggets input'
     )
@@ -90,7 +90,7 @@ def main():
 
     for allele in supp_alleles:
         predict(class_='II',
-                peptides_path=args.input,
+                peptides_path=args.peptides,
                 mhc=allele,
                 output=allele + args.output)
 

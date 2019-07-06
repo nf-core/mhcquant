@@ -58,7 +58,7 @@ def helpMessage() {
       --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
       --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
       --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
-      --alleles                         Path to file including allele information
+      --class_1_alleles                 Path to file including class 1 allele information
       --class_2_alleles                 Path to file including class 2 allele information
 
     Variants:
@@ -231,19 +231,19 @@ if( params.include_proteins_from_vcf) {
 
 
 /*
- * Create a channel for input alleles file
+ * Create a channel for class 1 alleles file
  */
 if( params.run_prediction){
     Channel
-        .fromPath( params.alleles )
+        .fromPath( params.class_1_alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
-        .into { input_alleles; input_alleles_refine; input_alleles_neoepitope; input_alleles_neoepitope_binding}
+        .into { peptides_class_1_alleles; peptides_class_1_alleles_refine; neoepitopes_class_1_alleles; neoepitopes_class_1_alleles_prediction}
 } else {
 
-    input_alleles = Channel.empty()
-    input_alleles_refine = Channel.empty()
-    input_alleles_neoepitope = Channel.empty()
-    input_alleles_neoepitope_binding = Channel.empty()
+    peptides_class_1_alleles = Channel.empty()
+    peptides_class_1_alleles_refine = Channel.empty()
+    neoepitopes_class_1_alleles = Channel.empty()
+    neoepitopes_class_1_alleles_prediction = Channel.empty()
 }
 
 /*
@@ -292,7 +292,7 @@ summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
 summary['Predictions']  = params.run_prediction
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
-summary['Alleles']      = params.alleles
+summary['Class 1 Alleles'] = params.class_1_alleles
 summary['Class 2 Alelles'] = params.class_2_alleles
 summary['Variants']     = params.vcf
 summary['Centroidisation'] = params.run_centroidisation
@@ -798,7 +798,7 @@ process predict_psms {
     input:
      file perc_mztab_file from percolator_ids_mztab
      file psm_mztab_file from psm_ids_mztab
-     file allotypes_refine from input_alleles_refine
+     file allotypes_refine from peptides_class_1_alleles_refine
 
     output:
      file "peptide_filter.idXML" into peptide_filter
@@ -1021,7 +1021,7 @@ process predict_peptides_mhcflurry_class_1 {
 
     input:
      file mztab_file from features_mztab
-     file allotypes from input_alleles
+     file class_1_alleles from peptides_class_1_alleles
 
     output:
      file "*predicted_peptides_class_1.csv" into predicted_peptides
@@ -1032,7 +1032,7 @@ process predict_peptides_mhcflurry_class_1 {
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides_class_1.csv
+     mhcflurry_predict_mztab.py ${class_1_alleles} ${mztab_file} predicted_peptides_class_1.csv
      """
 }
 
@@ -1074,7 +1074,7 @@ process predict_peptides_mhcflurry_class_1 {
 
     script:
     """
-    mhcnuggets_predict_peptides.py --input ${preprocessed_peptides} --alleles ${class_2_alleles} --output _predicted_peptides_class_2
+    mhcnuggets_predict_peptides.py --peptides ${preprocessed_peptides} --alleles ${class_2_alleles} --output _predicted_peptides_class_2
     """
  }
 
@@ -1110,7 +1110,7 @@ process predict_possible_neoepitopes {
     echo true
 
     input:
-     file alleles_file from input_alleles_neoepitope
+     file alleles_file from neoepitopes_class_1_alleles
      file vcf_file from input_vcf_neoepitope
 
     output:
@@ -1156,7 +1156,7 @@ process Predict_neoepitopes_mhcflurry_class_1 {
     echo true
 
     input:
-     file allotypes from input_alleles_neoepitope_binding
+     file allotypes from neoepitopes_class_1_alleles_prediction
      file neoepitopes from found_neoepitopes
 
     output:
@@ -1212,7 +1212,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
 
     script:
     """
-    mhcnuggets_predict_peptides.py --input ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output _predicted_neoepitopes_class_2
+    mhcnuggets_predict_peptides.py --peptides ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output _predicted_neoepitopes_class_2
     """
 }
 

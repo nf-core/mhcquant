@@ -221,13 +221,16 @@ Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memo
 Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are [supported by mhcflurry](supported_alleles.md))
 
 ### `--refine_fdr_on_predicted_subset`
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Check whether your alleles are [supported by mhcflurry](supported_alleles.md))
+Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Check whether your alleles are [supported by mhcflurry](supported_class_1_alleles.md))
 
 ### `--affinity_threshold_subset`
 Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)
 
-### `--alleles`
-Specify a .tsv file containing the alleles of your probes. (line separated)
+### `--class_1_alleles`
+Specify a new line seperated tsv file containing the class 1 alleles of your probes. Verify that your alleles are [supported by MHCFlurry](supported_class_1_alleles.md).
+
+### '--class_2_alleles'
+Specify a new line seperated tsv file containing the class 2 alleles of your probes. Verify that your alleles are [supported by MHCNuggets](supported_class_2_alleles.md)
 
 ## Optional variant translation
 ### `--include_proteins_from_vcf`
