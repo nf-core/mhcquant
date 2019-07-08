@@ -53,6 +53,8 @@ def helpMessage() {
       --prec_charge                     Precursor charge (eg. "2:3")
       --max_rt_alignment_shift          Maximal retention time shift (sec) resulting from linear alignment      
       --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+      --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
+      --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
 
     Binding Predictions:
       --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
@@ -111,6 +113,8 @@ params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
 fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
+params.description_correct_features = 0
+params.klammer = false
 params.number_mods = 3
 
 params.num_hits = 1
@@ -668,16 +672,37 @@ process run_percolator {
     output:
      file "${id_file_psm.baseName}_perc.idXML" into id_files_merged_psm_perc
 
+    if (params.klammer && params.description_correct_features == 0) {
+        log.warn('Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.')
+        log.warn('Klammer has been turned off!')
+    }
+
     script:
-     """
-     PercolatorAdapter -in ${id_file_psm} \\
+    if (params.description_correct_features > 0 && params.klammer){
+    """
+    PercolatorAdapter -in ${id_file_psm} \\
                        -out ${id_file_psm.baseName}_perc.idXML \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -threads ${task.cpus} \\
                        -enzyme no_enzyme \\
-                       $fdr_level 
-     """
+                       $fdr_level \\
+                       -doc ${params.description_correct_features} \\
+                       -klammer
+    """
+    } else {
+    """
+    PercolatorAdapter -in ${id_file_psm} \\
+                       -out ${id_file_psm.baseName}_perc.idXML \\
+                       -trainFDR 0.05 \\
+                       -testFDR 0.05 \\
+                       -threads ${task.cpus} \\
+                       -enzyme no_enzyme \\
+                       $fdr_level \\
+                       -doc ${params.description_correct_features} \\
+    """
+    }
+     
 
 }
 

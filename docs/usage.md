@@ -216,6 +216,12 @@ Set a maximum retention time shift for the linear rt alignment
 ### `--spectrum_batch_size`
 Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
+### '--description_correct_features'
+Include description of correct features, i.e. features describing the difference between the observed and predicted isoelectric point, retention time and precursor mass. See [here](https://github.com/percolator/percolator/wiki/Retention-time-and-calibration) for more details.
+
+### '--klammer'
+Only available if description_correct_features is greater than 0. Retention time features are calculated as in Klammer et al. instead of with Elude.
+
 ## Optional binding prediction
 ### `--run_prediction`
 Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are [supported by mhcflurry](supported_alleles.md))
