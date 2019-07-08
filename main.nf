@@ -57,7 +57,8 @@ def helpMessage() {
       --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
 
     Binding Predictions:
-      --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
+      --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
+      --predict_class_2                 Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 
       --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
       --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
       --class_1_alleles                 Path to file including class 1 allele information
@@ -131,7 +132,8 @@ params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
 //prediction params
-params.run_prediction = false
+params.predict_class_1 = false
+params.predict_class_2 = false
 params.refine_fdr_on_predicted_subset = false
 params.subset_affinity_threshold = 500
 
@@ -237,7 +239,7 @@ if( params.include_proteins_from_vcf) {
 /*
  * Create a channel for class 1 alleles file
  */
-if( params.run_prediction){
+if( params.predict_class_1){
     Channel
         .fromPath( params.class_1_alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
@@ -253,7 +255,7 @@ if( params.run_prediction){
 /*
  * Create a channel for class 2 alleles file
  */
-if( params.run_prediction){
+if( params.predict_class_2){
     Channel
         .fromPath( params.class_2_alleles )
         .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
@@ -294,10 +296,11 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
-summary['Predictions']  = params.run_prediction
+summary['Class 1 Prediction'] = params.class_1_prediction
+summary['Class 2 Prediction'] = params.class_2_prediction
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
-summary['Class 1 Alleles'] = params.class_1_alleles
-summary['Class 2 Alelles'] = params.class_2_alleles
+summary['Class 1 Alleles'] = params.predict_class_1
+summary['Class 2 Alelles'] = params.predict_class_2
 summary['Variants']     = params.vcf
 summary['Centroidisation'] = params.run_centroidisation
 summary['Max Memory']   = params.max_memory
@@ -1052,7 +1055,7 @@ process predict_peptides_mhcflurry_class_1 {
      file "*predicted_peptides_class_1.csv" into predicted_peptides
 
     when:
-     params.run_prediction
+     params.predict_class_1
 
     script:
      """
@@ -1074,7 +1077,7 @@ process predict_peptides_mhcflurry_class_1 {
      file 'peptide_to_geneID' into peptide_to_geneID
 
     when:
-     params.run_prediction
+     params.predict_class_2
 
     script:
     """
@@ -1095,7 +1098,7 @@ process predict_peptides_mhcflurry_class_1 {
      file '*_predicted_peptides_class_2' into predicted_mhcnuggets_peptides
 
     when:
-     params.run_prediction
+     params.predict_class_2
 
     script:
     """
@@ -1118,7 +1121,7 @@ process predict_peptides_mhcflurry_class_1 {
      file '*.csv' into postprocessed_peptides_mhcnuggets
 
     when:
-     params.run_prediction
+     params.predict_class_2
 
     script:
     """
@@ -1189,7 +1192,7 @@ process Predict_neoepitopes_mhcflurry_class_1 {
     
     when:
      params.include_proteins_from_vcf
-     params.run_prediction
+     params.predict_class_1
 
     script:
      """
@@ -1211,7 +1214,7 @@ process preprocess_neoepitopes_mhcnuggets_class_2 {
 
     when:
      params.include_proteins_from_vcf
-     params.run_prediction
+     params.predict_class_2
 
     script:
     """
@@ -1233,7 +1236,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
 
     when:
      params.include_proteins_from_vcf
-     params.run_prediction
+     params.predict_class_2
 
     script:
     """
@@ -1256,7 +1259,7 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
 
     when:
      params.include_proteins_from_vcf
-     params.run_prediction
+     params.predict_class_2
 
     script:
     """
