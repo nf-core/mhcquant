@@ -55,6 +55,7 @@ def helpMessage() {
       --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
       --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
       --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
 
     Binding Predictions:
       --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
@@ -130,6 +131,8 @@ params.enzyme = 'unspecific cleavage'
 params.fixed_mods = ''
 params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
+
+params.skip_decoy_generation = false
 
 //prediction params
 params.predict_class_1 = false
@@ -225,6 +228,16 @@ if( params.include_proteins_from_vcf) {
         .set { input_fasta_vcf }
 
     input_fasta = Channel.empty()
+    input_fasta_1 = Channel.empty()
+    input_fasta_2 = Channel.empty()
+
+} elif( params.skip_decoy_generation) {
+    Channel
+        .fromPath( params.fasta )
+        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+        .into { input_fasta; input_fasta_1; input_fasta_2 }
+
+    input_fasta_vcf = Channel.empty()
 
 } else {
     Channel
@@ -233,6 +246,9 @@ if( params.include_proteins_from_vcf) {
         .set { input_fasta }
 
     input_fasta_vcf = Channel.empty()
+    input_fasta_1 = Channel.empty()
+    input_fasta_2 = Channel.empty()
+
 }
 
 
@@ -397,7 +413,10 @@ process generate_decoy_database {
 
     output:
      file "${fastafile.baseName}_decoy.fasta" into (fastafile_decoy_1, fastafile_decoy_2)
-     
+    
+    when:
+     !params.skip_decoy_generation
+ 
     script:
      """
      DecoyDatabase  -in ${fastafile} \\
@@ -438,7 +457,7 @@ process db_search_comet {
  
     input:
      file mzml_file from input_mzmls.mix(input_mzmls_picked)
-     file fasta_decoy from fastafile_decoy_1.first()
+     file fasta_decoy from fastafile_decoy_1.mix(input_fasta_1).first()
 
     output:
      file "${mzml_file.baseName}.idXML" into id_files
@@ -475,7 +494,7 @@ process index_peptides {
  
     input:
      file id_file from id_files
-     file fasta_decoy from fastafile_decoy_2.first()
+     file fasta_decoy from fastafile_decoy_2.mix(input_fasta_2).first()
 
     output:
      file "${id_file.baseName}_idx.idXML" into (id_files_idx, id_files_idx_original)
