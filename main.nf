@@ -53,12 +53,16 @@ def helpMessage() {
       --prec_charge                     Precursor charge (eg. "2:3")
       --max_rt_alignment_shift          Maximal retention time shift (sec) resulting from linear alignment      
       --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+      --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
+      --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
 
     Binding Predictions:
-      --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
+      --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
+      --predict_class_2                 Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 
       --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
       --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
-      --alleles                         Path to file including allele information
+      --class_1_alleles                 Path to file including class 1 allele information
+      --class_2_alleles                 Path to file including class 2 allele information
 
     Variants:
       --include_proteins_from_vcf       Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)
@@ -97,7 +101,6 @@ params.fasta = params.fasta ?: { log.error "No read data privided. Make sure you
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
 
-
 /*
  * Define the default parameters
  */
@@ -111,6 +114,8 @@ params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
 fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
+params.description_correct_features = 0
+params.klammer = false
 params.number_mods = 3
 
 params.num_hits = 1
@@ -127,7 +132,8 @@ params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
 //prediction params
-params.run_prediction = false
+params.predict_class_1 = false
+params.predict_class_2 = false
 params.refine_fdr_on_predicted_subset = false
 params.subset_affinity_threshold = 500
 
@@ -216,7 +222,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta_vcf}
+        .set { input_fasta_vcf }
 
     input_fasta = Channel.empty()
 
@@ -224,29 +230,41 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta}
+        .set { input_fasta }
 
     input_fasta_vcf = Channel.empty()
 }
 
 
 /*
- * Create a channel for input alleles file
+ * Create a channel for class 1 alleles file
  */
-if( params.run_prediction){
+if( params.predict_class_1){
     Channel
-        .fromPath( params.alleles )
+        .fromPath( params.class_1_alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
-        .into { input_alleles; input_alleles_refine; input_alleles_neoepitope; input_alleles_neoepitope_binding}
+        .into { peptides_class_1_alleles; peptides_class_1_alleles_refine; neoepitopes_class_1_alleles; neoepitopes_class_1_alleles_prediction}
 } else {
 
-    input_alleles = Channel.empty()
-    input_alleles_refine = Channel.empty()
-    input_alleles_neoepitope = Channel.empty()
-    input_alleles_neoepitope_binding = Channel.empty()
+    peptides_class_1_alleles = Channel.empty()
+    peptides_class_1_alleles_refine = Channel.empty()
+    neoepitopes_class_1_alleles = Channel.empty()
+    neoepitopes_class_1_alleles_prediction = Channel.empty()
 }
 
+/*
+ * Create a channel for class 2 alleles file
+ */
+if( params.predict_class_2){
+    Channel
+        .fromPath( params.class_2_alleles )
+        .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
+        .into { nepepitopes_class_2_alleles; peptides_class_2_alleles }
+} else {
 
+    nepepitopes_class_2_alleles = Channel.empty()
+    peptides_class_2_alleles = Channel.empty()
+}
 
 /*
  * Create a channel for input vcf file
@@ -261,7 +279,6 @@ if( params.include_proteins_from_vcf){
     input_vcf = Channel.empty()
     input_vcf_neoepitope = Channel.empty()
 }
-
 
 // Header log info
 log.info """=======================================================
@@ -279,9 +296,11 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
-summary['Predictions']  = params.run_prediction
+summary['Class 1 Prediction'] = params.class_1_prediction
+summary['Class 2 Prediction'] = params.class_2_prediction
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
-summary['Alleles']      = params.alleles
+summary['Class 1 Alleles'] = params.predict_class_1
+summary['Class 2 Alelles'] = params.predict_class_2
 summary['Variants']     = params.vcf
 summary['Centroidisation'] = params.run_centroidisation
 summary['Max Memory']   = params.max_memory
@@ -324,6 +343,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 
    return yaml_file
 }
+
 
 /*
  * STEP 0 - Output Description HTML
@@ -573,7 +593,6 @@ process align_mzml_files {
                       -out ${mzml_file_align.baseName}_aligned.mzML \\
                       -threads ${task.cpus}
      """
-
 }
 
 
@@ -610,7 +629,7 @@ process merge_aligned_idxml_files {
 
     output:
      file "all_ids_merged.idXML" into id_merged
-    
+
     script:
      """
      IDMerger -in $ids_aligned \\
@@ -656,16 +675,37 @@ process run_percolator {
     output:
      file "${id_file_psm.baseName}_perc.idXML" into id_files_merged_psm_perc
 
+    if (params.klammer && params.description_correct_features == 0) {
+        log.warn('Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.')
+        log.warn('Klammer has been turned off!')
+    }
+
     script:
-     """
-     PercolatorAdapter -in ${id_file_psm} \\
+    if (params.description_correct_features > 0 && params.klammer){
+    """
+    PercolatorAdapter -in ${id_file_psm} \\
                        -out ${id_file_psm.baseName}_perc.idXML \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -threads ${task.cpus} \\
                        -enzyme no_enzyme \\
-                       $fdr_level 
-     """
+                       $fdr_level \\
+                       -doc ${params.description_correct_features} \\
+                       -klammer
+    """
+    } else {
+    """
+    PercolatorAdapter -in ${id_file_psm} \\
+                       -out ${id_file_psm.baseName}_perc.idXML \\
+                       -trainFDR 0.05 \\
+                       -testFDR 0.05 \\
+                       -threads ${task.cpus} \\
+                       -enzyme no_enzyme \\
+                       $fdr_level \\
+                       -doc ${params.description_correct_features} \\
+    """
+    }
+     
 
 }
 
@@ -786,7 +826,7 @@ process predict_psms {
     input:
      file perc_mztab_file from percolator_ids_mztab
      file psm_mztab_file from psm_ids_mztab
-     file allotypes_refine from input_alleles_refine
+     file allotypes_refine from peptides_class_1_alleles_refine
 
     output:
      file "peptide_filter.idXML" into peptide_filter
@@ -917,14 +957,14 @@ process quantify_identifications_targeted {
 process link_extracted_features {
 
     input:
-     file feautres from feature_files.collect{it}
+     file features from feature_files.collect{it}
 
     output:
      file "all_features_merged.consensusXML" into consensus_file
     
     script:
      """
-     FeatureLinkerUnlabeledKD -in $feautres \\
+     FeatureLinkerUnlabeledKD -in $features \\
                               -out 'all_features_merged.consensusXML' \\
                               -threads ${task.cpus}
      """
@@ -988,7 +1028,7 @@ process export_mztab {
      file feature_file_2 from consensus_file_resolved_2
 
     output:
-     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes
+     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes, mhcnuggets_mztab
 
     script:
      """
@@ -1003,36 +1043,102 @@ process export_mztab {
 /*
  * STEP 18 - If specified predict peptides using MHCFlurry
  */
-process predict_peptides {
-    publishDir "${params.outdir}/"
+process predict_peptides_mhcflurry_class_1 {
+    publishDir "${params.outdir}/class_1_bindings"
     echo true
 
     input:
      file mztab_file from features_mztab
-     file allotypes from input_alleles
+     file class_1_alleles from peptides_class_1_alleles
 
     output:
-     file "*predicted_peptides.csv" into predicted_peptides
+     file "*predicted_peptides_class_1.csv" into predicted_peptides
 
     when:
-     params.run_prediction
+     params.predict_class_1
 
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides.csv
+     mhcflurry_predict_mztab.py ${class_1_alleles} ${mztab_file} predicted_peptides_class_1.csv
      """
 }
 
 /*
- * STEP 19 - Predict all possible neoepitopes from vcf
+ * STEP 19 - Preprocess found peptides for MHCNuggets prediction class 2
+ */ 
+ process preprocess_peptides_mhcnuggets_class_2 {
+     
+    input:
+     file mztab_file from mhcnuggets_mztab
+
+    output:
+     file 'preprocessed_mhcnuggets_peptides' into preprocessed_mhcnuggets_peptides
+     file 'peptide_to_geneID' into peptide_to_geneID
+
+    when:
+     params.predict_class_2
+
+    script:
+    """
+    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output preprocessed_mhcnuggets_peptides
+    """
+ }
+
+ /*
+ * STEP 20 - Predict found peptides using MHCNuggets class 2
+*/  
+ process predict_peptides_mhcnuggets_class_2 {
+
+    input:
+     file preprocessed_peptides from preprocessed_mhcnuggets_peptides
+     file class_2_alleles from peptides_class_2_alleles
+
+    output:
+     file '*_predicted_peptides_class_2' into predicted_mhcnuggets_peptides
+
+    when:
+     params.predict_class_2
+
+    script:
+    """
+    mhcnuggets_predict_peptides.py --peptides ${preprocessed_peptides} --alleles ${class_2_alleles} --output _predicted_peptides_class_2
+    """
+ }
+
+
+ /*
+ * STEP 21 - Postprocess predicted MHCNuggets peptides class 2
+ */ 
+ process postprocess_peptides_mhcnuggets_class_2 {
+    publishDir "${params.outdir}/class_2_bindings"
+
+    input:
+     file predicted_peptides from predicted_mhcnuggets_peptides.collect{it}
+     file peptide_to_geneID from peptide_to_geneID
+
+    output:
+     file '*.csv' into postprocessed_peptides_mhcnuggets
+
+    when:
+     params.predict_class_2
+
+    script:
+    """
+    postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID}
+    """
+ }
+ 
+
+/*
+ * STEP 22 - Predict all possible neoepitopes from vcf
  */
 process predict_possible_neoepitopes {
     publishDir "${params.outdir}/"
     echo true
 
     input:
-     file alleles_file from input_alleles_neoepitope
+     file alleles_file from neoepitopes_class_1_alleles
      file vcf_file from input_vcf_neoepitope
 
     output:
@@ -1048,7 +1154,7 @@ process predict_possible_neoepitopes {
 }
 
 /*
- * STEP 20 - Resolve found neoepitopes
+ * STEP 23 - Resolve found neoepitopes
  */
 process Resolve_found_neoepitopes {
     publishDir "${params.outdir}/"
@@ -1059,7 +1165,7 @@ process Resolve_found_neoepitopes {
      file neoepitopes from possible_neoepitopes
 
     output:
-     file "found_neoepitopes.csv" into found_neoepitopes
+     file "found_neoepitopes.csv" into found_neoepitopes, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
     
     when:
      params.include_proteins_from_vcf
@@ -1071,29 +1177,96 @@ process Resolve_found_neoepitopes {
 }
 
 /*
- * STEP 21 - Predict binding affinites of neoepitopes
+ * STEP 24 - Predict class 1 neoepitopes MHCFlurry
  */
-process Predict_binding_neoepitopes {
-    publishDir "${params.outdir}/"
+process Predict_neoepitopes_mhcflurry_class_1 {
+    publishDir "${params.outdir}/class_1_bindings"
     echo true
 
     input:
-     file allotypes from input_alleles_neoepitope_binding
+     file allotypes from neoepitopes_class_1_alleles_prediction
      file neoepitopes from found_neoepitopes
 
     output:
-     file "*predicted_neoepitopes.csv" into predicted_neoepitopes
+     file "*predicted_neoepitopes_class_1.csv" into predicted_neoepitopes
     
     when:
      params.include_proteins_from_vcf
-     params.run_prediction
+     params.predict_class_1
 
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes.csv
+     mhcflurry_neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes_class_1.csv
      """
 }
+
+/*
+ * STEP 25 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
+ */
+process preprocess_neoepitopes_mhcnuggets_class_2 {
+
+    input:
+    file neoepitopes from mhcnuggets_neo_preprocessing
+
+    output:
+    file 'mhcnuggets_preprocessed' into preprocessed_mhcnuggets_neoepitopes
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
+
+    script:
+    """
+    preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output mhcnuggets_preprocessed
+    """
+}
+
+/*
+ * STEP 26 - Predict class 2 MHCNuggets
+ */
+process predict_neoepitopes_mhcnuggets_class_2 {
+
+    input:
+    file preprocessed_neoepitopes from preprocessed_mhcnuggets_neoepitopes
+    file cl_2_alleles from nepepitopes_class_2_alleles
+
+    output:
+    file '*_predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
+
+    script:
+    """
+    mhcnuggets_predict_peptides.py --peptides ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output _predicted_neoepitopes_class_2
+    """
+}
+
+/*
+ * STEP 27 - Class 2 MHCNuggets Postprocessing
+*/ 
+process postprocess_neoepitopes_mhcnuggets_class_2 {
+    publishDir "${params.outdir}/class_2_bindings"
+
+    input:
+    file neoepitopes from mhcnuggets_neo_postprocessing
+    file predicted_cl_2 from predicted_neoepitopes_class_2.collect{it}
+
+    output:
+    file '*.csv' into postprocessed_predicted_neoepitopes_class_2
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
+
+    script:
+    """
+    postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
+    """
+}
+
 
 /*
  * Completion e-mail notification

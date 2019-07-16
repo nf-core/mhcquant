@@ -10,3 +10,4 @@ dependencies:
   - python=2.7.15
   - mhcflurry=1.2.2
   - fred2=2.0.3
+  - mhcnuggets=2.3.1
