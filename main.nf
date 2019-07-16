@@ -25,7 +25,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' --include_proteins_from_vcf --run_prediction --refine_fdr_on_predicted_subset -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --class_1_alleles 'alleles.tsv' --include_proteins_from_vcf --predict_class_1 --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
       --mzmls                           Path to input data (must be surrounded with quotes)
