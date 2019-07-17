@@ -216,34 +216,25 @@ Set a maximum retention time shift for the linear rt alignment
 ### `--spectrum_batch_size`
 Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
-### '--description_correct_features'
-Include description of correct features, i.e. features describing the difference between the observed and predicted isoelectric point, retention time and precursor mass. See [here](https://github.com/percolator/percolator/wiki/Retention-time-and-calibration) for more details.
-
-### '--klammer'
-Only available if description_correct_features is greater than 0. Retention time features are calculated as in Klammer et al. instead of with Elude.
-
 ## Optional binding prediction
 ### `--run_prediction`
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are [supported by mhcflurry](supported_alleles.md))
+Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
 
 ### `--refine_fdr_on_predicted_subset`
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Check whether your alleles are [supported by mhcflurry](supported_class_1_alleles.md))
+Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Check whether your alleles are supported by mhcflurry)
 
 ### `--affinity_threshold_subset`
 Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)
 
-### `--class_1_alleles`
-Specify a new line seperated tsv file containing the class 1 alleles of your probes. Verify that your alleles are [supported by MHCFlurry](supported_class_1_alleles.md).
-
-### '--class_2_alleles'
-Specify a new line seperated tsv file containing the class 2 alleles of your probes. Verify that your alleles are [supported by MHCNuggets](supported_class_2_alleles.md)
+### `--alleles`
+Specify a .tsv file containing the alleles of your probes. (line separated)
 
 ## Optional variant translation
 ### `--include_proteins_from_vcf`
 Set to 'True' or 'False' depending on whether variants should be translated to proteins and included into your fasta for database search.
 
 ### `--vcf`
-Specify a .vcf file containing the information about genomic variants (vcf < v.4.2). If a vcf file is specified, neoepitopes will also automatically be resolved.
+Specify a .vcf file containing the information about genomic variants (vcf < v.4.2).
 
 ### `--variant_annotation_style`
 Specify style of tool used for variant annotation - currently supported: "SNPEFF", "VEP", "ANNOVAR"
@@ -319,4 +310,3 @@ Should be a string in the format integer-unit. eg. `--max_cpus 1`
 
 ### `--plaintext_email`
 Set to receive plain-text e-mails instead of HTML formatted.
-

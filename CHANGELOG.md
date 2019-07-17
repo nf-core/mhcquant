@@ -1,5 +1,12 @@
 # nf-core/mhcquant: Changelog
 
+## v1.2.7 nf-core/mhcquant "Golden Eagle" -2019/05/05
+
+### `Added`
+MHCnugget predictor
+Few fixes
+RT features for percolator
+
 ## v1.2.6 nf-core/mhcquant "Golden Eagle" - 2019/03/05
 
 ### `Fixed`

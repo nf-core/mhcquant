@@ -1,7 +1,7 @@
 name: nf-core-mhcquant-1.2.7dev
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - conda-forge::r-rmarkdown=1.10
