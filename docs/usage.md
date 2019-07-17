@@ -41,7 +41,8 @@
     * [`--spectrum_batch_size`](#--spectrum_batch_size)
     * [`--skip_decoy_generation`](#--skip_decoy_generation)
 * [Optional binding predicion](#optional-binding-prediction)
-    * [`--run_prediction`](#--run_prediction)
+    * [`--predict_class_1`](#--predict_class_1)
+    * [`--predict_class_2`](#--predict_class_2)
     * [`--refine_fdr_on_predicted_subset`](#--refine_fdr_on_predicted_subset)
     * [`--affinity_threshold_subset`](#--affinity_threshold_subset)
     * [`--alleles`](#--alleles)
@@ -84,7 +85,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --run_prediction -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --predict_class_1 -profile standard,docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -238,8 +239,11 @@ If you want to use your own decoys, you can specify a databaset that includes de
 One should consider though that this option will then prevent to append variants to the database and if not using reversed decoys the subset refinement FDR option will not work. 
 
 ## Optional binding prediction
-### `--run_prediction`
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
+### `--predict_class_1`
+Set flag depending on whether MHC class 2 binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
+
+### `--predict_class_2`
+Set flag depending on whether MHC class 1 binding predictions using the tool mhcnugget should be run. (Check whether your alleles are supported by mhcnugget)
 
 ### `--refine_fdr_on_predicted_subset`
 Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Please be aware that this option is only available for MHC class I data of alleles that are supported by mhcflurry)
