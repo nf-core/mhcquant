@@ -16,9 +16,11 @@ Nextflow offers an option to limit the memory used for execution (--max_memory '
 As the Comet proteomic search engine is the most memory and computation intensive step, one can limit it by setting the --spectrum_batch_size option. Here you specify the number of spectra processed at the same time (default: 500). Setting this parameter lower will require less memory however slow down the overall execution time.
 
 # Issues with comet.exe on arch based systems
+
 We noticed that comet.exe sometimes crashes on arch based systems using the docker or singularity profiles. It is possible that this is due to the docker package being build with a different compiler than comet and therefore this could potentially lead to header conflicts. Since we are creating the singularity image from the docker image the error is propagated to the singularity profile as well. 
 
 ## Extra resources and getting help
+
 If you still have an issue with running the pipeline then feel free to contact us.
 Have a look at the [pipeline website](https://github.com/nf-core/mhcquant) to find out how.
 

@@ -20,6 +20,10 @@
     * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
     * [`--precursor_mass_tolerance`](#--precursor_mass_tolerance)
     * [`--fragment_bin_offset`](#--fragment_bin_offset)
+    * [`--use_a_ions`](#--use_a_ions)
+    * [`--use_c_ions`](#--use_c_ions)
+    * [`--use_x_ions`](#--use_x_ions)
+    * [`--use_z_ions`](#--use_z_ions)
     * [`--fdr_threshold`](#--fdr_threshold)
     * [`--fdr_level`](#--fdr_level)
     * [`--number_mods`](#--number_mods)
@@ -35,6 +39,7 @@
     * [`--variable_mods`](#--variable_mods)
     * [`--max_rt_alignment_shift`](#--max_rt_alignment_shift)
     * [`--spectrum_batch_size`](#--spectrum_batch_size)
+    * [`--skip_decoy_generation`](#--skip_decoy_generation)
 * [Optional binding predicion](#optional-binding-prediction)
     * [`--run_prediction`](#--run_prediction)
     * [`--refine_fdr_on_predicted_subset`](#--refine_fdr_on_predicted_subset)
@@ -174,6 +179,18 @@ Specify the precursor mass tolerance used for the comet database search. For Hig
 ### `--fragment_bin_offset`
 Specify the fragment bin offset used for the comet database search. For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)
 
+### `--use_a_ions`
+Include a ions into the peptide spectrum matching
+
+### `--use_c_ions`
+Include c ions into the peptide spectrum matching
+
+### `--use_x_ions`
+Include x ions into the peptide spectrum matching
+
+### `--use_z_ions`
+Include z ions into the peptide spectrum matching
+
 ### `--fdr_threshold`
 Specify the false discovery rate threshold at which peptide hits should be selected. (eg. 0.01)
 
@@ -215,6 +232,10 @@ Set a maximum retention time shift for the linear rt alignment
 
 ### `--spectrum_batch_size`
 Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+
+### `--skip_decoy_generation`
+If you want to use your own decoys, you can specify a databaset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.
+One should consider though that this option will then prevent to append variants to the database and if not using reversed decoys the subset refinement FDR option will not work. 
 
 ## Optional binding prediction
 ### `--run_prediction`
