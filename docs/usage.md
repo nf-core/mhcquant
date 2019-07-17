@@ -242,7 +242,7 @@ One should consider though that this option will then prevent to append variants
 Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
 
 ### `--refine_fdr_on_predicted_subset`
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Check whether your alleles are supported by mhcflurry)
+Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Please be aware that this option is only available for MHC class I data of alleles that are supported by mhcflurry)
 
 ### `--affinity_threshold_subset`
 Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)

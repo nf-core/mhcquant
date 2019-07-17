@@ -148,6 +148,9 @@ log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database"
 params.predict_class_1 = false
 params.predict_class_2 = false
 params.refine_fdr_on_predicted_subset = false
+if (params.skip_decoy_generation) {
+log.warn "Be aware: subset FDR refinement only considers MHC class I alleles supported by mhcflurry"
+}
 params.subset_affinity_threshold = 500
 
 //variant params
