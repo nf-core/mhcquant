@@ -39,6 +39,10 @@ def helpMessage() {
       --precursor_mass_tolerance        Mass tolerance of precursor mass (ppm)
       --fragment_mass_tolerance         Mass tolerance of fragment mass bin (ppm)
       --fragment_bin_offset             Offset of fragment mass bin (Comet specific parameter)
+      --use_x_ions                      Use x ions for spectral matching in addition
+      --use_z_ions                      Use z ions for spectral matching in addition
+      --use_a_ions                      Use a ions for spectral matching in addition
+      --use_c_ions                      Use c ions for spectral matching in addition
       --fdr_threshold                   Threshold for FDR filtering
       --fdr_level                       Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
       --digest_mass_range               Mass range of peptides considered for matching
@@ -111,6 +115,14 @@ params.peptide_min_length = 8
 params.peptide_max_length = 12
 params.fragment_mass_tolerance = 0.02
 params.precursor_mass_tolerance = 5
+params.use_x_ions = false
+x_ions = params.use_x_ions ? '-use_X_ions true' : ''
+params.use_z_ions = false
+z_ions = params.use_z_ions ? '-use_Z_ions true' : ''
+params.use_a_ions = false
+a_ions = params.use_a_ions ? '-use_A_ions true' : ''
+params.use_c_ions = false
+c_ions = params.use_c_ions ? '-use_C_ions true' : ''
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
@@ -133,6 +145,10 @@ params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
 params.skip_decoy_generation = false
+if (params.skip_decoy_generation) {
+log.warn "Be aware: skipping decoy generation will prevent generating variants and subset FDR refinement"
+log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database"
+}
 
 //prediction params
 params.predict_class_1 = false
@@ -231,7 +247,7 @@ if( params.include_proteins_from_vcf) {
     input_fasta_1 = Channel.empty()
     input_fasta_2 = Channel.empty()
 
-} elif( params.skip_decoy_generation) {
+} else if( params.skip_decoy_generation) {
     Channel
         .fromPath( params.fasta )
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
@@ -312,11 +328,9 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
-summary['Class 1 Prediction'] = params.class_1_prediction
-summary['Class 2 Prediction'] = params.class_2_prediction
+summary['Class 1 Prediction'] = params.predict_class_1
+summary['Class 2 Prediction'] = params.predict_class_2
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
-summary['Class 1 Alleles'] = params.predict_class_1
-summary['Class 2 Alelles'] = params.predict_class_2
 summary['Variants']     = params.vcf
 summary['Centroidisation'] = params.run_centroidisation
 summary['Max Memory']   = params.max_memory
@@ -481,7 +495,11 @@ process db_search_comet {
                    -variable_modifications ${params.variable_mods.tokenize(',').collect { "'${it}'" }.join(" ") } \\
                    -fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")} \\
                    -enzyme '${params.enzyme}' \\
-                   -spectrum_batch_size ${params.spectrum_batch_size}
+                   -spectrum_batch_size ${params.spectrum_batch_size} \\
+                   $a_ions \\
+                   $c_ions \\
+                   $x_ions \\
+                   $z_ions \\
      """
 
 }
