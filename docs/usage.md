@@ -20,6 +20,10 @@
     * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
     * [`--precursor_mass_tolerance`](#--precursor_mass_tolerance)
     * [`--fragment_bin_offset`](#--fragment_bin_offset)
+    * [`--use_a_ions`](#--use_a_ions)
+    * [`--use_c_ions`](#--use_c_ions)
+    * [`--use_x_ions`](#--use_x_ions)
+    * [`--use_z_ions`](#--use_z_ions)
     * [`--fdr_threshold`](#--fdr_threshold)
     * [`--fdr_level`](#--fdr_level)
     * [`--number_mods`](#--number_mods)
@@ -35,8 +39,10 @@
     * [`--variable_mods`](#--variable_mods)
     * [`--max_rt_alignment_shift`](#--max_rt_alignment_shift)
     * [`--spectrum_batch_size`](#--spectrum_batch_size)
+    * [`--skip_decoy_generation`](#--skip_decoy_generation)
 * [Optional binding predicion](#optional-binding-prediction)
-    * [`--run_prediction`](#--run_prediction)
+    * [`--predict_class_1`](#--predict_class_1)
+    * [`--predict_class_2`](#--predict_class_2)
     * [`--refine_fdr_on_predicted_subset`](#--refine_fdr_on_predicted_subset)
     * [`--affinity_threshold_subset`](#--affinity_threshold_subset)
     * [`--alleles`](#--alleles)
@@ -79,7 +85,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --run_prediction -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --predict_class_1 -profile standard,docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -174,6 +180,18 @@ Specify the precursor mass tolerance used for the comet database search. For Hig
 ### `--fragment_bin_offset`
 Specify the fragment bin offset used for the comet database search. For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)
 
+### `--use_a_ions`
+Include a ions into the peptide spectrum matching
+
+### `--use_c_ions`
+Include c ions into the peptide spectrum matching
+
+### `--use_x_ions`
+Include x ions into the peptide spectrum matching
+
+### `--use_z_ions`
+Include z ions into the peptide spectrum matching
+
 ### `--fdr_threshold`
 Specify the false discovery rate threshold at which peptide hits should be selected. (eg. 0.01)
 
@@ -216,12 +234,19 @@ Set a maximum retention time shift for the linear rt alignment
 ### `--spectrum_batch_size`
 Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
 
+### `--skip_decoy_generation`
+If you want to use your own decoys, you can specify a databaset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.
+One should consider though that this option will then prevent to append variants to the database and if not using reversed decoys the subset refinement FDR option will not work. 
+
 ## Optional binding prediction
-### `--run_prediction`
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
+### `--predict_class_1`
+Set flag depending on whether MHC class 2 binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
+
+### `--predict_class_2`
+Set flag depending on whether MHC class 1 binding predictions using the tool mhcnugget should be run. (Check whether your alleles are supported by mhcnugget)
 
 ### `--refine_fdr_on_predicted_subset`
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Check whether your alleles are supported by mhcflurry)
+Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Please be aware that this option is only available for MHC class I data of alleles that are supported by mhcflurry)
 
 ### `--affinity_threshold_subset`
 Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)

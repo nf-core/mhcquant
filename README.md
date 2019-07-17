@@ -20,7 +20,7 @@ The workflow is based on the OpenMS C++ framework for computational mass spectro
 
 ### Run
 ```
-nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --run_prediction --refine_fdr_on_predicted_subset -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --predict_class_I --refine_fdr_on_predicted_subset -profile standard,docker
 ```
 
 ### Documentation

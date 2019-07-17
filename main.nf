@@ -18,7 +18,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' --include_proteins_from_vcf --run_prediction --refine_fdr_on_predicted_subset -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --class_1_alleles 'alleles.tsv' --include_proteins_from_vcf --predict_class_1 --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
       --mzmls                           Path to input data (must be surrounded with quotes)
@@ -32,6 +32,10 @@ def helpMessage() {
       --precursor_mass_tolerance        Mass tolerance of precursor mass (ppm)
       --fragment_mass_tolerance         Mass tolerance of fragment mass bin (ppm)
       --fragment_bin_offset             Offset of fragment mass bin (Comet specific parameter)
+      --use_x_ions                      Use x ions for spectral matching in addition
+      --use_z_ions                      Use z ions for spectral matching in addition
+      --use_a_ions                      Use a ions for spectral matching in addition
+      --use_c_ions                      Use c ions for spectral matching in addition
       --fdr_threshold                   Threshold for FDR filtering
       --fdr_level                       Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
       --digest_mass_range               Mass range of peptides considered for matching
@@ -48,6 +52,8 @@ def helpMessage() {
       --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
       --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
       --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
+
 
     Binding Predictions:
       --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
@@ -103,6 +109,14 @@ params.peptide_min_length = 8
 params.peptide_max_length = 12
 params.fragment_mass_tolerance = 0.02
 params.precursor_mass_tolerance = 5
+params.use_x_ions = false
+x_ions = params.use_x_ions ? '-use_X_ions true' : ''
+params.use_z_ions = false
+z_ions = params.use_z_ions ? '-use_Z_ions true' : ''
+params.use_a_ions = false
+a_ions = params.use_a_ions ? '-use_A_ions true' : ''
+params.use_c_ions = false
+c_ions = params.use_c_ions ? '-use_C_ions true' : ''
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
@@ -124,10 +138,19 @@ params.fixed_mods = ''
 params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
+params.skip_decoy_generation = false
+if (params.skip_decoy_generation) {
+log.warn "Be aware: skipping decoy generation will prevent generating variants and subset FDR refinement"
+log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database"
+}
+
 //prediction params
 params.predict_class_1 = false
 params.predict_class_2 = false
 params.refine_fdr_on_predicted_subset = false
+if (params.skip_decoy_generation) {
+log.warn "Be aware: subset FDR refinement only considers MHC class I alleles supported by mhcflurry"
+}
 params.subset_affinity_threshold = 500
 
 //variant params
@@ -232,6 +255,16 @@ if( params.include_proteins_from_vcf) {
         .set { input_fasta_vcf }
 
     input_fasta = Channel.empty()
+    input_fasta_1 = Channel.empty()
+    input_fasta_2 = Channel.empty()
+
+} else if( params.skip_decoy_generation) {
+    Channel
+        .fromPath( params.fasta )
+        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+        .into { input_fasta; input_fasta_1; input_fasta_2 }
+
+    input_fasta_vcf = Channel.empty()
 
 } else {
     Channel
@@ -240,6 +273,9 @@ if( params.include_proteins_from_vcf) {
         .set { input_fasta }
 
     input_fasta_vcf = Channel.empty()
+    input_fasta_1 = Channel.empty()
+    input_fasta_2 = Channel.empty()
+
 }
 
 
@@ -295,8 +331,8 @@ summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
-summary['Class 1 Prediction'] = params.class_1_prediction
-summary['Class 2 Prediction'] = params.class_2_prediction
+summary['Class 1 Prediction'] = params.predict_class_1
+summary['Class 2 Prediction'] = params.predict_class_2
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
 summary['Class 1 Alleles'] = params.predict_class_1
 summary['Class 2 Alelles'] = params.predict_class_2
@@ -428,7 +464,10 @@ process generate_decoy_database {
 
     output:
      file "${fastafile.baseName}_decoy.fasta" into (fastafile_decoy_1, fastafile_decoy_2)
-     
+    
+    when:
+     !params.skip_decoy_generation
+ 
     script:
      """
      DecoyDatabase  -in ${fastafile} \\
@@ -469,7 +508,7 @@ process db_search_comet {
  
     input:
      file mzml_file from input_mzmls.mix(input_mzmls_picked)
-     file fasta_decoy from fastafile_decoy_1.first()
+     file fasta_decoy from fastafile_decoy_1.mix(input_fasta_1).first()
 
     output:
      file "${mzml_file.baseName}.idXML" into id_files
@@ -493,7 +532,11 @@ process db_search_comet {
                    -variable_modifications ${params.variable_mods.tokenize(',').collect { "'${it}'" }.join(" ") } \\
                    -fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")} \\
                    -enzyme '${params.enzyme}' \\
-                   -spectrum_batch_size ${params.spectrum_batch_size}
+                   -spectrum_batch_size ${params.spectrum_batch_size} \\
+                   $a_ions \\
+                   $c_ions \\
+                   $x_ions \\
+                   $z_ions \\     
      """
 
 }
@@ -506,7 +549,7 @@ process index_peptides {
  
     input:
      file id_file from id_files
-     file fasta_decoy from fastafile_decoy_2.first()
+     file fasta_decoy from fastafile_decoy_2.mix(input_fasta_2).first()
 
     output:
      file "${id_file.baseName}_idx.idXML" into (id_files_idx, id_files_idx_original)
