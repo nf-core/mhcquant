@@ -273,11 +273,11 @@ One should consider though that this option will then prevent to append variants
 
 ### `--predict_class_1`
 
-Set flag depending on whether MHC class 2 binding predictions using the tool mhcflurry should be run. (Check whether your alleles are supported by mhcflurry)
+Set flag depending on whether MHC class 1 binding predictions using the tool mhcflurry should be run. [Check whether your alleles are supported by mhcflurry](supported_class_1_alleles.md)
 
 ### `--predict_class_2`
 
-Set flag depending on whether MHC class 1 binding predictions using the tool mhcnugget should be run. (Check whether your alleles are supported by mhcnugget)
+Set flag depending on whether MHC class 2 binding predictions using the tool mhcnugget should be run. [Check whether your alleles are supported by mhcnugget](supported_class_2_alleles.md)
 
 ### `--refine_fdr_on_predicted_subset`
 

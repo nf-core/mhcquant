@@ -1,4 +1,4 @@
-# Alleles supported by MHCFlurry (13.04.2019)
+# Class 1 Alleles supported by MHCFlurry (13.04.2019)
 
 A*01:01
 A*02:01
