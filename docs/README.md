@@ -10,3 +10,4 @@ The nf-core/mhcquant documentation is split into the following files:
     * [Adding your own system](configuration/adding_your_own.md)
 4. [Output and how to interpret the results](output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+6. [Pipeline-specific Troubleshooting](troublesheeting.md)
