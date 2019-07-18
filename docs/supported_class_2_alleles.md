@@ -1,4 +1,5 @@
-# Alleles supported by MHCNuggets (05.07.2019)
+# Class 2 Alleles supported by MHCNuggets (05.07.2019)
+
 HLA-DPB1*01:01
 HLA-DPB1*02:01
 HLA-DPB1*03:01
