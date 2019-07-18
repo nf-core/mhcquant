@@ -6,8 +6,15 @@ This document describes the output produced by the pipeline
 
 The final output of the pipeline should include the following files:
 
-* [mzTab](#mzTab) - the community standard format for sharing mass spectrometry search results
-* [csv](#csv) - aggregate csv report, containing all information about peptide identification and quantification results
+* [all_features_merged_resolved.mzTab](#mzTab) - the community standard format for sharing mass spectrometry search results
+* [all_feautres_merged_resolved.csv](#csv) - aggregate csv report, containing all information about peptide identification and quantification results
+* [found_neoepitopes.csv](#found_neoepitopes) - a csv listing all neoepitopes found in the mass spectrometry search, independant of binding predictions
+* [vcf_neoepitopes.csv](#vcf_neoepitopes) - a csv listing all theoretically possible neoepitope sequences from the variants specified in the vcf
+* [_vcf.fasta](#fasta) - the fasta database including mutated proteins used for the database search
+* [class_1/2_binding_predictions](#class_1/2_binding_predictions) - a folder containing the respective binding predictions of all detected peptides and all theoretically possible neoepitope sequences 
+* [Intermediate_resuls](#intermediates) - a folder containing all intermediate results from the steps in the pipeline (unfiltered and filtered PSMs, aligned mzMLs, features, etc. ..)
+* [Documentation](#docs) - a folder containing summarized reports of the pipeline execution
+* [pipeline_info](#info) - a folder containing detailed reports on computational runtimes and workflow steps
 
 ## mzTab
 
@@ -57,10 +64,27 @@ CONSENSUS contains information about precursor features that were identified in 
 
 PEPTIDE contains information about peptide hits that were identified and correspond to the consensus features described one row above.
 
-## Predictions
+## found_neoepitopes
 
-The prediction output is a comma separated table (csv) for each allele, listing each peptide sequence and its corresponding predicted affinity scores:
+csv file listing detected neoepitope sequences:
+
+```bash
+peptide sequence   geneID
+```
+
+## vcf_neoepitopes
+
+csv file listing theoretically possible neoepitope sequences:
+
+```bash
+Sequence        Antigen ID       Variants
+```
+
+## class_1/2_binding_predictions
+
+The prediction outputs are comma separated table (csv) for each allele, listing each peptide sequence and its corresponding predicted affinity scores:
 
 ```bash
 peptide   allele   prediction   prediction_low   prediction_high   prediction_percentile
 ```
+
