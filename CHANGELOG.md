@@ -1,6 +1,13 @@
 # nf-core/mhcquant: Changelog
 
-## v1.2.7 nf-core/mhcquant "Golden Eagle" -2019/05/05
+## v1.3 nf-core/mhcquant "Red Parrot" - 2019/07/19
+
+### `Fixed`
+nf-core template update
+x,z,a,c ions
+documentation
+
+## v1.2.7 nf-core/mhcquant "Golden Eagle" - 2019/05/05
 
 ### `Added`
 MHCnugget predictor
