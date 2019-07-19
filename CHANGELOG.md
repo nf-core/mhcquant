@@ -1,6 +1,6 @@
 # nf-core/mhcquant: Changelog
 
-## v1.3 nf-core/mhcquant "Red Perrot" - 2019/07/19
+## v1.3 nf-core/mhcquant "Red Parrot" - 2019/07/19
 
 ### `Fixed`
 nf-core template update
