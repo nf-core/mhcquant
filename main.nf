@@ -938,7 +938,7 @@ process filter_psms_by_predictions {
      file peptide_filter_file from peptide_filter
 
     output:
-     file "${id_file_psm_filtered.baseName}_pred_filtered.idXML" into (id_files_merged_psm_pred_filtered, id_files_merged_psm_pred_filtered_II)
+     file "${id_file_psm_filtered.baseName}_pred_filtered.idXML" into id_files_merged_psm_pred_filtered
 
     when:
      params.refine_fdr_on_predicted_subset    
