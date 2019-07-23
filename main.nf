@@ -1334,7 +1334,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
     file cl_2_alleles from nepepitopes_class_2_alleles
 
     output:
-    file '*_predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
+    file '*predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
 
     when:
      params.include_proteins_from_vcf

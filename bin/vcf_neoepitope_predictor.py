@@ -59,7 +59,7 @@ from Fred2.Core import Protein, Allele, MutationSyntax, Variant
 from Fred2.Core.Variant import VariationType
 from Fred2.IO import read_lines, MartsAdapter, read_annovar_exonic
 from Fred2.EpitopePrediction import EpitopePredictorFactory
-from Fred2.Core import generate_peptides_from_proteins, generate_peptides_from_variants
+from Fred2.Core import generate_transcripts_from_variants, generate_proteins_from_transcripts, generate_peptides_from_proteins, generate_peptides_from_variants
 from Fred2.IO.ADBAdapter import EIdentifierTypes, EAdapterFields
 from Fred2.IO.FileReader import read_vcf
 
@@ -295,10 +295,17 @@ def main():
             return -1
 
         epitopes = []
-        for length in range(args.peptide_min_length, args.peptide_max_length):
-            epitopes.extend(filter(lambda x: any(x.get_variants_by_protein(tid) for tid in x.proteins.iterkeys()),
-                                   generate_peptides_from_variants(variants,
-                                                                   length, martDB, EIdentifierTypes.ENSEMBL)))
+        minlength=args.peptide_min_length
+        maxlength=args.peptide_max_length
+        prots = [p for p in generate_proteins_from_transcripts(generate_transcripts_from_variants(variants, martDB, EIdentifierTypes.ENSEMBL))]
+        for peplen in range(minlength, maxlength+1):
+            peptide_gen = generate_peptides_from_proteins(prots, peplen)
+
+            peptides_var = [x for x in peptide_gen]
+
+            # remove peptides which are not 'variant relevant'
+            peptides = [x for x in peptides_var if any(x.get_variants_by_protein(y) for y in x.proteins.keys())]
+            epitopes.extend(peptides)
 
         for v in variants:
             for trans_id, coding in v.coding.iteritems():
