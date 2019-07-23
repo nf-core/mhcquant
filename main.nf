@@ -52,7 +52,8 @@ def helpMessage() {
       --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
       --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
       --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
-
+      --quantification_fdr              Assess and assign ids matched between runs with an additional quantification FDR
+      --quantification_min_prob         Specify a minimum probability cut off for quantification
 
     Binding Predictions:
       --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
@@ -141,6 +142,12 @@ params.skip_decoy_generation = false
 if (params.skip_decoy_generation) {
 log.warn "Be aware: skipping decoy generation will prevent generating variants and subset FDR refinement"
 log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database"
+}
+
+params.quantification_fdr = false
+params.quantification_min_prob = 0
+if (params.quantification_fdr) {
+   log.warn "Quantification FDR enabled"
 }
 
 //prediction params
@@ -333,9 +340,10 @@ summary['Fasta Ref']    = params.fasta
 summary['Class 1 Prediction'] = params.predict_class_1
 summary['Class 2 Prediction'] = params.predict_class_2
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
+summary['Quantification FDR'] = params.quantification_fdr
 summary['Class 1 Alleles'] = params.predict_class_1
 summary['Class 2 Alelles'] = params.predict_class_2
-summary['Variants']     = params.vcf
+summary['Variants']     = params.include_proteins_from_vcf
 summary['Centroidisation'] = params.run_centroidisation
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
@@ -596,14 +604,14 @@ process filter_fdr_for_idalignment {
      file id_file_idx_fdr from id_files_idx_fdr
 
     output:
-     file "${id_file_idx_fdr.baseName}_filtered.idXML" into id_files_idx_fdr_filtered
+     file "${id_file_idx_fdr.baseName}_filtered.idXML" into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
 
     script:
      """
      IDFilter -in ${id_file_idx_fdr} \\
               -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
-              -score:pep 0.05 \\
+              -score:pep 0.01 \\
               -remove_decoys
      """
 
@@ -640,6 +648,10 @@ input_mzmls_align
 id_files_idx_original
  .collectFile( sort: { it.baseName } )
  .set{input_ids_sorted}
+
+id_files_for_quant_fdr
+ .collectFile( sort: { it.baseName } )
+ .set{input_ids_for_quant_fdr_sorted}
 
 id_files_trafo
  .flatten()
@@ -1009,18 +1021,29 @@ process quantify_identifications_targeted {
     input:
      file id_file_quant from id_files_merged_psm_perc_filtered.mix(id_files_merged_psm_pred_perc_filtered).first()
      file mzml_quant from mzml_files_aligned
+     file id_file_quant_int from input_ids_for_quant_fdr_sorted
 
     output:
-     file "${mzml_quant.baseName}.featureXML" into (feature_files, feature_files_2)
+     file "${mzml_quant.baseName}.featureXML" into feature_files
 
     script:
+    if (!params.quantification_fdr){
      """
      FeatureFinderIdentification -in ${mzml_quant} \\
                                  -id ${id_file_quant} \\
                                  -out ${mzml_quant.baseName}.featureXML \\
                                  -threads ${task.cpus}
      """
-
+    } else {
+          """
+     FeatureFinderIdentification -in ${mzml_quant} \\
+                                 -id ${id_file_quant_int} \\
+                                 -id_ext ${id_file_quant} \\
+                                 -svm:min_prob ${params.quantification_min_prob} \\
+                                 -out ${mzml_quant.baseName}.featureXML \\
+                                 -threads ${task.cpus}
+     """   
+    }
 }
 
 
@@ -1224,7 +1247,7 @@ process predict_possible_neoepitopes {
 
     script:
      """
-     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -a ${alleles_file} -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o vcf_neoepitopes.csv
+     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a ${alleles_file} -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o vcf_neoepitopes.csv
      """
 }
 
@@ -1394,7 +1417,6 @@ workflow.onComplete {
             }
         }
     } catch (all) {
-        log.warn "[nf-core/mhcquant] Could not attach MultiQC report to summary email"
     }
 
     // Render the TXT template

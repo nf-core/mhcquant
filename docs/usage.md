@@ -40,6 +40,8 @@
   * [`--max_rt_alignment_shift`](#--max_rt_alignment_shift)
   * [`--spectrum_batch_size`](#--spectrum_batch_size)
   * [`--skip_decoy_generation`](#--skip_decoy_generation)
+  * [`--quantification_fdr`](#--quantification_fdr)
+  * [`--quantification_min_prob`](#--quantification_min_prob)
 * [Optional binding predicion](#optional-binding-prediction)
   * [`--predict_class_1`](#--predict_class_1)
   * [`--predict_class_2`](#--predict_class_2)
@@ -270,6 +272,14 @@ Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memo
 
 If you want to use your own decoys, you can specify a databaset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.
 One should consider though that this option will then prevent to append variants to the database and if not using reversed decoys the subset refinement FDR option will not work.
+
+### `--quantification_fdr`
+
+Set this option to assess and assign quantification of peptides with an FDR measure (Weisser H. and Choudhary J.S. J Proteome Res. 2017 Aug 4)
+
+### `--quantification_min_prob`
+
+Specify a cut off probability value for quantification events as a filter
 
 ## Optional binding prediction
 
