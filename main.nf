@@ -145,7 +145,7 @@ log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database"
 }
 
 params.quantification_fdr = false
-params.quantification_min_prob = 0.9
+params.quantification_min_prob = 0
 if (params.quantification_fdr) {
    log.warn "Quantification FDR enabled"
 }
