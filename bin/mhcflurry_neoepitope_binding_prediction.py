@@ -44,9 +44,13 @@ neoepitopes = [line.rstrip('\n').strip().split(',') for line in open(sys.argv[-2
 neoepitopes = flatten(neoepitopes)
 seqs_to_geneID = dict(zip(neoepitopes[::2], neoepitopes[1::2]))
 
-# call mhcflurry
-for allele in alleles:
-    predictor = Class1AffinityPredictor.load()
-    df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_to_geneID.keys())
-    df_pred.insert(1, 'geneID', pd.Series(np.array(seqs_to_geneID.values())))
-    df_pred.to_csv(allele + '_' + sys.argv[-1])
+if len(seqs_to_geneID) > 0:
+   # call mhcflurry
+   for allele in alleles:
+       predictor = Class1AffinityPredictor.load()
+       df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_to_geneID.keys())
+       df_pred.insert(1, 'geneID', pd.Series(np.array(seqs_to_geneID.values())))
+       df_pred.to_csv(allele + '_' + sys.argv[-1])
+else:
+   op=open(sys.argv[-1],'w')
+   op.close()
