@@ -258,6 +258,8 @@ Specify which fixed modifications should be applied to the database search (eg. 
 
 Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
 
+Multiple fixed or variable modifications can be specified comma separated (e.g. 'Carbamidomethyl (C),Oxidation (M)')
+
 ### `--max_rt_alignment_shift`
 
 Set a maximum retention time shift for the linear rt alignment
