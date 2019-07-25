@@ -293,6 +293,9 @@ if( params.predict_class_1){
         .fromPath( params.class_1_alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
         .into { peptides_class_1_alleles; peptides_class_1_alleles_refine; neoepitopes_class_1_alleles; neoepitopes_class_1_alleles_prediction}
+
+    possible_neoepitopes_II = Channel.empty()
+
 } else {
 
     peptides_class_1_alleles = Channel.empty()
