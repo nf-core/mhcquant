@@ -5,6 +5,8 @@
 ### `Fixed`
 nf-core template update
 x,z,a,c ions
+quantification fdr
+empty neoepitope list bugs fixed
 documentation
 
 ## v1.2.7 nf-core/mhcquant "Golden Eagle" - 2019/05/05
