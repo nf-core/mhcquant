@@ -294,8 +294,6 @@ if( params.predict_class_1){
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
         .into { peptides_class_1_alleles; peptides_class_1_alleles_refine; neoepitopes_class_1_alleles; neoepitopes_class_1_alleles_prediction}
 
-    possible_neoepitopes_II = Channel.empty()
-
 } else {
 
     peptides_class_1_alleles = Channel.empty()
@@ -1129,7 +1127,7 @@ process export_mztab {
      file feature_file_2 from consensus_file_resolved_2
 
     output:
-     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes, mhcnuggets_mztab
+     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab
 
     script:
      """
@@ -1293,17 +1291,43 @@ process Resolve_found_neoepitopes {
 
     input:
      file mztab from features_mztab_neoepitopes
-     file neoepitopes from possible_neoepitopes.mix(possible_neoepitopes_II)
+     file neoepitopes from possible_neoepitopes
 
     output:
-     file "found_neoepitopes.csv" into found_neoepitopes, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
+     file "found_neoepitopes_class_1.csv" into found_neoepitopes
     
     when:
      params.include_proteins_from_vcf
+     params.predict_class_1
 
     script:
      """
-     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_1
+     """
+}
+
+
+/*
+ * STEP 23/2 - Resolve found neoepitopes
+ */
+process Resolve_found_class_2_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file mztab from features_mztab_neoepitopes_II
+     file neoepitopes from possible_neoepitopes_II
+
+    output:
+     file "found_neoepitopes_class_2.csv" into found_neoepitopes_II, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
+
+    script:
+     """
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_2
      """
 }
 
