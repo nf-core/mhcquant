@@ -15,6 +15,10 @@ Nextflow offers an option to limit the memory used for execution (--max_memory '
 
 As the Comet proteomic search engine is the most memory and computation intensive step, one can limit it by setting the --spectrum_batch_size option. Here you specify the number of spectra processed at the same time (default: 500). Setting this parameter lower will require less memory however slow down the overall execution time.
 
+## Variant calling file format problems
+
+Variant calling files come in very different formats and annotation styles. While we tried to support most common formats it could be that our integrated vcf_reader can not parse every format correctly resulting in an error. As a general guideline we support VCF format < 4.2 and annotation styles of VEP, ANNOVAR and SNPEFF. Moreover, insertions and deletions might not be parsed properly and one possibility could be to focus on SNPs only in your data. A last work around could be to translate variants into a protein database independantly of MHCquant and use this as input for the database search.
+
 ## Issues with comet.exe on arch based systems
 
 We noticed that comet.exe sometimes crashes on arch based systems using the docker or singularity profiles. It is possible that this is due to the docker package being build with a different compiler than comet and therefore this could potentially lead to header conflicts. Since we are creating the singularity image from the docker image the error is propagated to the singularity profile as well.
