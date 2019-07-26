@@ -11,7 +11,7 @@ The final output of the pipeline should include the following files:
 * [found_neoepitopes.csv](#found_neoepitopes) - a csv listing all neoepitopes found in the mass spectrometry search, independant of binding predictions
 * [vcf_neoepitopes.csv](#vcf_neoepitopes) - a csv listing all theoretically possible neoepitope sequences from the variants specified in the vcf
 * [_vcf.fasta](#fasta) - the fasta database including mutated proteins used for the database search
-* [class_1/2_binding_predictions](#class_1/2_binding_predictions) - a folder containing the respective binding predictions of all detected peptides and all theoretically possible neoepitope sequences 
+* [class_1/2_binding_predictions](#class_1/2_binding_predictions) - a folder containing the respective binding predictions of all detected peptides and all theoretically possible neoepitope sequences
 * [Intermediate_resuls](#intermediates) - a folder containing all intermediate results from the steps in the pipeline (unfiltered and filtered PSMs, aligned mzMLs, features, etc. ..)
 * [Documentation](#docs) - a folder containing summarized reports of the pipeline execution
 * [pipeline_info](#info) - a folder containing detailed reports on computational runtimes and workflow steps
@@ -87,4 +87,3 @@ The prediction outputs are comma separated table (csv) for each allele, listing 
 ```bash
 peptide   allele   prediction   prediction_low   prediction_high   prediction_percentile
 ```
-
