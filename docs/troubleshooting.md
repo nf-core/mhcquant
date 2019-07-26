@@ -25,7 +25,7 @@ Make sure your fasta database does not contain empty lines or special characters
 
 ## Issues with comet.exe on arch based systems
 
-We noticed that comet.exe sometimes crashes on arch based systems using the docker or singularity profiles. It is possible that this is due to the docker package being build with a different compiler than comet and therefore this could potentially lead to header conflicts. Since we are creating the singularity image from the docker image the error is propagated to the singularity profile as well. Possibly changing systems or running MHCquant in a virutal machine is then the only solution.
+We noticed that comet.exe sometimes crashes on arch based systems using the docker or singularity profiles. It is possible that this is due to the docker package being build with a different compiler than comet and therefore this could potentially lead to header conflicts. Since we are creating the singularity image from the docker image the error is propagated to the singularity profile as well. Possibly changing systems or running MHCquant in a virtual machine is then the only solution.
 
 ## Extra resources and getting help
 
