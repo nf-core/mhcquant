@@ -9,7 +9,7 @@ quantification fdr
 empty neoepitope list bugs fixed
 documentation
 
-## v1.2.7 nf-core/mhcquant "Golden Eagle" - 2019/05/05
+## v1.2.6 nf-core/mhcquant "Golden Eagle" - 2019/05/05
 
 ### `Added`
 MHCnugget predictor
