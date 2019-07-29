@@ -7,7 +7,7 @@ This document describes the output produced by the pipeline
 The final output of the pipeline should include the following files:
 
 * [all_features_merged_resolved.mzTab](#mzTab) - the community standard format for sharing mass spectrometry search results
-* [all_feautres_merged_resolved.csv](#csv) - aggregate csv report, containing all information about peptide identification and quantification results
+* [all_features_merged_resolved.csv](#csv) - aggregate csv report, containing all information about peptide identification and quantification results
 * [found_neoepitopes.csv](#found_neoepitopes) - a csv listing all neoepitopes found in the mass spectrometry search, independant of binding predictions
 * [vcf_neoepitopes.csv](#vcf_neoepitopes) - a csv listing all theoretically possible neoepitope sequences from the variants specified in the vcf
 * [_vcf.fasta](#fasta) - the fasta database including mutated proteins used for the database search
