@@ -47,7 +47,8 @@
   * [`--predict_class_2`](#--predict_class_2)
   * [`--refine_fdr_on_predicted_subset`](#--refine_fdr_on_predicted_subset)
   * [`--affinity_threshold_subset`](#--affinity_threshold_subset)
-  * [`--alleles`](#--alleles)
+  * [`--class_1_alleles`](#--class_1_alleles)
+  * [`--class_2_alleles`](#--class_2_alleles)
 * [Optional variant translation](#optional-variant_translation)
   * [`--include_proteins_from_vcf`](#--include_proteins_from_vcf)
   * [`--vcf`](#--vcf)
@@ -89,7 +90,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --predict_class_1 -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --class_1_alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --predict_class_1 -profile standard,docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -299,9 +300,13 @@ Set to 'True' or 'False' depending on whether binding predictions using the tool
 
 Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)
 
-### `--alleles`
+### `--class_1_alleles`
 
-Specify a .tsv file containing the alleles of your probes. (line separated)
+Specify a .tsv file containing the MHC class 1 alleles of your probes. (line separated)
+
+### `--class_2_alleles`
+
+Specify a .tsv file containing the MHC class 2 alleles of your probes. (line separated)
 
 ## Optional variant translation
 
