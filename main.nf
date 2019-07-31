@@ -614,7 +614,7 @@ process filter_fdr_for_idalignment {
      IDFilter -in ${id_file_idx_fdr} \\
               -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
-              -score:pep 0.01 \\
+              -score:pep ${params.fdr_threshold} \\
               -remove_decoys
      """
 
