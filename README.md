@@ -40,4 +40,4 @@ The nf-core/mhcquant pipeline comes with documentation about the pipeline, found
 
 ## Credits
 
-nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann).
+nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann),[Lukas Heumos](https://github.com/zethson),[Alexander Peltzer](https://github.com/apeltzer)
