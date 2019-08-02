@@ -417,6 +417,9 @@ process get_software_versions {
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
+    comet --version >& v_comet.txt
+    percolator -h >& v_percolator.txt
+    FileInfo -h >& v_openms.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
