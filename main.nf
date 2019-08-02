@@ -413,13 +413,13 @@ process get_software_versions {
     file "software_versions.csv"
 
     script:
-    // TODO nf-core: Get all tools to print their version number here
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
-    comet --version >& v_comet.txt
-    percolator -h >& v_percolator.txt
-    FileInfo -h >& v_openms.txt
+    FileInfo --help &> v_openms.txt
+    percolator -h &> v_percolator.txt
+    comet -p
+    mhcflurry-predict --version &> v_mhcflurry.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
