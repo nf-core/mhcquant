@@ -7,7 +7,7 @@ The nf-core/mhcquant documentation is split into the following files:
 3. Pipeline HPC Cluster configuration
     * [Local configuration](configuration/local.md)
     * [bwForCluster BinAC](configuration/binac.md)
-    * [Adding your own system](configuration/adding_your_own.md)
+    * [Adding your own system config](configuration/adding_your_own.md)
 4. [Output and how to interpret the results](output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-6. [Pipeline-specific Troubleshooting](troublesheeting.md)
+6. [Pipeline-specific Troubleshooting](troubleshooting.md)
