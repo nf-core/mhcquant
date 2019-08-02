@@ -6,8 +6,9 @@ import re
 regexes = {
     'nf-core/mhcquant': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
-    'Comet': ['v_comet.txt', r"version (\S+)"],
+    'Comet': ['comet.params.new', r"comet_version (\S+)"],
     'Percolator': ['v_percolator.txt', r"version (\S+)"],
+    'MHCFlurry': ['v_mhcflurry.txt', r"mhcflurry (\S+)"],
     'OpenMS': ['v_openms.txt', r"Version: (\S+)"],
 }
 results = OrderedDict()
@@ -16,6 +17,7 @@ results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['Comet'] = '<span style="color:#999999;\">N/A</span>'
 results['Percolator'] = '<span style="color:#999999;\">N/A</span>'
 results['OpenMS'] = '<span style="color:#999999;\">N/A</span>'
+results['MHCFlurry']= '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
