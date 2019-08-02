@@ -29,14 +29,15 @@ nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta'
 
 The nf-core/mhcquant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
-1. [Installation](docs/installation.md)
-2. Pipeline configuration
-    * [Local installation](https://nf-co.re/usage/local_installation)
-    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
-3. [Running the pipeline](docs/usage.md)
-4. [Output and how to interpret the results](docs/output.md)
+1. [Installation](installation.md)
+2. [Running the pipeline](usage.md)
+3. Pipeline HPC Cluster configuration
+    * [Local configuration](configuration/local.md)
+    * [bwForCluster BinAC](configuration/binac.md)
+    * [Adding your own system config](configuration/adding_your_own.md)
+4. [Output and how to interpret the results](output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+6. [Pipeline-specific Troubleshooting](troubleshooting.md)
 
 ## Credits
 
