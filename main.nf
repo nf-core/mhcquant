@@ -11,21 +11,13 @@
 
 
 def helpMessage() {
+    log.info nfcoreHeader()
     log.info"""
-    =======================================================
-                                              ,--./,-.
-              ___     __   __   __   ___     /,-._.--~\'
-        |\\ | |__  __ /  ` /  \\ |__) |__         }  {
-        | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
-                                              `._,._,\'
-
-     nf-core/mhcquant : v${workflow.manifest.version}
-    =======================================================
     Usage:
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --alleles 'alleles.tsv' --include_proteins_from_vcf --run_prediction --refine_fdr_on_predicted_subset -profile standard,docker
+    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --class_1_alleles 'alleles.tsv' --include_proteins_from_vcf --predict_class_1 --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
       --mzmls                           Path to input data (must be surrounded with quotes)
@@ -39,6 +31,10 @@ def helpMessage() {
       --precursor_mass_tolerance        Mass tolerance of precursor mass (ppm)
       --fragment_mass_tolerance         Mass tolerance of fragment mass bin (ppm)
       --fragment_bin_offset             Offset of fragment mass bin (Comet specific parameter)
+      --use_x_ions                      Use x ions for spectral matching in addition
+      --use_z_ions                      Use z ions for spectral matching in addition
+      --use_a_ions                      Use a ions for spectral matching in addition
+      --use_c_ions                      Use c ions for spectral matching in addition
       --fdr_threshold                   Threshold for FDR filtering
       --fdr_level                       Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
       --digest_mass_range               Mass range of peptides considered for matching
@@ -53,12 +49,19 @@ def helpMessage() {
       --prec_charge                     Precursor charge (eg. "2:3")
       --max_rt_alignment_shift          Maximal retention time shift (sec) resulting from linear alignment      
       --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+      --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
+      --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
+      --quantification_fdr              Assess and assign ids matched between runs with an additional quantification FDR
+      --quantification_min_prob         Specify a minimum probability cut off for quantification
 
     Binding Predictions:
-      --run_prediction                  Whether a affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
+      --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
+      --predict_class_2                 Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 
       --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
       --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
-      --alleles                         Path to file including allele information
+      --class_1_alleles                 Path to file including class 1 allele information
+      --class_2_alleles                 Path to file including class 2 allele information
 
     Variants:
       --include_proteins_from_vcf       Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)
@@ -97,7 +100,6 @@ params.fasta = params.fasta ?: { log.error "No read data privided. Make sure you
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
 
-
 /*
  * Define the default parameters
  */
@@ -107,10 +109,20 @@ params.peptide_min_length = 8
 params.peptide_max_length = 12
 params.fragment_mass_tolerance = 0.02
 params.precursor_mass_tolerance = 5
+params.use_x_ions = false
+x_ions = params.use_x_ions ? '-use_X_ions true' : ''
+params.use_z_ions = false
+z_ions = params.use_z_ions ? '-use_Z_ions true' : ''
+params.use_a_ions = false
+a_ions = params.use_a_ions ? '-use_A_ions true' : ''
+params.use_c_ions = false
+c_ions = params.use_c_ions ? '-use_C_ions true' : ''
 params.fragment_bin_offset = 0
 params.fdr_threshold = 0.01
 params.fdr_level = 'peptide-level-fdrs'
 fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
+params.description_correct_features = 0
+params.klammer = false
 params.number_mods = 3
 
 params.num_hits = 1
@@ -126,9 +138,25 @@ params.fixed_mods = ''
 params.variable_mods = 'Oxidation (M)'
 params.spectrum_batch_size = 500
 
+params.skip_decoy_generation = false
+if (params.skip_decoy_generation) {
+log.warn "Be aware: skipping decoy generation will prevent generating variants and subset FDR refinement"
+log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database"
+}
+
+params.quantification_fdr = false
+params.quantification_min_prob = 0
+if (params.quantification_fdr) {
+   log.warn "Quantification FDR enabled"
+}
+
 //prediction params
-params.run_prediction = false
+params.predict_class_1 = false
+params.predict_class_2 = false
 params.refine_fdr_on_predicted_subset = false
+if (params.skip_decoy_generation) {
+log.warn "Be aware: subset FDR refinement only considers MHC class I alleles supported by mhcflurry"
+}
 params.subset_affinity_threshold = 500
 
 //variant params
@@ -153,6 +181,8 @@ variant_snp_filter="-fSNP"
 } else {
 variant_snp_filter=""
 }
+
+
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -171,7 +201,12 @@ if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
     if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
 }
-
+//
+// NOTE - THIS IS NOT USED IN THIS PIPELINE, EXAMPLE ONLY
+// If you want to use the above in a process, define the following:
+//   input:
+//   file fasta from fasta
+//
 
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
@@ -180,20 +215,26 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
   custom_runName = workflow.runName
 }
 
-// Check workDir/outdir paths to be S3 buckets if running on AWSBatch
-// related: https://github.com/nextflow-io/nextflow/issues/813
+
 if( workflow.profile == 'awsbatch') {
-    if(!workflow.workDir.startsWith('s3:') || !params.outdir.startsWith('s3:')) exit 1, "Workdir or Outdir not on S3 - specify S3 Buckets for each to run on AWSBatch!"
+  // AWSBatch sanity checking
+  if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+  // Check outdir paths to be S3 buckets if running on AWSBatch
+  // related: https://github.com/nextflow-io/nextflow/issues/813
+  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+  // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
+// Stage config files
+ch_multiqc_config = Channel.fromPath(params.multiqc_config)
+ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
 
-/*
- * Create a channel for input mzml files
- */
+
 if( params.run_centroidisation) {
     Channel
         .fromPath( params.mzmls )
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+        .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
         .set { input_mzmls_unpicked }
 
     input_mzmls = Channel.empty()
@@ -202,7 +243,7 @@ if( params.run_centroidisation) {
 } else {
     Channel
         .fromPath( params.mzmls )
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+        .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
         .into { input_mzmls; input_mzmls_align }
 
     input_mzmls_unpicked = Channel.empty()
@@ -217,36 +258,64 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta_vcf}
+        .set { input_fasta_vcf }
 
     input_fasta = Channel.empty()
+    input_fasta_1 = Channel.empty()
+    input_fasta_2 = Channel.empty()
+
+} else if( params.skip_decoy_generation) {
+    Channel
+        .fromPath( params.fasta )
+        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+        .into { input_fasta; input_fasta_1; input_fasta_2 }
+
+    input_fasta_vcf = Channel.empty()
 
 } else {
     Channel
         .fromPath( params.fasta )
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta}
+        .set { input_fasta }
 
     input_fasta_vcf = Channel.empty()
+    input_fasta_1 = Channel.empty()
+    input_fasta_2 = Channel.empty()
+
 }
 
 
 /*
- * Create a channel for input alleles file
+ * Create a channel for class 1 alleles file
  */
-if( params.run_prediction){
+if( params.predict_class_1){
     Channel
-        .fromPath( params.alleles )
+        .fromPath( params.class_1_alleles )
         .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
-        .into { input_alleles; input_alleles_refine}
+        .into { peptides_class_1_alleles; peptides_class_1_alleles_refine; neoepitopes_class_1_alleles; neoepitopes_class_1_alleles_prediction}
+
 } else {
 
-    input_alleles = Channel.empty()
-    input_alleles_refine = Channel.empty()
+    peptides_class_1_alleles = Channel.empty()
+    peptides_class_1_alleles_refine = Channel.empty()
+    neoepitopes_class_1_alleles = Channel.empty()
+    neoepitopes_class_1_alleles_prediction = Channel.empty()
 }
 
+/*
+ * Create a channel for class 2 alleles file
+ */
+if( params.predict_class_2){
+    Channel
+        .fromPath( params.class_2_alleles )
+        .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
+        .into { nepepitopes_class_2_alleles; peptides_class_2_alleles; peptides_class_2_alleles_II }
+} else {
 
-
+    nepepitopes_class_2_alleles = Channel.empty()
+    peptides_class_2_alleles = Channel.empty()
+    peptides_class_2_alleles_II = Channel.empty()
+}
 
 /*
  * Create a channel for input vcf file
@@ -255,33 +324,29 @@ if( params.include_proteins_from_vcf){
     Channel
         .fromPath( params.vcf )
         .ifEmpty { exit 1, "params.vcf was empty - no input file supplied" }
-        .set { input_vcf}
+        .into { input_vcf; input_vcf_neoepitope; input_vcf_neoepitope_II}
 } else {
 
     input_vcf = Channel.empty()
+    input_vcf_neoepitope = Channel.empty()
+    input_vcf_neoepitope_II = Channel.empty()
 }
 
-
 // Header log info
-log.info """=======================================================
-                                          ,--./,-.
-          ___     __   __   __   ___     /,-._.--~\'
-    |\\ | |__  __ /  ` /  \\ |__) |__         }  {
-    | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
-                                          `._,._,\'
-
-nf-core/mhcquant v${workflow.manifest.version}"
-======================================================="""
+log.info nfcoreHeader()
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/mhcquant'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['mzMLs']        = params.mzmls
 summary['Fasta Ref']    = params.fasta
-summary['Predictions']  = params.run_prediction
+summary['Class 1 Prediction'] = params.predict_class_1
+summary['Class 2 Prediction'] = params.predict_class_2
 summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
-summary['Alleles']      = params.alleles
-summary['Variants']     = params.vcf
+summary['Quantification FDR'] = params.quantification_fdr
+summary['Class 1 Alleles'] = params.predict_class_1
+summary['Class 2 Alelles'] = params.predict_class_2
+summary['Variants']     = params.include_proteins_from_vcf
 summary['Centroidisation'] = params.run_centroidisation
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
@@ -298,16 +363,24 @@ summary['Output dir']     = params.outdir
 summary['Script dir']     = workflow.projectDir
 summary['Config Profile'] = workflow.profile
 if(workflow.profile == 'awsbatch'){
-   summary['AWS Region'] = params.awsregion
-   summary['AWS Queue'] = params.awsqueue
+   summary['AWS Region']    = params.awsregion
+   summary['AWS Queue']     = params.awsqueue
 }
-if(params.email) summary['E-mail Address'] = params.email
-log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
-log.info "========================================="
+summary['Config Profile'] = workflow.profile
+if(params.config_profile_description) summary['Config Description'] = params.config_profile_description
+if(params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
+if(params.config_profile_url)         summary['Config URL']         = params.config_profile_url
+if(params.email) {
+  summary['E-mail Address']  = params.email
+  summary['MultiQC maxsize'] = params.maxMultiqcEmailFileSize
+}
+log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
+log.info "\033[2m----------------------------------------------------\033[0m"
 
+// Check the hostnames against configured profiles
+checkHostname()
 
 def create_workflow_summary(summary) {
-
     def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
     yaml_file.text  = """
     id: 'nf-core-mhcquant-summary'
@@ -322,6 +395,33 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
     """.stripIndent()
 
    return yaml_file
+}
+
+
+/*
+ * Parse software version numbers
+ */
+process get_software_versions {
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+    saveAs: {filename ->
+        if (filename.indexOf(".csv") > 0) filename
+        else null
+    }
+    
+    output:
+    file 'software_versions_mqc.yaml' into software_versions_yaml
+    file "software_versions.csv"
+
+    script:
+    """
+    echo $workflow.manifest.version > v_pipeline.txt
+    echo $workflow.nextflow.version > v_nextflow.txt
+    FileInfo --help &> v_openms.txt
+    percolator -h &> v_percolator.txt
+    comet -p
+    mhcflurry-predict --version &> v_mhcflurry.txt
+    scrape_software_versions.py &> software_versions_mqc.yaml
+    """
 }
 
 
@@ -377,7 +477,10 @@ process generate_decoy_database {
 
     output:
      file "${fastafile.baseName}_decoy.fasta" into (fastafile_decoy_1, fastafile_decoy_2)
-     
+    
+    when:
+     !params.skip_decoy_generation
+ 
     script:
      """
      DecoyDatabase  -in ${fastafile} \\
@@ -418,7 +521,7 @@ process db_search_comet {
  
     input:
      file mzml_file from input_mzmls.mix(input_mzmls_picked)
-     file fasta_decoy from fastafile_decoy_1.first()
+     file fasta_decoy from fastafile_decoy_1.mix(input_fasta_1).first()
 
     output:
      file "${mzml_file.baseName}.idXML" into id_files
@@ -439,10 +542,14 @@ process db_search_comet {
                    -precursor_charge ${params.prec_charge} \\
                    -activation_method ${params.activation_method} \\
                    -use_NL_ions true \\
-                   -variable_modifications '${params.variable_mods}' \\
-                   -fixed_modifications ${params.fixed_mods} \\
+                   -variable_modifications ${params.variable_mods.tokenize(',').collect { "'${it}'" }.join(" ") } \\
+                   -fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")} \\
                    -enzyme '${params.enzyme}' \\
-                   -spectrum_batch_size ${params.spectrum_batch_size}
+                   -spectrum_batch_size ${params.spectrum_batch_size} \\
+                   $a_ions \\
+                   $c_ions \\
+                   $x_ions \\
+                   $z_ions \\     
      """
 
 }
@@ -455,7 +562,7 @@ process index_peptides {
  
     input:
      file id_file from id_files
-     file fasta_decoy from fastafile_decoy_2.first()
+     file fasta_decoy from fastafile_decoy_2.mix(input_fasta_2).first()
 
     output:
      file "${id_file.baseName}_idx.idXML" into (id_files_idx, id_files_idx_original)
@@ -503,14 +610,14 @@ process filter_fdr_for_idalignment {
      file id_file_idx_fdr from id_files_idx_fdr
 
     output:
-     file "${id_file_idx_fdr.baseName}_filtered.idXML" into id_files_idx_fdr_filtered
+     file "${id_file_idx_fdr.baseName}_filtered.idXML" into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
 
     script:
      """
      IDFilter -in ${id_file_idx_fdr} \\
               -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
-              -score:pep 0.05 \\
+              -score:pep ${params.fdr_threshold} \\
               -remove_decoys
      """
 
@@ -548,6 +655,10 @@ id_files_idx_original
  .collectFile( sort: { it.baseName } )
  .set{input_ids_sorted}
 
+id_files_for_quant_fdr
+ .collectFile( sort: { it.baseName } )
+ .set{input_ids_for_quant_fdr_sorted}
+
 id_files_trafo
  .flatten()
  .collectFile( sort: { it.baseName } )
@@ -565,7 +676,7 @@ process align_mzml_files {
 
     output:
      file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
-
+  
     script:
      """
      MapRTTransformer -in ${mzml_file_align} \\
@@ -573,7 +684,6 @@ process align_mzml_files {
                       -out ${mzml_file_align.baseName}_aligned.mzML \\
                       -threads ${task.cpus}
      """
-
 }
 
 
@@ -610,7 +720,7 @@ process merge_aligned_idxml_files {
 
     output:
      file "all_ids_merged.idXML" into id_merged
-    
+
     script:
      """
      IDMerger -in $ids_aligned \\
@@ -656,16 +766,37 @@ process run_percolator {
     output:
      file "${id_file_psm.baseName}_perc.idXML" into id_files_merged_psm_perc
 
+    if (params.klammer && params.description_correct_features == 0) {
+        log.warn('Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.')
+        log.warn('Klammer has been turned off!')
+    }
+
     script:
-     """
-     PercolatorAdapter -in ${id_file_psm} \\
+    if (params.description_correct_features > 0 && params.klammer){
+    """
+    PercolatorAdapter -in ${id_file_psm} \\
                        -out ${id_file_psm.baseName}_perc.idXML \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -threads ${task.cpus} \\
                        -enzyme no_enzyme \\
-                       $fdr_level 
-     """
+                       $fdr_level \\
+                       -doc ${params.description_correct_features} \\
+                       -klammer
+    """
+    } else {
+    """
+    PercolatorAdapter -in ${id_file_psm} \\
+                       -out ${id_file_psm.baseName}_perc.idXML \\
+                       -trainFDR 0.05 \\
+                       -testFDR 0.05 \\
+                       -threads ${task.cpus} \\
+                       -enzyme no_enzyme \\
+                       $fdr_level \\
+                       -doc ${params.description_correct_features} \\
+    """
+    }
+     
 
 }
 
@@ -781,11 +912,12 @@ process export_mztab_psm {
  */
 process predict_psms {
     publishDir "${params.outdir}/Intermediate_Results/"
+    echo true
 
     input:
      file perc_mztab_file from percolator_ids_mztab
      file psm_mztab_file from psm_ids_mztab
-     file allotypes_refine from input_alleles_refine
+     file allotypes_refine from peptides_class_1_alleles_refine
 
     output:
      file "peptide_filter.idXML" into peptide_filter
@@ -895,18 +1027,29 @@ process quantify_identifications_targeted {
     input:
      file id_file_quant from id_files_merged_psm_perc_filtered.mix(id_files_merged_psm_pred_perc_filtered).first()
      file mzml_quant from mzml_files_aligned
+     file id_file_quant_int from input_ids_for_quant_fdr_sorted
 
     output:
-     file "${mzml_quant.baseName}.featureXML" into (feature_files, feature_files_2)
+     file "${mzml_quant.baseName}.featureXML" into feature_files
 
     script:
+    if (!params.quantification_fdr){
      """
      FeatureFinderIdentification -in ${mzml_quant} \\
                                  -id ${id_file_quant} \\
                                  -out ${mzml_quant.baseName}.featureXML \\
                                  -threads ${task.cpus}
      """
-
+    } else {
+          """
+     FeatureFinderIdentification -in ${mzml_quant} \\
+                                 -id ${id_file_quant_int} \\
+                                 -id_ext ${id_file_quant} \\
+                                 -svm:min_prob ${params.quantification_min_prob} \\
+                                 -out ${mzml_quant.baseName}.featureXML \\
+                                 -threads ${task.cpus}
+     """   
+    }
 }
 
 
@@ -916,14 +1059,14 @@ process quantify_identifications_targeted {
 process link_extracted_features {
 
     input:
-     file feautres from feature_files.collect{it}
+     file features from feature_files.collect{it}
 
     output:
      file "all_features_merged.consensusXML" into consensus_file
     
     script:
      """
-     FeatureLinkerUnlabeledKD -in $feautres \\
+     FeatureLinkerUnlabeledKD -in $features \\
                               -out 'all_features_merged.consensusXML' \\
                               -threads ${task.cpus}
      """
@@ -987,7 +1130,7 @@ process export_mztab {
      file feature_file_2 from consensus_file_resolved_2
 
     output:
-     file "${feature_file_2.baseName}.mzTab" into features_mztab
+     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab
 
     script:
      """
@@ -1002,24 +1145,288 @@ process export_mztab {
 /*
  * STEP 18 - If specified predict peptides using MHCFlurry
  */
-process predict_peptides {
-    publishDir "${params.outdir}/"
+process predict_peptides_mhcflurry_class_1 {
+    publishDir "${params.outdir}/class_1_bindings"
+    echo true
 
     input:
      file mztab_file from features_mztab
-     file allotypes from input_alleles
+     file class_1_alleles from peptides_class_1_alleles
 
     output:
-     file "*predicted_peptides.csv" into predicted_peptides
+     file "*predicted_peptides_class_1.csv" into predicted_peptides
 
     when:
-     params.run_prediction
+     params.predict_class_1
 
     script:
      """
-     mhcflurry-downloads fetch models_class1
-     mhcflurry_predict_mztab.py ${allotypes} ${mztab_file} predicted_peptides.csv
+     mhcflurry-downloads --quiet fetch models_class1
+     mhcflurry_predict_mztab.py ${class_1_alleles} ${mztab_file} predicted_peptides_class_1.csv
      """
+}
+
+
+/*
+ * STEP 19 - Preprocess found peptides for MHCNuggets prediction class 2
+ */ 
+ process preprocess_peptides_mhcnuggets_class_2 {
+     
+    input:
+     file mztab_file from mhcnuggets_mztab
+
+    output:
+     file 'preprocessed_mhcnuggets_peptides' into preprocessed_mhcnuggets_peptides
+     file 'peptide_to_geneID' into peptide_to_geneID
+
+    when:
+     params.predict_class_2
+
+    script:
+    """
+    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output preprocessed_mhcnuggets_peptides
+    """
+ }
+
+
+ /*
+ * STEP 20 - Predict found peptides using MHCNuggets class 2
+*/  
+ process predict_peptides_mhcnuggets_class_2 {
+
+    input:
+     file preprocessed_peptides from preprocessed_mhcnuggets_peptides
+     file class_2_alleles from peptides_class_2_alleles
+
+    output:
+     file '*_predicted_peptides_class_2' into predicted_mhcnuggets_peptides
+
+    when:
+     params.predict_class_2
+
+    script:
+    """
+    mhcnuggets_predict_peptides.py --peptides ${preprocessed_peptides} --alleles ${class_2_alleles} --output _predicted_peptides_class_2
+    """
+ }
+
+
+ /*
+ * STEP 21 - Postprocess predicted MHCNuggets peptides class 2
+ */ 
+ process postprocess_peptides_mhcnuggets_class_2 {
+    publishDir "${params.outdir}/class_2_bindings"
+
+    input:
+     file predicted_peptides from predicted_mhcnuggets_peptides.collect{it}
+     file peptide_to_geneID from peptide_to_geneID
+
+    output:
+     file '*.csv' into postprocessed_peptides_mhcnuggets
+
+    when:
+     params.predict_class_2
+
+    script:
+    """
+    postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID}
+    """
+ }
+ 
+
+/*
+ * STEP 22 - Predict all possible neoepitopes from vcf
+ */
+process predict_possible_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file alleles_file from neoepitopes_class_1_alleles
+     file vcf_file from input_vcf_neoepitope
+
+    output:
+     file "vcf_neoepitopes.csv" into possible_neoepitopes
+    
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_1
+
+    script:
+     """
+     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a ${alleles_file} -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o vcf_neoepitopes.csv
+     """
+}
+
+
+/*
+ * STEP 22/2 - Predict all possible neoepitopes from vcf
+ */
+process predict_possible_class_2_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file alleles_file_II from peptides_class_2_alleles_II
+     file vcf_file from input_vcf_neoepitope_II
+
+    output:
+     file "vcf_neoepitopes.csv" into possible_neoepitopes_II
+
+    when:
+     params.include_proteins_from_vcf
+     !params.predict_class_1
+     params.predict_class_2
+
+    script:
+     """
+     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a ${alleles_file_II} -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o vcf_neoepitopes.csv
+     """
+}
+
+
+/*
+ * STEP 23 - Resolve found neoepitopes
+ */
+process Resolve_found_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file mztab from features_mztab_neoepitopes
+     file neoepitopes from possible_neoepitopes
+
+    output:
+     file "found_neoepitopes_class_1.csv" into found_neoepitopes
+    
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_1
+
+    script:
+     """
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_1
+     """
+}
+
+
+/*
+ * STEP 23/2 - Resolve found neoepitopes
+ */
+process Resolve_found_class_2_neoepitopes {
+    publishDir "${params.outdir}/"
+    echo true
+
+    input:
+     file mztab from features_mztab_neoepitopes_II
+     file neoepitopes from possible_neoepitopes_II
+
+    output:
+     file "found_neoepitopes_class_2.csv" into found_neoepitopes_II, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
+
+    script:
+     """
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_2
+     """
+}
+
+
+/*
+ * STEP 24 - Predict class 1 neoepitopes MHCFlurry
+ */
+process Predict_neoepitopes_mhcflurry_class_1 {
+    publishDir "${params.outdir}/class_1_bindings"
+    echo true
+
+    input:
+     file allotypes from neoepitopes_class_1_alleles_prediction
+     file neoepitopes from found_neoepitopes
+
+    output:
+     file "*predicted_neoepitopes_class_1.csv" into predicted_neoepitopes
+    
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_1
+
+    script:
+     """
+     mhcflurry-downloads --quiet fetch models_class1
+     mhcflurry_neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes_class_1.csv
+     """
+}
+
+
+/*
+ * STEP 25 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
+ */
+process preprocess_neoepitopes_mhcnuggets_class_2 {
+
+    input:
+    file neoepitopes from mhcnuggets_neo_preprocessing
+
+    output:
+    file 'mhcnuggets_preprocessed' into preprocessed_mhcnuggets_neoepitopes
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
+
+    script:
+    """
+    preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output mhcnuggets_preprocessed
+    """
+}
+
+
+/*
+ * STEP 26 - Predict class 2 MHCNuggets
+ */
+process predict_neoepitopes_mhcnuggets_class_2 {
+
+    input:
+    file preprocessed_neoepitopes from preprocessed_mhcnuggets_neoepitopes
+    file cl_2_alleles from nepepitopes_class_2_alleles
+
+    output:
+    file '*predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
+
+    script:
+    """
+    mhcnuggets_predict_peptides.py --peptides ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output _predicted_neoepitopes_class_2
+    """
+}
+
+
+/*
+ * STEP 27 - Class 2 MHCNuggets Postprocessing
+*/ 
+process postprocess_neoepitopes_mhcnuggets_class_2 {
+    publishDir "${params.outdir}/class_2_bindings"
+
+    input:
+    file neoepitopes from mhcnuggets_neo_postprocessing
+    file predicted_cl_2 from predicted_neoepitopes_class_2.collect{it}
+
+    output:
+    file '*.csv' into postprocessed_predicted_neoepitopes_class_2
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
+
+    script:
+    """
+    postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
+    """
 }
 
 
@@ -1052,9 +1459,24 @@ workflow.onComplete {
     if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
     if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
     if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
+
+    // TODO nf-core: If not using MultiQC, strip out this code (including params.maxMultiqcEmailFileSize)
+    // On success try attach the multiqc report
+    def mqc_report = null
+    try {
+        if (workflow.success) {
+            mqc_report = multiqc_report.getVal()
+            if (mqc_report.getClass() == ArrayList){
+                log.warn "[nf-core/mhcquant] Found multiple reports from process 'multiqc', will use only one"
+                mqc_report = mqc_report[0]
+            }
+        }
+    } catch (all) {
+    }
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
@@ -1068,7 +1490,7 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
@@ -1088,7 +1510,7 @@ workflow.onComplete {
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/Documentation/" )
+    def output_d = new File( "${params.outdir}/pipeline_info/" )
     if( !output_d.exists() ) {
       output_d.mkdirs()
     }
@@ -1101,6 +1523,67 @@ workflow.onComplete {
     def output_tf = new File( output_d, "pipeline_report.txt" )
     output_tf.withWriter { w -> w << email_txt }
 
-    log.info "[nf-core/mhcquant] Pipeline Complete"
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_red = params.monochrome_logs ? '' : "\033[0;31m";
 
+    if (workflow.stats.ignoredCount > 0 && workflow.success) {
+      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
+      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
+      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
+    }
+
+    if(workflow.success){
+        log.info "${c_purple}[nf-core/mhcquant]${c_green} Pipeline completed successfully${c_reset}"
+    } else {
+        checkHostname()
+        log.info "${c_purple}[nf-core/mhcquant]${c_red} Pipeline completed with errors${c_reset}"
+    }
+
+}
+
+
+def nfcoreHeader(){
+    // Log colors ANSI codes
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_black = params.monochrome_logs ? '' : "\033[0;30m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
+    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_white = params.monochrome_logs ? '' : "\033[0;37m";
+
+    return """    ${c_dim}----------------------------------------------------${c_reset}
+                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
+    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
+    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
+    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
+                                            ${c_green}`._,._,\'${c_reset}
+    ${c_purple}  nf-core/mhcquant v${workflow.manifest.version}${c_reset}
+    ${c_dim}----------------------------------------------------${c_reset}
+    """.stripIndent()
+}
+
+def checkHostname(){
+    def c_reset = params.monochrome_logs ? '' : "\033[0m"
+    def c_white = params.monochrome_logs ? '' : "\033[0;37m"
+    def c_red = params.monochrome_logs ? '' : "\033[1;91m"
+    def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
+    if(params.hostnames){
+        def hostname = "hostname".execute().text.trim()
+        params.hostnames.each { prof, hnames ->
+            hnames.each { hname ->
+                if(hostname.contains(hname) && !workflow.profile.contains(prof)){
+                    log.error "====================================================\n" +
+                            "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
+                            "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
+                            "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
+                            "============================================================"
+                }
+            }
+        }
+    }
 }
