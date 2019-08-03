@@ -1,6 +1,6 @@
 # nf-core/mhcquant: Changelog
 
-## v1.3 nf-core/mhcquant "Red Parrot" - 2019/08/02
+## v1.3 nf-core/mhcquant "Red Parrot" - 2019/08/03
 
 ### `Fixed`
 - nf-core template update
@@ -8,6 +8,7 @@
 - quantification fdr
 - empty neoepitope list bugs fixed
 - documentation
+- scrape version numbers
 
 ## v1.2.6 nf-core/mhcquant "Golden Eagle" - 2019/05/05
 
