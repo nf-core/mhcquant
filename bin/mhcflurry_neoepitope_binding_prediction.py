@@ -1,44 +1,20 @@
 #!/usr/bin/env python
-import argparse
-import logging
 import pandas as pd
 import numpy as np
+import logging
 import sys
 
-from collections import defaultdict
 from mhcflurry import Class1AffinityPredictor
 
-#logging setup
+# logging setup
 console = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
-LOG = logging.getLogger("MHCFlurry Predict mztab")
+LOG = logging.getLogger("Neoepitope Binding Prediction")
 LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
-def parse_mztab(identified_peptides_file):
-       """
-       parses an mztab file and returns all identified proteins
-
-       :param identified_peptides_file: path to the mztab file
-       :return: identified proteins
-       """
-       mztab = open(identified_peptides_file)
-       mztab_read = mztab.readlines()
-       mztab.close()
-
-       seq_geneIDs = defaultdict(str)
-       for line in mztab_read:
-              if line.startswith("PEP"):
-                     content = line.split('\t')
-                     seq = content[1]
-                     geneID = content[2]
-                     if not 'U' in seq and not 'X' in seq and not 'Z' in seq and not 'J' in seq and not 'B' in seq:
-                            seq_geneIDs[seq] = geneID
-
-       return seq_geneIDs
-
-#List of alleles supported by mhcflurry
+# List of alleles supported by mhcflurry
 supported_alleles = "A*01:01,A*02:01,A*02:02,A*02:03,A*02:05,A*02:06,A*02:07,A*02:11,A*02:12,A*02:16,A*02:17,A*02:19," \
                     "A*02:50,A*03:01,A*11:01,A*23:01,A*24:02,A*24:03,A*25:01,A*26:01,A*26:02,A*26:03,A*29:02,A*30:01," \
                     "A*30:02,A*31:01,A*32:01,A*33:01,A*66:01,A*68:01,A*68:02,A*68:23,A*69:01,A*80:01,B*07:01,B*07:02," \
@@ -47,25 +23,28 @@ supported_alleles = "A*01:01,A*02:01,A*02:02,A*02:03,A*02:05,A*02:06,A*02:07,A*0
                     "B*44:02,B*44:03,B*45:01,B*46:01,B*48:01,B*51:01,B*53:01,B*54:01,B*57:01,B*58:01,B*83:01,C*03:03," \
                     "C*04:01,C*05:01,C*06:02,C*07:02,C*08:02,C*12:03,C*14:02,C*15:02".split(",")
 
-#read provided allotypes
-op=open(sys.argv[-3])
-alleles=op.read().split("\n")
+# read provided allotypes
+op = open(sys.argv[-3])
+alleles = op.read().split("\n")
 op.close()
 
-#extract and verify alleles 
-unsupported_alleles=[a for a in alleles if a not in supported_alleles]
-alleles=[a for a in alleles if a in supported_alleles]
+# extract and verify alleles
+unsupported_alleles = [a for a in alleles if a not in supported_alleles]
+alleles = [a for a in alleles if a in supported_alleles]
 
 if unsupported_alleles:
-       for allele in unsupported_alleles:
-              LOG.warning("Allele: " + allele + " is not supported by MHCFlurry!")
+    for allele in unsupported_alleles:
+        LOG.warning("Allele: " + allele + " is not supported by MHCFlurry!")
 if not alleles:
-   LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
+    LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
 
- # read identified peptides
-seqs_to_geneID = parse_mztab(sys.argv[-2])
+flatten = lambda l: [item for sublist in l for item in sublist]
+# read identified peptides
+neoepitopes = [line.rstrip('\n').strip().split(',') for line in open(sys.argv[-2])][1:]
+neoepitopes = flatten(neoepitopes)
+seqs_to_geneID = dict(zip(neoepitopes[::2], neoepitopes[1::2]))
 
-if len(seqs_to_geneID) > 0: 
+if len(seqs_to_geneID) > 0:
    # call mhcflurry
    for allele in alleles:
        predictor = Class1AffinityPredictor.load()
@@ -75,4 +54,3 @@ if len(seqs_to_geneID) > 0:
 else:
    op=open(sys.argv[-1],'w')
    op.close()
-
