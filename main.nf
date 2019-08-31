@@ -51,6 +51,7 @@ def helpMessage() {
       --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
       --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
       --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --predict_RT                      Retention time prediction for identified peptides
       --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
       --quantification_fdr              Assess and assign ids matched between runs with an additional quantification FDR
       --quantification_min_prob         Specify a minimum probability cut off for quantification
@@ -123,6 +124,7 @@ params.fdr_level = 'peptide-level-fdrs'
 fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
 params.description_correct_features = 0
 params.klammer = false
+params.predict_RT = false
 params.number_mods = 3
 
 params.num_hits = 1
@@ -346,6 +348,7 @@ summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
 summary['Quantification FDR'] = params.quantification_fdr
 summary['Class 1 Alleles'] = params.predict_class_1
 summary['Class 2 Alelles'] = params.predict_class_2
+summary['RT Prediction'] = params.predict_RT
 summary['Variants']     = params.include_proteins_from_vcf
 summary['Centroidisation'] = params.run_centroidisation
 summary['Max Memory']   = params.max_memory
@@ -811,7 +814,7 @@ process filter_by_q_value {
      file id_file_perc from id_files_merged_psm_perc
 
     output:
-     file "${id_file_perc.baseName}_filtered.idXML" into id_files_merged_psm_perc_filtered
+     file "${id_file_perc.baseName}_filtered.idXML" into (id_files_merged_psm_perc_filtered, ids_for_rt_training, ids_for_rt_prediction)
 
     when:
      !params.refine_fdr_on_predicted_subset
@@ -1000,7 +1003,7 @@ process filter_refined_q_value {
      file id_file_perc_pred from id_files_merged_psm_pred_perc
      
     output:
-     file "${id_file_perc_pred.baseName}_filtered.idXML" into id_files_merged_psm_pred_perc_filtered
+     file "${id_file_perc_pred.baseName}_filtered.idXML" into (id_files_merged_psm_pred_perc_filtered, ids_for_rt_training_subset, ids_for_rt_prediction_subset)
 
     when:
      params.refine_fdr_on_predicted_subset     
@@ -1247,7 +1250,8 @@ process predict_possible_neoepitopes {
 
     output:
      file "vcf_neoepitopes.csv" into possible_neoepitopes
-    
+     file "vcf_neoepitopes.txt" into possible_neoepitopes_list
+ 
     when:
      params.include_proteins_from_vcf
      params.predict_class_1
@@ -1272,6 +1276,7 @@ process predict_possible_class_2_neoepitopes {
 
     output:
      file "vcf_neoepitopes.csv" into possible_neoepitopes_II
+     file "vcf_neoepitopes.txt" into possible_neoepitopes_list_II
 
     when:
      params.include_proteins_from_vcf
@@ -1426,6 +1431,91 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
     script:
     """
     postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
+    """
+}
+
+
+/*
+ * STEP 28 - Train Retention Times Predictor
+*/
+process train_retention_time_predictor {
+
+    input:
+    file id_files_for_rt_training from ids_for_rt_training.mix(ids_for_rt_training_subset)
+
+    output:
+    file "${id_files_for_rt_training.baseName}.txt" into (trained_rt_model, trained_rt_model_II)
+    file "${id_files_for_rt_training.baseName}_params.paramXML" into (trained_rt_params, trained_rt_params_II) 
+    file "${id_files_for_rt_training.baseName}_trainset.txt" into (trained_rt_set,  trained_rt_set_II)
+
+    when:
+     params.predict_RT
+
+    script:
+    """
+    RTModel -in ${id_files_for_rt_training} \\
+            -cv:skip_cv \\
+            -out "${id_files_for_rt_training.baseName}.txt" \\
+            -out_oligo_params "${id_files_for_rt_training.baseName}_params.paramXML" \\
+            -out_oligo_trainset "${id_files_for_rt_training.baseName}_trainset.txt"
+    """
+}
+
+
+/*
+ * STEP 29 - Retention Times Predictor Found Peptides
+*/
+process predict_retention_times_of_found_peptides {
+    publishDir "${params.outdir}/RT_prediction/"
+
+    input:
+    file id_files_for_rt_prediction from ids_for_rt_prediction.mix(ids_for_rt_prediction_subset)
+    file trained_rt_param_file from trained_rt_params
+    file trained_rt_set_file from trained_rt_set
+    file trained_rt_model_file from trained_rt_model
+
+    output:
+    file "${id_files_for_rt_prediction.baseName}_RTpredicted.csv" into rt_predicted
+
+    when:
+     params.predict_RT
+
+    script:
+    """
+    RTPredict -in_id ${id_files_for_rt_prediction} \\
+              -svm_model ${trained_rt_model_file} \\
+              -in_oligo_params ${trained_rt_param_file} \\
+              -in_oligo_trainset ${trained_rt_set_file} \\
+              -out_text:file "${id_files_for_rt_prediction.baseName}_RTpredicted.csv"
+    """
+}
+
+
+/*
+ * STEP 29 - Retention Times Predictor Found Peptides
+*/
+process predict_retention_times_of_possible_neoepitopes {
+    publishDir "${params.outdir}/RT_prediction/"
+
+    input:
+    file txt_file_for_rt_prediction from possible_neoepitopes_list.mix(possible_neoepitopes_list_II)
+    file trained_rt_param_file_II from trained_rt_params_II
+    file trained_rt_set_file_II from trained_rt_set_II
+    file trained_rt_model_file_II from trained_rt_model_II
+
+    output:
+    file "${txt_file_for_rt_prediction.baseName}_RTpredicted.csv" into rt_predicted_II
+
+    when:
+     params.predict_RT
+
+    script:
+    """
+    RTPredict -in_text ${txt_file_for_rt_prediction} \\
+              -svm_model ${trained_rt_model_file_II} \\
+              -in_oligo_params ${trained_rt_param_file_II} \\
+              -in_oligo_trainset ${trained_rt_set_file_II} \\
+              -out_text:file "${txt_file_for_rt_prediction.baseName}_RTpredicted.csv"
     """
 }
 

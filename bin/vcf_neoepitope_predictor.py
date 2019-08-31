@@ -386,6 +386,10 @@ def main():
 
                 f.write(str(p) + "\t" + proteins + vars_str + "\n")
 
+        with open(args.output.replace('.csv','.txt'), "w") as f:
+            for epitope in epitopes:
+                f.write(str(epitope) + "\n")
+
     return 0
 
 
