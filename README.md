@@ -13,7 +13,7 @@ https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
 ### Introduction
 
-nfcore/mhcquant is a bioinformatics analysis pipeline used for quantitative processing of data dependant (DDA) peptidomics data.
+nfcore/mhcquant is a bioinformatics analysis pipeline used for quantitative processing of data dependent (DDA) peptidomics data.
 
 It was specifically designed to analyse immunopeptidomics data, which deals with the analysis of affinity purified, unspecifically cleaved peptides that have recently been discussed intensively in [the context of cancer vaccines](https://www.nature.com/articles/ncomms13404).
 
