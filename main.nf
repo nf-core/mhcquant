@@ -1305,7 +1305,7 @@ process Resolve_found_neoepitopes {
 
     script:
      """
-     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_1.vcf
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_1
      """
 }
 
@@ -1330,7 +1330,7 @@ process Resolve_found_class_2_neoepitopes {
 
     script:
      """
-     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_2.csv
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_2
      """
 }
 
