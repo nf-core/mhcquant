@@ -38,6 +38,10 @@ The nf-core/mhcquant pipeline comes with documentation about the pipeline, found
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 6. [Pipeline-specific Troubleshooting](docs/troubleshooting.md)
 
+## Citation
+
+Bichmann L. et al MHCquant: Automated and reproducible data analysis for immunopeptidomics. J. Proteome Res., 18, 11 3876-3884, (2019)
+
 ## Credits
 
 nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann),[Lukas Heumos](https://github.com/zethson),[Alexander Peltzer](https://github.com/apeltzer)
