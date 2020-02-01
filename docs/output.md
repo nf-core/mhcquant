@@ -18,7 +18,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ## mzTab
 
-
 [mzTab](http://www.psidev.info/mztab) is a light-weight format to report mass spectrometry search results. It provides all important information about idenfied peptide hits and is compatible with the PRIDE Archive - proteomics data repository:
 
 Griss, J. et al. The mzTab Data Exchange Format: Communicating Mass-spectrometry-based Proteomics and Metabolomics Experimental Results to a Wider Audience. Mol Cell Proteomics 13, 2765–2775 (2014).

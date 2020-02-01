@@ -80,8 +80,8 @@ if (params.help) {
 
 
 // Validate inputs
-params.mzmls = params.mzmls ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
-params.fasta = params.fasta ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
+params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+params.fasta = params.fasta ?: { log.error "No peptide privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
 
