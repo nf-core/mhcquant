@@ -397,7 +397,7 @@ process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
 
     input:
-    file output_docs
+    file output_docs from ch_output_docs
 
     output:
     file "results_description.html"
@@ -1061,7 +1061,7 @@ process resolve_conflicts {
 
 
 /*
- * STEP 1 - FastQC
+ * STEP 16 - export all information as text to csv
  */
 process export_text {
     publishDir "${params.outdir}/"
@@ -1183,14 +1183,18 @@ process predict_peptides_mhcflurry_class_1 {
     publishDir "${params.outdir}/class_2_bindings"
 
     input:
-    set val(name), file(reads) from ch_read_files_fastqc
+     file predicted_peptides from predicted_mhcnuggets_peptides.collect{it}
+     file peptide_to_geneID from peptide_to_geneID
 
     output:
-    file "*_fastqc.{zip,html}" into ch_fastqc_results
+     file '*.csv' into postprocessed_peptides_mhcnuggets
+
+    when:
+     params.predict_class_2
 
     script:
     """
-    fastqc --quiet --threads $task.cpus $reads
+    postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID}
     """
  }
  
@@ -1323,35 +1327,31 @@ process Predict_neoepitopes_mhcflurry_class_1 {
      """
 }
 
+
 /*
- * STEP 2 - MultiQC
+ * STEP 25 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
  */
-process multiqc {
-    publishDir "${params.outdir}/MultiQC", mode: 'copy'
+process preprocess_neoepitopes_mhcnuggets_class_2 {
 
     input:
-    file multiqc_config from ch_multiqc_config
-    // TODO nf-core: Add in log files from your new processes for MultiQC to find!
-    file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
-    file ('software_versions/*') from ch_software_versions_yaml.collect()
-    file workflow_summary from create_workflow_summary(summary)
+    file neoepitopes from mhcnuggets_neo_preprocessing
 
     output:
-    file "*multiqc_report.html" into ch_multiqc_report
-    file "*_data"
-    file "multiqc_plots"
+    file 'mhcnuggets_preprocessed' into preprocessed_mhcnuggets_neoepitopes
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
 
     script:
-    rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-    rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-    // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
     """
-    multiqc -f $rtitle $rfilename --config $multiqc_config .
+    preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output mhcnuggets_preprocessed
     """
 }
 
+
 /*
- * STEP 3 - Output Description HTML
+ * STEP 26 - Predict class 2 MHCNuggets
  */
 process predict_neoepitopes_mhcnuggets_class_2 {
 
@@ -1380,16 +1380,22 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
     publishDir "${params.outdir}/class_2_bindings"
 
     input:
-    file output_docs from ch_output_docs
+    file neoepitopes from mhcnuggets_neo_postprocessing
+    file predicted_cl_2 from predicted_neoepitopes_class_2.collect{it}
 
     output:
-    file "results_description.html"
+    file '*.csv' into postprocessed_predicted_neoepitopes_class_2
+
+    when:
+     params.include_proteins_from_vcf
+     params.predict_class_2
 
     script:
     """
-    markdown_to_html.r $output_docs results_description.html
+    postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
     """
 }
+
 
 /*
  * STEP 28 - Train Retention Times Predictor
@@ -1474,6 +1480,7 @@ process predict_retention_times_of_possible_neoepitopes {
               -out_text:file "${txt_file_for_rt_prediction.baseName}_RTpredicted.csv"
     """
 }
+
 
 
 /*
