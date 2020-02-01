@@ -1,7 +1,0 @@
-name: nf-core-mhcquant-percolator-1.2.6
-channels:
-  - bioconda
-  - conda-forge
-  - defaults
-dependencies:
-  - percolator=3.1
