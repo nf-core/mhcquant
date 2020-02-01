@@ -26,4 +26,4 @@ jobs:
         run: |
           # TODO nf-core: You can customise CI pipeline run tests as required
           # (eg. adding multiple test runs with different parameters)
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --include_proteins_from_vcf --predict_RT
