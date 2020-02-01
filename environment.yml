@@ -4,9 +4,10 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - conda-forge::python=3.7.3
-  # TODO nf-core: Add required software dependencies here
-  - bioconda::fastqc=0.11.8
-  - bioconda::multiqc=1.7
-  - conda-forge::r-markdown=1.1
-  - conda-forge::r-base=3.6.1
+  - conda-forge::r-rmarkdown=1.10
+  - openms=2.4.0
+  - comet-ms=2016013
+  - python=2.7.15
+  - mhcflurry=1.2.2
+  - fred2=2.0.3
+  - mhcnuggets=2.3.1
