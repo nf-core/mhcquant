@@ -44,4 +44,4 @@ script:
   # Lint the documentation
   - markdownlint ${TRAVIS_BUILD_DIR} -c ${TRAVIS_BUILD_DIR}/.github/markdownlint.yml
   # Run the pipeline with the test profile
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker -ansi-log false -name mhcquant-${TRAVIS_EVENT_TYPE}-${TRAVIS_PULL_REQUEST}-${TRAVIS_COMMIT:0:6}-test-description --predict_class_1 --predict_class_2 --include_proteins_from_vcf --predict_RT
+  - sudo nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker -ansi-log false -name mhcquant-${TRAVIS_EVENT_TYPE}-${TRAVIS_PULL_REQUEST}-${TRAVIS_COMMIT:0:6}-test-description --predict_class_1 --predict_class_2 --include_proteins_from_vcf --predict_RT
