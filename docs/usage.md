@@ -2,10 +2,11 @@
 
 ## Table of contents
 
-* [Introduction](#general-nextflow-info)
+* [Table of contents](#table-of-contents)
+* [Introduction](#introduction)
 * [Running the pipeline](#running-the-pipeline)
-* [Updating the pipeline](#updating-the-pipeline)
-* [Reproducibility](#reproducibility)
+  * [Updating the pipeline](#updating-the-pipeline)
+  * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
   * [`--mzmls`](#--mzmls)
   * [`--fasta`](#--fasta)
@@ -85,6 +86,8 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
+<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
@@ -130,22 +133,19 @@ Use this to specify the location of your input mzML files. For example:
 --mzmls 'path/to/data/*.mzML'
 ```
 
-Please note the following requirements:
-
-1. The path must be enclosed in quotes
-2. The path must have at least one `*` wildcard character
-
 ### `--fasta`
 
 If you prefer, you can specify the full path to your fasta input protein database when you run the pipeline:
 
-```bash
---fasta '[path to Fasta protein database]'
-```
-
 ### `-profile`
 
-Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile standard,docker` - the order of arguments is important!
+Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
+
+Note that multiple profiles can be loaded, for example: `-profile test,docker` - the order of arguments is important!
+They are loaded in sequence, so later profiles can overwrite earlier profiles.
+
+If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
+The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
 
 * `standard`
   * The default profile, used if `-profile` is not specified at all.
@@ -346,11 +346,15 @@ Each step in the pipeline has a default set of requirements for number of CPUs, 
 
 ### Custom resource requests
 
-Wherever process-specific requirements are set in the pipeline, the default value can be changed by creating a custom config file. See the files in [`conf`](../conf) for examples.
+Wherever process-specific requirements are set in the pipeline, the default value can be changed by creating a custom config file. See the files hosted at [`nf-core/configs`](https://github.com/nf-core/configs/tree/master/conf) for examples.
+
+If you are likely to be running `nf-core` pipelines regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter (see definition below). You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
+
+If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack).
 
 ## AWS Batch specific parameters
 
-Running the pipeline on AWS Batch requires a couple of specific parameters to be set according to your AWS Batch configuration. Please use the `-awsbatch` profile and then specify all of the following parameters.
+Running the pipeline on AWS Batch requires a couple of specific parameters to be set according to your AWS Batch configuration. Please use [`-profile awsbatch`](https://github.com/nf-core/configs/blob/master/conf/awsbatch.config) and then specify all of the following parameters.
 
 ### `--awsqueue`
 
@@ -358,7 +362,11 @@ The JobQueue that you intend to use on AWS Batch.
 
 ### `--awsregion`
 
-The AWS region to run your job in. Default is set to `eu-west-1` but can be adjusted to your needs.
+The AWS region in which to run your job. Default is set to `eu-west-1` but can be adjusted to your needs.
+
+### `--awscli`
+
+The [AWS CLI](https://www.nextflow.io/docs/latest/awscloud.html#aws-cli-installation) path in your custom AMI. Default: `/home/ec2-user/miniconda/bin/aws`.
 
 Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
 
@@ -370,7 +378,11 @@ The output directory where the results will be saved.
 
 ### `--email`
 
-Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to speicfy this on the command line for every run.
+Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.
+
+### `--email_on_fail`
+
+This works exactly as with `--email`, except emails are only sent if the workflow is not successful.
 
 ### `-name`
 
@@ -394,12 +406,42 @@ Specify the path to a specific config file (this is a core NextFlow command).
 
 **NB:** Single hyphen (core Nextflow option)
 
-Note - you can use this to override defaults. For example, you can specify a config file using `-c` that contains the following:
+Note - you can use this to override pipeline defaults.
+
+### `--custom_config_version`
+
+Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default: `master`.
+
+```bash
+## Download and use config file with following git commid id
+--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
+```
+
+### `--custom_config_base`
+
+If you're running offline, nextflow will not be able to fetch the institutional config files
+from the internet. If you don't need them, then this is not a problem. If you do need them,
+you should download the files from the repo and tell nextflow where to find them with the
+`custom_config_base` option. For example:
+
+```bash
+## Download and unzip the config files
+cd /path/to/my/configs
+wget https://github.com/nf-core/configs/archive/master.zip
+unzip master.zip
+
+## Run the pipeline
+cd /path/to/my/data
+nextflow run /path/to/pipeline/ --custom_config_base /path/to/my/configs/configs-master/
+```
+
+> Note that the nf-core/tools helper package has a `download` command to download all required pipeline
+> files + singularity containers + institutional configs in one go for you, to make this process easier.
 
 ### `--max_memory`
 
 Use to set a top-limit for the default memory requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_memory '8.GB'``
+Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`
 
 ### `--max_time`
 
@@ -414,3 +456,7 @@ Should be a string in the format integer-unit. eg. `--max_cpus 1`
 ### `--plaintext_email`
 
 Set to receive plain-text e-mails instead of HTML formatted.
+
+### `--monochrome_logs`
+
+Set to disable colourful command line output and live life in monochrome.

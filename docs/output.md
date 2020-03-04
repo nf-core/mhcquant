@@ -1,10 +1,10 @@
 # nf-core/mhcquant: Output
 
-This document describes the output produced by the pipeline
+This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
 ## Pipeline overview
 
-The final output of the pipeline should include the following files:
+The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the final output of the pipeline should include the following files:
 
 * [all_features_merged_resolved.mzTab](#mzTab) - the community standard format for sharing mass spectrometry search results
 * [all_features_merged_resolved.csv](#csv) - aggregate csv report, containing all information about peptide identification and quantification results
@@ -25,8 +25,6 @@ Griss, J. et al. The mzTab Data Exchange Format: Communicating Mass-spectrometry
 ## csv
 
 The csv output file is a table containing all information extracted from a database search throughout the pipeline. See the OpenMS or PSI documentation for more information about [annotated scores and format](http://ftp.mi.fu-berlin.de/pub/OpenMS/release1.9-documentation/html/TOPP_TextExporter.html).
-
-Each row index is represented by a label describing its content:
 
 ```bash
 #MAP    id      filename        label   size

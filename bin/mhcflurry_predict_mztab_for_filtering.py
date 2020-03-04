@@ -72,6 +72,3 @@ for pep in seqs_new_all:
 	op.write('\t\t\t' + '</PeptideHit>' + '\n')
 op.write('</PeptideIdentification>' + '\n')
 op.close()
-
-
-
