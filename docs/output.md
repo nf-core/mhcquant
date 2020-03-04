@@ -2,86 +2,42 @@
 
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
+<!-- TODO nf-core: Write this documentation describing your workflow's output -->
+
 ## Pipeline overview
 
-The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the final output of the pipeline should include the following files:
+The pipeline is built using [Nextflow](https://www.nextflow.io/)
+and processes data using the following steps:
 
-* [all_features_merged_resolved.mzTab](#mzTab) - the community standard format for sharing mass spectrometry search results
-* [all_features_merged_resolved.csv](#csv) - aggregate csv report, containing all information about peptide identification and quantification results
-* [found_neoepitopes.csv](#found_neoepitopes) - a csv listing all neoepitopes found in the mass spectrometry search, independant of binding predictions
-* [vcf_neoepitopes.csv](#vcf_neoepitopes) - a csv listing all theoretically possible neoepitope sequences from the variants specified in the vcf
-* [_vcf.fasta](#fasta) - the fasta database including mutated proteins used for the database search
-* [class_1/2_binding_predictions](#class_1/2_binding_predictions) - a folder containing the respective binding predictions of all detected peptides and all theoretically possible neoepitope sequences
-* [Intermediate_resuls](#intermediates) - a folder containing all intermediate results from the steps in the pipeline (unfiltered and filtered PSMs, aligned mzMLs, features, etc. ..)
-* [Documentation](#docs) - a folder containing summarized reports of the pipeline execution
-* [pipeline_info](#info) - a folder containing detailed reports on computational runtimes and workflow steps
+* [FastQC](#fastqc) - read quality control
+* [MultiQC](#multiqc) - aggregate report, describing results of the whole pipeline
 
-## mzTab
+## FastQC
 
-[mzTab](http://www.psidev.info/mztab) is a light-weight format to report mass spectrometry search results. It provides all important information about idenfied peptide hits and is compatible with the PRIDE Archive - proteomics data repository:
+[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C). You get information about adapter contamination and other overrepresented sequences.
 
-Griss, J. et al. The mzTab Data Exchange Format: Communicating Mass-spectrometry-based Proteomics and Metabolomics Experimental Results to a Wider Audience. Mol Cell Proteomics 13, 2765–2775 (2014).
+For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-## csv
+> **NB:** The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the `trim_galore` directory.
 
-The csv output file is a table containing all information extracted from a database search throughout the pipeline. See the OpenMS or PSI documentation for more information about [annotated scores and format](http://ftp.mi.fu-berlin.de/pub/OpenMS/release1.9-documentation/html/TOPP_TextExporter.html).
+**Output directory: `results/fastqc`**
 
-```bash
-#MAP    id      filename        label   size
-```
+* `sample_fastqc.html`
+  * FastQC report, containing quality metrics for your untrimmed raw fastq files
+* `zips/sample_fastqc.zip`
+  * zip file containing the FastQC report, tab-delimited data file and plot images
 
-MAP contains information about the different mzML files that were provided initially
+## MultiQC
 
-```bash
-#RUN    run_id  score_type      score_direction date_time       search_engine_version   parameters
-```
+[MultiQC](http://multiqc.info) is a visualisation tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in within the report data directory.
 
-RUN contains information about the search that was performed on each run
+The pipeline has special steps which allow the software versions used to be reported in the MultiQC output for future traceability.
 
-```bash
-#PROTEIN        score   rank    accession       protein_description     coverage        sequence
-```
+**Output directory: `results/multiqc`**
 
-PROTEIN contains infomration about the protein ids corresponding to the peptides that were detected (No protein inference was performed)
+* `Project_multiqc_report.html`
+  * MultiQC report - a standalone HTML file that can be viewed in your web browser
+* `Project_multiqc_data/`
+  * Directory containing parsed statistics from the different tools used in the pipeline
 
-```bash
-#UNASSIGNEDPEPTIDE      rt      mz      score   rank    sequence        charge  aa_before       aa_after        score_type      search_identifier       accessions      FFId_category   feature_id      file_origin     map_index       spectrum_reference      COMET:IonFrac   COMET:deltCn    COMET:deltLCn   COMET:lnExpect  COMET:lnNumSP   COMET:lnRankSP  MS:1001491      MS:1001492      MS:1001493      MS:1002252      MS:1002253      MS:1002254      MS:1002255      MS:1002256      MS:1002257      MS:1002258      MS:1002259      num_matched_peptides    protein_references      target_decoy
-```
-
-UNASSIGNEDPEPTIDE contains information about PSMs that were identified but couldn't be quantified to a precursor feature on MS Level 1.
-
-```bash
-#CONSENSUS      rt_cf   mz_cf   intensity_cf    charge_cf       width_cf        quality_cf      rt_0    mz_0    intensity_0     charge_0        width_0 rt_1    mz_1    intensity_1     charge_1        width_1 rt_2    mz_2    intensity_2     charge_2        width_2 rt_3    mz_3    intensity_3     charge_3        width_3
-```
-
-CONSENSUS contains information about precursor features that were identified in multiple runs (eg. run 1-3 in this case)
-
-```bash
-#PEPTIDE        rt      mz      score   rank    sequence        charge  aa_before       aa_after        score_type      search_identifier       accessions      FFId_category   fea
-```
-
-PEPTIDE contains information about peptide hits that were identified and correspond to the consensus features described one row above.
-
-## found_neoepitopes
-
-csv file listing detected neoepitope sequences:
-
-```bash
-peptide sequence   geneID
-```
-
-## vcf_neoepitopes
-
-csv file listing theoretically possible neoepitope sequences:
-
-```bash
-Sequence        Antigen ID       Variants
-```
-
-## class_1/2_binding_predictions
-
-The prediction outputs are comma separated table (csv) for each allele, listing each peptide sequence and its corresponding predicted affinity scores:
-
-```bash
-peptide   allele   prediction   prediction_low   prediction_high   prediction_percentile
-```
+For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)
