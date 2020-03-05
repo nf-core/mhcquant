@@ -68,10 +68,10 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 If you use `nf-core/mhcquant` for your analysis, please cite:
 
 > **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**
-> 
+>
 > Leon Bichmann, Annika Nelde, Michael Ghosh, Lukas Heumos, Christopher Mohr, Alexander Peltzer, Leon Kuchenbecker, Timo Sachsenberg, Juliane S. Walz, Stefan > Stevanović, Hans-Georg Rammensee, Oliver Kohlbacher
-> 
-> Journal of Proteome Research 2019 18 (11), 3876-3884 
+>
+> Journal of Proteome Research 2019 18 (11), 3876-3884
 > DOI: 10.1021/acs.jproteome.9b00313
 
 You can cite the `nf-core` publication as follows:
