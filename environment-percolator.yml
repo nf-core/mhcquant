@@ -1,7 +1,7 @@
-name: nf-core-mhcquant-percolator-1.3
+name: nf-core-mhcquant-percolator-dev
 channels:
   - bioconda
   - conda-forge
   - defaults
 dependencies:
-  - percolator=3.1
+  - percolator=3.4
