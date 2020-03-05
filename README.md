@@ -11,6 +11,12 @@
 
 ## Introduction
 
+nfcore/mhcquant is a bioinformatics analysis pipeline used for quantitative processing of data dependent (DDA) peptidomics data.
+
+It was specifically designed to analyse immunopeptidomics data, which deals with the analysis of affinity purified, unspecifically cleaved peptides that have recently been discussed intensively in [the context of cancer vaccines](https://www.nature.com/articles/ncomms13404).
+
+The workflow is based on the OpenMS C++ framework for computational mass spectrometry. RAW files (mzML) serve as inputs and a database search (Comet) is performed based on a given input protein database. FDR rescoring is applied using Percolator 3.0 based on a competitive target-decoy approach (reversed decoys). For label free quantification all input files undergo identification based retention time alignment (MapAlignerIdentification), and targeted feature extraction matching ids between runs (FeatureFinderIdentification). In addition, a variant calling file (vcf) can be specified to translate variants into proteins that will be included in the database search and binding predictions on specified alleles (alleles.tsv) using MHCFlurry (Class 1) or MHCNugget (Class 2) can be directly run on the output peptide lists. Moreover, if a vcf file was specified, neoepitopes will automatically be determined and binding predictions can also directly be predicted for them.
+
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
 ## Quick Start
@@ -29,10 +35,8 @@ nextflow run nf-core/mhcquant -profile test,<docker/singularity/conda/institute>
 
 iv. Start running your own analysis!
 
-<!-- TODO nf-core: Update the default command above used to run the pipeline -->
-
 ```bash
-nextflow run nf-core/mhcquant -profile <docker/singularity/conda/institute> --reads '*_R{1,2}.fastq.gz' --genome GRCh37
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --predict_class_I --refine_fdr_on_predicted_subset -profile standard,docker
 ```
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
@@ -45,12 +49,9 @@ The nf-core/mhcquant pipeline comes with documentation about the pipeline, found
 2. Pipeline configuration
     * [Local installation](https://nf-co.re/usage/local_installation)
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-
-<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
 
 ## Credits
 
@@ -64,8 +65,14 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 
 ## Citation
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi. -->
-<!-- If you use  nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+If you use `nf-core/mhcquant` for your analysis, please cite:
+
+> **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**
+> 
+> Leon Bichmann, Annika Nelde, Michael Ghosh, Lukas Heumos, Christopher Mohr, Alexander Peltzer, Leon Kuchenbecker, Timo Sachsenberg, Juliane S. Walz, Stefan > Stevanović, Hans-Georg Rammensee, Oliver Kohlbacher
+> 
+> Journal of Proteome Research 2019 18 (11), 3876-3884 
+> DOI: 10.1021/acs.jproteome.9b00313
 
 You can cite the `nf-core` publication as follows:
 
