@@ -51,9 +51,10 @@ def helpMessage() {
       --description_correct_features [int]      Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
       --klammer [bool]                          Retention time features are calculated as in Klammer et al. instead of with Elude.
       --predict_RT [bool]                       Retention time prediction for identified peptides
-      --skip_decoy_generation [bool             Use a fasta database that already includes decoy sequences
+      --skip_decoy_generation [bool]            Use a fasta database that already includes decoy sequences
       --quantification_fdr [bool]               Assess and assign ids matched between runs with an additional quantification FDR
-      --quantification_min_prob  [int           Specify a minimum probability cut off for quantification
+      --quantification_min_prob  [int]          Specify a minimum probability cut off for quantification
+
     Binding Predictions:	
       --predict_class_1 [bool]                  Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
       --predict_class_2 [bool]                  Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
@@ -61,6 +62,7 @@ def helpMessage() {
       --subset_affinity_threshold [int]         Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
       --class_1_alleles [file]                  Path to file including class 1 allele information	
       --class_2_alleles [file]                  Path to file including class 2 allele information	
+      
     Variants:	
       --include_proteins_from_vcf [bool]        Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
       --vcf [file]                              Path to vcf file	
