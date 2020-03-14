@@ -1,5 +1,16 @@
 # nf-core/mhcquant: Changelog
 
+## dev
+
+### `Fixed`
+
+- nf-core template update 1.8 and 1.9
+- Added version numbers of mhcnuggets and Fred2
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.3 nf-core/mhcquant "Red Parrot" - 2019/08/03
 
 ### `Fixed`
