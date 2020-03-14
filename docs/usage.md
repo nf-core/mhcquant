@@ -8,13 +8,9 @@
   * [Updating the pipeline](#updating-the-pipeline)
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
-  * [`-profile`](#-profile)
   * [`--mzmls`](#--mzmls)
-  * [`-profile`](#-profile-single-dash)
-    * [`docker`](#docker)
-    * [`awsbatch`](#awsbatch)
-    * [`standard`](#standard)
-    * [`none`](#none)
+  * [`--fasta`](#--fasta)
+  * [`-profile`](#-profile)
 * [Mass Spectrometry Search](#Mass-Spectrometry-Search)
   * [`--peptide_min_length`](#--peptide_min_length)
   * [`--peptide_max_length`](#--peptide_max_length)
@@ -99,7 +95,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --class_1_alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --predict_class_1 -profile standard,docker
+nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta 'SWISSPROT_12_2018.fasta' --class_1_alleles 'alleles.tsv' --vcf 'variants.vcf' --include_proteins_from_vcf --predict_class_1 -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
