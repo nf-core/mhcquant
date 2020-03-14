@@ -490,6 +490,8 @@ process peak_picking {
  * STEP 2 - run comet database search
  */
 process db_search_comet {
+
+    label 'process_high'
  
     input:
      file mzml_file from input_mzmls.mix(input_mzmls_picked)
@@ -1213,6 +1215,8 @@ process predict_possible_neoepitopes {
     publishDir "${params.outdir}/"
     echo true
 
+    label 'process_high'
+
     input:
      file alleles_file from neoepitopes_class_1_alleles
      file vcf_file from input_vcf_neoepitope
@@ -1238,6 +1242,8 @@ process predict_possible_neoepitopes {
 process predict_possible_class_2_neoepitopes {
     publishDir "${params.outdir}/"
     echo true
+
+    label 'process_high'
 
     input:
      file alleles_file_II from peptides_class_2_alleles_II
