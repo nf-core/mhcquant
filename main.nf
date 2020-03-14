@@ -20,66 +20,66 @@ def helpMessage() {
     nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --class_1_alleles 'alleles.tsv' --include_proteins_from_vcf --predict_class_1 --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
-      --mzmls [str]                       Path to input data (must be surrounded with quotes)	
-      --fasta [str]                       Path to Fasta reference
-      -profile [str]                      Configuration profile to use. Can use multiple (comma separated)
-                                          Available: docker, singularity, test, awsbatch and more
+      --mzmls [file]                            Path to input data (must be surrounded with quotes)	
+      --fasta [file]                            Path to Fasta reference
+      -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
+                                                Available: docker, singularity, test, awsbatch and more
     Mass Spectrometry Search:
-      --peptide_min_length                Minimum peptide length for filtering
-      --peptide_max_length                Maximum peptide length for filtering
-      --precursor_mass_tolerance          Mass tolerance of precursor mass (ppm)
-      --fragment_mass_tolerance           Mass tolerance of fragment mass bin (ppm)
-      --fragment_bin_offset               Offset of fragment mass bin (Comet specific parameter)
-      --use_x_ions                        Use x ions for spectral matching in addition
-      --use_z_ions                        Use z ions for spectral matching in addition
-      --use_a_ions                        Use a ions for spectral matching in addition
-      --use_c_ions                        Use c ions for spectral matching in addition
-      --fdr_threshold                     Threshold for FDR filtering
-      --fdr_level                         Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
-      --digest_mass_range                 Mass range of peptides considered for matching
-      --activation_method                 Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
-      --enzyme                            Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
-      --number_mods                       Maximum number of modifications of PSMs
-      --fixed_mods                        Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
-      --variable_mods                     Variable modifications ('Oxidation (M)', see OpenMS modifications)
-      --num_hits                          Number of reported hits
-      --run_centroidisation               Specify whether mzml data is peak picked or not (true, false)
-      --pick_ms_levels                    The ms level used for peak picking (eg. 1, 2)
-      --prec_charge                       Precursor charge (eg. "2:3")
-      --max_rt_alignment_shift            Maximal retention time shift (sec) resulting from linear alignment      
-      --spectrum_batch_size               Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
-      --description_correct_features      Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
-      --klammer                           Retention time features are calculated as in Klammer et al. instead of with Elude.
-      --predict_RT                        Retention time prediction for identified peptides
-      --skip_decoy_generation             Use a fasta databse that already includes decoy sequences
-      --quantification_fdr                Assess and assign ids matched between runs with an additional quantification FDR
-      --quantification_min_prob           Specify a minimum probability cut off for quantification
+      --peptide_min_length [int]                Minimum peptide length for filtering
+      --peptide_max_length [int]                Maximum peptide length for filtering
+      --precursor_mass_tolerance [int           Mass tolerance of precursor mass (ppm)
+      --fragment_mass_tolerance [int]           Mass tolerance of fragment mass bin (ppm)
+      --fragment_bin_offset [int]               Offset of fragment mass bin (Comet specific parameter)
+      --use_x_ions [bool]                       Use x ions for spectral matching in addition
+      --use_z_ions [bool]                       Use z ions for spectral matching in addition
+      --use_a_ions [bool]                       Use a ions for spectral matching in addition
+      --use_c_ions [bool]                       Use c ions for spectral matching in addition
+      --fdr_threshold [int]                     Threshold for FDR filtering
+      --fdr_level [str]                         Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
+      --digest_mass_range [int]                 Mass range of peptides considered for matching
+      --activation_method [str]                 Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
+      --enzyme [str]                            Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
+      --number_mods [int]                       Maximum number of modifications of PSMs
+      --fixed_mods [str]                        Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
+      --variable_mods [str]                     Variable modifications ('Oxidation (M)', see OpenMS modifications)
+      --num_hits [int]                          Number of reported hits
+      --run_centroidisation [bool]              Specify whether mzml data is peak picked or not (true, false)
+      --pick_ms_levels [int]                    The ms level used for peak picking (eg. 1, 2)
+      --prec_charge [str]                       Precursor charge (eg. "2:3")
+      --max_rt_alignment_shift [int]            Maximal retention time shift (sec) resulting from linear alignment      
+      --spectrum_batch_size [int]               Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+      --description_correct_features [int]      Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
+      --klammer [bool]                          Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --predict_RT [bool]                       Retention time prediction for identified peptides
+      --skip_decoy_generation [bool             Use a fasta database that already includes decoy sequences
+      --quantification_fdr [bool]               Assess and assign ids matched between runs with an additional quantification FDR
+      --quantification_min_prob  [int           Specify a minimum probability cut off for quantification
     Binding Predictions:	
-        --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
-        --predict_class_2                 Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
-        --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
-        --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
-        --class_1_alleles                 Path to file including class 1 allele information	
-        --class_2_alleles                 Path to file including class 2 allele information	
+        --predict_class_1 [bool]                Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
+        --predict_class_2 [bool]                Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
+        --refine_fdr_on_predicted_subset[bool]  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
+        --subset_affinity_threshold [int]       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
+        --class_1_alleles [file]                Path to file including class 1 allele information	
+        --class_2_alleles [file]                Path to file including class 2 allele information	
     Variants:	
-        --include_proteins_from_vcf       Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
-        --vcf                             Path to vcf file	
-        --variant_annotation_style        Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
-        --variant_reference               Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
-        --variant_indel_filter            Remove insertions and deletions from vcf (true, false)	
-        --variant_frameshift_filter       Remove insertions and deltionns causing frameshifts from vcf (true, false)	
-        --variant_snp_filter              Remove snps from vcf (true, false)
+        --include_proteins_from_vcf [bool]      Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
+        --vcf [file]                            Path to vcf file	
+        --variant_annotation_style [str]        Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
+        --variant_reference [str]               Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
+        --variant_indel_filter [bool]           Remove insertions and deletions from vcf (true, false)	
+        --variant_frameshift_filter [bool]      Remove insertions and deltionns causing frameshifts from vcf (true, false)	
+        --variant_snp_filter [bool]             Remove snps from vcf (true, false)
 
     Other options:
-      --outdir [file]                     The output directory where the results will be saved
-      --email [email]                     Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      --email_on_fail [email]             Same as --email, except only send mail if the workflow is not successful
-      -name [str]                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
+      --outdir [file]                           The output directory where the results will be saved
+      --email [email]                           Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      --email_on_fail [email]                   Same as --email, except only send mail if the workflow is not successful
+      -name [str]                               Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
 
     AWSBatch options:
-      --awsqueue [str]                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion [str]                   The AWS Region for your AWS Batch job to run on
-      --awscli [str]                      Path to the AWS CLI tool
+      --awsqueue [str]                          The AWSBatch JobQueue that needs to be set when running on AWSBatch
+      --awsregion [str]                         The AWS Region for your AWS Batch job to run on
+      --awscli [str]                            Path to the AWS CLI tool
     """.stripIndent()
 }
 
