@@ -55,20 +55,20 @@ def helpMessage() {
       --quantification_fdr [bool]               Assess and assign ids matched between runs with an additional quantification FDR
       --quantification_min_prob  [int           Specify a minimum probability cut off for quantification
     Binding Predictions:	
-        --predict_class_1 [bool]                Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
-        --predict_class_2 [bool]                Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
-        --refine_fdr_on_predicted_subset[bool]  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
-        --subset_affinity_threshold [int]       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
-        --class_1_alleles [file]                Path to file including class 1 allele information	
-        --class_2_alleles [file]                Path to file including class 2 allele information	
+      --predict_class_1 [bool]                  Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
+      --predict_class_2 [bool]                  Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
+      --refine_fdr_on_predicted_subset[bool]    Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
+      --subset_affinity_threshold [int]         Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
+      --class_1_alleles [file]                  Path to file including class 1 allele information	
+      --class_2_alleles [file]                  Path to file including class 2 allele information	
     Variants:	
-        --include_proteins_from_vcf [bool]      Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
-        --vcf [file]                            Path to vcf file	
-        --variant_annotation_style [str]        Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
-        --variant_reference [str]               Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
-        --variant_indel_filter [bool]           Remove insertions and deletions from vcf (true, false)	
-        --variant_frameshift_filter [bool]      Remove insertions and deltionns causing frameshifts from vcf (true, false)	
-        --variant_snp_filter [bool]             Remove snps from vcf (true, false)
+      --include_proteins_from_vcf [bool]        Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
+      --vcf [file]                              Path to vcf file	
+      --variant_annotation_style [str]          Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
+      --variant_reference [str]                 Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
+      --variant_indel_filter [bool]             Remove insertions and deletions from vcf (true, false)	
+      --variant_frameshift_filter [bool]        Remove insertions and deltionns causing frameshifts from vcf (true, false)	
+      --variant_snp_filter [bool]               Remove snps from vcf (true, false)
 
     Other options:
       --outdir [file]                           The output directory where the results will be saved
