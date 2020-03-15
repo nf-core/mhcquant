@@ -20,70 +20,68 @@ def helpMessage() {
     nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --class_1_alleles 'alleles.tsv' --include_proteins_from_vcf --predict_class_1 --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
-      --mzmls                           Path to input data (must be surrounded with quotes)	
-      --fasta                           Path to Fasta reference
-
-      -profile [str]                    Configuration profile to use. Can use multiple (comma separated)
-                                        Available: conda, docker, singularity, test, awsbatch and more
-
+      --mzmls [file]                            Path to input data (must be surrounded with quotes)	
+      --fasta [file]                            Path to Fasta reference
+      -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
+                                                Available: docker, singularity, test, awsbatch and more
     Mass Spectrometry Search:
-      --peptide_min_length              Minimum peptide length for filtering
-      --peptide_max_length              Maximum peptide length for filtering
-      --precursor_mass_tolerance        Mass tolerance of precursor mass (ppm)
-      --fragment_mass_tolerance         Mass tolerance of fragment mass bin (ppm)
-      --fragment_bin_offset             Offset of fragment mass bin (Comet specific parameter)
-      --use_x_ions                      Use x ions for spectral matching in addition
-      --use_z_ions                      Use z ions for spectral matching in addition
-      --use_a_ions                      Use a ions for spectral matching in addition
-      --use_c_ions                      Use c ions for spectral matching in addition
-      --fdr_threshold                   Threshold for FDR filtering
-      --fdr_level                       Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
-      --digest_mass_range               Mass range of peptides considered for matching
-      --activation_method               Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
-      --enzyme                          Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
-      --number_mods                     Maximum number of modifications of PSMs
-      --fixed_mods                      Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
-      --variable_mods                   Variable modifications ('Oxidation (M)', see OpenMS modifications)
-      --num_hits                        Number of reported hits
-      --run_centroidisation             Specify whether mzml data is peak picked or not (true, false)
-      --pick_ms_levels                  The ms level used for peak picking (eg. 1, 2)
-      --prec_charge                     Precursor charge (eg. "2:3")
-      --max_rt_alignment_shift          Maximal retention time shift (sec) resulting from linear alignment      
-      --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
-      --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
-      --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
-      --predict_RT                      Retention time prediction for identified peptides
-      --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
-      --quantification_fdr              Assess and assign ids matched between runs with an additional quantification FDR
-      --quantification_min_prob         Specify a minimum probability cut off for quantification
+      --peptide_min_length [int]                Minimum peptide length for filtering
+      --peptide_max_length [int]                Maximum peptide length for filtering
+      --precursor_mass_tolerance [int           Mass tolerance of precursor mass (ppm)
+      --fragment_mass_tolerance [int]           Mass tolerance of fragment mass bin (ppm)
+      --fragment_bin_offset [int]               Offset of fragment mass bin (Comet specific parameter)
+      --use_x_ions [bool]                       Use x ions for spectral matching in addition
+      --use_z_ions [bool]                       Use z ions for spectral matching in addition
+      --use_a_ions [bool]                       Use a ions for spectral matching in addition
+      --use_c_ions [bool]                       Use c ions for spectral matching in addition
+      --fdr_threshold [int]                     Threshold for FDR filtering
+      --fdr_level [str]                         Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
+      --digest_mass_range [int]                 Mass range of peptides considered for matching
+      --activation_method [str]                 Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
+      --enzyme [str]                            Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
+      --number_mods [int]                       Maximum number of modifications of PSMs
+      --fixed_mods [str]                        Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
+      --variable_mods [str]                     Variable modifications ('Oxidation (M)', see OpenMS modifications)
+      --num_hits [int]                          Number of reported hits
+      --run_centroidisation [bool]              Specify whether mzml data is peak picked or not (true, false)
+      --pick_ms_levels [int]                    The ms level used for peak picking (eg. 1, 2)
+      --prec_charge [str]                       Precursor charge (eg. "2:3")
+      --max_rt_alignment_shift [int]            Maximal retention time shift (sec) resulting from linear alignment      
+      --spectrum_batch_size [int]               Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+      --description_correct_features [int]      Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
+      --klammer [bool]                          Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --predict_RT [bool]                       Retention time prediction for identified peptides
+      --skip_decoy_generation [bool]            Use a fasta database that already includes decoy sequences
+      --quantification_fdr [bool]               Assess and assign ids matched between runs with an additional quantification FDR
+      --quantification_min_prob  [int]          Specify a minimum probability cut off for quantification
 
     Binding Predictions:	
-        --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
-        --predict_class_2                 Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
-        --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
-        --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
-        --class_1_alleles                 Path to file including class 1 allele information	
-        --class_2_alleles                 Path to file including class 2 allele information	
+      --predict_class_1 [bool]                  Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
+      --predict_class_2 [bool]                  Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
+      --refine_fdr_on_predicted_subset[bool]    Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
+      --subset_affinity_threshold [int]         Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
+      --class_1_alleles [file]                  Path to file including class 1 allele information	
+      --class_2_alleles [file]                  Path to file including class 2 allele information	
 
     Variants:	
-        --include_proteins_from_vcf       Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
-        --vcf                             Path to vcf file	
-        --variant_annotation_style        Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
-        --variant_reference               Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
-        --variant_indel_filter            Remove insertions and deletions from vcf (true, false)	
-        --variant_frameshift_filter       Remove insertions and deltionns causing frameshifts from vcf (true, false)	
-        --variant_snp_filter              Remove snps from vcf (true, false)
+      --include_proteins_from_vcf [bool]        Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
+      --vcf [file]                              Path to vcf file	
+      --variant_annotation_style [str]          Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
+      --variant_reference [str]                 Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
+      --variant_indel_filter [bool]             Remove insertions and deletions from vcf (true, false)	
+      --variant_frameshift_filter [bool]        Remove insertions and deltionns causing frameshifts from vcf (true, false)	
+      --variant_snp_filter [bool]               Remove snps from vcf (true, false)
 
     Other options:
-      --outdir [file]                 The output directory where the results will be saved
-      --email [email]                 Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      --email_on_fail [email]         Same as --email, except only send mail if the workflow is not successful
-      -name [str]                     Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
+      --outdir [file]                           The output directory where the results will be saved
+      --email [email]                           Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      --email_on_fail [email]                   Same as --email, except only send mail if the workflow is not successful
+      -name [str]                               Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
 
     AWSBatch options:
-      --awsqueue [str]                The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion [str]               The AWS Region for your AWS Batch job to run on
-      --awscli [str]                  Path to the AWS CLI tool
+      --awsqueue [str]                          The AWSBatch JobQueue that needs to be set when running on AWSBatch
+      --awsregion [str]                         The AWS Region for your AWS Batch job to run on
+      --awscli [str]                            Path to the AWS CLI tool
     """.stripIndent()
 }
 
@@ -93,15 +91,13 @@ if (params.help) {
     exit 0
 }
 
-
 // Validate inputs
 params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
 params.fasta = params.fasta ?: { log.error "No database fasta privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
-
 /*
- * Define the default parameters
+ * SET UP CONFIGURATION VARIABLES
  */
 
 //MS params
@@ -183,32 +179,7 @@ variant_snp_filter="-fSNP"
 variant_snp_filter=""
 }
 
-
-/*
- * SET UP CONFIGURATION VARIABLES
- */
-// Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
-custom_runName = params.name
-if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
-    custom_runName = workflow.runName
-}
-
-if (workflow.profile.contains('awsbatch')) {
-    // AWSBatch sanity checking
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-    // Check outdir paths to be S3 buckets if running on AWSBatch
-    // related: https://github.com/nextflow-io/nextflow/issues/813
-    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
-    // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
-}
-
-// Stage config files
-ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
-
-
-if( params.run_centroidisation) {
+if (params.run_centroidisation) {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
@@ -226,7 +197,6 @@ if( params.run_centroidisation) {
     input_mzmls_unpicked = Channel.empty()
     input_mzmls_align_unpicked = Channel.empty()
 }
-
 
 /*
  * Create a channel for input fasta file
@@ -281,14 +251,14 @@ if( params.predict_class_1){
 
 /*
  * Create a channel for class  2 allele files
- */
+*/
 if( params.predict_class_2){
     Channel
         .fromPath( params.class_2_alleles )
         .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
         .into { nepepitopes_class_2_alleles; peptides_class_2_alleles; peptides_class_2_alleles_II }
-} else {
 
+} else {
     nepepitopes_class_2_alleles = Channel.empty()
     peptides_class_2_alleles = Channel.empty()
     peptides_class_2_alleles_II = Channel.empty()
@@ -302,48 +272,70 @@ if( params.include_proteins_from_vcf){
         .fromPath( params.vcf )
         .ifEmpty { exit 1, "params.vcf was empty - no input file supplied" }
         .into { input_vcf; input_vcf_neoepitope; input_vcf_neoepitope_II}
-} else {
 
+} else {
     input_vcf = Channel.empty()
     input_vcf_neoepitope = Channel.empty()
     input_vcf_neoepitope_II = Channel.empty()
 }
 
+// Stage config files
+ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+
+// Has the run name been specified by the user?
+//  this has the bonus effect of catching both -name and --name
+custom_runName = params.name
+if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
+    custom_runName = workflow.runName
+}
+
+if (workflow.profile.contains('awsbatch')) {
+    // AWSBatch sanity checking
+    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+    // Check outdir paths to be S3 buckets if running on AWSBatch
+    // related: https://github.com/nextflow-io/nextflow/issues/813
+    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+    // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+}
+
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
-summary['Pipeline Name']  = 'nf-core/mhcquant'
-summary['Pipeline Version'] = workflow.manifest.version
-summary['Run Name']     = custom_runName ?: workflow.runName
-summary['mzMLs']        = params.mzmls
-summary['Fasta Ref']    = params.fasta
+if (workflow.revision) summary['Pipeline Release'] = workflow.revision
+summary['Run Name']           = custom_runName ?: workflow.runName
+summary['Pipeline Name']      = 'nf-core/mhcquant'
+summary['Pipeline Version']   = workflow.manifest.version
+summary['Run Name']           = custom_runName ?: workflow.runName
+summary['mzMLs']              = params.mzmls
+summary['Fasta Ref']          = params.fasta
 summary['Class 1 Prediction'] = params.predict_class_1
 summary['Class 2 Prediction'] = params.predict_class_2
-summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
+summary['SubsetFDR']          = params.refine_fdr_on_predicted_subset
 summary['Quantification FDR'] = params.quantification_fdr
-summary['Class 1 Alleles'] = params.predict_class_1
-summary['Class 2 Alelles'] = params.predict_class_2
-summary['RT Prediction'] = params.predict_RT
-summary['Variants']     = params.include_proteins_from_vcf
-summary['Centroidisation'] = params.run_centroidisation
-summary['Max Memory']   = params.max_memory
-summary['Max CPUs']     = params.max_cpus
-summary['Max Time']     = params.max_time
-summary['Output dir']   = params.outdir
-summary['Working dir']  = workflow.workDir
-summary['Container Engine'] = workflow.containerEngine
+summary['Class 1 Alleles']    = params.predict_class_1
+summary['Class 2 Alelles']    = params.predict_class_2
+summary['RT Prediction']      = params.predict_RT
+summary['Variants']           = params.include_proteins_from_vcf
+summary['Centroidisation']    = params.run_centroidisation
+summary['Max Memory']         = params.max_memory
+summary['Max CPUs']           = params.max_cpus
+summary['Max Time']           = params.max_time
+summary['Output dir']         = params.outdir
+summary['Working dir']        = workflow.workDir
+summary['Container Engine']   = workflow.containerEngine
 if(workflow.containerEngine) summary['Container'] = workflow.container
-summary['Current home']   = "$HOME"
-summary['Current user']   = "$USER"
-summary['Current path']   = "$PWD"
-summary['Working dir']    = workflow.workDir
-summary['Output dir']     = params.outdir
-summary['Script dir']     = workflow.projectDir
-summary['Config Profile'] = workflow.profile
+summary['Current home']       = "$HOME"
+summary['Current user']       = "$USER"
+summary['Current path']       = "$PWD"
+summary['Working dir']        = workflow.workDir
+summary['Output dir']         = params.outdir
+summary['Script dir']         = workflow.projectDir
+summary['Config Profile']     = workflow.profile
 if (workflow.profile.contains('awsbatch')) {
-    summary['AWS Region']   = params.awsregion
-    summary['AWS Queue']    = params.awsqueue
-    summary['AWS CLI']      = params.awscli
+    summary['AWS Region']     = params.awsregion
+    summary['AWS Queue']      = params.awsqueue
+    summary['AWS CLI']        = params.awscli
 }
 summary['Config Profile'] = workflow.profile
 if (params.config_profile_description) summary['Config Description'] = params.config_profile_description
@@ -359,9 +351,10 @@ log.info "-\033[2m--------------------------------------------------\033[0m-"
 // Check the hostnames against configured profiles
 checkHostname()
 
-def create_workflow_summary(summary) {
-    def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
-    yaml_file.text  = """
+Channel.from(summary.collect{ [it.key, it.value] })
+    .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
+    .reduce { a, b -> return [a, b].join("\n            ") }
+    .map { x -> """
     id: 'nf-core-mhcquant-summary'
     description: " - this information is collected when the pipeline is started."
     section_name: 'nf-core/mhcquant Workflow Summary'
@@ -369,12 +362,10 @@ def create_workflow_summary(summary) {
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
-${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
+            $x
         </dl>
-    """.stripIndent()
-
-   return yaml_file
-}
+    """.stripIndent() }
+    .set { ch_workflow_summary }
 
 /*
  * Parse software version numbers
@@ -398,6 +389,8 @@ process get_software_versions {
     percolator -h &> v_percolator.txt
     comet -p
     mhcflurry-predict --version &> v_mhcflurry.txt
+    echo 2.3.1 > v_mhcnuggets.txt
+    echo 2.0.3 > v_fred2.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -405,9 +398,9 @@ process get_software_versions {
 
 /*
  * STEP 0 - Output Description HTML
- */
+*/ 
 process output_documentation {
-    publishDir "${params.outdir}/Documentation", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
     file output_docs from ch_output_docs
@@ -417,9 +410,10 @@ process output_documentation {
 
     script:
     """
-    markdown_to_html.r $output_docs results_description.html
+    markdown_to_html.py $output_docs -o results_description.html
     """
 }
+
 
 
 /*
@@ -496,6 +490,8 @@ process peak_picking {
  * STEP 2 - run comet database search
  */
 process db_search_comet {
+
+    label 'process_high'
  
     input:
      file mzml_file from input_mzmls.mix(input_mzmls_picked)
@@ -1219,6 +1215,8 @@ process predict_possible_neoepitopes {
     publishDir "${params.outdir}/"
     echo true
 
+    label 'process_high'
+
     input:
      file alleles_file from neoepitopes_class_1_alleles
      file vcf_file from input_vcf_neoepitope
@@ -1244,6 +1242,8 @@ process predict_possible_neoepitopes {
 process predict_possible_class_2_neoepitopes {
     publishDir "${params.outdir}/"
     echo true
+
+    label 'process_high'
 
     input:
      file alleles_file_II from peptides_class_2_alleles_II
@@ -1493,7 +1493,6 @@ process predict_retention_times_of_possible_neoepitopes {
               -out_text:file "${txt_file_for_rt_prediction.baseName}_RTpredicted.csv"
     """
 }
-
 
 /*
  * Completion e-mail notification

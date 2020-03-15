@@ -18,7 +18,6 @@ MARTDBURL = {"GRCH37": "http://grch37.ensembl.org/biomart/martservice?query=",
 def read_variant_effect_predictor(file, gene_filter=None):
     """
     Reads a VCF (v4.1) file generatede by variant effect predictor and generates variant objects
-
     :param str file: Path to vcf file
     :param list gene_filter: List of proteins (in HGNC) of inerrest. Variants are filter according to this list
     :return: list(Variant) - a list of Fred2.Core.Variant objects
@@ -235,3 +234,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+    

@@ -19,7 +19,6 @@ LOG.setLevel(logging.INFO)
 def parse_mztab(identified_peptides_file):
        """
        parses an mztab file and returns all identified proteins
-
        :param identified_peptides_file: path to the mztab file
        :return: identified proteins
        """
@@ -75,4 +74,3 @@ if len(seqs_to_geneID) > 0:
 else:
    op=open(sys.argv[-1],'w')
    op.close()
-

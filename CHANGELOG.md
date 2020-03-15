@@ -1,7 +1,15 @@
 # nf-core/mhcquant: Changelog
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
-and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+## dev
+
+### `Fixed`
+
+- nf-core template update 1.8 and 1.9
+- Added version numbers of mhcnuggets and Fred2
+
+### `Dependencies`
+
+### `Deprecated`
 
 ## v1.3 nf-core/mhcquant "Red Parrot" - 2019/08/03
 
@@ -13,6 +21,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - empty neoepitope list bugs fixed
 - documentation
 - scrape version numbers
+
+### `Dependencies`
+
+### `Deprecated`
 
 ## v1.2.6 nf-core/mhcquant "Golden Eagle" - 2019/05/05
 

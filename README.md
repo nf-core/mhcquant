@@ -2,10 +2,10 @@
 
 **Identify and quantify peptides from mass spectrometry raw data**.
 
-[![Build Status](https://travis-ci.com/nf-core/mhcquant.svg?branch=master)](https://travis-ci.com/nf-core/mhcquant)
 [![GitHub Actions CI Status](https://github.com/nf-core/mhcquant/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/mhcquant/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/mhcquant/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/mhcquant/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
+
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/mhcquant.svg)](https://hub.docker.com/r/nfcore/mhcquant)
 
@@ -23,7 +23,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 i. Install [`nextflow`](https://nf-co.re/usage/installation)
 
-ii. Install one of [`docker`](https://docs.docker.com/engine/installation/), [`singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`conda`](https://conda.io/miniconda.html)
+ii. Install either [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility (please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))
 
 iii. Download the pipeline and test it on a minimal dataset with a single command
 
@@ -31,7 +31,7 @@ iii. Download the pipeline and test it on a minimal dataset with a single comman
 nextflow run nf-core/mhcquant -profile test,<docker/singularity/conda/institute>
 ```
 
-> Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile institute` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
+> Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
 iv. Start running your own analysis!
 
@@ -43,20 +43,19 @@ See [usage docs](docs/usage.md) for all of the available options when running th
 
 ## Documentation
 
-The nf-core/mhcquant pipeline comes with detailed documentation about the pipeline, found in the `docs/` directory:
+The nf-core/mhcquant pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
 1. [Installation](https://nf-co.re/usage/installation)
-2. [Running the pipeline](docs/usage.md)
-3. Pipeline HPC Cluster configuration
+2. Pipeline configuration
     * [Local installation](https://nf-co.re/usage/local_installation)
     * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
+3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-6. [Pipeline-specific Troubleshooting](docs/troubleshooting.md)
 
 ## Credits
 
-nf-core/mhcquant was originally written by Leon Bichmann.
+nf-core/mhcquant was originally written by Leon Bichmann, Lukas Heumos and Alexander Peltzer.
 
 ## Contributions and Support
 
@@ -66,7 +65,20 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 
 ## Citation
 
-You can cite the `nf-core` pre-print as follows:  
+If you use `nf-core/mhcquant` for your analysis, please cite:
 
-> Ewels PA, Peltzer A, Fillinger S, Alneberg JA, Patel H, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. **nf-core: Community curated bioinformatics pipelines**. *bioRxiv*. 2019. p. 610741. [doi: 10.1101/610741](https://www.biorxiv.org/content/10.1101/610741v1).
-nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann),[Lukas Heumos](https://github.com/zethson),[Alexander Peltzer](https://github.com/apeltzer)
+> **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**
+>
+> Leon Bichmann, Annika Nelde, Michael Ghosh, Lukas Heumos, Christopher Mohr, Alexander Peltzer, Leon Kuchenbecker, Timo Sachsenberg, Juliane S. Walz, Stefan > Stevanović, Hans-Georg Rammensee, Oliver Kohlbacher
+>
+> Journal of Proteome Research 2019 18 (11), 3876-3884
+> DOI: 10.1021/acs.jproteome.9b00313
+
+You can cite the `nf-core` publication as follows:
+
+> **The nf-core framework for community-curated bioinformatics pipelines.**
+>
+> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
+>
+> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).  
+> ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
