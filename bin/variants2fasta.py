@@ -218,7 +218,7 @@ def main():
         opr2=op.read()
         op.close()
 
-        concat=opr1+'\n'+opr2
+        concat=opr1+opr2
 
         op=open(args.output,'w')
         op.write(concat)
