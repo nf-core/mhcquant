@@ -901,7 +901,7 @@ process predict_psms {
 
     script:
      """
-     mhcflurry-downloads fetch models_class1
+     mhcflurry-downloads --quiet fetch models_class1
      mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} peptide_filter.idXML
      """
 }
