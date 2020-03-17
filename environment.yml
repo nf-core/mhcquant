@@ -12,6 +12,6 @@ dependencies:
   - bioconda::openms=2.4.0
   - bioconda::comet-ms=2016013
   - python=2.7.15
-  - bioconda::mhcflurry=1.2.2
+  - bioconda::mhcflurry=1.4.3
   - bioconda::fred2=2.0.6
   - bioconda::mhcnuggets=2.3.2 
