@@ -901,7 +901,7 @@ process predict_psms {
 
     script:
      """
-     mhcflurry-downloads --quiet fetch models_class1
+     mhcflurry-downloads --quiet fetch models_class1_pan
      mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} peptide_filter.idXML
      """
 }
@@ -1139,7 +1139,7 @@ process predict_peptides_mhcflurry_class_1 {
 
     script:
      """
-     mhcflurry-downloads --quiet fetch models_class1
+     mhcflurry-downloads --quiet fetch models_class1_pan
      mhcflurry_predict_mztab.py ${class_1_alleles} ${mztab_file} predicted_peptides_class_1.csv
      """
 }
@@ -1339,7 +1339,7 @@ process Predict_neoepitopes_mhcflurry_class_1 {
 
     script:
      """
-     mhcflurry-downloads --quiet fetch models_class1
+     mhcflurry-downloads --quiet fetch models_class1_pan
      mhcflurry_neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes_class_1.csv
      """
 }
