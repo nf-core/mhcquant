@@ -592,6 +592,7 @@ process filter_fdr_for_idalignment {
               -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
+              -length '${params.peptide_min_length}:${params.peptide_max_length}' \\
               -remove_decoys
      """
 
@@ -1471,7 +1472,7 @@ process predict_retention_times_of_found_peptides {
 
 
 /*
- * STEP 29 - Retention Times Predictor Found Peptides
+ * STEP 29 - Retention Times Predictor possible Neoepitopes
 */
 process predict_retention_times_of_possible_neoepitopes {
     publishDir "${params.outdir}/RT_prediction/"
