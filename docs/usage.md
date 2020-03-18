@@ -39,6 +39,7 @@
   * [`--skip_decoy_generation`](#--skip_decoy_generation)
   * [`--quantification_fdr`](#--quantification_fdr)
   * [`--quantification_min_prob`](#--quantification_min_prob)
+  * [`--predict_RT`](#--predict_RT)
 * [Optional binding predicion](#optional-binding-prediction)
   * [`--predict_class_1`](#--predict_class_1)
   * [`--predict_class_2`](#--predict_class_2)
@@ -281,6 +282,10 @@ Set this option to assess and assign quantification of peptides with an FDR meas
 
 Specify a cut off probability value for quantification events as a filter
 
+### `--predict_RT`
+
+Set this option to predict times of all identified peptides and possible neoepitopes based on high scoring ids
+ 
 ## Optional binding prediction
 
 ### `--predict_class_1`

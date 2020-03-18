@@ -1,5 +1,16 @@
 # nf-core/mhcquant: Changelog
 
+## v1.4 nf-core/mhcquat "Blue Kingfisher" - 2020/03/18
+
+### `Fixed`
+
+- version upgrade mhcnuggets and mhcflurry
+- output file order in intermediate results
+- increased run times for MS search and variant translation
+- RT prediction
+- Quantification FDR
+- Variant pass filter
+
 ## dev
 
 ### `Fixed`

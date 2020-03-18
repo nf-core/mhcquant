@@ -57,7 +57,7 @@ from Fred2.IO import read_lines, MartsAdapter, read_annovar_exonic
 from Fred2.EpitopePrediction import EpitopePredictorFactory
 from Fred2.Core import generate_transcripts_from_variants, generate_proteins_from_transcripts, generate_peptides_from_proteins, generate_peptides_from_variants
 from Fred2.IO.ADBAdapter import EIdentifierTypes, EAdapterFields
-from Fred2.IO.FileReader import read_vcf
+from vcf_reader import read_vcf
 
 # logging setup
 console = logging.StreamHandler(sys.stdout)

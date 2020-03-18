@@ -13,6 +13,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 * [_vcf.fasta](#fasta) - the fasta database including mutated proteins used for the database search
 * [class_1/2_binding_predictions](#class_1/2_binding_predictions) - a folder containing the respective binding predictions of all detected peptides and all theoretically possible neoepitope sequences
 * [Intermediate_resuls](#intermediates) - a folder containing all intermediate results from the steps in the pipeline (unfiltered and filtered PSMs, aligned mzMLs, features, etc. ..)
+* [Intermediate_results/mhcquant_file_order.txt](#file_order) - a txt file listing the order of files used for annotating intensitites in the mzTab output
 * [Documentation](#docs) - a folder containing summarized reports of the pipeline execution
 * [pipeline_info](#info) - a folder containing detailed reports on computational runtimes and workflow steps
 
