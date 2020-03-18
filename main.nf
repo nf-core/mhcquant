@@ -1004,7 +1004,7 @@ process quantify_identifications_targeted {
      file id_file_quant_int from input_ids_for_quant_fdr_sorted
 
     output:
-     file "${mzml_quant.baseName}.featureXML" into feature_files
+     file "${mzml_quant.baseName}.featureXML" into (feature_files, feature_files_II)
 
     script:
     if (!params.quantification_fdr){
@@ -1031,16 +1031,20 @@ process quantify_identifications_targeted {
  * STEP 14 - link extracted features
  */
 process link_extracted_features {
+    publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
      file features from feature_files.collect{it}
+     file features_base from feature_files_II.map { file -> file.baseName + '\n' }.collect{it}
 
     output:
+     file "mhcquant_file_order.txt" into order_file
      file "all_features_merged.consensusXML" into consensus_file
     
     script:
      """
-     FeatureLinkerUnlabeledKD -in $features \\
+     cat ${features_base} > 'mhcquant_file_order.txt'
+     FeatureLinkerUnlabeledKD -in ${features} \\
                               -out 'all_features_merged.consensusXML' \\
                               -threads ${task.cpus}
      """
