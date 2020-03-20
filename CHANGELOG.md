@@ -4,17 +4,11 @@
 
 ### `Fixed`
 
-- version upgrade mhcnuggets and mhcflurry
 - output file order in intermediate results
 - increased run times for MS search and variant translation
 - RT prediction
 - Quantification FDR
 - Variant pass filter
-
-## dev
-
-### `Fixed`
-
 - nf-core template update 1.8 and 1.9
 - Added version numbers of mhcnuggets and Fred2
 
