@@ -1,13 +1,17 @@
-name: nf-core-mhcquant-1.3
+# You can use this file to create a conda environment for this pipeline:
+#   conda env create -f environment.yml
+name: nf-core-mhcquant-1.4
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - conda-forge::r-rmarkdown=1.10
-  - openms=2.4.0
-  - comet-ms=2016013
+  - conda-forge::markdown=3.1.1
+  - conda-forge::pymdown-extensions=6.0
+  - conda-forge::pygments=2.5.2
+  - bioconda::openms=2.4.0
+  - bioconda::comet-ms=2016013
   - python=2.7.15
-  - mhcflurry=1.2.2
-  - fred2=2.0.3
-  - mhcnuggets=2.3.1
+  - bioconda::mhcflurry=1.4.3
+  - bioconda::fred2=2.0.6
+  - bioconda::mhcnuggets=2.3.2 

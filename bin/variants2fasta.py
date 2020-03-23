@@ -9,7 +9,7 @@ from Fred2.IO import read_lines, MartsAdapter, read_annovar_exonic
 from Fred2.EpitopePrediction import EpitopePredictorFactory
 from Fred2.Core import generate_peptides_from_proteins, generate_peptides_from_variants, generate_transcripts_from_variants, generate_proteins_from_transcripts
 from Fred2.IO.ADBAdapter import EIdentifierTypes, EAdapterFields
-from Fred2.IO.FileReader import read_vcf
+from vcf_reader import read_vcf
 
 
 MARTDBURL = {"GRCH37": "http://grch37.ensembl.org/biomart/martservice?query=",
@@ -18,7 +18,6 @@ MARTDBURL = {"GRCH37": "http://grch37.ensembl.org/biomart/martservice?query=",
 def read_variant_effect_predictor(file, gene_filter=None):
     """
     Reads a VCF (v4.1) file generatede by variant effect predictor and generates variant objects
-
     :param str file: Path to vcf file
     :param list gene_filter: List of proteins (in HGNC) of inerrest. Variants are filter according to this list
     :return: list(Variant) - a list of Fred2.Core.Variant objects
@@ -219,7 +218,7 @@ def main():
         opr2=op.read()
         op.close()
 
-        concat=opr1+'\n'+opr2
+        concat=opr1+opr2
 
         op=open(args.output,'w')
         op.write(concat)
@@ -235,3 +234,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+    

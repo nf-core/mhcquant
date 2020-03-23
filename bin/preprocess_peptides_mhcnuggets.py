@@ -16,7 +16,6 @@ LOG.setLevel(logging.INFO)
 def parse_mztab(identified_peptides_file):
        """
        parses an mztab file and returns all identified proteins
-
        :param identified_peptides_file: path to the mztab file
        :return: identified proteins
        """
@@ -58,7 +57,7 @@ def main():
     with open(args.output, 'w') as f:
         for protein in seq_to_geneIDs.keys():
             f.write(protein + '\n')
-    
+
     # write seq to geneID in a suitable format (csv?)
     with open('peptide_to_geneID', 'w') as f:
         for protein, geneID in seq_to_geneIDs.items():
@@ -66,3 +65,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    

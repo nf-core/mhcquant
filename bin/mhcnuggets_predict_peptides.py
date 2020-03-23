@@ -85,7 +85,7 @@ def main():
     )
 
     args = model.parse_args()
-    
+
     if open(args.peptides).readlines()!=[]:
        supp_alleles = parse_alleles(args.alleles)
 
@@ -100,3 +100,4 @@ def main():
        op.close()   
 if __name__ == '__main__':
     main()
+    

@@ -2,15 +2,12 @@
 """
 Commandline tool for extracting unique neoepitopes from mztab files and the 
 and the FRED2 vcf_neoepitope_predictor.py script.
-
 usage: found_neoepitopes.py [-h]
                                 -m MZTAB
                                 -n NEOEPITOPES
                                [-f FILEFORMAT {raw, csv, json}]
                                 -o OUTPUT
-
 Neoepitope prediction for TargetInsepctor.
-
 optional arguments:
   -h, --help            show this help message and exit
   -m, --mztab           MZTAB
@@ -43,7 +40,6 @@ LOG.setLevel(logging.INFO)
 def parse_mztab(identified_peptides_file):
     """
     parses an mztab file and returns all identified proteins
-
     :param identified_peptides_file: path to the mztab file
     :return: identified proteins
     """
@@ -66,7 +62,6 @@ def parse_mztab(identified_peptides_file):
 def parse_vcf_neoepitopes(neoepitope_file, alleles):
     """
     parses the output of the VCF neoepitope predictor script
-
     :param neoepitope_file: output file of VCF neoepitope script
     :param alleles: all alleles which were used for the VCF neoepitope script
     :return: dictionary of alleles to peptide sequences
@@ -113,7 +108,6 @@ def parse_vcf_neoepitopes(neoepitope_file, alleles):
 def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
     """
     writes all unique neoepitopes to a specified file
-
     :param filepath: path to write the file to
     :param found_neoepitopes: dictionary of alleles to peptide sequences
     :param file_format: json or csv or raw

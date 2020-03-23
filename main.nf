@@ -9,10 +9,10 @@
 ----------------------------------------------------------------------------------------
 */
 
-
 def helpMessage() {
     log.info nfcoreHeader()
     log.info"""
+
     Usage:
 
     The typical command for running the pipeline is as follows:
@@ -20,88 +20,90 @@ def helpMessage() {
     nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --class_1_alleles 'alleles.tsv' --include_proteins_from_vcf --predict_class_1 --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
-      --mzmls                           Path to input data (must be surrounded with quotes)
-      --fasta                           Path to Fasta reference
-      -profile                          Configuration profile to use. Can use multiple (comma separated)
-                                        Available: standard, conda, docker, singularity, awsbatch, test
-
+      --mzmls [file]                            Path to input data (must be surrounded with quotes)	
+      --raw_input [bool]                        Specify whether raw files should be used as input
+      --raw_files [file]                        Path to input raw data (must be surrounded with quotes)
+      --fasta [file]                            Path to Fasta reference
+      -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
+                                                Available: docker, singularity, test, awsbatch and more
     Mass Spectrometry Search:
-      --peptide_min_length              Minimum peptide length for filtering
-      --peptide_max_length              Maximum peptide length for filtering
-      --precursor_mass_tolerance        Mass tolerance of precursor mass (ppm)
-      --fragment_mass_tolerance         Mass tolerance of fragment mass bin (ppm)
-      --fragment_bin_offset             Offset of fragment mass bin (Comet specific parameter)
-      --use_x_ions                      Use x ions for spectral matching in addition
-      --use_z_ions                      Use z ions for spectral matching in addition
-      --use_a_ions                      Use a ions for spectral matching in addition
-      --use_c_ions                      Use c ions for spectral matching in addition
-      --fdr_threshold                   Threshold for FDR filtering
-      --fdr_level                       Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
-      --digest_mass_range               Mass range of peptides considered for matching
-      --activation_method               Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
-      --enzyme                          Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
-      --number_mods                     Maximum number of modifications of PSMs
-      --fixed_mods                      Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
-      --variable_mods                   Variable modifications ('Oxidation (M)', see OpenMS modifications)
-      --num_hits                        Number of reported hits
-      --run_centroidisation             Specify whether mzml data is peak picked or not (true, false)
-      --pick_ms_levels                  The ms level used for peak picking (eg. 1, 2)
-      --prec_charge                     Precursor charge (eg. "2:3")
-      --max_rt_alignment_shift          Maximal retention time shift (sec) resulting from linear alignment      
-      --spectrum_batch_size             Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
-      --description_correct_features    Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
-      --klammer                         Retention time features are calculated as in Klammer et al. instead of with Elude.
-      --skip_decoy_generation           Use a fasta databse that already includes decoy sequences
-      --quantification_fdr              Assess and assign ids matched between runs with an additional quantification FDR
-      --quantification_min_prob         Specify a minimum probability cut off for quantification
+      --peptide_min_length [int]                Minimum peptide length for filtering
+      --peptide_max_length [int]                Maximum peptide length for filtering
+      --precursor_mass_tolerance [int           Mass tolerance of precursor mass (ppm)
+      --fragment_mass_tolerance [int]           Mass tolerance of fragment mass bin (ppm)
+      --fragment_bin_offset [int]               Offset of fragment mass bin (Comet specific parameter)
+      --use_x_ions [bool]                       Use x ions for spectral matching in addition
+      --use_z_ions [bool]                       Use z ions for spectral matching in addition
+      --use_a_ions [bool]                       Use a ions for spectral matching in addition
+      --use_c_ions [bool]                       Use c ions for spectral matching in addition
+      --fdr_threshold [int]                     Threshold for FDR filtering
+      --fdr_level [str]                         Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
+      --digest_mass_range [int]                 Mass range of peptides considered for matching
+      --activation_method [str]                 Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
+      --enzyme [str]                            Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
+      --number_mods [int]                       Maximum number of modifications of PSMs
+      --fixed_mods [str]                        Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
+      --variable_mods [str]                     Variable modifications ('Oxidation (M)', see OpenMS modifications)
+      --num_hits [int]                          Number of reported hits
+      --run_centroidisation [bool]              Specify whether mzml data is peak picked or not (true, false)
+      --pick_ms_levels [int]                    The ms level used for peak picking (eg. 1, 2)
+      --prec_charge [str]                       Precursor charge (eg. "2:3")
+      --max_rt_alignment_shift [int]            Maximal retention time shift (sec) resulting from linear alignment      
+      --spectrum_batch_size [int]               Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
+      --description_correct_features [int]      Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
+      --klammer [bool]                          Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --predict_RT [bool]                       Retention time prediction for identified peptides
+      --skip_decoy_generation [bool]            Use a fasta database that already includes decoy sequences
+      --quantification_fdr [bool]               Assess and assign ids matched between runs with an additional quantification FDR
+      --quantification_min_prob  [int]          Specify a minimum probability cut off for quantification
 
-    Binding Predictions:
-      --predict_class_1                 Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)
-      --predict_class_2                 Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 
-      --refine_fdr_on_predicted_subset  Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)
-      --subset_affinity_threshold       Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)
-      --class_1_alleles                 Path to file including class 1 allele information
-      --class_2_alleles                 Path to file including class 2 allele information
+    Binding Predictions:	
+      --predict_class_1 [bool]                  Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
+      --predict_class_2 [bool]                  Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
+      --refine_fdr_on_predicted_subset[bool]    Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
+      --subset_affinity_threshold [int]         Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
+      --class_1_alleles [file]                  Path to file including class 1 allele information	
+      --class_2_alleles [file]                  Path to file including class 2 allele information	
 
-    Variants:
-      --include_proteins_from_vcf       Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)
-      --vcf                             Path to vcf file
-      --variant_annotation_style        Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")
-      --variant_reference               Specify reference genome used for variant annotation ("GRCH37","GRCH38")
-      --variant_indel_filter            Remove insertions and deletions from vcf (true, false)
-      --variant_frameshift_filter       Remove insertions and deltionns causing frameshifts from vcf (true, false)
-      --variant_snp_filter              Remove snps from vcf (true, false)
+    Variants:	
+      --include_proteins_from_vcf [bool]        Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
+      --vcf [file]                              Path to vcf file	
+      --variant_annotation_style [str]          Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
+      --variant_reference [str]                 Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
+      --variant_indel_filter [bool]             Remove insertions and deletions from vcf (true, false)	
+      --variant_frameshift_filter [bool]        Remove insertions and deltionns causing frameshifts from vcf (true, false)	
+      --variant_snp_filter [bool]               Remove snps from vcf (true, false)
 
     Other options:
-      --outdir                          The output directory where the results will be saved
-      --email                           Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      -name                             Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+      --outdir [file]                           The output directory where the results will be saved
+      --email [email]                           Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
+      --email_on_fail [email]                   Same as --email, except only send mail if the workflow is not successful
+      -name [str]                               Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
 
     AWSBatch options:
-      --awsqueue                        The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion                       The AWS Region for your AWS Batch job to run on
+      --awsqueue [str]                          The AWSBatch JobQueue that needs to be set when running on AWSBatch
+      --awsregion [str]                         The AWS Region for your AWS Batch job to run on
+      --awscli [str]                            Path to the AWS CLI tool
     """.stripIndent()
 }
 
-/*
- * SET UP CONFIGURATION VARIABLES
- */
-
 // Show help message
-if (params.help){
+if (params.help) {
     helpMessage()
     exit 0
 }
 
-
 // Validate inputs
-params.mzmls = params.mzmls ?: { log.error "No read data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
-params.fasta = params.fasta ?: { log.error "No read data privided. Make sure you have used the '--fasta' option."; exit 1 }()
+if(!params.raw_input){
+   params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+} else {
+   params.raw_files = params.raw_files ?: { log.error "No spectra data privided. Make sure you have used the '--raw_files' option."; exit 1 }()
+}
+params.fasta = params.fasta ?: { log.error "No database fasta privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
-
 /*
- * Define the default parameters
+ * SET UP CONFIGURATION VARIABLES
  */
 
 //MS params
@@ -123,6 +125,7 @@ params.fdr_level = 'peptide-level-fdrs'
 fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
 params.description_correct_features = 0
 params.klammer = false
+params.predict_RT = false
 params.number_mods = 3
 
 params.num_hits = 1
@@ -182,56 +185,24 @@ variant_snp_filter="-fSNP"
 variant_snp_filter=""
 }
 
+if (params.raw_input){
 
-/*
- * SET UP CONFIGURATION VARIABLES
- */
+  input_mzmls = Channel.empty()
+  input_mzmls_align = Channel.empty()
+  input_mzmls_unpicked = Channel.empty()
+  input_mzmls_align_unpicked = Channel.empty()
 
-
-// Configurable variables
-params.name = false
-params.email = false
-params.plaintext_email = false
-
-output_docs = file("$baseDir/docs/output.md")
-
-
-// AWSBatch sanity checking
-if(workflow.profile == 'awsbatch'){
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-    if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
-}
-//
-// NOTE - THIS IS NOT USED IN THIS PIPELINE, EXAMPLE ONLY
-// If you want to use the above in a process, define the following:
-//   input:
-//   file fasta from fasta
-//
-
-// Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
-custom_runName = params.name
-if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
-  custom_runName = workflow.runName
-}
+  Channel
+        .fromPath( params.raw_files )
+        .ifEmpty { exit 1, "Cannot find any raw files matching: ${params.raw_files}\nNB: Path needs to be enclosed in quotes!" }
+        .set { input_raws }
 
 
-if( workflow.profile == 'awsbatch') {
-  // AWSBatch sanity checking
-  if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-  // Check outdir paths to be S3 buckets if running on AWSBatch
-  // related: https://github.com/nextflow-io/nextflow/issues/813
-  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
-  // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
-}
+} else {
 
-// Stage config files
-ch_multiqc_config = Channel.fromPath(params.multiqc_config)
-ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
+  input_raws = Channel.empty()
 
-
-if( params.run_centroidisation) {
+  if (params.run_centroidisation) {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
@@ -240,7 +211,7 @@ if( params.run_centroidisation) {
     input_mzmls = Channel.empty()
     input_mzmls_align = Channel.empty()
 
-} else {
+  } else {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
@@ -248,8 +219,9 @@ if( params.run_centroidisation) {
 
     input_mzmls_unpicked = Channel.empty()
     input_mzmls_align_unpicked = Channel.empty()
-}
+  }
 
+}
 
 /*
  * Create a channel for input fasta file
@@ -303,15 +275,15 @@ if( params.predict_class_1){
 }
 
 /*
- * Create a channel for class 2 alleles file
- */
+ * Create a channel for class  2 allele files
+*/
 if( params.predict_class_2){
     Channel
         .fromPath( params.class_2_alleles )
         .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
         .into { nepepitopes_class_2_alleles; peptides_class_2_alleles; peptides_class_2_alleles_II }
-} else {
 
+} else {
     nepepitopes_class_2_alleles = Channel.empty()
     peptides_class_2_alleles = Channel.empty()
     peptides_class_2_alleles_II = Channel.empty()
@@ -325,64 +297,89 @@ if( params.include_proteins_from_vcf){
         .fromPath( params.vcf )
         .ifEmpty { exit 1, "params.vcf was empty - no input file supplied" }
         .into { input_vcf; input_vcf_neoepitope; input_vcf_neoepitope_II}
-} else {
 
+} else {
     input_vcf = Channel.empty()
     input_vcf_neoepitope = Channel.empty()
     input_vcf_neoepitope_II = Channel.empty()
 }
 
+// Stage config files
+ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+
+// Has the run name been specified by the user?
+//  this has the bonus effect of catching both -name and --name
+custom_runName = params.name
+if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
+    custom_runName = workflow.runName
+}
+
+if (workflow.profile.contains('awsbatch')) {
+    // AWSBatch sanity checking
+    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+    // Check outdir paths to be S3 buckets if running on AWSBatch
+    // related: https://github.com/nextflow-io/nextflow/issues/813
+    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+    // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+}
+
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
-summary['Pipeline Name']  = 'nf-core/mhcquant'
-summary['Pipeline Version'] = workflow.manifest.version
-summary['Run Name']     = custom_runName ?: workflow.runName
-summary['mzMLs']        = params.mzmls
-summary['Fasta Ref']    = params.fasta
+if (workflow.revision) summary['Pipeline Release'] = workflow.revision
+summary['Run Name']           = custom_runName ?: workflow.runName
+summary['Pipeline Name']      = 'nf-core/mhcquant'
+summary['Pipeline Version']   = workflow.manifest.version
+summary['Run Name']           = custom_runName ?: workflow.runName
+summary['mzMLs']              = params.mzmls
+summary['Fasta Ref']          = params.fasta
 summary['Class 1 Prediction'] = params.predict_class_1
 summary['Class 2 Prediction'] = params.predict_class_2
-summary['SubsetFDR']    = params.refine_fdr_on_predicted_subset
+summary['SubsetFDR']          = params.refine_fdr_on_predicted_subset
 summary['Quantification FDR'] = params.quantification_fdr
-summary['Class 1 Alleles'] = params.predict_class_1
-summary['Class 2 Alelles'] = params.predict_class_2
-summary['Variants']     = params.include_proteins_from_vcf
-summary['Centroidisation'] = params.run_centroidisation
-summary['Max Memory']   = params.max_memory
-summary['Max CPUs']     = params.max_cpus
-summary['Max Time']     = params.max_time
-summary['Output dir']   = params.outdir
-summary['Working dir']  = workflow.workDir
-summary['Container Engine'] = workflow.containerEngine
+summary['Class 1 Alleles']    = params.predict_class_1
+summary['Class 2 Alelles']    = params.predict_class_2
+summary['RT Prediction']      = params.predict_RT
+summary['Variants']           = params.include_proteins_from_vcf
+summary['Centroidisation']    = params.run_centroidisation
+summary['Max Memory']         = params.max_memory
+summary['Max CPUs']           = params.max_cpus
+summary['Max Time']           = params.max_time
+summary['Output dir']         = params.outdir
+summary['Working dir']        = workflow.workDir
+summary['Container Engine']   = workflow.containerEngine
 if(workflow.containerEngine) summary['Container'] = workflow.container
-summary['Current home']   = "$HOME"
-summary['Current user']   = "$USER"
-summary['Current path']   = "$PWD"
-summary['Working dir']    = workflow.workDir
-summary['Output dir']     = params.outdir
-summary['Script dir']     = workflow.projectDir
-summary['Config Profile'] = workflow.profile
-if(workflow.profile == 'awsbatch'){
-   summary['AWS Region']    = params.awsregion
-   summary['AWS Queue']     = params.awsqueue
+summary['Current home']       = "$HOME"
+summary['Current user']       = "$USER"
+summary['Current path']       = "$PWD"
+summary['Working dir']        = workflow.workDir
+summary['Output dir']         = params.outdir
+summary['Script dir']         = workflow.projectDir
+summary['Config Profile']     = workflow.profile
+if (workflow.profile.contains('awsbatch')) {
+    summary['AWS Region']     = params.awsregion
+    summary['AWS Queue']      = params.awsqueue
+    summary['AWS CLI']        = params.awscli
 }
 summary['Config Profile'] = workflow.profile
-if(params.config_profile_description) summary['Config Description'] = params.config_profile_description
-if(params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
-if(params.config_profile_url)         summary['Config URL']         = params.config_profile_url
-if(params.email) {
-  summary['E-mail Address']  = params.email
-  summary['MultiQC maxsize'] = params.maxMultiqcEmailFileSize
+if (params.config_profile_description) summary['Config Description'] = params.config_profile_description
+if (params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
+if (params.config_profile_url)         summary['Config URL']         = params.config_profile_url
+if (params.email || params.email_on_fail) {
+    summary['E-mail Address']    = params.email
+    summary['E-mail on failure'] = params.email_on_fail
 }
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
-log.info "\033[2m----------------------------------------------------\033[0m"
+log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
 checkHostname()
 
-def create_workflow_summary(summary) {
-    def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
-    yaml_file.text  = """
+Channel.from(summary.collect{ [it.key, it.value] })
+    .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
+    .reduce { a, b -> return [a, b].join("\n            ") }
+    .map { x -> """
     id: 'nf-core-mhcquant-summary'
     description: " - this information is collected when the pipeline is started."
     section_name: 'nf-core/mhcquant Workflow Summary'
@@ -390,26 +387,23 @@ def create_workflow_summary(summary) {
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
-${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
+            $x
         </dl>
-    """.stripIndent()
-
-   return yaml_file
-}
-
+    """.stripIndent() }
+    .set { ch_workflow_summary }
 
 /*
  * Parse software version numbers
  */
 process get_software_versions {
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
-    saveAs: {filename ->
-        if (filename.indexOf(".csv") > 0) filename
-        else null
-    }
-    
+        saveAs: { filename ->
+                      if (filename.indexOf(".csv") > 0) filename
+                      else null
+                }
+
     output:
-    file 'software_versions_mqc.yaml' into software_versions_yaml
+    file 'software_versions_mqc.yaml' into ch_software_versions_yaml
     file "software_versions.csv"
 
     script:
@@ -420,6 +414,8 @@ process get_software_versions {
     percolator -h &> v_percolator.txt
     comet -p
     mhcflurry-predict --version &> v_mhcflurry.txt
+    echo 2.3.1 > v_mhcnuggets.txt
+    echo 2.0.3 > v_fred2.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
@@ -427,21 +423,22 @@ process get_software_versions {
 
 /*
  * STEP 0 - Output Description HTML
- */
+*/ 
 process output_documentation {
-    publishDir "${params.outdir}/Documentation", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
-    file output_docs
+    file output_docs from ch_output_docs
 
     output:
     file "results_description.html"
 
     script:
     """
-    markdown_to_html.r $output_docs results_description.html
+    markdown_to_html.py $output_docs -o results_description.html
     """
 }
+
 
 
 /*
@@ -492,6 +489,27 @@ process generate_decoy_database {
 
 
 /*
+ * STEP 1.1 - Raw file conversion
+ */
+process raw_file_conversion {
+
+    input:
+     file rawfile from input_raws
+
+    output:
+     file "${rawfile.baseName}.mzML" into (raws_converted, raws_converted_align)
+   
+    when:
+     params.raw_input
+    
+    script:
+     """
+     ThermoRawFileParser.sh -i=${rawfile} -f=2 -b=${rawfile.baseName}.mzML
+     """
+}
+
+
+/*
  * STEP 1.5 - Optional: Run Peak Picking as Preprocessing
  */
 process peak_picking {
@@ -518,9 +536,11 @@ process peak_picking {
  * STEP 2 - run comet database search
  */
 process db_search_comet {
+
+    label 'process_high'
  
     input:
-     file mzml_file from input_mzmls.mix(input_mzmls_picked)
+     file mzml_file from raws_converted.mix(input_mzmls.mix(input_mzmls_picked))
      file fasta_decoy from fastafile_decoy_1.mix(input_fasta_1).first()
 
     output:
@@ -618,6 +638,7 @@ process filter_fdr_for_idalignment {
               -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
+              -length '${params.peptide_min_length}:${params.peptide_max_length}' \\
               -remove_decoys
      """
 
@@ -647,6 +668,7 @@ process align_ids {
 }
 
 input_mzmls_align
+ .mix(raws_converted_align)
  .mix(input_mzmls_align_picked)
  .collectFile( sort: { it.baseName } )
  .set{input_mzmls_combined}
@@ -811,7 +833,7 @@ process filter_by_q_value {
      file id_file_perc from id_files_merged_psm_perc
 
     output:
-     file "${id_file_perc.baseName}_filtered.idXML" into id_files_merged_psm_perc_filtered
+     file "${id_file_perc.baseName}_filtered.idXML" into (id_files_merged_psm_perc_filtered, ids_for_rt_training, ids_for_rt_prediction)
 
     when:
      !params.refine_fdr_on_predicted_subset
@@ -927,7 +949,7 @@ process predict_psms {
 
     script:
      """
-     mhcflurry-downloads fetch models_class1
+     mhcflurry-downloads --quiet fetch models_class1
      mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} peptide_filter.idXML
      """
 }
@@ -1000,7 +1022,7 @@ process filter_refined_q_value {
      file id_file_perc_pred from id_files_merged_psm_pred_perc
      
     output:
-     file "${id_file_perc_pred.baseName}_filtered.idXML" into id_files_merged_psm_pred_perc_filtered
+     file "${id_file_perc_pred.baseName}_filtered.idXML" into (id_files_merged_psm_pred_perc_filtered, ids_for_rt_training_subset, ids_for_rt_prediction_subset)
 
     when:
      params.refine_fdr_on_predicted_subset     
@@ -1030,7 +1052,7 @@ process quantify_identifications_targeted {
      file id_file_quant_int from input_ids_for_quant_fdr_sorted
 
     output:
-     file "${mzml_quant.baseName}.featureXML" into feature_files
+     file "${mzml_quant.baseName}.featureXML" into (feature_files, feature_files_II)
 
     script:
     if (!params.quantification_fdr){
@@ -1057,16 +1079,20 @@ process quantify_identifications_targeted {
  * STEP 14 - link extracted features
  */
 process link_extracted_features {
+    publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
      file features from feature_files.collect{it}
+     file features_base from feature_files_II.map { file -> file.baseName + '\n' }.collect{it}
 
     output:
+     file "mhcquant_file_order.txt" into order_file
      file "all_features_merged.consensusXML" into consensus_file
     
     script:
      """
-     FeatureLinkerUnlabeledKD -in $features \\
+     cat ${features_base} > 'mhcquant_file_order.txt'
+     FeatureLinkerUnlabeledKD -in ${features} \\
                               -out 'all_features_merged.consensusXML' \\
                               -threads ${task.cpus}
      """
@@ -1241,13 +1267,16 @@ process predict_possible_neoepitopes {
     publishDir "${params.outdir}/"
     echo true
 
+    label 'process_high'
+
     input:
      file alleles_file from neoepitopes_class_1_alleles
      file vcf_file from input_vcf_neoepitope
 
     output:
      file "vcf_neoepitopes.csv" into possible_neoepitopes
-    
+     file "vcf_neoepitopes.txt" into possible_neoepitopes_list
+ 
     when:
      params.include_proteins_from_vcf
      params.predict_class_1
@@ -1266,12 +1295,15 @@ process predict_possible_class_2_neoepitopes {
     publishDir "${params.outdir}/"
     echo true
 
+    label 'process_high'
+
     input:
      file alleles_file_II from peptides_class_2_alleles_II
      file vcf_file from input_vcf_neoepitope_II
 
     output:
      file "vcf_neoepitopes.csv" into possible_neoepitopes_II
+     file "vcf_neoepitopes.txt" into possible_neoepitopes_list_II
 
     when:
      params.include_proteins_from_vcf
@@ -1431,14 +1463,98 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
 
 
 /*
+ * STEP 28 - Train Retention Times Predictor
+*/
+process train_retention_time_predictor {
+
+    input:
+    file id_files_for_rt_training from ids_for_rt_training.mix(ids_for_rt_training_subset)
+
+    output:
+    file "${id_files_for_rt_training.baseName}.txt" into (trained_rt_model, trained_rt_model_II)
+    file "${id_files_for_rt_training.baseName}_params.paramXML" into (trained_rt_params, trained_rt_params_II) 
+    file "${id_files_for_rt_training.baseName}_trainset.txt" into (trained_rt_set,  trained_rt_set_II)
+
+    when:
+     params.predict_RT
+
+    script:
+    """
+    RTModel -in ${id_files_for_rt_training} \\
+            -cv:skip_cv \\
+            -out "${id_files_for_rt_training.baseName}.txt" \\
+            -out_oligo_params "${id_files_for_rt_training.baseName}_params.paramXML" \\
+            -out_oligo_trainset "${id_files_for_rt_training.baseName}_trainset.txt"
+    """
+}
+
+
+/*
+ * STEP 29 - Retention Times Predictor Found Peptides
+*/
+process predict_retention_times_of_found_peptides {
+    publishDir "${params.outdir}/RT_prediction/"
+
+    input:
+    file id_files_for_rt_prediction from ids_for_rt_prediction.mix(ids_for_rt_prediction_subset)
+    file trained_rt_param_file from trained_rt_params
+    file trained_rt_set_file from trained_rt_set
+    file trained_rt_model_file from trained_rt_model
+
+    output:
+    file "${id_files_for_rt_prediction.baseName}_RTpredicted.csv" into rt_predicted
+
+    when:
+     params.predict_RT
+
+    script:
+    """
+    RTPredict -in_id ${id_files_for_rt_prediction} \\
+              -svm_model ${trained_rt_model_file} \\
+              -in_oligo_params ${trained_rt_param_file} \\
+              -in_oligo_trainset ${trained_rt_set_file} \\
+              -out_text:file "${id_files_for_rt_prediction.baseName}_RTpredicted.csv"
+    """
+}
+
+
+/*
+ * STEP 29 - Retention Times Predictor possible Neoepitopes
+*/
+process predict_retention_times_of_possible_neoepitopes {
+    publishDir "${params.outdir}/RT_prediction/"
+
+    input:
+    file txt_file_for_rt_prediction from possible_neoepitopes_list.mix(possible_neoepitopes_list_II)
+    file trained_rt_param_file_II from trained_rt_params_II
+    file trained_rt_set_file_II from trained_rt_set_II
+    file trained_rt_model_file_II from trained_rt_model_II
+
+    output:
+    file "${txt_file_for_rt_prediction.baseName}_RTpredicted.csv" into rt_predicted_II
+
+    when:
+     params.predict_RT
+
+    script:
+    """
+    RTPredict -in_text ${txt_file_for_rt_prediction} \\
+              -svm_model ${trained_rt_model_file_II} \\
+              -in_oligo_params ${trained_rt_param_file_II} \\
+              -in_oligo_trainset ${trained_rt_set_file_II} \\
+              -out_text:file "${txt_file_for_rt_prediction.baseName}_RTpredicted.csv"
+    """
+}
+
+/*
  * Completion e-mail notification
  */
 workflow.onComplete {
 
     // Set up the e-mail variables
     def subject = "[nf-core/mhcquant] Successful: $workflow.runName"
-    if(!workflow.success){
-      subject = "[nf-core/mhcquant] FAILED: $workflow.runName"
+    if (!workflow.success) {
+        subject = "[nf-core/mhcquant] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -1456,26 +1572,17 @@ workflow.onComplete {
     email_fields['summary']['Date Completed'] = workflow.complete
     email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
     email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
+    if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
-    // TODO nf-core: If not using MultiQC, strip out this code (including params.maxMultiqcEmailFileSize)
-    // On success try attach the multiqc report
-    def mqc_report = null
-    try {
-        if (workflow.success) {
-            mqc_report = multiqc_report.getVal()
-            if (mqc_report.getClass() == ArrayList){
-                log.warn "[nf-core/mhcquant] Found multiple reports from process 'multiqc', will use only one"
-                mqc_report = mqc_report[0]
-            }
-        }
-    } catch (all) {
+    // Check if we are only sending emails on failure
+    email_address = params.email
+    if (!params.email && params.email_on_fail && !workflow.success) {
+        email_address = params.email_on_fail
     }
 
     // Render the TXT template
@@ -1490,93 +1597,89 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
+    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report ]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
 
     // Send the HTML e-mail
-    if (params.email) {
+    if (email_address) {
         try {
-          if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
-          // Try to send HTML e-mail using sendmail
-          [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-core/mhcquant] Sent summary e-mail to $params.email (sendmail)"
+            if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
+            // Try to send HTML e-mail using sendmail
+            [ 'sendmail', '-t' ].execute() << sendmail_html
+            log.info "[nf-core/mhcquant] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
-          // Catch failures and try with plaintext
-          [ 'mail', '-s', subject, params.email ].execute() << email_txt
-          log.info "[nf-core/mhcquant] Sent summary e-mail to $params.email (mail)"
+            // Catch failures and try with plaintext
+            [ 'mail', '-s', subject, email_address ].execute() << email_txt
+            log.info "[nf-core/mhcquant] Sent summary e-mail to $email_address (mail)"
         }
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/pipeline_info/" )
-    if( !output_d.exists() ) {
-      output_d.mkdirs()
+    def output_d = new File("${params.outdir}/pipeline_info/")
+    if (!output_d.exists()) {
+        output_d.mkdirs()
     }
-    def output_ir = new File( "${params.outdir}/Intermediate_Results/" )
-    if( !output_ir.exists() ) {
-      output_ir.mkdirs()
-    }
-    def output_hf = new File( output_d, "pipeline_report.html" )
+    def output_hf = new File(output_d, "pipeline_report.html")
     output_hf.withWriter { w -> w << email_html }
-    def output_tf = new File( output_d, "pipeline_report.txt" )
+    def output_tf = new File(output_d, "pipeline_report.txt")
     output_tf.withWriter { w -> w << email_txt }
 
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
 
     if (workflow.stats.ignoredCount > 0 && workflow.success) {
-      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
-      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
-      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
+        log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
+        log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
+        log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
     }
 
-    if(workflow.success){
-        log.info "${c_purple}[nf-core/mhcquant]${c_green} Pipeline completed successfully${c_reset}"
+    if (workflow.success) {
+        log.info "-${c_purple}[nf-core/mhcquant]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "${c_purple}[nf-core/mhcquant]${c_red} Pipeline completed with errors${c_reset}"
+        log.info "-${c_purple}[nf-core/mhcquant]${c_red} Pipeline completed with errors${c_reset}-"
     }
 
 }
 
 
-def nfcoreHeader(){
+def nfcoreHeader() {
     // Log colors ANSI codes
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
     c_white = params.monochrome_logs ? '' : "\033[0;37m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
 
-    return """    ${c_dim}----------------------------------------------------${c_reset}
+    return """    -${c_dim}--------------------------------------------------${c_reset}-
                                             ${c_green},--.${c_black}/${c_green},-.${c_reset}
     ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
     ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
     ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
                                             ${c_green}`._,._,\'${c_reset}
     ${c_purple}  nf-core/mhcquant v${workflow.manifest.version}${c_reset}
-    ${c_dim}----------------------------------------------------${c_reset}
+    -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
 
-def checkHostname(){
+def checkHostname() {
     def c_reset = params.monochrome_logs ? '' : "\033[0m"
     def c_white = params.monochrome_logs ? '' : "\033[0;37m"
     def c_red = params.monochrome_logs ? '' : "\033[1;91m"
     def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
-    if(params.hostnames){
+    if (params.hostnames) {
         def hostname = "hostname".execute().text.trim()
         params.hostnames.each { prof, hnames ->
             hnames.each { hname ->
-                if(hostname.contains(hname) && !workflow.profile.contains(prof)){
+                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
                     log.error "====================================================\n" +
                             "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
                             "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
