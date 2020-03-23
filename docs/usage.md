@@ -9,6 +9,8 @@
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
   * [`--mzmls`](#--mzmls)
+  * [`--raw_input`](#--raw_input)
+  * [`--raw_files`](#--raw_files)
   * [`--fasta`](#--fasta)
   * [`-profile`](#-profile)
 * [Mass Spectrometry Search](#Mass-Spectrometry-Search)
@@ -134,6 +136,18 @@ Use this to specify the location of your input mzML files. For example:
 
 ```bash
 --mzmls 'path/to/data/*.mzML'
+```
+
+### `--raw_input`
+
+Set this flag if you want to use raw files instead of mzml files
+
+### `--raw_files`
+
+Use this to specify the location of your input raw files. For example:
+
+```bash
+--raw_input --raw_files 'path/to/data/*.raw'
 ```
 
 ### `--fasta`
