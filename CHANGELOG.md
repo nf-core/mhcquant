@@ -6,6 +6,7 @@
 
 - output file order in intermediate results
 - increased run times for MS search and variant translation
+- Raw File Reading
 - RT prediction
 - Quantification FDR
 - Variant pass filter
