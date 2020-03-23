@@ -21,6 +21,8 @@ def helpMessage() {
 
     Mandatory arguments:
       --mzmls [file]                            Path to input data (must be surrounded with quotes)	
+      --raw_input [bool]                        Specify whether raw files should be used as input
+      --raw_files [file]                        Path to input raw data (must be surrounded with quotes)
       --fasta [file]                            Path to Fasta reference
       -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
                                                 Available: docker, singularity, test, awsbatch and more
@@ -92,7 +94,11 @@ if (params.help) {
 }
 
 // Validate inputs
-params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+if(!params.raw_input){
+   params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+} else {
+   params.raw_files = params.raw_files ?: { log.error "No spectra data privided. Make sure you have used the '--raw_files' option."; exit 1 }()
+}
 params.fasta = params.fasta ?: { log.error "No database fasta privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
@@ -179,7 +185,24 @@ variant_snp_filter="-fSNP"
 variant_snp_filter=""
 }
 
-if (params.run_centroidisation) {
+if (params.raw_input){
+
+  input_mzmls = Channel.empty()
+  input_mzmls_align = Channel.empty()
+  input_mzmls_unpicked = Channel.empty()
+  input_mzmls_align_unpicked = Channel.empty()
+
+  Channel
+        .fromPath( params.raw_files )
+        .ifEmpty { exit 1, "Cannot find any raw files matching: ${params.raw_files}\nNB: Path needs to be enclosed in quotes!" }
+        .set { input_raws }
+
+
+} else {
+
+  input_raws = Channel.empty()
+
+  if (params.run_centroidisation) {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
@@ -188,7 +211,7 @@ if (params.run_centroidisation) {
     input_mzmls = Channel.empty()
     input_mzmls_align = Channel.empty()
 
-} else {
+  } else {
     Channel
         .fromPath( params.mzmls )
         .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
@@ -196,6 +219,8 @@ if (params.run_centroidisation) {
 
     input_mzmls_unpicked = Channel.empty()
     input_mzmls_align_unpicked = Channel.empty()
+  }
+
 }
 
 /*
@@ -464,6 +489,27 @@ process generate_decoy_database {
 
 
 /*
+ * STEP 1.1 - Raw file conversion
+ */
+process raw_file_conversion {
+
+    input:
+     file rawfile from input_raws
+
+    output:
+     file "${rawfile.baseName}.mzML" into (raws_converted, raws_converted_align)
+   
+    when:
+     params.raw_input
+    
+    script:
+     """
+     ThermoRawFileParser.sh -i=${rawfile} -f=2 -b=${rawfile.baseName}.mzML
+     """
+}
+
+
+/*
  * STEP 1.5 - Optional: Run Peak Picking as Preprocessing
  */
 process peak_picking {
@@ -494,7 +540,7 @@ process db_search_comet {
     label 'process_high'
  
     input:
-     file mzml_file from input_mzmls.mix(input_mzmls_picked)
+     file mzml_file from raws_converted.mix(input_mzmls.mix(input_mzmls_picked))
      file fasta_decoy from fastafile_decoy_1.mix(input_fasta_1).first()
 
     output:
@@ -622,6 +668,7 @@ process align_ids {
 }
 
 input_mzmls_align
+ .mix(raws_converted_align)
  .mix(input_mzmls_align_picked)
  .collectFile( sort: { it.baseName } )
  .set{input_mzmls_combined}
