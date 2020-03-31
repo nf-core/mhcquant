@@ -22,7 +22,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 The output mzTab contains many columns annotating the most important information - here are a few outpointed:
 
 ```bash
-PEP	sequence	accession	best_search_engine_score[1]	retention_time	charge	mass_to_charge	peptide_abundance_study_variable[1]	
+PEP   sequence   accession   best_search_engine_score[1]   retention_time   charge   mass_to_charge   peptide_abundance_study_variable[1]
 ```
 
 Most important to know that in this format we annotated the q-value of each peptide identification in the best_seach_engine_score[1] column and peptide quantities in the peptide_abundance_study_variable columns.
