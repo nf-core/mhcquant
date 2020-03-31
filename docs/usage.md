@@ -298,7 +298,7 @@ Specify a cut off probability value for quantification events as a filter
 
 ### `--predict_RT`
 
-Set this option to predict times of all identified peptides and possible neoepitopes based on high scoring ids
+Set this option to predict retention times of all identified peptides and possible neoepitopes based on high scoring ids
 
 ## Optional binding prediction
 
