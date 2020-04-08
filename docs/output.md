@@ -19,6 +19,15 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ## mzTab
 
+The output mzTab contains many columns annotating the most important information - here are a few outpointed:
+
+```bash
+PEP   sequence   accession   best_search_engine_score[1]   retention_time   charge   mass_to_charge   peptide_abundance_study_variable[1]
+```
+
+Most important to know that in this format we annotated the q-value of each peptide identification in the best_seach_engine_score[1] column and peptide quantities in the peptide_abundance_study_variable columns.
+When processing multiple files this will result in quantities for each MS run. Which MS run represents which column of peptide_abundance is described in the Intermediate_results folder in the mhcquant_file_order.txt file.
+
 [mzTab](http://www.psidev.info/mztab) is a light-weight format to report mass spectrometry search results. It provides all important information about identified peptide hits and is compatible with the PRIDE Archive - proteomics data repository:
 
 Griss, J. et al. The mzTab Data Exchange Format: Communicating Mass-spectrometry-based Proteomics and Metabolomics Experimental Results to a Wider Audience. Mol Cell Proteomics 13, 2765-2775 (2014)
