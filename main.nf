@@ -614,6 +614,7 @@ process calculate_fdr_for_idalignment {
     script:
      """
      FalseDiscoveryRate -in ${id_file_idx} \\
+                        -protein 'false' \\
                         -out ${id_file_idx.baseName}_fdr.idXML \\
                         -threads ${task.cpus}
      """
@@ -638,7 +639,7 @@ process filter_fdr_for_idalignment {
               -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
-              -length '${params.peptide_min_length}:${params.peptide_max_length}' \\
+              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
               -remove_decoys
      """
 
@@ -846,7 +847,7 @@ process filter_by_q_value {
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
-              -length '${params.peptide_min_length}:${params.peptide_max_length}'
+              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}'
      """
 
 }
@@ -874,7 +875,7 @@ process filter_by_q_value_first {
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
-              -length '${params.peptide_min_length}:${params.peptide_max_length}'
+              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}'
      """
 
 }
@@ -1035,7 +1036,7 @@ process filter_refined_q_value {
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
-              -length '${params.peptide_min_length}:${params.peptide_max_length}'
+              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}'
      """
 
 }
