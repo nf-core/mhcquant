@@ -749,6 +749,7 @@ process merge_aligned_idxml_files {
               -out all_ids_merged.idXML \\
               -threads ${task.cpus}  \\
               -annotate_file_origin
+              -merge_proteins_add_psms
      """
 
 }
