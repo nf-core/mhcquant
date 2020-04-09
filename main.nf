@@ -23,6 +23,7 @@ def helpMessage() {
       --mzmls [file]                            Path to input data (must be surrounded with quotes)	
       --raw_input [bool]                        Specify whether raw files should be used as input
       --raw_files [file]                        Path to input raw data (must be surrounded with quotes)
+      --sample_sheet [file]                     Path to sample sheet (must be surrounded with quotes)
       --fasta [file]                            Path to Fasta reference
       -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
                                                 Available: docker, singularity, test, awsbatch and more
@@ -94,11 +95,22 @@ if (params.help) {
 }
 
 // Validate inputs
-if(!params.raw_input){
-   params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+if (params.sample_sheet)  {
+   sample_sheet = file(params.sample_sheet, checkIfExists: true)
+
+   ch_samples_from_sheet = Channel.from( sample_sheet )
+                .splitCsv(header: true, sep:'\t')
+                .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
+                .dump()
 } else {
-   params.raw_files = params.raw_files ?: { log.error "No spectra data privided. Make sure you have used the '--raw_files' option."; exit 1 }()
+   if(params.mzml_input){
+      params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+   }
+   if (params.raw_input){
+      params.raw_files = params.raw_files ?: { log.error "No spectra data privided. Make sure you have used the '--raw_files' option."; exit 1 }()
+   }
 }
+
 params.fasta = params.fasta ?: { log.error "No database fasta privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
@@ -185,41 +197,51 @@ variant_snp_filter="-fSNP"
 variant_snp_filter=""
 }
 
-if (params.raw_input){
+if (!params.sample_sheet){
+   if (params.raw_input){
 
-  input_mzmls = Channel.empty()
-  input_mzmls_align = Channel.empty()
-  input_mzmls_unpicked = Channel.empty()
-  input_mzmls_align_unpicked = Channel.empty()
+      input_mzmls = Channel.empty()
+      input_mzmls_align = Channel.empty()
+      input_mzmls_unpicked = Channel.empty()
+      input_mzmls_align_unpicked = Channel.empty()
 
-  Channel
-        .fromPath( params.raw_files )
-        .ifEmpty { exit 1, "Cannot find any raw files matching: ${params.raw_files}\nNB: Path needs to be enclosed in quotes!" }
-        .set { input_raws }
+      Channel
+           .fromPath( params.raw_files )
+           .ifEmpty { exit 1, "Cannot find any raw files matching: ${params.raw_files}\nNB: Path needs to be enclosed in quotes!" }
+           .set { input_raws }
 
+   } else {
+
+      input_raws = Channel.empty()
+
+      if (params.run_centroidisation) {
+         Channel
+            .fromPath( params.mzmls )
+            .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+            .set { input_mzmls_unpicked }
+
+         input_mzmls = Channel.empty()
+         input_mzmls_align = Channel.empty()
+
+      } else {
+         Channel
+            .fromPath( params.mzmls )
+            .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
+            .into { input_mzmls; input_mzmls_align }
+
+         input_mzmls_unpicked = Channel.empty()
+         input_mzmls_align_unpicked = Channel.empty()
+      }  
+   }
 
 } else {
 
-  input_raws = Channel.empty()
-
-  if (params.run_centroidisation) {
-    Channel
-        .fromPath( params.mzmls )
-        .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-        .set { input_mzmls_unpicked }
-
-    input_mzmls = Channel.empty()
-    input_mzmls_align = Channel.empty()
-
-  } else {
-    Channel
-        .fromPath( params.mzmls )
-        .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-        .into { input_mzmls; input_mzmls_align }
-
-    input_mzmls_unpicked = Channel.empty()
-    input_mzmls_align_unpicked = Channel.empty()
-  }
+   input_raws = Channel.empty()
+   input_mzmls = Channel.empty()
+   input_mzmls = Channel.empty()
+   input_mzmls_align = Channel.empty()
+   input_mzmls_unpicked = Channel.empty()
+   input_mzmls_align_unpicked = Channel.empty()
 
 }
 
@@ -536,15 +558,17 @@ process peak_picking {
  * STEP 2 - run comet database search
  */
 process db_search_comet {
+    tag "${Sample}"
 
     label 'process_high'
  
     input:
-     file mzml_file from raws_converted.mix(input_mzmls.mix(input_mzmls_picked))
+     set val(id), val(Sample), val(Condition), file(mzml_file) from ch_samples_from_sheet
+     //file mzml_file from raws_converted.mix(input_mzmls.mix(input_mzmls_picked))
      file fasta_decoy from fastafile_decoy_1.mix(input_fasta_1).first()
 
     output:
-     file "${mzml_file.baseName}.idXML" into id_files
+     set val("$id"), val("$Sample"), val("$Condition"), file("${mzml_file.baseName}.idXML") into id_files
 
     script:
      """
@@ -581,11 +605,13 @@ process db_search_comet {
 process index_peptides {
  
     input:
-     file id_file from id_files
+     //file id_file from id_files
+     set val(id), val(Sample), val(Condition), file(id_file) from id_files
      file fasta_decoy from fastafile_decoy_2.mix(input_fasta_2).first()
 
     output:
-     file "${id_file.baseName}_idx.idXML" into (id_files_idx, id_files_idx_original)
+     //file "${id_file.baseName}_idx.idXML" into (id_files_idx, id_files_idx_original)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${id_file.baseName}_idx.idXML") into (id_files_idx, id_files_idx_original)
 
     script:
      """
@@ -606,10 +632,12 @@ process index_peptides {
 process calculate_fdr_for_idalignment {
  
     input:
-     file id_file_idx from id_files_idx
+     //file id_file_idx from id_files_idx
+     set val(id), val(Sample), val(Condition), file(id_file_idx) from id_files_idx
 
     output:
-     file "${id_file_idx.baseName}_fdr.idXML" into id_files_idx_fdr
+     //file "${id_file_idx.baseName}_fdr.idXML" into id_files_idx_fdr
+     set val("$id"), val("$Sample"), val("$Condition"), file("${id_file_idx.baseName}_fdr.idXML") into id_files_idx_fdr
 
     script:
      """
@@ -628,15 +656,17 @@ process calculate_fdr_for_idalignment {
 process filter_fdr_for_idalignment {
  
     input:
-     file id_file_idx_fdr from id_files_idx_fdr
+     //file id_file_idx_fdr from id_files_idx_fdr
+     set val(id), val(Sample), val(Condition), file(id_file_idx_fdr) from id_files_idx_fdr
 
     output:
-     file "${id_file_idx_fdr.baseName}_filtered.idXML" into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
+     //file "${id_file_idx_fdr.baseName}_filtered.idXML" into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
+     set val("$Sample"), file("${id}_${id_file_idx_fdr.baseName}_filtered.idXML") into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
 
     script:
      """
      IDFilter -in ${id_file_idx_fdr} \\
-              -out ${id_file_idx_fdr.baseName}_filtered.idXML \\
+              -out ${id}_${id_file_idx_fdr.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
@@ -646,6 +676,7 @@ process filter_fdr_for_idalignment {
 
 }
 
+id_files_idx_fdr_filtered = id_files_idx_fdr_filtered.dump(tag:'Id files idx fdr filtered')
 
 /*
  * STEP 6 - compute alignment rt transformation
@@ -653,13 +684,14 @@ process filter_fdr_for_idalignment {
 process align_ids {
 
     input:
-     file id_names from id_files_idx_fdr_filtered.collect{it}
+     set val(Sample), file(id_names) from id_files_idx_fdr_filtered.groupTuple(by: 1)
 
     output:
-     file '*.trafoXML' into id_files_trafo
+     set val("$Sample"), file("*.trafoXML") into id_files_trafo
 
     script:
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
+
      """
      MapAlignerIdentification -in $id_names \\
                               -trafo_out $out_names \\
@@ -669,6 +701,8 @@ process align_ids {
 
 }
 
+id_files_trafo = id_files_trafo.flatMap{ it -> [it[0], it[1].baseName.split('_')[0], it[1]]}.dump(tag:'Id files trafo')
+
 input_mzmls_align
  .mix(raws_converted_align)
  .mix(input_mzmls_align_picked)
@@ -676,18 +710,30 @@ input_mzmls_align
  .set{input_mzmls_combined}
 
 id_files_idx_original
- .collectFile( sort: { it.baseName } )
- .set{input_ids_sorted}
+ .set{id_files_test}
+// .set{input_ids_sorted}
+// .collectFile( sort: true )
 
-id_files_for_quant_fdr
- .collectFile( sort: { it.baseName } )
- .set{input_ids_for_quant_fdr_sorted}
+input_ids_sorted=Channel.empty()
+
+//id_files_for_quant_fdr
+// .collectFile( sort: true )
+// .set{input_ids_for_quant_fdr_sorted}
+input_ids_for_quant_fdr_sorted=Channel.empty()
 
 id_files_trafo
- .flatten()
- .collectFile( sort: { it.baseName } )
- .into{trafo_sorted_mzml; trafo_sorted_id}
+ .set{test_channel}
 
+Channel
+ .empty()
+ .into{trafo_sorted_mzml; trafo_sorted_id}
+ //.println()
+ //.collectFile( sort: { it.baseName } )
+ //.into{trafo_sorted_mzml; trafo_sorted_id}
+
+id_files_trafo
+ //.join(test_channel, remainder: true)
+ //.transpose(by: 1, remainder: false)
 
 /*
  * STEP 7 - align mzML files using trafoXMLs
