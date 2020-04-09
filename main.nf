@@ -640,7 +640,8 @@ process filter_fdr_for_idalignment {
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
-              -remove_decoys
+              -remove_decoys \\
+              -delete_unreferenced_peptide_hits
      """
 
 }
@@ -847,7 +848,8 @@ process filter_by_q_value {
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
-              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}'
+              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
+              -delete_unreferenced_peptide_hits
      """
 
 }
@@ -875,7 +877,8 @@ process filter_by_q_value_first {
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
-              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}'
+              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
+              -delete_unreferenced_peptide_hits
      """
 
 }
@@ -1036,7 +1039,8 @@ process filter_refined_q_value {
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
-              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}'
+              -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
+              -delete_unreferenced_peptide_hits
      """
 
 }
