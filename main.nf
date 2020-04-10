@@ -98,10 +98,10 @@ if (params.help) {
 if (params.sample_sheet)  {
    sample_sheet = file(params.sample_sheet, checkIfExists: true)
 
-   ch_samples_from_sheet = Channel.from( sample_sheet )
+   Channel.from( sample_sheet )
                 .splitCsv(header: true, sep:'\t')
                 .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
-                .dump()
+                .into { ch_samples_from_sheet; ch_samples_from_sheet_II}
 } else {
    if(params.mzml_input){
       params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
@@ -656,12 +656,10 @@ process calculate_fdr_for_idalignment {
 process filter_fdr_for_idalignment {
  
     input:
-     //file id_file_idx_fdr from id_files_idx_fdr
      set val(id), val(Sample), val(Condition), file(id_file_idx_fdr) from id_files_idx_fdr
 
     output:
-     //file "${id_file_idx_fdr.baseName}_filtered.idXML" into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
-     set val("$Sample"), file("${id}_${id_file_idx_fdr.baseName}_filtered.idXML") into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
+     set val(id), val("$Sample"), val(Condition), file("${id}_${id_file_idx_fdr.baseName}_filtered.idXML") into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
 
     script:
      """
@@ -676,7 +674,6 @@ process filter_fdr_for_idalignment {
 
 }
 
-id_files_idx_fdr_filtered = id_files_idx_fdr_filtered.dump(tag:'Id files idx fdr filtered')
 
 /*
  * STEP 6 - compute alignment rt transformation
@@ -684,10 +681,10 @@ id_files_idx_fdr_filtered = id_files_idx_fdr_filtered.dump(tag:'Id files idx fdr
 process align_ids {
 
     input:
-     set val(Sample), file(id_names) from id_files_idx_fdr_filtered.groupTuple(by: 1)
+     set val(id), val(Sample), val(Condition), file(id_names) from id_files_idx_fdr_filtered.groupTuple(by: 1)
 
     output:
-     set val("$Sample"), file("*.trafoXML") into id_files_trafo
+     set val("$Sample"), file("*.trafoXML") into (id_files_trafo, id_files_trafo_II)
 
     script:
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
@@ -701,39 +698,20 @@ process align_ids {
 
 }
 
-id_files_trafo = id_files_trafo.flatMap{ it -> [it[0], it[1].baseName.split('_')[0], it[1]]}.dump(tag:'Id files trafo')
+//trafo_test.transpose().dump(tag: 'trafo test')
 
-input_mzmls_align
- .mix(raws_converted_align)
- .mix(input_mzmls_align_picked)
- .collectFile( sort: { it.baseName } )
- .set{input_mzmls_combined}
+ch_samples_from_sheet_II
+ .flatMap { it -> [tuple(it[0].toInteger(), it[1].toString(), it[2], it[3])]}
+ .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+ .set{joined_trafos_mzmls}
 
 id_files_idx_original
- .set{id_files_test}
-// .set{input_ids_sorted}
-// .collectFile( sort: true )
+ .flatMap { it -> [tuple(it[0].toInteger(), it[1].toString(), it[2], it[3])]}
+ .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+ .into{joined_trafos_ids; joined_test}
 
-input_ids_sorted=Channel.empty()
+//joined_test.dump(tag: 'joined_test')
 
-//id_files_for_quant_fdr
-// .collectFile( sort: true )
-// .set{input_ids_for_quant_fdr_sorted}
-input_ids_for_quant_fdr_sorted=Channel.empty()
-
-id_files_trafo
- .set{test_channel}
-
-Channel
- .empty()
- .into{trafo_sorted_mzml; trafo_sorted_id}
- //.println()
- //.collectFile( sort: { it.baseName } )
- //.into{trafo_sorted_mzml; trafo_sorted_id}
-
-id_files_trafo
- //.join(test_channel, remainder: true)
- //.transpose(by: 1, remainder: false)
 
 /*
  * STEP 7 - align mzML files using trafoXMLs
@@ -741,11 +719,10 @@ id_files_trafo
 process align_mzml_files {
 
     input:
-     file id_file_trafo from trafo_sorted_mzml
-     file mzml_file_align from input_mzmls_combined
+     set val(id), val(Sample), val(Condition), file(mzml_file_align), file(id_file_trafo) from joined_trafos_mzmls
 
     output:
-     file "${mzml_file_align.baseName}_aligned.mzML" into mzml_files_aligned
+     set val("$id"), val("$Sample"), val("$Condition"), file("${mzml_file_align.baseName}_aligned.mzML") into mzml_files_aligned
   
     script:
      """
@@ -763,11 +740,10 @@ process align_mzml_files {
 process align_idxml_files {
 
     input:
-     file idxml_file_trafo from trafo_sorted_id
-     file idxml_file_align from input_ids_sorted
+     set val(id), val(Sample), val(Condition), file(idxml_file_align), file(idxml_file_trafo) from joined_trafos_ids
 
     output:
-     file "${idxml_file_align.baseName}_aligned.idXML" into idxml_files_aligned
+     set val("$id"), val("$Sample"), val("$Condition"), file("${idxml_file_align.baseName}_aligned.idXML") into idxml_files_aligned
 
     script:
      """
@@ -786,15 +762,15 @@ process align_idxml_files {
 process merge_aligned_idxml_files {
 
     input:
-     file ids_aligned from idxml_files_aligned.collect{it}
+     set val(id), val(Sample), val(Condition), file(ids_aligned) from idxml_files_aligned.groupTuple(by: 1)
 
     output:
-     file "all_ids_merged.idXML" into id_merged
+     set val("$id"), val("$Sample"), val(Condition), file("${Sample}_all_ids_merged.idXML") into (id_merged, id_merged_test)
 
     script:
      """
      IDMerger -in $ids_aligned \\
-              -out all_ids_merged.idXML \\
+              -out ${Sample}_all_ids_merged.idXML \\
               -threads ${task.cpus}  \\
               -annotate_file_origin  \\
               -merge_proteins_add_PSMs
@@ -802,6 +778,7 @@ process merge_aligned_idxml_files {
 
 }
 
+//id_merged_test.dump(tag: 'id_merged')
 
 /*
  * STEP 10 - extract PSM features for Percolator
@@ -810,10 +787,10 @@ process extract_psm_features_for_percolator {
     publishDir "${params.outdir}/Intermediate_Results/"
  
     input:
-     file id_file_merged from id_merged
+     set val(id), val(Sample), val(Condition), file(id_file_merged) from id_merged
 
     output:
-     file "${id_file_merged.baseName}_psm.idXML" into (id_files_merged_psm, id_files_merged_psm_refine, id_files_merged_psm_refine_2)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${id_file_merged.baseName}_psm.idXML") into (id_files_merged_psm, id_files_merged_psm_refine, id_files_merged_psm_refine_2)
 
     script:
      """
@@ -832,10 +809,10 @@ process run_percolator {
     publishDir "${params.outdir}/Intermediate_Results/"
  
     input:
-     file id_file_psm from id_files_merged_psm
+     set val(id), val(Sample), val(Condition), file(id_file_psm) from id_files_merged_psm
 
     output:
-     file "${id_file_psm.baseName}_perc.idXML" into id_files_merged_psm_perc
+     set val("$id"), val("$Sample"), val("$Condition"), file("${id_file_psm.baseName}_perc.idXML") into (id_files_merged_psm_perc, id_files_merged_psm_perc_sub)
 
     if (params.klammer && params.description_correct_features == 0) {
         log.warn('Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.')
@@ -879,10 +856,10 @@ process filter_by_q_value {
     publishDir "${params.outdir}/Intermediate_Results/"
  
     input:
-     file id_file_perc from id_files_merged_psm_perc
+     set val(id), val(Sample), val(Condition), file(id_file_perc) from id_files_merged_psm_perc
 
     output:
-     file "${id_file_perc.baseName}_filtered.idXML" into (id_files_merged_psm_perc_filtered, ids_for_rt_training, ids_for_rt_prediction)
+     set val("$id"), val("$Sample"), file("${id_file_perc.baseName}_filtered.idXML") into (id_files_merged_psm_perc_filtered, ids_for_rt_training, ids_for_rt_prediction)
 
     when:
      !params.refine_fdr_on_predicted_subset
@@ -908,18 +885,18 @@ process filter_by_q_value_first {
     publishDir "${params.outdir}/Intermediate_Results/"
     
     input:
-     file id_file_perc from id_files_merged_psm_perc
+     file id_file_perc_sub from id_files_merged_psm_perc_sub
     
     output:
-     file "${id_file_perc.baseName}_filtered.idXML" into id_files_merged_psm_perc_filtered_refine
+     file "${id_file_perc_sub.baseName}_filtered.idXML" into id_files_merged_psm_perc_filtered_refine
 
     when:
      params.refine_fdr_on_predicted_subset
     
     script:
      """
-     IDFilter -in ${id_file_perc} \\
-              -out ${id_file_perc.baseName}_filtered.idXML \\
+     IDFilter -in ${id_file_perc_sub} \\
+              -out ${id_file_perc_sub.baseName}_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
@@ -1091,6 +1068,11 @@ process filter_refined_q_value {
 
 }
 
+id_files_for_quant_fdr
+ .flatMap { it -> [tuple(it[0], it[1], it[2], it[3])]}
+ .join(mzml_files_aligned, by: [0,1,2])
+ .combine(id_files_merged_psm_perc_filtered.mix(id_files_merged_psm_pred_perc_filtered), by:1)
+ .set{joined_mzmls_ids_quant}
 
 /*
  * STEP 13 - quantify identifications using targeted feature extraction
@@ -1099,28 +1081,27 @@ process quantify_identifications_targeted {
     publishDir "${params.outdir}/Intermediate_Results/"
  
     input:
-     file id_file_quant from id_files_merged_psm_perc_filtered.mix(id_files_merged_psm_pred_perc_filtered).first()
-     file mzml_quant from mzml_files_aligned
-     file id_file_quant_int from input_ids_for_quant_fdr_sorted
+     set val(Sample), val(id), val(Condition), file(id_file_quant_int), file(mzml_quant), val(all_ids), file(id_file_quant) from joined_mzmls_ids_quant
 
     output:
-     file "${mzml_quant.baseName}.featureXML" into (feature_files, feature_files_II)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${id}.featureXML") into (feature_files, feature_files_II, feature_test)
 
     script:
     if (!params.quantification_fdr){
+
      """
      FeatureFinderIdentification -in ${mzml_quant} \\
                                  -id ${id_file_quant} \\
-                                 -out ${mzml_quant.baseName}.featureXML \\
+                                 -out ${Sample}_${id}.featureXML \\
                                  -threads ${task.cpus}
      """
     } else {
-          """
+     """
      FeatureFinderIdentification -in ${mzml_quant} \\
                                  -id ${id_file_quant_int} \\
                                  -id_ext ${id_file_quant} \\
                                  -svm:min_prob ${params.quantification_min_prob} \\
-                                 -out ${mzml_quant.baseName}.featureXML \\
+                                 -out ${Sample}_${id}.featureXML \\
                                  -threads ${task.cpus}
      """   
     }
@@ -1134,18 +1115,15 @@ process link_extracted_features {
     publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
-     file features from feature_files.collect{it}
-     file features_base from feature_files_II.map { file -> file.baseName + '\n' }.collect{it}
+     set val(id), val(Sample), val(Condition), file(features) from feature_files.groupTuple(by:1)
 
     output:
-     file "mhcquant_file_order.txt" into order_file
-     file "all_features_merged.consensusXML" into consensus_file
+     set val("$Sample"), file("${Sample}_all_features_merged.consensusXML") into consensus_file
     
     script:
      """
-     cat ${features_base} > 'mhcquant_file_order.txt'
      FeatureLinkerUnlabeledKD -in ${features} \\
-                              -out 'all_features_merged.consensusXML' \\
+                              -out '${Sample}_all_features_merged.consensusXML' \\
                               -threads ${task.cpus}
      """
 
@@ -1158,15 +1136,15 @@ process link_extracted_features {
 process resolve_conflicts {
  
     input:
-     file consensus from consensus_file
+     set val(Sample), file(consensus) from consensus_file
 
     output:
-     file "${consensus.baseName}_resolved.consensusXML" into (consensus_file_resolved, consensus_file_resolved_2)
+     set val(Sample), file("${Sample}_resolved.consensusXML") into (consensus_file_resolved, consensus_file_resolved_2)
 
     script:
      """
      IDConflictResolver -in ${consensus} \\
-                        -out ${consensus.baseName}_resolved.consensusXML \\
+                        -out ${Sample}_resolved.consensusXML \\
                         -threads ${task.cpus}
      """
 
@@ -1180,15 +1158,15 @@ process export_text {
     publishDir "${params.outdir}/"
  
     input:
-     file consensus_resolved from consensus_file_resolved
+     set val(Sample), file(consensus_resolved) from consensus_file_resolved
 
     output:
-     file "${consensus_resolved.baseName}.csv" into consensus_text
+     set val(Sample), file("${Sample}.csv") into consensus_text
 
     script:
      """
      TextExporter -in ${consensus_resolved} \\
-                  -out ${consensus_resolved.baseName}.csv \\
+                  -out ${Sample}.csv \\
                   -threads ${task.cpus} \\
                   -id:add_hit_metavalues 0 \\
                   -id:add_metavalues 0 \\
@@ -1205,15 +1183,15 @@ process export_mztab {
     publishDir "${params.outdir}/"
 
     input:
-     file feature_file_2 from consensus_file_resolved_2
+     set val(Sample), file(feature_file_2) from consensus_file_resolved_2
 
     output:
-     file "${feature_file_2.baseName}.mzTab" into features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab
+     set val(Sample), file("${Sample}.mzTab") into (features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab)
 
     script:
      """
      MzTabExporter -in ${feature_file_2} \\
-                   -out ${feature_file_2.baseName}.mzTab \\
+                   -out ${Sample}.mzTab \\
                    -threads ${task.cpus}
      """
 
