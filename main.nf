@@ -654,12 +654,12 @@ process filter_fdr_for_idalignment {
      set val(id), val(Sample), val(Condition), file(id_file_idx_fdr) from id_files_idx_fdr
 
     output:
-     set val(id), val("$Sample"), val(Condition), file("${Sample}_${Condition}_${id}_idx_fdr_filtered.idXML") into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
+     set val(id), val("$Sample"), val(Condition), file("${id}_-_${Sample}_${Condition}_idx_fdr_filtered.idXML") into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
 
     script:
      """
      IDFilter -in ${id_file_idx_fdr} \\
-              -out ${Sample}_${Condition}_${id}_idx_fdr_filtered.idXML \\
+              -out ${Sample}_${Condition}_${id}_-_idx_fdr_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
@@ -699,12 +699,12 @@ process align_ids {
  */
 ch_samples_from_sheet_II
  .flatMap { it -> [tuple(it[0].toInteger(), it[1].toString(), it[2], it[3])]}
- .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+ .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
  .set{joined_trafos_mzmls}
 
 id_files_idx_original
  .flatMap { it -> [tuple(it[0].toInteger(), it[1].toString(), it[2], it[3])]}
- .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+ .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
  .set{joined_trafos_ids}
 
 
