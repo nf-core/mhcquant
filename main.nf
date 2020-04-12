@@ -59,12 +59,11 @@ def helpMessage() {
       --quantification_min_prob  [int]          Specify a minimum probability cut off for quantification
 
     Binding Predictions:	
+      --allele_sheet [file]                     Path to file including HLA class 1 and class 2 allele information 
       --predict_class_1 [bool]                  Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
       --predict_class_2 [bool]                  Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
       --refine_fdr_on_predicted_subset[bool]    Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
       --subset_affinity_threshold [int]         Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
-      --class_1_alleles [file]                  Path to file including class 1 allele information	
-      --class_2_alleles [file]                  Path to file including class 2 allele information	
 
     Variants:	
       --include_proteins_from_vcf [bool]        Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
@@ -114,6 +113,14 @@ if (params.sample_sheet)  {
 params.fasta = params.fasta ?: { log.error "No database fasta privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
+if (params.predict_class_1 || predict_class_2)  {
+   allele_sheet = file(params.allele_sheet, checkIfExists: true)
+
+   Channel.from( allele_sheet )
+                .splitCsv(header: true, sep:'\t')
+                .map { col -> tuple("${col.Sample}", "${col.HLA-Alleles_Class_1}", "${col.HLA-Alleles_Class_2}")}
+                .into { ch_alleles_from_sheet; ch_alleles_from_sheet_II}
+}
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -283,9 +290,10 @@ if( params.include_proteins_from_vcf) {
  * Create a channel for class 1 alleles file
  */
 if( params.predict_class_1){
-    Channel
-        .fromPath( params.class_1_alleles )
-        .ifEmpty { exit 1, "params.alleles was empty - no input file supplied" }
+
+    ch_alleles_from_sheet
+        .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
+        .flatMap {it -> [tuple(it[0], it{1})]}
         .into { peptides_class_1_alleles; peptides_class_1_alleles_refine; neoepitopes_class_1_alleles; neoepitopes_class_1_alleles_prediction}
 
 } else {
@@ -296,13 +304,15 @@ if( params.predict_class_1){
     neoepitopes_class_1_alleles_prediction = Channel.empty()
 }
 
+
 /*
  * Create a channel for class  2 allele files
 */
 if( params.predict_class_2){
-    Channel
-        .fromPath( params.class_2_alleles )
-        .ifEmpty { exit 1, "params.class_2_alleles was empty - no input file supplied" }
+
+     ch_alleles_from_sheet
+        .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
+        .flatMap {it -> [tuple(it[0], it{2})]}
         .into { nepepitopes_class_2_alleles; peptides_class_2_alleles; peptides_class_2_alleles_II }
 
 } else {
@@ -310,6 +320,7 @@ if( params.predict_class_2){
     peptides_class_2_alleles = Channel.empty()
     peptides_class_2_alleles_II = Channel.empty()
 }
+
 
 /*
  * Create a channel for input vcf file
