@@ -1,4 +1,5 @@
 #!/usr/bin/env nextflow
+
 /*
 ========================================================================================
                          nf-core/mhcquant
@@ -118,7 +119,7 @@ if (params.predict_class_1 || predict_class_2)  {
 
    Channel.from( allele_sheet )
                 .splitCsv(header: true, sep:'\t')
-                .map { col -> tuple("${col.Sample}", "${col.HLA-Alleles_Class_1}", "${col.HLA-Alleles_Class_2}")}
+                .map { col -> tuple("${col.Sample}", "${col.HLA_Alleles_Class_1}", "${col.HLA_Alleles_Class_2}")}
                 .into { ch_alleles_from_sheet; ch_alleles_from_sheet_II}
 }
 /*
@@ -293,7 +294,7 @@ if( params.predict_class_1){
 
     ch_alleles_from_sheet
         .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
-        .flatMap {it -> [tuple(it[0], it{1})]}
+        .flatMap {it -> [tuple("id", it[0].toString(), it[1])]}
         .into { peptides_class_1_alleles; peptides_class_1_alleles_refine; neoepitopes_class_1_alleles; neoepitopes_class_1_alleles_prediction}
 
 } else {
@@ -312,7 +313,7 @@ if( params.predict_class_2){
 
      ch_alleles_from_sheet
         .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
-        .flatMap {it -> [tuple(it[0], it{2})]}
+        .flatMap {it -> [tuple(it[0], it[2])]}
         .into { nepepitopes_class_2_alleles; peptides_class_2_alleles; peptides_class_2_alleles_II }
 
 } else {
@@ -784,7 +785,6 @@ process merge_aligned_idxml_files {
 
 }
 
-//id_merged_test.dump(tag: 'id_merged')
 
 /*
  * STEP 10 - extract PSM features for Percolator
@@ -970,9 +970,7 @@ process predict_psms {
     publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
-     set val(id), val(Sample), file(perc_mztab_file) from percolator_ids_mztab
-     set val(id), val(Sample), file(psm_mztab_file) from psm_ids_mztab
-     set file(allotypes_refine) from peptides_class_1_alleles_refine
+     set val(Sample), val(id), file(perc_mztab_file), file(psm_mztab_file), val(d), val(allotypes_refine) from percolator_ids_mztab.join(psm_ids_mztab, by:[0,1]).combine(peptides_class_1_alleles_refine, by:1)
 
     output:
      set val("$id"), val("$Sample"), file("${Sample}_peptide_filter.idXML") into peptide_filter
@@ -983,7 +981,7 @@ process predict_psms {
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} ${Sample}_peptide_filter.idXML
+     mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes_refine}' ${perc_mztab_file} ${psm_mztab_file} ${Sample}_peptide_filter.idXML
      """
 }
 
@@ -1191,7 +1189,7 @@ process export_mztab {
      set val(Sample), file(feature_file_2) from consensus_file_resolved_2
 
     output:
-     set val(Sample), file("${Sample}.mzTab") into (features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab)
+     set val("id"), val(Sample), file("${Sample}.mzTab") into (features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab)
 
     script:
      """
@@ -1211,11 +1209,10 @@ process predict_peptides_mhcflurry_class_1 {
     echo true
 
     input:
-     file mztab_file from features_mztab
-     file class_1_alleles from peptides_class_1_alleles
+     set val(Sample), val(id), file(mztab_file), val(d), val(class_1_alleles) from features_mztab.combine(peptides_class_1_alleles, by:1)
 
     output:
-     file "*predicted_peptides_class_1.csv" into predicted_peptides
+     set val("$Sample"), file("*predicted_peptides_class_1.csv") into predicted_peptides
 
     when:
      params.predict_class_1
@@ -1223,7 +1220,7 @@ process predict_peptides_mhcflurry_class_1 {
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     mhcflurry_predict_mztab.py ${class_1_alleles} ${mztab_file} predicted_peptides_class_1.csv
+     mhcflurry_predict_mztab.py '${class_1_alleles}' ${mztab_file} ${Sample}_predicted_peptides_class_1.csv
      """
 }
 
