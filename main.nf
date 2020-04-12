@@ -564,16 +564,15 @@ process db_search_comet {
  
     input:
      set val(id), val(Sample), val(Condition), file(mzml_file) from ch_samples_from_sheet
-     //file mzml_file from raws_converted.mix(input_mzmls.mix(input_mzmls_picked))
      file fasta_decoy from fastafile_decoy_1.mix(input_fasta_1).first()
 
     output:
-     set val("$id"), val("$Sample"), val("$Condition"), file("${mzml_file.baseName}.idXML") into id_files
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}.idXML") into id_files
 
     script:
      """
      CometAdapter  -in ${mzml_file} \\
-                   -out ${mzml_file.baseName}.idXML \\
+                   -out ${Sample}_${Condition}_${id}.idXML \\
                    -threads ${task.cpus} \\
                    -database ${fasta_decoy} \\
                    -precursor_mass_tolerance ${params.precursor_mass_tolerance} \\
@@ -605,18 +604,16 @@ process db_search_comet {
 process index_peptides {
  
     input:
-     //file id_file from id_files
      set val(id), val(Sample), val(Condition), file(id_file) from id_files
      file fasta_decoy from fastafile_decoy_2.mix(input_fasta_2).first()
 
     output:
-     //file "${id_file.baseName}_idx.idXML" into (id_files_idx, id_files_idx_original)
-     set val("$id"), val("$Sample"), val("$Condition"), file("${id_file.baseName}_idx.idXML") into (id_files_idx, id_files_idx_original)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML") into (id_files_idx, id_files_idx_original)
 
     script:
      """
      PeptideIndexer -in ${id_file} \\
-                    -out ${id_file.baseName}_idx.idXML \\
+                    -out ${Sample}_${Condition}_${id}_idx.idXML \\
                     -threads ${task.cpus} \\
                     -fasta ${fasta_decoy} \\
                     -decoy_string DECOY \\
@@ -632,18 +629,16 @@ process index_peptides {
 process calculate_fdr_for_idalignment {
  
     input:
-     //file id_file_idx from id_files_idx
      set val(id), val(Sample), val(Condition), file(id_file_idx) from id_files_idx
 
     output:
-     //file "${id_file_idx.baseName}_fdr.idXML" into id_files_idx_fdr
-     set val("$id"), val("$Sample"), val("$Condition"), file("${id_file_idx.baseName}_fdr.idXML") into id_files_idx_fdr
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx_fdr.idXML") into id_files_idx_fdr
 
     script:
      """
      FalseDiscoveryRate -in ${id_file_idx} \\
                         -protein 'false' \\
-                        -out ${id_file_idx.baseName}_fdr.idXML \\
+                        -out ${Sample}_${Condition}_${id}_idx_fdr.idXML \\
                         -threads ${task.cpus}
      """
 
@@ -659,12 +654,12 @@ process filter_fdr_for_idalignment {
      set val(id), val(Sample), val(Condition), file(id_file_idx_fdr) from id_files_idx_fdr
 
     output:
-     set val(id), val("$Sample"), val(Condition), file("${id}_${id_file_idx_fdr.baseName}_filtered.idXML") into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
+     set val(id), val("$Sample"), val(Condition), file("${Sample}_${Condition}_${id}_idx_fdr_filtered.idXML") into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
 
     script:
      """
      IDFilter -in ${id_file_idx_fdr} \\
-              -out ${id}_${id_file_idx_fdr.baseName}_filtered.idXML \\
+              -out ${Sample}_${Condition}_${id}_idx_fdr_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
@@ -698,8 +693,10 @@ process align_ids {
 
 }
 
-//trafo_test.transpose().dump(tag: 'trafo test')
 
+/*
+ * Intermediate Step - join RT transformation files with mzml and idxml channels
+ */
 ch_samples_from_sheet_II
  .flatMap { it -> [tuple(it[0].toInteger(), it[1].toString(), it[2], it[3])]}
  .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
@@ -708,9 +705,7 @@ ch_samples_from_sheet_II
 id_files_idx_original
  .flatMap { it -> [tuple(it[0].toInteger(), it[1].toString(), it[2], it[3])]}
  .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
- .into{joined_trafos_ids; joined_test}
-
-//joined_test.dump(tag: 'joined_test')
+ .set{joined_trafos_ids}
 
 
 /*
@@ -722,13 +717,13 @@ process align_mzml_files {
      set val(id), val(Sample), val(Condition), file(mzml_file_align), file(id_file_trafo) from joined_trafos_mzmls
 
     output:
-     set val("$id"), val("$Sample"), val("$Condition"), file("${mzml_file_align.baseName}_aligned.mzML") into mzml_files_aligned
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_aligned.mzML") into mzml_files_aligned
   
     script:
      """
      MapRTTransformer -in ${mzml_file_align} \\
                       -trafo_in ${id_file_trafo} \\
-                      -out ${mzml_file_align.baseName}_aligned.mzML \\
+                      -out ${Sample}_${Condition}_${id}_aligned.mzML \\
                       -threads ${task.cpus}
      """
 }
@@ -743,13 +738,13 @@ process align_idxml_files {
      set val(id), val(Sample), val(Condition), file(idxml_file_align), file(idxml_file_trafo) from joined_trafos_ids
 
     output:
-     set val("$id"), val("$Sample"), val("$Condition"), file("${idxml_file_align.baseName}_aligned.idXML") into idxml_files_aligned
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx_aligned.idXML") into idxml_files_aligned
 
     script:
      """
      MapRTTransformer -in ${idxml_file_align} \\
                       -trafo_in ${idxml_file_trafo} \\
-                      -out ${idxml_file_align.baseName}_aligned.idXML \\
+                      -out ${Sample}_${Condition}_${id}_idx_aligned.idXML \\
                       -threads ${task.cpus}
      """
 
@@ -790,12 +785,12 @@ process extract_psm_features_for_percolator {
      set val(id), val(Sample), val(Condition), file(id_file_merged) from id_merged
 
     output:
-     set val("$id"), val("$Sample"), val("$Condition"), file("${id_file_merged.baseName}_psm.idXML") into (id_files_merged_psm, id_files_merged_psm_refine, id_files_merged_psm_refine_2)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_all_ids_merged_psm.idXML") into (id_files_merged_psm, id_files_merged_psm_refine, id_files_merged_psm_refine_2)
 
     script:
      """
      PSMFeatureExtractor -in ${id_file_merged} \\
-                         -out ${id_file_merged.baseName}_psm.idXML \\
+                         -out ${Sample}_all_ids_merged_psm.idXML \\
                          -threads ${task.cpus} 
      """
 
@@ -812,7 +807,7 @@ process run_percolator {
      set val(id), val(Sample), val(Condition), file(id_file_psm) from id_files_merged_psm
 
     output:
-     set val("$id"), val("$Sample"), val("$Condition"), file("${id_file_psm.baseName}_perc.idXML") into (id_files_merged_psm_perc, id_files_merged_psm_perc_sub)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_all_ids_merged_psm_perc.idXML") into (id_files_merged_psm_perc, id_files_merged_psm_perc_sub)
 
     if (params.klammer && params.description_correct_features == 0) {
         log.warn('Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.')
@@ -823,7 +818,7 @@ process run_percolator {
     if (params.description_correct_features > 0 && params.klammer){
     """
     PercolatorAdapter -in ${id_file_psm} \\
-                       -out ${id_file_psm.baseName}_perc.idXML \\
+                       -out ${Sample}_all_ids_merged_psm_perc.idXML \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -threads ${task.cpus} \\
@@ -835,7 +830,7 @@ process run_percolator {
     } else {
     """
     PercolatorAdapter -in ${id_file_psm} \\
-                       -out ${id_file_psm.baseName}_perc.idXML \\
+                       -out ${Sample}_all_ids_merged_psm_perc.idXML \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -threads ${task.cpus} \\
@@ -859,7 +854,7 @@ process filter_by_q_value {
      set val(id), val(Sample), val(Condition), file(id_file_perc) from id_files_merged_psm_perc
 
     output:
-     set val("$id"), val("$Sample"), file("${id_file_perc.baseName}_filtered.idXML") into (id_files_merged_psm_perc_filtered, ids_for_rt_training, ids_for_rt_prediction)
+     set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged_psm_perc_filtered.idXML") into (id_files_merged_psm_perc_filtered, ids_for_rt_training, ids_for_rt_prediction)
 
     when:
      !params.refine_fdr_on_predicted_subset
@@ -867,7 +862,7 @@ process filter_by_q_value {
     script:
      """
      IDFilter -in ${id_file_perc} \\
-              -out ${id_file_perc.baseName}_filtered.idXML \\
+              -out ${Sample}_all_ids_merged_psm_perc_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
@@ -885,10 +880,10 @@ process filter_by_q_value_first {
     publishDir "${params.outdir}/Intermediate_Results/"
     
     input:
-     file id_file_perc_sub from id_files_merged_psm_perc_sub
+    set val(id), val(Sample), val(Condition), file(id_file_perc_sub) from id_files_merged_psm_perc_sub
     
     output:
-     file "${id_file_perc_sub.baseName}_filtered.idXML" into id_files_merged_psm_perc_filtered_refine
+    set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged_psm_perc_filtered.idXML") into id_files_merged_psm_perc_filtered_refine
 
     when:
      params.refine_fdr_on_predicted_subset
@@ -896,7 +891,7 @@ process filter_by_q_value_first {
     script:
      """
      IDFilter -in ${id_file_perc_sub} \\
-              -out ${id_file_perc_sub.baseName}_filtered.idXML \\
+              -out ${Sample}_all_ids_merged_psm_perc_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
@@ -914,10 +909,10 @@ process export_mztab_perc {
     publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
-     file percolator_mztab from id_files_merged_psm_perc_filtered_refine
+     set val(id), val(Sample), file(percolator_mztab) from id_files_merged_psm_perc_filtered_refine
 
     output:
-     file "${percolator_mztab.baseName}.mzTab" into percolator_ids_mztab
+     set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged_psm_perc_filtered.mzTab") into percolator_ids_mztab
 
     when:
      params.refine_fdr_on_predicted_subset
@@ -925,7 +920,7 @@ process export_mztab_perc {
     script:
      """
      MzTabExporter -in ${percolator_mztab} \\
-                   -out ${percolator_mztab.baseName}.mzTab \\
+                   -out ${Sample}_all_ids_merged_psm_perc_filtered.mzTab \\
                    -threads ${task.cpus}
      """
 
@@ -939,10 +934,10 @@ process export_mztab_psm {
     publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
-     file psm_mztab from id_files_merged_psm_refine
+     set val(id), val(Sample), file(psm_mztab) from id_files_merged_psm_refine
 
     output:
-     file "${psm_mztab.baseName}.mzTab" into psm_ids_mztab
+     set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged.mzTab") into psm_ids_mztab
 
     when:
      params.refine_fdr_on_predicted_subset
@@ -950,7 +945,7 @@ process export_mztab_psm {
     script:
      """
      MzTabExporter -in ${psm_mztab} \\
-                   -out ${psm_mztab.baseName}.mzTab \\
+                   -out ${Sample}_all_ids_merged.mzTab \\
                    -threads ${task.cpus}
      """
 
@@ -962,15 +957,14 @@ process export_mztab_psm {
  */
 process predict_psms {
     publishDir "${params.outdir}/Intermediate_Results/"
-    echo true
 
     input:
-     file perc_mztab_file from percolator_ids_mztab
-     file psm_mztab_file from psm_ids_mztab
-     file allotypes_refine from peptides_class_1_alleles_refine
+     set val(id), val(Sample), file(perc_mztab_file) from percolator_ids_mztab
+     set val(id), val(Sample), file(psm_mztab_file) from psm_ids_mztab
+     set file(allotypes_refine) from peptides_class_1_alleles_refine
 
     output:
-     file "peptide_filter.idXML" into peptide_filter
+     set val("$id"), val("$Sample"), file("${Sample}_peptide_filter.idXML") into peptide_filter
 
     when:
      params.refine_fdr_on_predicted_subset
@@ -978,7 +972,7 @@ process predict_psms {
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} peptide_filter.idXML
+     mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} ${allotypes_refine} ${perc_mztab_file} ${psm_mztab_file} ${Sample}_peptide_filter.idXML
      """
 }
 
@@ -990,11 +984,11 @@ process filter_psms_by_predictions {
     publishDir "${params.outdir}/Intermediate_Results/"
     
     input:
-     file id_file_psm_filtered from id_files_merged_psm_refine_2
-     file peptide_filter_file from peptide_filter
+     set val(id), val(Sample), file(pid_file_psm_filtered) from id_files_merged_psm_refine_2
+     set val(id), val(Sample), file(peptide_filter_file) from peptide_filter
 
     output:
-     file "${id_file_psm_filtered.baseName}_pred_filtered.idXML" into id_files_merged_psm_pred_filtered
+     set val("$id"), val("$Sample"), file("${Sample}_pred_filtered.idXML") into id_files_merged_psm_pred_filtered
 
     when:
      params.refine_fdr_on_predicted_subset    
@@ -1002,7 +996,7 @@ process filter_psms_by_predictions {
     script:
      """
      IDFilter -in ${id_file_psm_filtered} \\
-              -out ${id_file_psm_filtered.baseName}_pred_filtered.idXML \\
+              -out ${Sample}_pred_filtered.idXML \\
               -whitelist:ignore_modifications \\
               -whitelist:peptides ${peptide_filter_file}\\
               -threads ${task.cpus} \\
@@ -1018,10 +1012,10 @@ process run_percolator_on_predicted_subset {
     publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
-     file id_file_psm_subset from id_files_merged_psm_pred_filtered
+     set val(id), val(Sample), file(id_file_psm_subset) from id_files_merged_psm_pred_filtered
 
     output:
-     file "${id_file_psm_subset.baseName}_perc.idXML" into id_files_merged_psm_pred_perc
+     set val("$id"), val("$Sample"), file("${Sample}_perc_subset.idXML") into id_files_merged_psm_pred_perc
 
     when:
      params.refine_fdr_on_predicted_subset
@@ -1029,7 +1023,7 @@ process run_percolator_on_predicted_subset {
     script:
      """
      PercolatorAdapter -in ${id_file_psm_subset} \\
-                       -out ${id_file_psm_subset.baseName}_perc.idXML \\
+                       -out ${Sample}_perc_subset.idXML \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -threads ${task.cpus} \\
@@ -1047,10 +1041,10 @@ process filter_refined_q_value {
     publishDir "${params.outdir}/Intermediate_Results/"
      
     input:
-     file id_file_perc_pred from id_files_merged_psm_pred_perc
+     set val(id), val(Sample), file(id_file_perc_pred) from id_files_merged_psm_pred_perc
      
     output:
-     file "${id_file_perc_pred.baseName}_filtered.idXML" into (id_files_merged_psm_pred_perc_filtered, ids_for_rt_training_subset, ids_for_rt_prediction_subset)
+     set val("$id"), val("$Sample"), file("${Sample}_perc_subset_filtered.idXML") into (id_files_merged_psm_pred_perc_filtered, ids_for_rt_training_subset, ids_for_rt_prediction_subset)
 
     when:
      params.refine_fdr_on_predicted_subset     
@@ -1058,7 +1052,7 @@ process filter_refined_q_value {
     script:
      """      
      IDFilter -in ${id_file_perc_pred} \\
-              -out ${id_file_perc_pred.baseName}_filtered.idXML \\
+              -out ${Sample}_perc_subset_filtered \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
