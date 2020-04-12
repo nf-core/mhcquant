@@ -659,7 +659,7 @@ process filter_fdr_for_idalignment {
     script:
      """
      IDFilter -in ${id_file_idx_fdr} \\
-              -out ${Sample}_${Condition}_${id}_-_idx_fdr_filtered.idXML \\
+              -out ${id}_-_${Sample}_${Condition}_idx_fdr_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
@@ -934,7 +934,7 @@ process export_mztab_psm {
     publishDir "${params.outdir}/Intermediate_Results/"
 
     input:
-     set val(id), val(Sample), file(psm_mztab) from id_files_merged_psm_refine
+     set val(id), val(Sample), val(Condition), file(psm_mztab) from id_files_merged_psm_refine
 
     output:
      set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged.mzTab") into psm_ids_mztab
@@ -984,7 +984,7 @@ process filter_psms_by_predictions {
     publishDir "${params.outdir}/Intermediate_Results/"
     
     input:
-     set val(id), val(Sample), file(pid_file_psm_filtered) from id_files_merged_psm_refine_2
+     set val(id), val(Sample), val(Condition), file(id_file_psm_filtered) from id_files_merged_psm_refine_2
      set val(id), val(Sample), file(peptide_filter_file) from peptide_filter
 
     output:
@@ -1052,7 +1052,7 @@ process filter_refined_q_value {
     script:
      """      
      IDFilter -in ${id_file_perc_pred} \\
-              -out ${Sample}_perc_subset_filtered \\
+              -out ${Sample}_perc_subset_filtered.idXML \\
               -threads ${task.cpus} \\
               -score:pep ${params.fdr_threshold} \\
               -remove_decoys \\
