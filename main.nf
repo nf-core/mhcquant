@@ -1311,7 +1311,7 @@ process predict_possible_neoepitopes {
  
     when:
      params.include_proteins_from_vcf
-     params.predict_class_1
+     params.predict_class_2
 
     script:
      """
