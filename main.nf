@@ -95,13 +95,14 @@ if (params.help) {
 }
 
 // Validate inputs
+//MS Input
 if (params.sample_sheet)  {
    sample_sheet = file(params.sample_sheet, checkIfExists: true)
 
    Channel.from( sample_sheet )
                 .splitCsv(header: true, sep:'\t')
                 .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
-                .into { ch_samples_from_sheet; ch_samples_from_sheet_II}
+                .into { ch_samples_from_sheet; ch_samples_from_sheet_II; ch_samples_for_fasta}
 } else {
    if(params.mzml_input){
       params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
@@ -111,9 +112,12 @@ if (params.sample_sheet)  {
    }
 }
 
+
 params.fasta = params.fasta ?: { log.error "No database fasta privided. Make sure you have used the '--fasta' option."; exit 1 }()
 params.outdir = params.outdir ?: { log.warn "No output directory provided. Will put the results into './results'"; return "./results" }()
 
+
+//Allele Input
 if (params.predict_class_1 || predict_class_2)  {
    allele_sheet = file(params.allele_sheet, checkIfExists: true)
 
@@ -122,6 +126,19 @@ if (params.predict_class_1 || predict_class_2)  {
                 .map { col -> tuple("${col.Sample}", "${col.HLA_Alleles_Class_1}", "${col.HLA_Alleles_Class_2}")}
                 .into { ch_alleles_from_sheet; ch_alleles_from_sheet_II}
 }
+
+
+//Variant Input
+if (params.include_proteins_from_vcf)  {
+   vcf_sheet = file(params.vcf_sheet, checkIfExists: true)
+
+   Channel.from( vcf_sheet )
+                .splitCsv(header: true, sep:'\t')
+                .map { col -> tuple("${col.Sample}", "${col.VCF_FileName}",)}
+                .set {ch_vcf_from_sheet}
+}
+
+
 /*
  * SET UP CONFIGURATION VARIABLES
  */
@@ -269,6 +286,8 @@ if( params.include_proteins_from_vcf) {
 } else if( params.skip_decoy_generation) {
     Channel
         .fromPath( params.fasta )
+        .spread(ch_samples_for_fasta)
+        .println()
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .into { input_fasta; input_fasta_1; input_fasta_2 }
 
@@ -277,6 +296,8 @@ if( params.include_proteins_from_vcf) {
 } else {
     Channel
         .fromPath( params.fasta )
+        .spread(ch_samples_for_fasta)
+        .println()
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .set { input_fasta }
 
@@ -327,9 +348,10 @@ if( params.predict_class_2){
  * Create a channel for input vcf file
  */
 if( params.include_proteins_from_vcf){
-    Channel
-        .fromPath( params.vcf )
-        .ifEmpty { exit 1, "params.vcf was empty - no input file supplied" }
+
+    ch_vcf_from_sheet
+        .ifEmpty { exit 1, "params.vcf_sheet was empty - no vcf input file supplied" }
+        .flatMap {it -> [tuple("id", it[0].toString(), it[1])]}
         .into { input_vcf; input_vcf_neoepitope; input_vcf_neoepitope_II}
 
 } else {
@@ -337,6 +359,7 @@ if( params.include_proteins_from_vcf){
     input_vcf_neoepitope = Channel.empty()
     input_vcf_neoepitope_II = Channel.empty()
 }
+
 
 // Stage config files
 ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
@@ -482,11 +505,11 @@ process generate_proteins_from_vcf {
     publishDir "${params.outdir}/"
 
     input:
-     file fasta_file_vcf from input_fasta_vcf
-     file vcf_file from input_vcf
+     file fasta_file_vcf from input_fasta_vcf.first()
+     set val(id), val(Sample), file(vcf_file) from input_vcf
 
     output:
-     file "${fasta_file_vcf.baseName}_added_vcf.fasta" into appended_fasta
+     set val(id), val("$Sample"), file("${Sample}_${fasta_file_vcf.baseName}_added_vcf.fasta") into appended_fasta
 
     when:
      params.include_proteins_from_vcf
@@ -507,7 +530,7 @@ process generate_decoy_database {
      file fastafile from input_fasta.mix(appended_fasta)
 
     output:
-     file "${fastafile.baseName}_decoy.fasta" into (fastafile_decoy_1, fastafile_decoy_2)
+     set val(id), val("$Sample"), file("${fastafile.baseName}_decoy.fasta" into (fastafile_decoy_1, fastafile_decoy_2)
     
     when:
      !params.skip_decoy_generation
@@ -1231,18 +1254,18 @@ process predict_peptides_mhcflurry_class_1 {
  process preprocess_peptides_mhcnuggets_class_2 {
      
     input:
-     file mztab_file from mhcnuggets_mztab
+     set val(id), val(Sample), file(mztab_file) from mhcnuggets_mztab
 
     output:
-     file 'preprocessed_mhcnuggets_peptides' into preprocessed_mhcnuggets_peptides
-     file 'peptide_to_geneID' into peptide_to_geneID
+     set val("$id"), val("$Sample"), file("${Sample}_preprocessed_mhcnuggets_peptides") into preprocessed_mhcnuggets_peptides
+     set val("$id"), val("$Sample"), file('${Sample}_peptide_to_geneID') into peptide_to_geneID
 
     when:
      params.predict_class_2
 
     script:
     """
-    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output preprocessed_mhcnuggets_peptides
+    preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output ${Sample}_preprocessed_mhcnuggets_peptides
     """
  }
 
@@ -1253,18 +1276,17 @@ process predict_peptides_mhcflurry_class_1 {
  process predict_peptides_mhcnuggets_class_2 {
 
     input:
-     file preprocessed_peptides from preprocessed_mhcnuggets_peptides
-     file class_2_alleles from peptides_class_2_alleles
+     set val(Sample), val(id), file(preprocessed_peptides), val(d), val(class_2_alleles) from preprocessed_mhcnuggets_peptides.combine(peptides_class_2_alleles, by:1)
 
     output:
-     file '*_predicted_peptides_class_2' into predicted_mhcnuggets_peptides
+     set val("$Sample"), file('*_${Sample}_predicted_peptides_class_2') into predicted_mhcnuggets_peptides
 
     when:
      params.predict_class_2
 
     script:
     """
-    mhcnuggets_predict_peptides.py --peptides ${preprocessed_peptides} --alleles ${class_2_alleles} --output _predicted_peptides_class_2
+    mhcnuggets_predict_peptides.py --peptides ${preprocessed_peptides} --alleles '${class_2_alleles}' --output _${Sample}_predicted_peptides_class_2
     """
  }
 
@@ -1276,18 +1298,17 @@ process predict_peptides_mhcflurry_class_1 {
     publishDir "${params.outdir}/class_2_bindings"
 
     input:
-     file predicted_peptides from predicted_mhcnuggets_peptides.collect{it}
-     file peptide_to_geneID from peptide_to_geneID
+     set val(Sample), val(id), file(predicted_peptides), val(d), file(peptide_to_geneID) from predicted_mhcnuggets_peptides.combine(peptide_to_geneID, by:1).collect{it}
 
     output:
-     file '*.csv' into postprocessed_peptides_mhcnuggets
+     set val("$Sample"), file('*.csv') into postprocessed_peptides_mhcnuggets
 
     when:
      params.predict_class_2
 
     script:
     """
-    postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID}
+    postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID} --output ${Sample}_postprocessed.csv
     """
  }
  
@@ -1302,12 +1323,11 @@ process predict_possible_neoepitopes {
     label 'process_high'
 
     input:
-     file alleles_file from neoepitopes_class_1_alleles
-     file vcf_file from input_vcf_neoepitope
+     set val(id), val(Sample), val(alleles_file), file(vcf_file) from neoepitopes_class_1_alleles.join(input_vcf_neoepitope, by:[0,1])
 
     output:
-     file "vcf_neoepitopes.csv" into possible_neoepitopes
-     file "vcf_neoepitopes.txt" into possible_neoepitopes_list
+     set val("$id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.csv") into possible_neoepitopes
+     set val("$id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.txt") into possible_neoepitopes_list
  
     when:
      params.include_proteins_from_vcf
@@ -1315,7 +1335,7 @@ process predict_possible_neoepitopes {
 
     script:
      """
-     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a ${alleles_file} -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o vcf_neoepitopes.csv
+     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '${alleles_file}' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o ${Sample}_vcf_neoepitopes.csv
      """
 }
 
@@ -1330,12 +1350,11 @@ process predict_possible_class_2_neoepitopes {
     label 'process_high'
 
     input:
-     file alleles_file_II from peptides_class_2_alleles_II
-     file vcf_file from input_vcf_neoepitope_II
+     set val(id), val(Sample), val(alleles_file_II), file(vcf_file) from peptides_class_2_alleles_II.join(input_vcf_neoepitope_II, by:[0,1])
 
     output:
-     file "vcf_neoepitopes.csv" into possible_neoepitopes_II
-     file "vcf_neoepitopes.txt" into possible_neoepitopes_list_II
+     set val("$id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.csv") into possible_neoepitopes_II
+     set val("$id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.txt") into possible_neoepitopes_list_II
 
     when:
      params.include_proteins_from_vcf
@@ -1344,7 +1363,7 @@ process predict_possible_class_2_neoepitopes {
 
     script:
      """
-     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a ${alleles_file_II} -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o vcf_neoepitopes.csv
+     vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '${alleles_file_II}' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o ${Sample}_vcf_neoepitopes.csv
      """
 }
 
@@ -1357,11 +1376,10 @@ process Resolve_found_neoepitopes {
     echo true
 
     input:
-     file mztab from features_mztab_neoepitopes
-     file neoepitopes from possible_neoepitopes
+     set val(id), val(Sample), file(mztab), file(neoepitopes) from features_mztab_neoepitopes.join(possible_neoepitopes, by:[0,1])
 
     output:
-     file "found_neoepitopes_class_1.csv" into found_neoepitopes
+     set val("$Sample"), file("${Sample}_found_neoepitopes_class_1.csv") into found_neoepitopes
     
     when:
      params.include_proteins_from_vcf
@@ -1369,7 +1387,7 @@ process Resolve_found_neoepitopes {
 
     script:
      """
-     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_1
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${Sample}_found_neoepitopes_class_1
      """
 }
 
@@ -1382,11 +1400,10 @@ process Resolve_found_class_2_neoepitopes {
     echo true
 
     input:
-     file mztab from features_mztab_neoepitopes_II
-     file neoepitopes from possible_neoepitopes_II
+     set val(id), val(Sample), file(mztab), file(neoepitopes) from features_mztab_neoepitopes_II.join(possible_neoepitopes_II, by:[0,1])
 
     output:
-     file "found_neoepitopes_class_2.csv" into found_neoepitopes_II, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
+     set val("$id"), val("$Sample"), file("{Sample}_found_neoepitopes_class_2.csv") into found_neoepitopes_II, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
 
     when:
      params.include_proteins_from_vcf
@@ -1394,7 +1411,7 @@ process Resolve_found_class_2_neoepitopes {
 
     script:
      """
-     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o found_neoepitopes_class_2
+     resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${Sample}_found_neoepitopes_class_2
      """
 }
 
@@ -1407,11 +1424,10 @@ process Predict_neoepitopes_mhcflurry_class_1 {
     echo true
 
     input:
-     file allotypes from neoepitopes_class_1_alleles_prediction
-     file neoepitopes from found_neoepitopes
+     set val(id), val(Sample), val(allotypes), file(neoepitopes) from neoepitopes_class_1_alleles_prediction.join(found_neoepitopes, by:[0,1])
 
     output:
-     file "*predicted_neoepitopes_class_1.csv" into predicted_neoepitopes
+     set val("$id"), val("$Sample"), file("*_${Sample}_predicted_neoepitopes_class_1.csv") into predicted_neoepitopes
     
     when:
      params.include_proteins_from_vcf
@@ -1420,7 +1436,7 @@ process Predict_neoepitopes_mhcflurry_class_1 {
     script:
      """
      mhcflurry-downloads --quiet fetch models_class1
-     mhcflurry_neoepitope_binding_prediction.py ${allotypes} ${neoepitopes} predicted_neoepitopes_class_1.csv
+     mhcflurry_neoepitope_binding_prediction.py '${allotypes}' ${neoepitopes} _${Sample}_predicted_neoepitopes_class_1.csv
      """
 }
 
@@ -1431,10 +1447,10 @@ process Predict_neoepitopes_mhcflurry_class_1 {
 process preprocess_neoepitopes_mhcnuggets_class_2 {
 
     input:
-    file neoepitopes from mhcnuggets_neo_preprocessing
+     set val(id), val(Sample), file(neoepitopes) from mhcnuggets_neo_preprocessing
 
     output:
-    file 'mhcnuggets_preprocessed' into preprocessed_mhcnuggets_neoepitopes
+     set val("$id"), val("$Sample"), file('${Sample}_mhcnuggets_preprocessed') into preprocessed_mhcnuggets_neoepitopes
 
     when:
      params.include_proteins_from_vcf
@@ -1442,7 +1458,7 @@ process preprocess_neoepitopes_mhcnuggets_class_2 {
 
     script:
     """
-    preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output mhcnuggets_preprocessed
+    preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output ${Sample}_mhcnuggets_preprocessed
     """
 }
 
@@ -1453,11 +1469,10 @@ process preprocess_neoepitopes_mhcnuggets_class_2 {
 process predict_neoepitopes_mhcnuggets_class_2 {
 
     input:
-    file preprocessed_neoepitopes from preprocessed_mhcnuggets_neoepitopes
-    file cl_2_alleles from nepepitopes_class_2_alleles
+     set val(Sample), val(id), file(${preprocessed_neoepitopes}), val(d) val(cl_2_alleles) from preprocessed_mhcnuggets_neoepitopes.combine(nepepitopes_class_2_alleles, by:1)
 
     output:
-    file '*predicted_neoepitopes_class_2' into predicted_neoepitopes_class_2
+     set val("$id"), val("$Sample"), file('*_{$Sample}_predicted_neoepitopes_class_2') into predicted_neoepitopes_class_2
 
     when:
      params.include_proteins_from_vcf
@@ -1465,7 +1480,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
 
     script:
     """
-    mhcnuggets_predict_peptides.py --peptides ${preprocessed_neoepitopes} --alleles ${cl_2_alleles} --output _predicted_neoepitopes_class_2
+    mhcnuggets_predict_peptides.py --peptides ${preprocessed_neoepitopes} --alleles '${cl_2_alleles}' --output _{$Sample}_predicted_neoepitopes_class_2
     """
 }
 
@@ -1477,11 +1492,10 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
     publishDir "${params.outdir}/class_2_bindings"
 
     input:
-    file neoepitopes from mhcnuggets_neo_postprocessing
-    file predicted_cl_2 from predicted_neoepitopes_class_2.collect{it}
+     set val(Sample), val(id), file(neoepitopes), val(d), file(predicted_cl_2) from mhcnuggets_neo_postprocessing.combine(predicted_neoepitopes_class_2, by:1).collect{it}
 
     output:
-    file '*.csv' into postprocessed_predicted_neoepitopes_class_2
+     set val(Sample), file('*.csv') into postprocessed_predicted_neoepitopes_class_2
 
     when:
      params.include_proteins_from_vcf
@@ -1489,7 +1503,7 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
 
     script:
     """
-    postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
+    postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${Sample}_${neoepitopes}
     """
 }
 
@@ -1500,12 +1514,10 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
 process train_retention_time_predictor {
 
     input:
-    file id_files_for_rt_training from ids_for_rt_training.mix(ids_for_rt_training_subset)
+     set val(id), val(Sample), file(id_files_for_rt_training) from ids_for_rt_training.mix(ids_for_rt_training_subset)
 
     output:
-    file "${id_files_for_rt_training.baseName}.txt" into (trained_rt_model, trained_rt_model_II)
-    file "${id_files_for_rt_training.baseName}_params.paramXML" into (trained_rt_params, trained_rt_params_II) 
-    file "${id_files_for_rt_training.baseName}_trainset.txt" into (trained_rt_set,  trained_rt_set_II)
+     set val("$id"), val("$Sample"), file("${Sample}_id_files_for_rt_training.txt"), file("${Sample}_id_files_for_rt_training_params.paramXML"), file("${Sample}_id_files_for_rt_training_trainset.txt") into (trained_rt_model, trained_rt_model_II)
 
     when:
      params.predict_RT
@@ -1514,9 +1526,9 @@ process train_retention_time_predictor {
     """
     RTModel -in ${id_files_for_rt_training} \\
             -cv:skip_cv \\
-            -out "${id_files_for_rt_training.baseName}.txt" \\
-            -out_oligo_params "${id_files_for_rt_training.baseName}_params.paramXML" \\
-            -out_oligo_trainset "${id_files_for_rt_training.baseName}_trainset.txt"
+            -out "${Sample}_id_files_for_rt_training.txt" \\
+            -out_oligo_params "${Sample}_id_files_for_rt_training_params.paramXML" \\
+            -out_oligo_trainset "${Sample}_id_files_for_rt_training_trainset.txt"
     """
 }
 
@@ -1528,13 +1540,10 @@ process predict_retention_times_of_found_peptides {
     publishDir "${params.outdir}/RT_prediction/"
 
     input:
-    file id_files_for_rt_prediction from ids_for_rt_prediction.mix(ids_for_rt_prediction_subset)
-    file trained_rt_param_file from trained_rt_params
-    file trained_rt_set_file from trained_rt_set
-    file trained_rt_model_file from trained_rt_model
+     set val(id), val(Sample), file(id_files_for_rt_prediction), file(trained_rt_model_file), file(trained_rt_param_file), file(trained_rt_set_file) from ids_for_rt_prediction.mix(ids_for_rt_prediction_subset).join(trained_rt_model, by:[0,1])
 
     output:
-    file "${id_files_for_rt_prediction.baseName}_RTpredicted.csv" into rt_predicted
+     set val($Sample), file("${Sample}_id_files_for_rt_prediction_RTpredicted.csv") into rt_predicted
 
     when:
      params.predict_RT
@@ -1545,7 +1554,7 @@ process predict_retention_times_of_found_peptides {
               -svm_model ${trained_rt_model_file} \\
               -in_oligo_params ${trained_rt_param_file} \\
               -in_oligo_trainset ${trained_rt_set_file} \\
-              -out_text:file "${id_files_for_rt_prediction.baseName}_RTpredicted.csv"
+              -out_text:file "${Sample}_id_files_for_rt_prediction_RTpredicted.csv"
     """
 }
 
@@ -1557,13 +1566,10 @@ process predict_retention_times_of_possible_neoepitopes {
     publishDir "${params.outdir}/RT_prediction/"
 
     input:
-    file txt_file_for_rt_prediction from possible_neoepitopes_list.mix(possible_neoepitopes_list_II)
-    file trained_rt_param_file_II from trained_rt_params_II
-    file trained_rt_set_file_II from trained_rt_set_II
-    file trained_rt_model_file_II from trained_rt_model_II
+     set val(id), val(Sample), file(txt_file_for_rt_prediction), file(trained_rt_model_file_II), file(trained_rt_param_file_II), file(trained_rt_set_file_II) from possible_neoepitopes_list.mix(possible_neoepitopes_list_II).join(trained_rt_model_II, by:[0,1])
 
     output:
-    file "${txt_file_for_rt_prediction.baseName}_RTpredicted.csv" into rt_predicted_II
+     set val($Sample), file("${Sample}_txt_file_for_rt_prediction_RTpredicted.csv") into rt_predicted_II
 
     when:
      params.predict_RT
@@ -1574,7 +1580,7 @@ process predict_retention_times_of_possible_neoepitopes {
               -svm_model ${trained_rt_model_file_II} \\
               -in_oligo_params ${trained_rt_param_file_II} \\
               -in_oligo_trainset ${trained_rt_set_file_II} \\
-              -out_text:file "${txt_file_for_rt_prediction.baseName}_RTpredicted.csv"
+              -out_text:file "${Sample}_txt_file_for_rt_prediction_RTpredicted.csv"
     """
 }
 
