@@ -18,13 +18,12 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --mzmls '*.mzML' --fasta '*.fasta' --vcf '*.vcf' --class_1_alleles 'alleles.tsv' --include_proteins_from_vcf --predict_class_1 --refine_fdr_on_predicted_subset -profile standard,docker
+    nextflow run nf-core/mhcquant --sample_sheet 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
-      --mzmls [file]                            Path to input data (must be surrounded with quotes)	
-      --raw_input [bool]                        Specify whether raw files should be used as input
-      --raw_files [file]                        Path to input raw data (must be surrounded with quotes)
       --sample_sheet [file]                     Path to sample sheet (must be surrounded with quotes)
+      --raw_input [bool]                        Specify whether raw files are used as input
+      --mzml_input [bool]                       Specify whether mzml files are used as input
       --fasta [file]                            Path to Fasta reference
       -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
                                                 Available: docker, singularity, test, awsbatch and more
@@ -60,15 +59,15 @@ def helpMessage() {
       --quantification_min_prob  [int]          Specify a minimum probability cut off for quantification
 
     Binding Predictions:	
-      --allele_sheet [file]                     Path to file including HLA class 1 and class 2 allele information 
+      --allele_sheet [file]                     Path to file including Sample wise HLA class 1 and class 2 allele information 
       --predict_class_1 [bool]                  Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
       --predict_class_2 [bool]                  Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
       --refine_fdr_on_predicted_subset[bool]    Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
       --subset_affinity_threshold [int]         Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
 
-    Variants:	
+    Variants:
+      --vcf_sheet [file]                        Path to file including Sample wise vcf information 
       --include_proteins_from_vcf [bool]        Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
-      --vcf [file]                              Path to vcf file	
       --variant_annotation_style [str]          Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
       --variant_reference [str]                 Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
       --variant_indel_filter [bool]             Remove insertions and deletions from vcf (true, false)	
@@ -103,13 +102,44 @@ if (params.sample_sheet)  {
                 .splitCsv(header: true, sep:'\t')
                 .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
                 .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])]}
-                .into { ch_samples_from_sheet; ch_samples_from_sheet_II; ch_samples_for_fasta}
+                .into { ch_samples_from_sheet; ch_samples_for_fasta}
+
 } else {
+
    if(params.mzml_input){
-      params.mzmls = params.mzmls ?: { log.error "No spectra data privided. Make sure you have used the '--mzmls' option."; exit 1 }()
+      params.mzmls = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
+
+
+      if (params.run_centroidisation) {
+
+         Channel.from(params.mzmls)
+            .set { input_mzmls_unpicked }
+
+         input_mzmls = Channel.empty()
+         input_mzmls_align = Channel.empty()
+
+      } else {
+
+         Channel.from(params.mzmls)
+            .into { input_mzmls; input_mzmls_align }
+
+         input_mzmls_unpicked = Channel.empty()
+         input_mzmls_align_unpicked = Channel.empty()
+      }  
+
+      input_raws = Channel.empty()
+
    }
    if (params.raw_input){
-      params.raw_files = params.raw_files ?: { log.error "No spectra data privided. Make sure you have used the '--raw_files' option."; exit 1 }()
+      params.raw_files = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
+
+      Channel.from(params.raw_files)
+           .set { input_raws }
+
+      input_mzmls = Channel.empty()
+      input_mzmls_align = Channel.empty()
+      input_mzmls_unpicked = Channel.empty()
+      input_mzmls_align_unpicked = Channel.empty()
    }
 }
 
@@ -223,53 +253,6 @@ variant_snp_filter="-fSNP"
 variant_snp_filter=""
 }
 
-if (!params.sample_sheet){
-   if (params.raw_input){
-
-      input_mzmls = Channel.empty()
-      input_mzmls_align = Channel.empty()
-      input_mzmls_unpicked = Channel.empty()
-      input_mzmls_align_unpicked = Channel.empty()
-
-      Channel
-           .fromPath( params.raw_files )
-           .ifEmpty { exit 1, "Cannot find any raw files matching: ${params.raw_files}\nNB: Path needs to be enclosed in quotes!" }
-           .set { input_raws }
-
-   } else {
-
-      input_raws = Channel.empty()
-
-      if (params.run_centroidisation) {
-         Channel
-            .fromPath( params.mzmls )
-            .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-            .set { input_mzmls_unpicked }
-
-         input_mzmls = Channel.empty()
-         input_mzmls_align = Channel.empty()
-
-      } else {
-         Channel
-            .fromPath( params.mzmls )
-            .ifEmpty { exit 1, "Cannot find any mzmls matching: ${params.mzmls}\nNB: Path needs to be enclosed in quotes!" }
-            .into { input_mzmls; input_mzmls_align }
-
-         input_mzmls_unpicked = Channel.empty()
-         input_mzmls_align_unpicked = Channel.empty()
-      }  
-   }
-
-} else {
-
-   input_raws = Channel.empty()
-   input_mzmls = Channel.empty()
-   input_mzmls = Channel.empty()
-   input_mzmls_align = Channel.empty()
-   input_mzmls_unpicked = Channel.empty()
-   input_mzmls_align_unpicked = Channel.empty()
-
-}
 
 /*
  * Create a channel for input fasta file
@@ -553,10 +536,10 @@ process generate_decoy_database {
 process raw_file_conversion {
 
     input:
-     file rawfile from input_raws
+     set val(Sample), val(id), val(Condition), file(rawfile) from input_raws
 
     output:
-     file "${rawfile.baseName}.mzML" into (raws_converted, raws_converted_align)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${rawfile.baseName}.mzML") into (raws_converted, raws_converted_align)
    
     when:
      params.raw_input
@@ -574,10 +557,10 @@ process raw_file_conversion {
 process peak_picking {
 
     input:
-     file mzml_unpicked from input_mzmls_unpicked
+     set val(Sample), val(id), val(Condition), file(mzml_unpicked) from input_mzmls_unpicked
 
     output:
-     file "${mzml_unpicked.baseName}.mzML" into (input_mzmls_picked, input_mzmls_align_picked)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${mzml_unpicked.baseName}.mzML") into (input_mzmls_picked, input_mzmls_align_picked)
 
     when:
      params.run_centroidisation
@@ -591,10 +574,6 @@ process peak_picking {
 }
 
 
-//ch_samples_from_sheet.flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])]}.join(fastafile_decoy_1.mix(input_fasta_1), by:1)
-// .dump(tag: 'test')
-// .set{test}
-
 /*
  * STEP 2 - run comet database search
  */
@@ -604,7 +583,7 @@ process db_search_comet {
     label 'process_high'
  
     input:
-     set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) from ch_samples_from_sheet.join(fastafile_decoy_1.mix(input_fasta_1), by:1)
+     set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) from raws_converted.mix(input_mzmls.mix(input_mzmls_picked)).join(fastafile_decoy_1.mix(input_fasta_1), by:1)
 
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}.idXML") into id_files
@@ -736,7 +715,9 @@ process align_ids {
 /*
  * Intermediate Step - join RT transformation files with mzml and idxml channels
  */
-ch_samples_from_sheet_II
+ input_mzmls_align
+ .mix(raws_converted_align)
+ .mix(input_mzmls_align_picked)
  .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
  .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
  .set{joined_trafos_mzmls}
