@@ -104,42 +104,42 @@ if (params.sample_sheet)  {
                 .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])]}
                 .into { ch_samples_from_sheet; ch_samples_for_fasta}
 
-} else {
+}
 
-   if(params.mzml_input){
-      params.mzmls = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
+if(params.mzml_input){
+      ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
 
 
       if (params.run_centroidisation) {
 
-         Channel.from(params.mzmls)
+         ch_samples
             .set { input_mzmls_unpicked }
 
-         input_mzmls = Channel.empty()
-         input_mzmls_align = Channel.empty()
+         Channel.empty()
+            .into{input_mzmls; input_mzmls_d; input_mzmls_align}
 
       } else {
 
-         Channel.from(params.mzmls)
-            .into { input_mzmls; input_mzmls_align }
+         ch_samples
+            .into { input_mzmls; input_mzmls_d; input_mzmls_align }
 
-         input_mzmls_unpicked = Channel.empty()
-         input_mzmls_align_unpicked = Channel.empty()
+         Channel.empty()
+            .into{input_mzmls_unpicked; input_mzmls_align_unpicked}
       }  
 
-      input_raws = Channel.empty()
+      Channel.empty()
+        .into{input_raws;input_raws_d}
 
-   }
+} else {
    if (params.raw_input){
-      params.raw_files = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
+      ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
 
-      Channel.from(params.raw_files)
-           .set { input_raws }
+      ch_samples
+           .into { input_raws; input_raws_d }
 
-      input_mzmls = Channel.empty()
-      input_mzmls_align = Channel.empty()
-      input_mzmls_unpicked = Channel.empty()
-      input_mzmls_align_unpicked = Channel.empty()
+      Channel.empty()
+        .into{input_mzmls; input_mzmls_d; input_mzmls_align; input_mzmls_unpicked; input_mzmls_align_unpicked}
+
    }
 }
 
@@ -375,7 +375,7 @@ summary['Run Name']           = custom_runName ?: workflow.runName
 summary['Pipeline Name']      = 'nf-core/mhcquant'
 summary['Pipeline Version']   = workflow.manifest.version
 summary['Run Name']           = custom_runName ?: workflow.runName
-summary['mzMLs']              = params.mzmls
+summary['MS Samples']         = input_mzmls_d.mix(input_raws_d)
 summary['Fasta Ref']          = params.fasta
 summary['Class 1 Prediction'] = params.predict_class_1
 summary['Class 2 Prediction'] = params.predict_class_2
@@ -536,7 +536,7 @@ process generate_decoy_database {
 process raw_file_conversion {
 
     input:
-     set val(Sample), val(id), val(Condition), file(rawfile) from input_raws
+     set val(id), val(Sample), val(Condition), file(rawfile) from input_raws
 
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${rawfile.baseName}.mzML") into (raws_converted, raws_converted_align)
@@ -557,7 +557,7 @@ process raw_file_conversion {
 process peak_picking {
 
     input:
-     set val(Sample), val(id), val(Condition), file(mzml_unpicked) from input_mzmls_unpicked
+     set val(id), val(Sample), val(Condition), file(mzml_unpicked) from input_mzmls_unpicked
 
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${mzml_unpicked.baseName}.mzML") into (input_mzmls_picked, input_mzmls_align_picked)
@@ -715,7 +715,7 @@ process align_ids {
 /*
  * Intermediate Step - join RT transformation files with mzml and idxml channels
  */
- input_mzmls_align
+input_mzmls_align
  .mix(raws_converted_align)
  .mix(input_mzmls_align_picked)
  .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
@@ -1197,7 +1197,7 @@ process export_mztab {
      set val(Sample), file(feature_file_2) from consensus_file_resolved_2
 
     output:
-     set val("id"), val(Sample), file("${Sample}.mzTab") into (features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab)
+     set val("$id"), val("$Sample"), file("${Sample}.mzTab") into (features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab)
 
     script:
      """
