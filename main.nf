@@ -96,7 +96,7 @@ if (params.help) {
 // Validate inputs
 //MS Input
 if (params.sample_sheet)  {
-   sample_sheet = fromPath(params.sample_sheet)
+   sample_sheet = file(params.sample_sheet)
 
    Channel.from( sample_sheet )
                 .splitCsv(header: true, sep:'\t')
