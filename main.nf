@@ -836,12 +836,11 @@ process run_percolator {
     script:
     if (params.description_correct_features > 0 && params.klammer){
     """
-    PercolatorAdapter -in ${id_file_psm} \\
+    OMP_NUM_THREADS=${task.cpus} PercolatorAdapter -in ${id_file_psm} \\
                        -out ${Sample}_all_ids_merged_psm_perc.idXML \\
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
-                       -threads ${task.cpus} \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
                        -doc ${params.description_correct_features} \\
@@ -849,12 +848,11 @@ process run_percolator {
     """
     } else {
     """
-    PercolatorAdapter -in ${id_file_psm} \\
+    OMP_NUM_THREADS=${task.cpus} PercolatorAdapter -in ${id_file_psm} \\
                        -out ${Sample}_all_ids_merged_psm_perc.idXML \\
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
-                       -threads ${task.cpus} \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
                        -doc ${params.description_correct_features} \\
@@ -1041,12 +1039,11 @@ process run_percolator_on_predicted_subset {
 
     script:
      """
-     PercolatorAdapter -in ${id_file_psm_subset} \\
+     OMP_NUM_THREADS=${task.cpus} PercolatorAdapter -in ${id_file_psm_subset} \\
                        -out ${Sample}_perc_subset.idXML \\
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
-                       -threads ${task.cpus} \\
                        -enzyme no_enzyme \\
                        $fdr_level
      """
