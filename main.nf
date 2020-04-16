@@ -100,7 +100,7 @@ if (params.sample_sheet)  {
 
    Channel.from( sample_sheet )
                 .splitCsv(header: true, sep:'\t')
-                .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
+                .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", path("${col.ReplicateFileName}", checkifExists: true))}
                 .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])]}
                 .into { ch_samples_from_sheet; ch_samples_for_fasta}
 
