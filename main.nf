@@ -821,6 +821,8 @@ process extract_psm_features_for_percolator {
  */
 process run_percolator {
     publishDir "${params.outdir}/Intermediate_Results/"
+
+    label 'process_medium'
  
     input:
      set val(id), val(Sample), val(Condition), file(id_file_psm) from id_files_merged_psm
@@ -835,6 +837,7 @@ process run_percolator {
 
     script:
     if (params.description_correct_features > 0 && params.klammer){
+
     """
     PercolatorAdapter -in ${id_file_psm} \\
                        -out ${Sample}_all_ids_merged_psm_perc.idXML \\
@@ -856,6 +859,7 @@ process run_percolator {
                        -enzyme no_enzyme \\
                        $fdr_level \\
                        -doc ${params.description_correct_features} \\
+                       -seed 4711
     """
     }
      
