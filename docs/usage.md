@@ -147,11 +147,9 @@ Use this to specify a table including your input raw or mzml files as well as th
 
 Set this flag if you want to use raw files instead of mzml files
 
-
 ### `--mzml_input`
 
 Set this flag if you want to use mzml files instead of raw files
-
 
 ### `--fasta`
 
@@ -314,7 +312,6 @@ Specify a .tsv file containing the MHC class 1 alleles of your probes as well as
 | MM15_Melanom | A*03:01;A*68:01;B*27:05;B*35:03;C*02:02;C*04:01 |HLA-DRB1*01:01;HLA-DQB1*03:19;HLA-DQA1*05:01|
 | MM17_Melanom | A*02:01;B*07:01;B*26:01;C*11:01;C*01:01         |HLA-DRB1*01:02;HLA-DRB3*02:02;HLA-DRB4*01:03|
 
-
 ### `--predict_class_1`
 
 Set flag depending on whether MHC class 1 binding predictions using the tool mhcflurry should be run. [Check whether your alleles are supported by mhcflurry](supported_class_1_alleles.md)
@@ -331,7 +328,6 @@ Set to 'True' or 'False' depending on whether binding predictions using the tool
 
 Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)
 
-
 ## Optional variant translation
 
 ### `--vcf_sheet`
@@ -342,7 +338,6 @@ Specify a .tsv file containing the information about genomic variants (vcf files
 | -------------| :---------------------:|
 | MM15_Melanom | data/MM15_variants.vcf |
 | MM17_Melanom | data/MM17_variants.vcf |
-
 
 ### `--include_proteins_from_vcf`
 
