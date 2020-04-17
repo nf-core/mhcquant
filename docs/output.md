@@ -26,7 +26,6 @@ PEP   sequence   accession   best_search_engine_score[1]   retention_time   char
 ```
 
 Most important to know that in this format we annotated the q-value of each peptide identification in the best_seach_engine_score[1] column and peptide quantities in the peptide_abundance_study_variable columns.
-When processing multiple files this will result in quantities for each MS run. Which MS run represents which column of peptide_abundance is described in the Intermediate_results folder in the mhcquant_file_order.txt file.
 
 [mzTab](http://www.psidev.info/mztab) is a light-weight format to report mass spectrometry search results. It provides all important information about identified peptide hits and is compatible with the PRIDE Archive - proteomics data repository:
 

@@ -24,8 +24,7 @@ optional arguments:
   -maxl, --peptide_max_length {8,9,10,11,12,13,14,15,16,17}
                         The maximal length of peptides
   -a, --alleles ALLELES
-                        Path to the allele file (one per line in new
-                        nomenclature)
+                        Alleles string separated by semicolon
   -r, --reference REFERENCE
                         The reference genome used for varinat annotation and
                         calling.
@@ -325,11 +324,11 @@ def main():
             epitopes.extend(generate_peptides_from_proteins(proteins, length))
 
     # read in allele list
-    alleles = read_lines(args.alleles, in_type=Allele)
+    alleles = args.alleles
 
     # predict bindings for all found neoepitopes
     if args.predict_bindings:
-        result = EpitopePredictorFactory(args.method).predict(epitopes, alleles=alleles)
+        result = EpitopePredictorFactory(args.method).predict(epitopes, alleles=alleles.split(';'))
 
         with open(args.output, "w") as f:
             alleles = result.columns
