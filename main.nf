@@ -1217,7 +1217,6 @@ process export_mztab {
  */
 process predict_peptides_mhcflurry_class_1 {
     publishDir "${params.outdir}/class_1_bindings"
-    echo true
 
     input:
      set val(Sample), val(id), file(mztab_file), val(d), val(class_1_alleles) from features_mztab.combine(peptides_class_1_alleles, by:1)
@@ -1306,7 +1305,6 @@ process predict_peptides_mhcflurry_class_1 {
  */
 process predict_possible_neoepitopes {
     publishDir "${params.outdir}/"
-    echo true
 
     label 'process_high'
 
@@ -1333,7 +1331,6 @@ process predict_possible_neoepitopes {
  */
 process predict_possible_class_2_neoepitopes {
     publishDir "${params.outdir}/"
-    echo true
 
     label 'process_high'
 
@@ -1367,7 +1364,7 @@ process Resolve_found_neoepitopes {
      set val(id), val(Sample), file(mztab), file(neoepitopes) from features_mztab_neoepitopes.join(possible_neoepitopes, by:[0,1], remainder:true) 
 
     output:
-     set val("$Sample"), file("${Sample}_found_neoepitopes_class_1.csv") into found_neoepitopes
+     set val("$id"), val("$Sample"), file("${Sample}_found_neoepitopes_class_1.csv") into found_neoepitopes
     
     when:
      params.include_proteins_from_vcf
@@ -1409,10 +1406,9 @@ process Resolve_found_class_2_neoepitopes {
  */
 process Predict_neoepitopes_mhcflurry_class_1 {
     publishDir "${params.outdir}/class_1_bindings"
-    echo true
 
     input:
-     set val(id), val(Sample), val(allotypes), file(neoepitopes) from neoepitopes_class_1_alleles_prediction.join(found_neoepitopes, by:[0,1])
+     set val(Sample), val(id), val(allotypes), val(d), file(neoepitopes) from neoepitopes_class_1_alleles_prediction.join(found_neoepitopes, by:1)
 
     output:
      set val("$id"), val("$Sample"), file("*_${Sample}_predicted_neoepitopes_class_1.csv") into predicted_neoepitopes
