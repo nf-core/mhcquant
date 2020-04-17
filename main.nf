@@ -156,6 +156,11 @@ if (params.predict_class_1 || params.predict_class_2)  {
                 .splitCsv(header: true, sep:'\t')
                 .map { col -> tuple("${col.Sample}", "${col.HLA_Alleles_Class_1}", "${col.HLA_Alleles_Class_2}")}
                 .into { ch_alleles_from_sheet; ch_alleles_from_sheet_II}
+} else {
+
+   Channel
+      .empty()
+      .into { ch_alleles_from_sheet; ch_alleles_from_sheet_II}
 }
 
 
@@ -167,8 +172,12 @@ if (params.include_proteins_from_vcf)  {
                 .splitCsv(header: true, sep:'\t')
                 .map { col -> tuple("${col.Sample}", file("${col.VCF_FileName}"),)}
                 .set {ch_vcf_from_sheet}
-}
 
+} else {
+
+   ch_vcf_from_sheet = Channel.empty()
+
+}
 
 /*
  * SET UP CONFIGURATION VARIABLES
@@ -341,9 +350,11 @@ if( params.include_proteins_from_vcf){
         .into { input_vcf; input_vcf_neoepitope; input_vcf_neoepitope_II}
 
 } else {
+
     input_vcf = Channel.empty()
     input_vcf_neoepitope = Channel.empty()
     input_vcf_neoepitope_II = Channel.empty()
+
 }
 
 
@@ -1316,8 +1327,7 @@ process predict_possible_neoepitopes {
      set val("id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.txt") into possible_neoepitopes_list
  
     when:
-     params.include_proteins_from_vcf
-     params.predict_class_1
+     params.include_proteins_from_vcf & params.predict_class_1
 
     script:
      """
@@ -1342,9 +1352,7 @@ process predict_possible_class_2_neoepitopes {
      set val("id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.txt") into possible_neoepitopes_list_II
 
     when:
-     params.include_proteins_from_vcf
-     !params.predict_class_1
-     params.predict_class_2
+     params.include_proteins_from_vcf & !params.predict_class_1 & params.predict_class_2
 
     script:
      """
@@ -1367,8 +1375,7 @@ process Resolve_found_neoepitopes {
      set val("$id"), val("$Sample"), file("${Sample}_found_neoepitopes_class_1.csv") into found_neoepitopes
     
     when:
-     params.include_proteins_from_vcf
-     params.predict_class_1
+     params.include_proteins_from_vcf & params.predict_class_1
 
     script:
      """
@@ -1391,8 +1398,7 @@ process Resolve_found_class_2_neoepitopes {
      set val("$id"), val("$Sample"), file("${Sample}_found_neoepitopes_class_2.csv") into found_neoepitopes_II, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
 
     when:
-     params.include_proteins_from_vcf
-     params.predict_class_2
+     params.include_proteins_from_vcf & params.predict_class_2
 
     script:
      """
@@ -1414,8 +1420,7 @@ process Predict_neoepitopes_mhcflurry_class_1 {
      set val("$id"), val("$Sample"), file("*_${Sample}_predicted_neoepitopes_class_1.csv") into predicted_neoepitopes
     
     when:
-     params.include_proteins_from_vcf
-     params.predict_class_1
+     params.include_proteins_from_vcf & params.predict_class_1
 
     script:
      """
@@ -1437,8 +1442,7 @@ process preprocess_neoepitopes_mhcnuggets_class_2 {
      set val("$id"), val("$Sample"), file("${Sample}_mhcnuggets_preprocessed") into preprocessed_mhcnuggets_neoepitopes
 
     when:
-     params.include_proteins_from_vcf
-     params.predict_class_2
+     params.include_proteins_from_vcf & params.predict_class_2
 
     script:
     """
@@ -1459,8 +1463,7 @@ process predict_neoepitopes_mhcnuggets_class_2 {
      set val("$id"), val("$Sample"), file("*_predicted_neoepitopes_class_2") into predicted_neoepitopes_class_2
 
     when:
-     params.include_proteins_from_vcf
-     params.predict_class_2
+     params.include_proteins_from_vcf & params.predict_class_2
 
     script:
     """
@@ -1482,8 +1485,7 @@ process postprocess_neoepitopes_mhcnuggets_class_2 {
      set val("$Sample"), file("*.csv") into postprocessed_predicted_neoepitopes_class_2
 
     when:
-     params.include_proteins_from_vcf
-     params.predict_class_2
+     params.include_proteins_from_vcf & params.predict_class_2
 
     script:
     """
