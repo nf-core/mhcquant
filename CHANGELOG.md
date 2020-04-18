@@ -1,5 +1,17 @@
 # nf-core/mhcquant: Changelog
 
+## v1.5 nf-core/mhcquat "Flying Fish" - 2020/04/18
+
+### `Fixed`
+
+- raise OpenMS version to 2.5
+- adapt workflow accoringly with new options
+- integrate sample, allele and vcf instead of file dirs
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.4 nf-core/mhcquat "Blue Kingfisher" - 2020/03/18
 
 ### `Fixed`
