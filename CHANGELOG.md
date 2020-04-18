@@ -4,9 +4,9 @@
 
 ### `Fixed`
 
- - raise OpenMS version to 2.5
- - adapt workflow accoringly with new options
- - integrate sample, allele and vcf instead of file dirs
+- raise OpenMS version to 2.5
+- adapt workflow accoringly with new options
+- integrate sample, allele and vcf instead of file dirs
 
 ### `Dependencies`
 
