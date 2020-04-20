@@ -98,20 +98,33 @@ if (params.help) {
 
 // Validate inputs
 //MS Input
-if (params.sample_sheet)  {
-   sample_sheet = file(params.sample_sheet)
+sample_sheet = file(params.sample_sheet)
 
-   Channel.from( sample_sheet )
-                .splitCsv(header: true, sep:'\t')
-                .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
-                .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])]}
-                .into { ch_samples_from_sheet; ch_samples_for_fasta}
+Channel.from( sample_sheet )
+       .splitCsv(header: true, sep:'\t')
+       .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
+       .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])]}
+       .into { ch_samples_from_sheet; ch_samples_for_fasta; input_branch}
 
+input_branch.branch {
+        raw: hasExtension(it[3], 'raw')
+        mzML: hasExtension(it[3], 'mzML')
+}
+set{branch}
+
+
+// Check file extension
+def hasExtension(it, extension) {
+    it.toString().toLowerCase().endsWith(extension.toLowerCase())
 }
 
-if(params.mzml_input){
-      ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
 
+//test_extension=input_branch.map{ it -> it[3].getExtension().toString().toLowerCase()}.unique()
+//println(test_extension.toString()=='mzml')
+
+extension='mzml'
+if(extension=='zml'){
+      ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
 
       if (params.run_centroidisation) {
 
@@ -133,8 +146,8 @@ if(params.mzml_input){
       Channel.empty()
         .into{input_raws;input_raws_d}
 
-} else {
-   if (params.raw_input){
+} else if(extension=='raw') {
+
       ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
 
       ch_samples
@@ -143,7 +156,10 @@ if(params.mzml_input){
       Channel.empty()
         .into{input_mzmls; input_mzmls_d; input_mzmls_align; input_mzmls_unpicked; input_mzmls_align_unpicked}
 
-   }
+} else {
+
+      log.error "Files listed in the sample sheet should either be in .raw or .mzML format. Please check '--sample_sheet' option."; exit 1
+
 }
 
 

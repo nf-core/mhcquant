@@ -9,8 +9,6 @@
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
   * [`--sample_sheet`](#--sample_sheet)
-  * [`--raw_input`](#--raw_input)
-  * [`--mzml_input`](#--mzml_input)
   * [`--fasta`](#--fasta)
   * [`-profile`](#-profile)
 * [Mass Spectrometry Search](#Mass-Spectrometry-Search)
@@ -140,16 +138,8 @@ Use this to specify a table including your input raw or mzml files as well as th
 | 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |
 
 ```bash
---raw_input --sample_sheet 'path/samples.tsv'
+--sample_sheet 'path/samples.tsv'
 ```
-
-### `--raw_input`
-
-Set this flag if you want to use raw files instead of mzml files
-
-### `--mzml_input`
-
-Set this flag if you want to use mzml files instead of raw files
 
 ### `--fasta`
 
