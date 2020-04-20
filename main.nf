@@ -18,10 +18,10 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --sample_sheet 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker
+    nextflow run nf-core/mhcquant --input 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
-      --sample_sheet [file]                     Path to sample sheet (specifying raw or mzml files)
+      --input [file]                     Path to sample sheet (specifying raw or mzml files)
       --fasta [file]                            Path to Fasta reference
       -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
                                                 Available: docker, singularity, test, awsbatch and more
@@ -96,7 +96,7 @@ if (params.help) {
 
 // Validate inputs
 //MS Input
-sample_sheet = file(params.sample_sheet)
+sample_sheet = file(params.input)
 
 Channel.from( sample_sheet )
        .splitCsv(header: true, sep:'\t')
@@ -110,7 +110,7 @@ input_branch.branch {
         other: true
 }.set{ms_files}
 
-ms_files.other.subscribe { row -> log.warn("unknown format for entry " + row[3] + " in provided sample sheet. ignoring line.")}
+ms_files.other.subscribe { row -> log.warn("unknown format for entry " + row[3] + " in provided sample sheet. ignoring line."); exit 1 }
 
 
 //mzML branch

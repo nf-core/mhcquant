@@ -8,7 +8,7 @@
   * [Updating the pipeline](#updating-the-pipeline)
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
-  * [`--sample_sheet`](#--sample_sheet)
+  * [`--input`](#--input)
   * [`--fasta`](#--fasta)
   * [`-profile`](#-profile)
 * [Mass Spectrometry Search](#Mass-Spectrometry-Search)
@@ -39,6 +39,7 @@
   * [`--skip_decoy_generation`](#--skip_decoy_generation)
   * [`--quantification_fdr`](#--quantification_fdr)
   * [`--quantification_min_prob`](#--quantification_min_prob)
+  * [`--skip_quantification`](#--skip_quantification)
   * [`--predict_RT`](#--predict_RT)
 * [Optional binding predicion](#optional-binding-prediction)
   * [`--allele_sheet`](#--allele_sheet)
@@ -95,7 +96,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/mhcquant --sample_sheet 'samples.tsv' --fasta 'SWISSPROT_2020.fasta' --allele_sheet 'alleles.tsv' --vcf_sheet 'variants.tsv' --include_proteins_from_vcf --predict_class_1 -profile docker
+nextflow run nf-core/mhcquant --input 'samples.tsv' --fasta 'SWISSPROT_2020.fasta' --allele_sheet 'alleles.tsv' --vcf_sheet 'variants.tsv' --include_proteins_from_vcf --predict_class_1 -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -127,9 +128,9 @@ This version number will be logged in reports when you run the pipeline, so that
 
 ## Main arguments
 
-### `--sample_sheet`
+### `--input`
 
-Use this to specify a table including your input raw or mzml files as well as their metainformation such as SampleID and Condition. For example:
+Use this to specify a sample sheet table including your input raw or mzml files as well as their metainformation such as SampleID and Condition. For example:
 
 | ID   | Sample      | Condition  |   ReplicateFileName                       |
 | -----|:------------:| ----------:|------------------------------------------:|
@@ -138,7 +139,7 @@ Use this to specify a table including your input raw or mzml files as well as th
 | 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |
 
 ```bash
---sample_sheet 'path/samples.tsv'
+--input 'path/samples.tsv'
 ```
 
 ### `--fasta`
@@ -286,6 +287,10 @@ Set this option to assess and assign quantification of peptides with an FDR meas
 ### `--quantification_min_prob`
 
 Specify a cut off probability value for quantification events as a filter
+
+### `--skip_quantification`
+
+Set this flag to skip quantification steps
 
 ### `--predict_RT`
 

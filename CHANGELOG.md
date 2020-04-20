@@ -7,6 +7,9 @@
 - raise OpenMS version to 2.5
 - adapt workflow accoringly with new options
 - integrate sample, allele and vcf instead of file dirs
+- remove specifying input as file dirs eg "data/*.mzML"
+- branched mzML/raw input
+- introduce param to skip quantification
 
 ### `Dependencies`
 
