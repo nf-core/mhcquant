@@ -21,9 +21,7 @@ def helpMessage() {
     nextflow run nf-core/mhcquant --sample_sheet 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
-      --sample_sheet [file]                     Path to sample sheet (must be surrounded with quotes)
-      --raw_input [bool]                        Specify whether raw files are used as input
-      --mzml_input [bool]                       Specify whether mzml files are used as input
+      --sample_sheet [file]                     Path to sample sheet (specifying raw or mzml files)
       --fasta [file]                            Path to Fasta reference
       -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
                                                 Available: docker, singularity, test, awsbatch and more
@@ -109,58 +107,36 @@ Channel.from( sample_sheet )
 input_branch.branch {
         raw: hasExtension(it[3], 'raw')
         mzML: hasExtension(it[3], 'mzML')
-}
-set{branch}
+        other: true
+}.set{ms_files}
+
+ms_files.other.subscribe { row -> log.warn("unknown format for entry " + row[3] + " in provided sample sheet. ignoring line.")}
 
 
-// Check file extension
-def hasExtension(it, extension) {
-    it.toString().toLowerCase().endsWith(extension.toLowerCase())
-}
+//mzML branch
+if (params.run_centroidisation) {
 
-
-//test_extension=input_branch.map{ it -> it[3].getExtension().toString().toLowerCase()}.unique()
-//println(test_extension.toString()=='mzml')
-
-extension='mzml'
-if(extension=='zml'){
-      ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
-
-      if (params.run_centroidisation) {
-
-         ch_samples
-            .set { input_mzmls_unpicked }
-
-         Channel.empty()
-            .into{input_mzmls; input_mzmls_d; input_mzmls_align}
-
-      } else {
-
-         ch_samples
-            .into { input_mzmls; input_mzmls_d; input_mzmls_align }
-
-         Channel.empty()
-            .into{input_mzmls_unpicked; input_mzmls_align_unpicked}
-      }  
+      ms_files.mzML
+        .set { input_mzmls_unpicked }
 
       Channel.empty()
-        .into{input_raws;input_raws_d}
-
-} else if(extension=='raw') {
-
-      ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
-
-      ch_samples
-           .into { input_raws; input_raws_d }
-
-      Channel.empty()
-        .into{input_mzmls; input_mzmls_d; input_mzmls_align; input_mzmls_unpicked; input_mzmls_align_unpicked}
+        .into{input_mzmls; input_mzmls_d; input_mzmls_align}
 
 } else {
 
-      log.error "Files listed in the sample sheet should either be in .raw or .mzML format. Please check '--sample_sheet' option."; exit 1
+      ms_files.mzML
+        .into { input_mzmls; input_mzmls_d; input_mzmls_align }
 
-}
+      Channel.empty()
+        .into{input_mzmls_unpicked; input_mzmls_align_unpicked}
+}  
+
+
+//Raw branch
+ms_files.raw
+      .into { input_raws; input_raws_d }
+
+
 
 
 params.fasta = params.fasta ?: { log.error "No database fasta privided. Make sure you have used the '--fasta' option."; exit 1 }()
@@ -545,9 +521,6 @@ process raw_file_conversion {
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${rawfile.baseName}.mzML") into (raws_converted, raws_converted_align)
    
-    when:
-     params.raw_input
-    
     script:
      """
      ThermoRawFileParser.sh -i=${rawfile} -f=2 -b=${rawfile.baseName}.mzML
@@ -1746,4 +1719,9 @@ def checkHostname() {
             }
         }
     }
+}
+
+// Check file extension
+def hasExtension(it, extension) {
+    it.toString().toLowerCase().endsWith(extension.toLowerCase())
 }
