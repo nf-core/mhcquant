@@ -260,7 +260,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .spread(ch_samples_for_fasta)
-        .flatMap{it -> [tuple(it[1].toInteger(),it[2],it[0])]}      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
+        .flatMap{it -> [tuple(it[1],it[2],it[0])]}      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .into { input_fasta; input_fasta_1; input_fasta_2 }
 
@@ -712,19 +712,27 @@ process align_ids {
 /*
  * Intermediate Step - join RT transformation files with mzml and idxml channels
  */
-input_mzmls_align
- .mix(raws_converted_align)
- .mix(input_mzmls_align_picked)
- .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
- .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
- .set{joined_trafos_mzmls}
 
-id_files_idx_original
- .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
- .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
- .set{joined_trafos_ids}
+if(!params.skip_quantification){
 
+   input_mzmls_align
+    .mix(raws_converted_align)
+    .mix(input_mzmls_align_picked)
+    .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+    .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+    .set{joined_trafos_mzmls}
 
+   id_files_idx_original
+    .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+    .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+    .set{joined_trafos_ids}
+
+} else {
+
+   joined_trafos_mzmls = Channel.empty()
+   joined_trafos_ids = Channel.empty()
+
+}
 /*
  * STEP 7 - align mzML files using trafoXMLs
  */
@@ -858,7 +866,7 @@ process run_percolator {
     """
     OMP_NUM_THREADS=${task.cpus} \\
     PercolatorAdapter -in ${id_file_psm} \\
-                       -out ${Sample}_all_ids_merged_psm_perc.idXML 
+                       -out ${Sample}_all_ids_merged_psm_perc.idXML \\ 
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
