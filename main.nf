@@ -571,7 +571,7 @@ process db_search_comet {
     label 'process_high'
  
     input:
-     set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) from raws_converted.mix(input_mzmls.mix(input_mzmls_picked)).join(fastafile_decoy_1.mix(input_fasta_1), by:1, remainder:true)
+     set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) from raws_converted.mix(input_mzmls.mix(input_mzmls_picked)).join(fastafile_decoy_1.mix(input_fasta_1), by:1, remainder:true) 
 
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}.idXML") into id_files
@@ -693,11 +693,11 @@ process align_ids {
     output:
      set val("$Sample"), file("*.trafoXML") into (id_files_trafo, id_files_trafo_II)
 
-    script:
-     def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
-
     when:
      !params.skip_quantification
+
+    script:
+     def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
 
      """
      MapAlignerIdentification -in $id_names \\
