@@ -53,7 +53,7 @@ def helpMessage() {
       --spectrum_batch_size [int]               Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
       --description_correct_features [int]      Percolator: Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
       --klammer [bool]                          Percolator: Retention time features are calculated as in Klammer et al. instead of with Elude.
-      --subset-max-train [int]                  Percolator: Only train an SVM on a subset of PSMs, and use the resulting score vector to evaluate the other PSMs.
+      --subset_max_train [int]                  Percolator: Only train an SVM on a subset of PSMs, and use the resulting score vector to evaluate the other PSMs.
                                                 Recommended when analyzing huge numbers (>1 million) of PSMs. When set to 0, all PSMs are used for training as normal.
       --predict_RT [bool]                       Retention time prediction for identified peptides
       --skip_decoy_generation [bool]            Use a fasta database that already includes decoy sequences
@@ -850,7 +850,7 @@ process run_percolator {
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
-                       -subset-max-train ${params.subset-max-train} \\
+                       -subset-max-train ${params.subset_max_train} \\
                        -doc ${params.description_correct_features} \\
                        -klammer
     """
@@ -864,7 +864,7 @@ process run_percolator {
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
-                       -subset-max-train ${params.subset-max-train} \\
+                       -subset-max-train ${params.subset_max_train} \\
                        -doc ${params.description_correct_features} \\
                        -seed 4711
     """
@@ -1057,7 +1057,7 @@ process run_percolator_on_predicted_subset {
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
-                       -subset-max-train ${params.subset-max-train} \\
+                       -subset-max-train ${params.subset_max_train} \\
                        -doc ${params.description_correct_features} \\
                        $fdr_level
      """
