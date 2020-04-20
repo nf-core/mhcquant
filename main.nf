@@ -850,7 +850,7 @@ process run_percolator {
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
-                       -subset-max-train ${subset-max-train} \\
+                       -subset-max-train ${params.subset-max-train} \\
                        -doc ${params.description_correct_features} \\
                        -klammer
     """
@@ -858,11 +858,13 @@ process run_percolator {
     """
     OMP_NUM_THREADS=${task.cpus} \\
     PercolatorAdapter -in ${id_file_psm} \\
+                       -out ${Sample}_all_ids_merged_psm_perc.idXML 
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
+                       -subset-max-train ${subset-max-train} \\
                        -doc ${params.description_correct_features} \\
                        -seed 4711
     """
@@ -1048,12 +1050,15 @@ process run_percolator_on_predicted_subset {
 
     script:
      """
-     OMP_NUM_THREADS=${task.cpus} PercolatorAdapter -in ${id_file_psm_subset} \\
+     OMP_NUM_THREADS=${task.cpus} \\
+     PercolatorAdapter -in ${id_file_psm_subset} \\
                        -out ${Sample}_perc_subset.idXML \\
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
+                       -subset-max-train ${subset-max-train} \\
+                       -doc ${params.description_correct_features} \\
                        $fdr_level
      """
 
