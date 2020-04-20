@@ -850,7 +850,7 @@ process run_percolator {
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
-                       -subset-max-train 10000\\
+                       -subset-max-train ${subset-max-train} \\
                        -doc ${params.description_correct_features} \\
                        -klammer
     """
