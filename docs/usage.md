@@ -133,7 +133,7 @@ This version number will be logged in reports when you run the pipeline, so that
 
 Use this to specify a table including your input raw or mzml files as well as their metainformation such as SampleID and Condition. For example:
 
-| ID   | Samples      | Condition  |   ReplicateFileName                       |
+| ID   | Sample      | Condition  |   ReplicateFileName                       |
 | -----|:------------:| ----------:|------------------------------------------:|
 | 1    | MM15_Melanom |      A     |   data/MM15_Melanom_W_1_A_standard.raw    |
 | 2    | MM15_Melanom |      B     |   data/MM15_Melanom_W_1_B_standard.raw    |
@@ -307,7 +307,7 @@ Set this option to predict retention times of all identified peptides and possib
 
 Specify a .tsv file containing the MHC class 1 alleles of your probes as well as their metadata such as SampleID. (tab separated)
 
-| Samples      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |
+| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |
 | -------------| :----------------------------------------------:| ------------------------------------------:|
 | MM15_Melanom | A*03:01;A*68:01;B*27:05;B*35:03;C*02:02;C*04:01 |HLA-DRB1*01:01;HLA-DQB1*03:19;HLA-DQA1*05:01|
 | MM17_Melanom | A*02:01;B*07:01;B*26:01;C*11:01;C*01:01         |HLA-DRB1*01:02;HLA-DRB3*02:02;HLA-DRB4*01:03|
@@ -334,7 +334,7 @@ Affinity threshold (nM) used to define binders for PSM subset selection in the f
 
 Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.
 
-| Samples      | VCF_FileName           |
+| Sample      | VCF_FileName           |
 | -------------| :---------------------:|
 | MM15_Melanom | data/MM15_variants.vcf |
 | MM17_Melanom | data/MM17_variants.vcf |
