@@ -866,15 +866,15 @@ process run_percolator {
     """
     OMP_NUM_THREADS=${task.cpus} \\
     PercolatorAdapter -in ${id_file_psm} \\
-                       -out ${Sample}_all_ids_merged_psm_perc.idXML \\ 
+                       -out ${Sample}_all_ids_merged_psm_perc.idXML \\
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
+                       -threads ${task.cpus} \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
                        -subset-max-train ${params.subset_max_train} \\
                        -doc ${params.description_correct_features} \\
-                       -seed 4711
     """
     }
      
