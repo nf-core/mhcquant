@@ -864,7 +864,7 @@ process run_percolator {
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
-                       -subset-max-train ${subset-max-train} \\
+                       -subset-max-train ${params.subset-max-train} \\
                        -doc ${params.description_correct_features} \\
                        -seed 4711
     """
@@ -1057,7 +1057,7 @@ process run_percolator_on_predicted_subset {
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
-                       -subset-max-train ${subset-max-train} \\
+                       -subset-max-train ${params.subset-max-train} \\
                        -doc ${params.description_correct_features} \\
                        $fdr_level
      """
