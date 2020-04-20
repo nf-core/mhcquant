@@ -260,7 +260,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .spread(ch_samples_for_fasta)
-        .flatMap{it -> [tuple(it[1],it[2],it[0])]}      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
+        .flatMap{it -> [tuple(it[1].toInteger(),it[2],it[0])]}      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .into { input_fasta; input_fasta_1; input_fasta_2 }
 
@@ -270,7 +270,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .spread(ch_samples_for_fasta)
-        .flatMap{it -> [tuple(it[1],it[2],it[0])]}      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
+        .flatMap{it -> [tuple(it[1].toInteger(),it[2],it[0])]}      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .set { input_fasta }
 
