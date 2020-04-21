@@ -8,9 +8,7 @@
   * [Updating the pipeline](#updating-the-pipeline)
   * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
-  * [`--sample_sheet`](#--sample_sheet)
-  * [`--raw_input`](#--raw_input)
-  * [`--mzml_input`](#--mzml_input)
+  * [`--input`](#--input)
   * [`--fasta`](#--fasta)
   * [`-profile`](#-profile)
 * [Mass Spectrometry Search](#Mass-Spectrometry-Search)
@@ -41,6 +39,7 @@
   * [`--skip_decoy_generation`](#--skip_decoy_generation)
   * [`--quantification_fdr`](#--quantification_fdr)
   * [`--quantification_min_prob`](#--quantification_min_prob)
+  * [`--skip_quantification`](#--skip_quantification)
   * [`--predict_RT`](#--predict_RT)
 * [Optional binding predicion](#optional-binding-prediction)
   * [`--allele_sheet`](#--allele_sheet)
@@ -97,7 +96,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/mhcquant --sample_sheet 'samples.tsv' --fasta 'SWISSPROT_2020.fasta' --allele_sheet 'alleles.tsv' --vcf_sheet 'variants.tsv' --include_proteins_from_vcf --predict_class_1 -profile docker
+nextflow run nf-core/mhcquant --input 'samples.tsv' --fasta 'SWISSPROT_2020.fasta' --allele_sheet 'alleles.tsv' --vcf_sheet 'variants.tsv' --include_proteins_from_vcf --predict_class_1 -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -129,27 +128,19 @@ This version number will be logged in reports when you run the pipeline, so that
 
 ## Main arguments
 
-### `--sample_sheet`
+### `--input`
 
-Use this to specify a table including your input raw or mzml files as well as their metainformation such as SampleID and Condition. For example:
+Use this to specify a sample sheet table including your input raw or mzml files as well as their metainformation such as SampleID and Condition. For example:
 
-| ID   | Samples      | Condition  |   ReplicateFileName                       |
+| ID   | Sample      | Condition  |   ReplicateFileName                       |
 | -----|:------------:| ----------:|------------------------------------------:|
 | 1    | MM15_Melanom |      A     |   data/MM15_Melanom_W_1_A_standard.raw    |
 | 2    | MM15_Melanom |      B     |   data/MM15_Melanom_W_1_B_standard.raw    |
 | 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |
 
 ```bash
---raw_input --sample_sheet 'path/samples.tsv'
+--input 'path/samples.tsv'
 ```
-
-### `--raw_input`
-
-Set this flag if you want to use raw files instead of mzml files
-
-### `--mzml_input`
-
-Set this flag if you want to use mzml files instead of raw files
 
 ### `--fasta`
 
@@ -297,6 +288,10 @@ Set this option to assess and assign quantification of peptides with an FDR meas
 
 Specify a cut off probability value for quantification events as a filter
 
+### `--skip_quantification`
+
+Set this flag to skip quantification steps
+
 ### `--predict_RT`
 
 Set this option to predict retention times of all identified peptides and possible neoepitopes based on high scoring ids
@@ -307,7 +302,7 @@ Set this option to predict retention times of all identified peptides and possib
 
 Specify a .tsv file containing the MHC class 1 alleles of your probes as well as their metadata such as SampleID. (tab separated)
 
-| Samples      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |
+| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |
 | -------------| :----------------------------------------------:| ------------------------------------------:|
 | MM15_Melanom | A*03:01;A*68:01;B*27:05;B*35:03;C*02:02;C*04:01 |HLA-DRB1*01:01;HLA-DQB1*03:19;HLA-DQA1*05:01|
 | MM17_Melanom | A*02:01;B*07:01;B*26:01;C*11:01;C*01:01         |HLA-DRB1*01:02;HLA-DRB3*02:02;HLA-DRB4*01:03|
@@ -334,7 +329,7 @@ Affinity threshold (nM) used to define binders for PSM subset selection in the f
 
 Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.
 
-| Samples      | VCF_FileName           |
+| Sample      | VCF_FileName           |
 | -------------| :---------------------:|
 | MM15_Melanom | data/MM15_variants.vcf |
 | MM17_Melanom | data/MM17_variants.vcf |

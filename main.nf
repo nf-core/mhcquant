@@ -18,12 +18,10 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/mhcquant --sample_sheet 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker
+    nextflow run nf-core/mhcquant --input 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
-      --sample_sheet [file]                     Path to sample sheet (must be surrounded with quotes)
-      --raw_input [bool]                        Specify whether raw files are used as input
-      --mzml_input [bool]                       Specify whether mzml files are used as input
+      --input [file]                     Path to sample sheet (specifying raw or mzml files)
       --fasta [file]                            Path to Fasta reference
       -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
                                                 Available: docker, singularity, test, awsbatch and more
@@ -51,10 +49,13 @@ def helpMessage() {
       --prec_charge [str]                       Precursor charge (eg. "2:3")
       --max_rt_alignment_shift [int]            Maximal retention time shift (sec) resulting from linear alignment      
       --spectrum_batch_size [int]               Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
-      --description_correct_features [int]      Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
-      --klammer [bool]                          Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --description_correct_features [int]      Percolator: Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
+      --klammer [bool]                          Percolator: Retention time features are calculated as in Klammer et al. instead of with Elude.
+      --subset_max_train [int]                  Percolator: Only train an SVM on a subset of PSMs, and use the resulting score vector to evaluate the other PSMs.
+                                                Recommended when analyzing huge numbers (>1 million) of PSMs. When set to 0, all PSMs are used for training as normal.
       --predict_RT [bool]                       Retention time prediction for identified peptides
       --skip_decoy_generation [bool]            Use a fasta database that already includes decoy sequences
+      --skip_quantification [bool]              Do not run steps for peptide quantification (For example in case of problematic RT Alignment)
       --quantification_fdr [bool]               Assess and assign ids matched between runs with an additional quantification FDR
       --quantification_min_prob  [int]          Specify a minimum probability cut off for quantification
 
@@ -95,53 +96,47 @@ if (params.help) {
 
 // Validate inputs
 //MS Input
-if (params.sample_sheet)  {
-   sample_sheet = file(params.sample_sheet)
+sample_sheet = file(params.input)
 
-   Channel.from( sample_sheet )
-                .splitCsv(header: true, sep:'\t')
-                .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
-                .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])]}
-                .into { ch_samples_from_sheet; ch_samples_for_fasta}
+Channel.from( sample_sheet )
+       .splitCsv(header: true, sep:'\t')
+       .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
+       .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])]}
+       .into { ch_samples_from_sheet; ch_samples_for_fasta; input_branch}
 
-}
+input_branch.branch {
+        raw: hasExtension(it[3], 'raw')
+        mzML: hasExtension(it[3], 'mzML')
+        other: true
+}.set{ms_files}
 
-if(params.mzml_input){
-      ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
+ms_files.other.subscribe { row -> log.warn("unknown format for entry " + row[3] + " in provided sample sheet. ignoring line."); exit 1 }
 
 
-      if (params.run_centroidisation) {
+//mzML branch
+if (params.run_centroidisation) {
 
-         ch_samples
-            .set { input_mzmls_unpicked }
-
-         Channel.empty()
-            .into{input_mzmls; input_mzmls_d; input_mzmls_align}
-
-      } else {
-
-         ch_samples
-            .into { input_mzmls; input_mzmls_d; input_mzmls_align }
-
-         Channel.empty()
-            .into{input_mzmls_unpicked; input_mzmls_align_unpicked}
-      }  
+      ms_files.mzML
+        .set { input_mzmls_unpicked }
 
       Channel.empty()
-        .into{input_raws;input_raws_d}
+        .into{input_mzmls; input_mzmls_d; input_mzmls_align}
 
 } else {
-   if (params.raw_input){
-      ch_samples = ch_samples_from_sheet ?: { log.error "No sample sheet provided. Make sure you have used the '--sample_sheet' option."; exit 1 }()
 
-      ch_samples
-           .into { input_raws; input_raws_d }
+      ms_files.mzML
+        .into { input_mzmls; input_mzmls_d; input_mzmls_align }
 
       Channel.empty()
-        .into{input_mzmls; input_mzmls_d; input_mzmls_align; input_mzmls_unpicked; input_mzmls_align_unpicked}
+        .into{input_mzmls_unpicked; input_mzmls_align_unpicked}
+}  
 
-   }
-}
+
+//Raw branch
+ms_files.raw
+      .into { input_raws; input_raws_d }
+
+
 
 
 params.fasta = params.fasta ?: { log.error "No database fasta privided. Make sure you have used the '--fasta' option."; exit 1 }()
@@ -183,12 +178,8 @@ if (params.include_proteins_from_vcf)  {
  * SET UP CONFIGURATION VARIABLES
  */
 
-//MS params
-params.peptide_min_length = 8
-params.peptide_max_length = 12
-params.fragment_mass_tolerance = 0.02
-params.precursor_mass_tolerance = 5
-params.use_x_ions = false
+fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
+
 x_ions = params.use_x_ions ? '-use_X_ions true' : ''
 params.use_z_ions = false
 z_ions = params.use_z_ions ? '-use_Z_ions true' : ''
@@ -196,27 +187,6 @@ params.use_a_ions = false
 a_ions = params.use_a_ions ? '-use_A_ions true' : ''
 params.use_c_ions = false
 c_ions = params.use_c_ions ? '-use_C_ions true' : ''
-params.fragment_bin_offset = 0
-params.fdr_threshold = 0.01
-params.fdr_level = 'peptide-level-fdrs'
-fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
-params.description_correct_features = 0
-params.klammer = false
-params.predict_RT = false
-params.number_mods = 3
-
-params.num_hits = 1
-params.digest_mass_range = "800:2500"
-params.pick_ms_levels = 2
-params.run_centroidisation = false
-
-params.prec_charge = '2:3'
-params.activation_method = 'ALL'
-
-params.enzyme = 'unspecific cleavage'
-params.fixed_mods = ''
-params.variable_mods = 'Oxidation (M)'
-params.spectrum_batch_size = 500
 
 params.skip_decoy_generation = false
 if (params.skip_decoy_generation) {
@@ -270,7 +240,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .spread(ch_samples_for_fasta)
-        .flatMap{it -> [tuple(it[1],it[2],it[0])]}
+        .flatMap{it -> [tuple(it[1],it[2],it[0])]}       //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .set { input_fasta_vcf }
 
@@ -282,7 +252,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .spread(ch_samples_for_fasta)
-        .flatMap{it -> [tuple(it[1],it[2],it[0])]}
+        .flatMap{it -> [tuple(it[1],it[2],it[0])]}      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .into { input_fasta; input_fasta_1; input_fasta_2 }
 
@@ -292,7 +262,7 @@ if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
         .spread(ch_samples_for_fasta)
-        .flatMap{it -> [tuple(it[1].toInteger(),it[2],it[0])]}
+        .flatMap{it -> [tuple(it[1].toInteger(),it[2],it[0])]}      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .set { input_fasta }
 
@@ -310,7 +280,7 @@ if( params.predict_class_1){
 
     ch_alleles_from_sheet
         .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
-        .flatMap {it -> [tuple("id", it[0].toString(), it[1])]}
+        .flatMap {it -> [tuple("id", it[0].toString(), it[1])]}     //maps tuple to val("id"), val("Sample"), val("Alleles_Class_2")
         .into { peptides_class_1_alleles; peptides_class_1_alleles_refine; neoepitopes_class_1_alleles; neoepitopes_class_1_alleles_prediction}
 
 } else {
@@ -329,7 +299,7 @@ if( params.predict_class_2){
 
      ch_alleles_from_sheet_II
         .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
-        .flatMap {it -> [tuple("id", it[0].toString(), it[2])]}
+        .flatMap {it -> [tuple("id", it[0].toString(), it[2])]}     //maps tuple to val("id"), val("Sample"), val("Alleles_Class_2")
         .into { nepepitopes_class_2_alleles; peptides_class_2_alleles; peptides_class_2_alleles_II }
 
 } else {
@@ -346,7 +316,7 @@ if( params.include_proteins_from_vcf){
 
     ch_vcf_from_sheet
         .ifEmpty { exit 1, "params.vcf_sheet was empty - no vcf input file supplied" }
-        .flatMap {it -> [tuple("id", it[0].toString(), it[1])]}
+        .flatMap {it -> [tuple("id", it[0].toString(), it[1])]}    //maps tuple to val("id"), val("Sample"), val("VCF_FileName")
         .into { input_vcf; input_vcf_neoepitope; input_vcf_neoepitope_II}
 
 } else {
@@ -551,9 +521,6 @@ process raw_file_conversion {
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${rawfile.baseName}.mzML") into (raws_converted, raws_converted_align)
    
-    when:
-     params.raw_input
-    
     script:
      """
      ThermoRawFileParser.sh -i=${rawfile} -f=2 -b=${rawfile.baseName}.mzML
@@ -593,7 +560,7 @@ process db_search_comet {
     label 'process_high'
  
     input:
-     set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) from raws_converted.mix(input_mzmls.mix(input_mzmls_picked)).join(fastafile_decoy_1.mix(input_fasta_1), by:1, remainder:true)
+     set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) from raws_converted.mix(input_mzmls.mix(input_mzmls_picked)).join(fastafile_decoy_1.mix(input_fasta_1), by:1, remainder:true) 
 
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}.idXML") into id_files
@@ -636,7 +603,7 @@ process index_peptides {
      set val(Sample), val(id), val(Condition), file(id_file), val(d), file(fasta_decoy) from id_files.join(fastafile_decoy_2.mix(input_fasta_2), by:1)
 
     output:
-     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML") into (id_files_idx, id_files_idx_original)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML") into (id_files_idx, id_files_idx_original, id_files_idx_original_II)
 
     script:
      """
@@ -662,6 +629,9 @@ process calculate_fdr_for_idalignment {
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx_fdr.idXML") into id_files_idx_fdr
 
+    when:
+     !params.skip_quantification
+
     script:
      """
      FalseDiscoveryRate -in ${id_file_idx} \\
@@ -683,6 +653,9 @@ process filter_fdr_for_idalignment {
 
     output:
      set val(id), val("$Sample"), val(Condition), file("${id}_-_${Sample}_${Condition}_idx_fdr_filtered.idXML") into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
+
+    when:
+     !params.skip_quantification
 
     script:
      """
@@ -709,6 +682,9 @@ process align_ids {
     output:
      set val("$Sample"), file("*.trafoXML") into (id_files_trafo, id_files_trafo_II)
 
+    when:
+     !params.skip_quantification
+
     script:
      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
 
@@ -725,19 +701,27 @@ process align_ids {
 /*
  * Intermediate Step - join RT transformation files with mzml and idxml channels
  */
-input_mzmls_align
- .mix(raws_converted_align)
- .mix(input_mzmls_align_picked)
- .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
- .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
- .set{joined_trafos_mzmls}
 
-id_files_idx_original
- .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
- .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
- .set{joined_trafos_ids}
+if(!params.skip_quantification){
 
+   input_mzmls_align
+    .mix(raws_converted_align)
+    .mix(input_mzmls_align_picked)
+    .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+    .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+    .set{joined_trafos_mzmls}
 
+   id_files_idx_original
+    .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+    .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+    .set{joined_trafos_ids}
+
+} else {
+
+   joined_trafos_mzmls = Channel.empty()
+   joined_trafos_ids = Channel.empty()
+
+}
 /*
  * STEP 7 - align mzML files using trafoXMLs
  */
@@ -748,7 +732,10 @@ process align_mzml_files {
 
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_aligned.mzML") into mzml_files_aligned
-  
+
+    when:
+     !params.skip_quantification
+
     script:
      """
      MapRTTransformer -in ${mzml_file_align} \\
@@ -770,6 +757,9 @@ process align_idxml_files {
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx_aligned.idXML") into idxml_files_aligned
 
+    when:
+     !params.skip_quantification
+
     script:
      """
      MapRTTransformer -in ${idxml_file_align} \\
@@ -787,7 +777,7 @@ process align_idxml_files {
 process merge_aligned_idxml_files {
 
     input:
-     set val(id), val(Sample), val(Condition), file(ids_aligned) from idxml_files_aligned.groupTuple(by: 1)
+     set val(id), val(Sample), val(Condition), file(ids_aligned) from idxml_files_aligned.mix(id_files_idx_original_II).groupTuple(by: 1)
 
     output:
      set val("$id"), val("$Sample"), val(Condition), file("${Sample}_all_ids_merged.idXML") into (id_merged, id_merged_test)
@@ -849,27 +839,31 @@ process run_percolator {
     if (params.description_correct_features > 0 && params.klammer){
 
     """
-    OMP_NUM_THREADS=${task.cpus} PercolatorAdapter -in ${id_file_psm} \\
+    OMP_NUM_THREADS=${task.cpus} \\
+    PercolatorAdapter -in ${id_file_psm} \\
                        -out ${Sample}_all_ids_merged_psm_perc.idXML \\
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
+                       -subset-max-train ${params.subset_max_train} \\
                        -doc ${params.description_correct_features} \\
                        -klammer
     """
     } else {
     """
-    OMP_NUM_THREADS=${task.cpus} PercolatorAdapter -in ${id_file_psm} \\
+    OMP_NUM_THREADS=${task.cpus} \\
+    PercolatorAdapter -in ${id_file_psm} \\
                        -out ${Sample}_all_ids_merged_psm_perc.idXML \\
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
+                       -threads ${task.cpus} \\
                        -enzyme no_enzyme \\
                        $fdr_level \\
+                       -subset-max-train ${params.subset_max_train} \\
                        -doc ${params.description_correct_features} \\
-                       -seed 4711
     """
     }
      
@@ -1053,12 +1047,15 @@ process run_percolator_on_predicted_subset {
 
     script:
      """
-     OMP_NUM_THREADS=${task.cpus} PercolatorAdapter -in ${id_file_psm_subset} \\
+     OMP_NUM_THREADS=${task.cpus} \\
+     PercolatorAdapter -in ${id_file_psm_subset} \\
                        -out ${Sample}_perc_subset.idXML \\
                        -seed 4711 \\
                        -trainFDR 0.05 \\
                        -testFDR 0.05 \\
                        -enzyme no_enzyme \\
+                       -subset-max-train ${params.subset_max_train} \\
+                       -doc ${params.description_correct_features} \\
                        $fdr_level
      """
 
@@ -1111,6 +1108,9 @@ process quantify_identifications_targeted {
     output:
      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${id}.featureXML") into (feature_files, feature_files_II, feature_test)
 
+    when:
+     !params.skip_quantification
+
     script:
     if (!params.quantification_fdr){
 
@@ -1145,6 +1145,9 @@ process link_extracted_features {
     output:
      set val("$Sample"), file("${Sample}_all_features_merged.consensusXML") into consensus_file
     
+    when:
+     !params.skip_quantification
+
     script:
      """
      FeatureLinkerUnlabeledKD -in ${features} \\
@@ -1165,6 +1168,9 @@ process resolve_conflicts {
 
     output:
      set val(Sample), file("${Sample}_resolved.consensusXML") into (consensus_file_resolved, consensus_file_resolved_2)
+
+    when:
+     !params.skip_quantification
 
     script:
      """
@@ -1713,4 +1719,9 @@ def checkHostname() {
             }
         }
     }
+}
+
+// Check file extension
+def hasExtension(it, extension) {
+    it.toString().toLowerCase().endsWith(extension.toLowerCase())
 }

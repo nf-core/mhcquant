@@ -24,4 +24,4 @@ jobs:
           docker pull nfcore/mhcquant:dev && docker tag nfcore/mhcquant:dev nfcore/mhcquant:1.5
       - name: Run pipeline with test data
         run: |
-          sudo nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --mzml_input --predict_RT
+          sudo nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --predict_RT
