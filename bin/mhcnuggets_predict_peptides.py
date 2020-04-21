@@ -54,10 +54,8 @@ def convert_alleles_mhcnuggets_format(alleles):
     return [allele.replace('*', '') for allele in alleles]
 
 
-def parse_alleles(filepath):
-    with open(filepath, 'r') as f:
-        # convert all alleles into mhcnuggets format
-        alleles = flatten([line.split('\n') for line in f])
+def parse_alleles(allele_input):
+        alleles = allele_input.split(';')
         supp_alleles = convert_alleles_mhcnuggets_format(list(set(alleles).intersection(supported_alleles_class_2)))
 
         return supp_alleles
