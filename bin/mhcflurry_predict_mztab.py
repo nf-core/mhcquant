@@ -19,7 +19,6 @@ LOG.setLevel(logging.INFO)
 def parse_mztab(identified_peptides_file):
        """
        parses an mztab file and returns all identified proteins
-
        :param identified_peptides_file: path to the mztab file
        :return: identified proteins
        """
@@ -48,9 +47,7 @@ supported_alleles = "A*01:01,A*02:01,A*02:02,A*02:03,A*02:05,A*02:06,A*02:07,A*0
                     "C*04:01,C*05:01,C*06:02,C*07:02,C*08:02,C*12:03,C*14:02,C*15:02".split(",")
 
 #read provided allotypes
-op=open(sys.argv[-3])
-alleles=op.read().split("\n")
-op.close()
+alleles=sys.argv[-3].split(";")
 
 #extract and verify alleles 
 unsupported_alleles=[a for a in alleles if a not in supported_alleles]
@@ -75,4 +72,3 @@ if len(seqs_to_geneID) > 0:
 else:
    op=open(sys.argv[-1],'w')
    op.close()
-

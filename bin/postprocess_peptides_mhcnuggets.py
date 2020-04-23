@@ -29,6 +29,12 @@ def main():
         help='peptides to seq_ID csv file'
     )
 
+    model.add_argument(
+        '-o', '--output',
+        type=str,
+        help='output file name'
+    )
+
     args = model.parse_args()
 
     peptide_to_geneID = defaultdict()
@@ -50,7 +56,7 @@ def main():
                 ic50 = split[1].strip()
                 peptide_to_geneID_ic50[peptide] = (geneID, ic50)
 
-            with open(prediction + '.csv', 'w') as f:
+            with open(args.output, 'w') as f:
                 f.write('peptide,geneID,ic50\n')
                 for peptide, pair in peptide_to_geneID_ic50.items():
                     f.write(peptide + ',' + pair[0] + ',' + pair[1] + '\n')
