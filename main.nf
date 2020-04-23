@@ -603,7 +603,7 @@ process index_peptides {
      set val(Sample), val(id), val(Condition), file(id_file), val(d), file(fasta_decoy) from id_files.join(fastafile_decoy_2.mix(input_fasta_2), by:1)
 
     output:
-     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML") into (id_files_idx, id_files_idx_original, id_files_idx_original_II)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML") into (id_files_idx, id_files_idx_original)
 
     script:
      """
@@ -716,10 +716,13 @@ if(!params.skip_quantification){
     .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
     .set{joined_trafos_ids}
 
+   id_files_idx_original_II = Channel.empty()
+
 } else {
 
    joined_trafos_mzmls = Channel.empty()
    joined_trafos_ids = Channel.empty()
+   id_files_idx_original_II = id_files_idx_original
 
 }
 /*
