@@ -1,5 +1,16 @@
 # nf-core/mhcquant: Changelog
 
+## v1.5.1 nf-core/mhcquat "Flying Fish" - 2020/04/24
+
+### `Fixed`
+
+- set optimal config for cluster execution
+- fix duplication of ids / mixing of channels
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.5 nf-core/mhcquat "Flying Fish" - 2020/04/18
 
 ### `Fixed`
