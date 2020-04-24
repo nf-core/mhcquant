@@ -470,6 +470,8 @@ process output_documentation {
 process generate_proteins_from_vcf {
     publishDir "${params.outdir}/"
 
+    label 'process_web'
+
     input:
      set val(Sample), val(id), file(fasta_file_vcf), val(d), file(vcf_file) from input_fasta_vcf.combine(input_vcf, by:1)
 
@@ -557,7 +559,7 @@ process peak_picking {
 process db_search_comet {
     tag "${Sample}"
 
-    label 'process_high'
+    label 'process_medium_long'
  
     input:
      set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) from raws_converted.mix(input_mzmls.mix(input_mzmls_picked)).join(fastafile_decoy_1.mix(input_fasta_1), by:1, remainder:true) 
@@ -1326,7 +1328,7 @@ process predict_peptides_mhcflurry_class_1 {
 process predict_possible_neoepitopes {
     publishDir "${params.outdir}/"
 
-    label 'process_high'
+    label 'process_web'
 
     input:
      set val(id), val(Sample), val(alleles), file(vcf_file) from neoepitopes_class_1_alleles.join(input_vcf_neoepitope, by:[0,1], remainder:true)
@@ -1351,7 +1353,7 @@ process predict_possible_neoepitopes {
 process predict_possible_class_2_neoepitopes {
     publishDir "${params.outdir}/"
 
-    label 'process_high'
+    label 'process_web'
 
     input:
      set val(id), val(Sample), val(alleles_II), file(vcf_file) from peptides_class_2_alleles_II.join(input_vcf_neoepitope_II, by:[0,1], remainder:true)
