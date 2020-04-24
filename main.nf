@@ -470,6 +470,8 @@ process output_documentation {
 process generate_proteins_from_vcf {
     publishDir "${params.outdir}/"
 
+    label 'process_web'
+
     input:
      set val(Sample), val(id), file(fasta_file_vcf), val(d), file(vcf_file) from input_fasta_vcf.combine(input_vcf, by:1)
 
@@ -557,7 +559,7 @@ process peak_picking {
 process db_search_comet {
     tag "${Sample}"
 
-    label 'process_high'
+    label 'process_medium_long'
  
     input:
      set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) from raws_converted.mix(input_mzmls.mix(input_mzmls_picked)).join(fastafile_decoy_1.mix(input_fasta_1), by:1, remainder:true) 
@@ -603,7 +605,7 @@ process index_peptides {
      set val(Sample), val(id), val(Condition), file(id_file), val(d), file(fasta_decoy) from id_files.join(fastafile_decoy_2.mix(input_fasta_2), by:1)
 
     output:
-     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML") into (id_files_idx, id_files_idx_original, id_files_idx_original_II)
+     set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML") into (id_files_idx, id_files_idx_original)
 
     script:
      """
@@ -716,10 +718,13 @@ if(!params.skip_quantification){
     .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
     .set{joined_trafos_ids}
 
+   id_files_idx_original_II = Channel.empty()
+
 } else {
 
    joined_trafos_mzmls = Channel.empty()
    joined_trafos_ids = Channel.empty()
+   id_files_idx_original_II = id_files_idx_original
 
 }
 /*
@@ -1323,7 +1328,7 @@ process predict_peptides_mhcflurry_class_1 {
 process predict_possible_neoepitopes {
     publishDir "${params.outdir}/"
 
-    label 'process_high'
+    label 'process_web'
 
     input:
      set val(id), val(Sample), val(alleles), file(vcf_file) from neoepitopes_class_1_alleles.join(input_vcf_neoepitope, by:[0,1], remainder:true)
@@ -1348,7 +1353,7 @@ process predict_possible_neoepitopes {
 process predict_possible_class_2_neoepitopes {
     publishDir "${params.outdir}/"
 
-    label 'process_high'
+    label 'process_web'
 
     input:
      set val(id), val(Sample), val(alleles_II), file(vcf_file) from peptides_class_2_alleles_II.join(input_vcf_neoepitope_II, by:[0,1], remainder:true)
