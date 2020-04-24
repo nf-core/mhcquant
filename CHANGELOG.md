@@ -11,7 +11,6 @@
 
 ### `Deprecated`
 
-
 ## v1.5 nf-core/mhcquat "Flying Fish" - 2020/04/18
 
 ### `Fixed`
