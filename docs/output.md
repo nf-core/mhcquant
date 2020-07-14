@@ -33,7 +33,7 @@ Griss, J. et al. The mzTab Data Exchange Format: Communicating Mass-spectrometry
 
 ## csv
 
-The csv output file is a table containing all information extracted from a database search throughout the pipeline. See the OpenMS or PSI documentation for more information about [annotated scores and format](http://ftp.mi.fu-berlin.de/pub/OpenMS/release1.9-documentation/html/TOPP_TextExporter.html).
+The csv output file is a table containing all information extracted from a database search throughout the pipeline. See the OpenMS or PSI documentation for more information about [annotated scores and format](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/release/latest/html/TOPP_TextExporter.html).
 
 ```bash
 #MAP    id      filename        label   size
