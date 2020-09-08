@@ -21,7 +21,7 @@ def helpMessage() {
     nextflow run nf-core/mhcquant --input 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker
 
     Mandatory arguments:
-      --input [file]                     Path to sample sheet (specifying raw or mzml files)
+      --input [file]                            Path to sample sheet (specifying raw or mzml files)
       --fasta [file]                            Path to Fasta reference
       -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
                                                 Available: docker, singularity, test, awsbatch and more
@@ -1646,7 +1646,11 @@ workflow.onComplete {
             log.info "[nf-core/mhcquant] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
-            [ 'mail', '-s', subject, email_address ].execute() << email_txt
+            def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
+            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
+              mail_cmd += [ '-A', mqc_report ]
+            }
+            mail_cmd.execute() << email_html
             log.info "[nf-core/mhcquant] Sent summary e-mail to $email_address (mail)"
         }
     }
