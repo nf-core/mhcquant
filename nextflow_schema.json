@@ -561,6 +561,16 @@
         },
         "clusterOptions": {
             "type": "string"
+        },
+        "awsqueue": {
+            "type": "string"
+        },
+        "awsregion": {
+            "type": "string",
+            "default": "eu-west-1"
+        },
+        "include_proteins_from_vcf": {
+            "type": "string"
         }
     }
 }
