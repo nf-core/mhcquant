@@ -554,6 +554,10 @@
         },
         "include_proteins_from_vcf": {
             "type": "string"
+        },
+        "config_profile_name": {
+            "type": "string",
+            "default": "Full test profile"
         }
     }
 }
