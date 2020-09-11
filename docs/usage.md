@@ -7,7 +7,7 @@
 * [Running the pipeline](#running-the-pipeline)
   * [Updating the pipeline](#updating-the-pipeline)
   * [Reproducibility](#reproducibility)
-* [Core Nextflow arguments](#core-nextflow-arguments) 
+* [Core Nextflow arguments](#core-nextflow-arguments)
   * [`--input`](#--input)
   * [`--fasta`](#--fasta)
   * [`--allele_sheet`](#--allele_sheet)
@@ -149,4 +149,3 @@ Specify the path to a specific config file (this is a core NextFlow command).
 **NB:** Single hyphen (core Nextflow option)
 
 Note - you can use this to override pipeline defaults.
-

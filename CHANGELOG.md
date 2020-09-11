@@ -3,6 +3,7 @@
 ## v1.6 nf-core/mhcquant "Beijing Duck" - 2020/09/11
 
 ### `Added`
+
 - Template raise to 1.10.2
 - Added parameter scheme
 
