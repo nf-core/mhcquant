@@ -7,79 +7,14 @@
 * [Running the pipeline](#running-the-pipeline)
   * [Updating the pipeline](#updating-the-pipeline)
   * [Reproducibility](#reproducibility)
-* [Main arguments](#main-arguments)
+* [Core Nextflow arguments](#core-nextflow-arguments) 
   * [`--input`](#--input)
   * [`--fasta`](#--fasta)
-  * [`-profile`](#-profile)
-* [Mass Spectrometry Search](#Mass-Spectrometry-Search)
-  * [`--peptide_min_length`](#--peptide_min_length)
-  * [`--peptide_max_length`](#--peptide_max_length)
-  * [`--fragment_mass_tolerance`](#--fragment_mass_tolerance)
-  * [`--precursor_mass_tolerance`](#--precursor_mass_tolerance)
-  * [`--fragment_bin_offset`](#--fragment_bin_offset)
-  * [`--use_a_ions`](#--use_a_ions)
-  * [`--use_c_ions`](#--use_c_ions)
-  * [`--use_x_ions`](#--use_x_ions)
-  * [`--use_z_ions`](#--use_z_ions)
-  * [`--fdr_threshold`](#--fdr_threshold)
-  * [`--fdr_level`](#--fdr_level)
-  * [`--number_mods`](#--number_mods)
-  * [`--num_hits`](#--num_hits)
-  * [`--digest_mass_range`](#--digest_mass_range)
-  * [`--pick_ms_levels`](#--pick_ms_levels)
-  * [`--run_centroidisation`](#--run_centroidisation)
-  * [`--prec_charge`](#--prec_charge)
-  * [`--digest_mass_range`](#--digest_mass_range)
-  * [`--activation_method`](#--activation_method)
-  * [`--enzyme`](#--enzyme)
-  * [`--fixed_mods`](#--fixed_mods)
-  * [`--variable_mods`](#--variable_mods)
-  * [`--max_rt_alignment_shift`](#--max_rt_alignment_shift)
-  * [`--spectrum_batch_size`](#--spectrum_batch_size)
-  * [`--skip_decoy_generation`](#--skip_decoy_generation)
-  * [`--quantification_fdr`](#--quantification_fdr)
-  * [`--quantification_min_prob`](#--quantification_min_prob)
-  * [`--skip_quantification`](#--skip_quantification)
-  * [`--predict_RT`](#--predict_RT)
-* [Optional binding predicion](#optional-binding-prediction)
   * [`--allele_sheet`](#--allele_sheet)
-  * [`--predict_class_1`](#--predict_class_1)
-  * [`--predict_class_2`](#--predict_class_2)
-  * [`--refine_fdr_on_predicted_subset`](#--refine_fdr_on_predicted_subset)
-  * [`--affinity_threshold_subset`](#--affinity_threshold_subset)
-* [Optional variant translation](#optional-variant_translation)
   * [`--vcf_sheet`](#--vcf_sheet)
-  * [`--include_proteins_from_vcf`](#--include_proteins_from_vcf)
-  * [`--variant_annotation_style`](#--variant_annotation_style)
-  * [`--variant_reference`](#--variant_reference)
-  * [`--variant_indel_filter`](#--variant_indel_filter)
-  * [`--variant_frameshift_filter`](#--variant_frameshift_filter)
-  * [`--variant_snp_filter`](#--variant_snp_filter)
-* [Job Resources](#job-resources)
-* [Automatic resubmission](#automatic-resubmission)
-* [Custom resource requests](#custom-resource-requests)
-  * [Automatic resubmission](#automatic-resubmission)
-  * [Custom resource requests](#custom-resource-requests)
-* [AWS Batch specific parameters](#aws-batch-specific-parameters)
-  * [`--awsqueue`](#--awsqueue)
-  * [`--awsregion`](#--awsregion)
-  * [`--awscli`](#--awscli)
-* [Other command line parameters](#other-command-line-parameters)
-  * [`--outdir`](#--outdir)
-  * [`--email`](#--email)
-  * [`--email_on_fail`](#--email_on_fail)
-  * [`--max_multiqc_email_size`](#--max_multiqc_email_size)
-  * [`-name`](#-name)
+  * [`-profile`](#-profile)
   * [`-resume`](#-resume)
   * [`-c`](#-c)
-  * [`--custom_config_version`](#--custom_config_version)
-  * [`--custom_config_base`](#--custom_config_base)
-  * [`--max_memory`](#--max_memory)
-  * [`--max_time`](#--max_time)
-  * [`--max_cpus`](#--max_cpus)
-  * [`--plaintext_email`](#--plaintext_email)
-  * [`--monochrome_logs`](#--monochrome_logs)
-  * [`--multiqc_config`](#--multiqc_config)
 
 ## Introduction
 
@@ -152,6 +87,24 @@ If you prefer, you can specify the full path to your fasta input protein databas
 --fasta '[path to Fasta protein database]'
 ```
 
+### `--allele_sheet`
+
+Specify a .tsv file containing the MHC class 1 alleles of your probes as well as their metadata such as SampleID. (tab separated)
+
+| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |
+| -------------| :----------------------------------------------:| ------------------------------------------:|
+| MM15_Melanom | A*03:01;A*68:01;B*27:05;B*35:03;C*02:02;C*04:01 |HLA-DRB1*01:01;HLA-DQB1*03:19;HLA-DQA1*05:01|
+| MM17_Melanom | A*02:01;B*07:01;B*26:01;C*11:01;C*01:01         |HLA-DRB1*01:02;HLA-DRB3*02:02;HLA-DRB4*01:03|
+
+### `--vcf_sheet`
+
+Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.
+
+| Sample      | VCF_FileName           |
+| -------------| :---------------------:|
+| MM15_Melanom | data/MM15_variants.vcf |
+| MM17_Melanom | data/MM17_variants.vcf |
+
 ### `-profile`
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
@@ -181,232 +134,6 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
 
-## Mass Spectrometry Search
-
-### `--peptide_min_length`
-
-Specify the minimum length of peptides considered after processing
-
-### `--peptide_max_length`
-
-Specify the maximum length of peptides considered after processing
-
-### `--fragment_mass_tolerance`
-
-Specify the fragment mass tolerance used for the comet database search. For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)
-
-### `--precursor_mass_tolerance`
-
-Specify the precursor mass tolerance used for the comet database search. For High-Resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)
-
-### `--fragment_bin_offset`
-
-Specify the fragment bin offset used for the comet database search. For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)
-
-### `--use_a_ions`
-
-Include a ions into the peptide spectrum matching
-
-### `--use_c_ions`
-
-Include c ions into the peptide spectrum matching
-
-### `--use_x_ions`
-
-Include x ions into the peptide spectrum matching
-
-### `--use_z_ions`
-
-Include z ions into the peptide spectrum matching
-
-### `--fdr_threshold`
-
-Specify the false discovery rate threshold at which peptide hits should be selected. (eg. 0.01)
-
-### `--fdr_level`
-
-Specify the level at which the false discovery rate should be computed. 'peptide-level-fdrs' is recommended. ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
-
-### `--number_mods`
-
-Specify the maximum number of modifications that should be contained in a peptide sequence match. (eg. 3)
-
-### `--num_hits`
-
-Specify the number of hits that should be reported for each spectrum. (eg. 1)
-
-### `--digest_mass_range`
-
-Specify the mass range that peptides should fullfill to be considered for peptide spectrum matching. (eg. 800:2500)
-
-### `--pick_ms_levels`
-
-If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)
-
-### `--run_centroidisation`
-
-Choose whether the specified ms_level in pick_ms_levels is centroided or not. ("True", "False")
-
-### `--prec_charge`
-
-Specifiy the precursor charge range that peptides should fullfill to be considered for peptide spectrum matching. (eg. "2:3")
-
-### `--activation method`
-
-Specify which fragmentation method was used in the MS acquisition ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
-
-### `--enzyme`
-
-Specify which enzymatic restriction should be applied ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
-
-### `--fixed_mods`
-
-Specify which fixed modifications should be applied to the database search (eg. '' or 'Carbamidomethyl (C)', see OpenMS modifications)
-
-### `--variable_mods`
-
-Specify which variable modifications should be applied to the database search (eg. 'Oxidation (M)', see OpenMS modifications)
-
-Multiple fixed or variable modifications can be specified comma separated (e.g. 'Carbamidomethyl (C),Oxidation (M)')
-
-### `--max_rt_alignment_shift`
-
-Set a maximum retention time shift for the linear rt alignment
-
-### `--spectrum_batch_size`
-
-Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
-
-### `--skip_decoy_generation`
-
-If you want to use your own decoys, you can specify a databaset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.
-One should consider though that this option will then prevent to append variants to the database and if not using reversed decoys the subset refinement FDR option will not work.
-
-### `--quantification_fdr`
-
-Set this option to assess and assign quantification of peptides with an FDR measure (Weisser H. and Choudhary J.S. J Proteome Res. 2017 Aug 4)
-
-### `--quantification_min_prob`
-
-Specify a cut off probability value for quantification events as a filter
-
-### `--skip_quantification`
-
-Set this flag to skip quantification steps
-
-### `--predict_RT`
-
-Set this option to predict retention times of all identified peptides and possible neoepitopes based on high scoring ids
-
-## Optional binding prediction
-
-### `--allele_sheet`
-
-Specify a .tsv file containing the MHC class 1 alleles of your probes as well as their metadata such as SampleID. (tab separated)
-
-| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |
-| -------------| :----------------------------------------------:| ------------------------------------------:|
-| MM15_Melanom | A*03:01;A*68:01;B*27:05;B*35:03;C*02:02;C*04:01 |HLA-DRB1*01:01;HLA-DQB1*03:19;HLA-DQA1*05:01|
-| MM17_Melanom | A*02:01;B*07:01;B*26:01;C*11:01;C*01:01         |HLA-DRB1*01:02;HLA-DRB3*02:02;HLA-DRB4*01:03|
-
-### `--predict_class_1`
-
-Set flag depending on whether MHC class 1 binding predictions using the tool mhcflurry should be run. [Check whether your alleles are supported by mhcflurry](supported_class_1_alleles.md)
-
-### `--predict_class_2`
-
-Set flag depending on whether MHC class 2 binding predictions using the tool mhcnugget should be run. [Check whether your alleles are supported by mhcnugget](supported_class_2_alleles.md)
-
-### `--refine_fdr_on_predicted_subset`
-
-Set to 'True' or 'False' depending on whether binding predictions using the tool mhcflurry should be used to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Please be aware that this option is only available for MHC class I data of alleles that are supported by mhcflurry)
-
-### `--affinity_threshold_subset`
-
-Affinity threshold (nM) used to define binders for PSM subset selection in the fdr refinement procedure (eg. 500)
-
-## Optional variant translation
-
-### `--vcf_sheet`
-
-Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.
-
-| Sample      | VCF_FileName           |
-| -------------| :---------------------:|
-| MM15_Melanom | data/MM15_variants.vcf |
-| MM17_Melanom | data/MM17_variants.vcf |
-
-### `--include_proteins_from_vcf`
-
-Set to 'True' or 'False' depending on whether variants should be translated to proteins and included into your fasta for database search.
-
-### `--variant_annotation_style`
-
-Specify style of tool used for variant annotation - currently supported: "SNPEFF", "VEP", "ANNOVAR"
-
-### `--variant_reference`
-
-Specify genomic reference used for variant annotation: "GRCH37", "GRCH38"
-
-### `--variant_indel_filter`
-
-Specify whether insertions and deletions should not be considered for variant translation
-
-### `--variant_frameshift_filter`
-
-Specify whether frameshifts should not be considered for variant translation
-
-### `--variant_snp_filter`
-
-Specify whether snps should not be considered for variant translation
-
-## Job resources
-
-### Automatic resubmission
-
-Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
-
-### Custom resource requests
-
-Wherever process-specific requirements are set in the pipeline, the default value can be changed by creating a custom config file. See the files hosted at [`nf-core/configs`](https://github.com/nf-core/configs/tree/master/conf) for examples.
-
-If you are likely to be running `nf-core` pipelines regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter (see definition below). You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
-
-If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack) on the [`#configs` channel](https://nfcore.slack.com/channels/configs).
-
-### Running in the background
-
-Nextflow handles job submissions and supervises the running jobs. The Nextflow process must run until the pipeline is finished.
-
-The Nextflow `-bg` flag launches Nextflow in the background, detached from your terminal so that the workflow does not stop if you log out of your session. The logs are saved to a file.
-
-Alternatively, you can use `screen` / `tmux` or similar tool to create a detached session which you can log back into at a later time.
-Some HPC setups also allow you to run nextflow within a cluster job submitted your job scheduler (from where it submits more jobs).
-
-#### Nextflow memory requirements
-
-## Other command line parameters
-
-### `--outdir`
-
-The output directory where the results will be saved.
-
-### `--email`
-
-Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.
-
-### `--email_on_fail`
-
-This works exactly as with `--email`, except emails are only sent if the workflow is not successful.
-
-### `-name`
-
-Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
-
-This is used in the MultiQC report (if not default) and in the summary HTML / e-mail (always).
-
-**NB:** Single hyphen (core Nextflow option)
-
 ### `-resume`
 
 Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
@@ -423,48 +150,3 @@ Specify the path to a specific config file (this is a core NextFlow command).
 
 Note - you can use this to override pipeline defaults.
 
-### `--custom_config_version`
-
-Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default: `master`.
-
-```bash
-## Download and use config file with following git commid id
---custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96
-```
-
-### `--custom_config_base`
-
-If you're running offline, nextflow will not be able to fetch the institutional config files
-from the internet. If you don't need them, then this is not a problem. If you do need them,
-you should download the files from the repo and tell nextflow where to find them with the
-`custom_config_base` option. For example:
-
-```bash
-NXF_OPTS='-Xms1g -Xmx4g'
-```
-
-> Note that the nf-core/tools helper package has a `download` command to download all required pipeline
-> files + singularity containers + institutional configs in one go for you, to make this process easier.
-
-### `--max_memory`
-
-Use to set a top-limit for the default memory requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_memory '8.GB'`
-
-### `--max_time`
-
-Use to set a top-limit for the default time requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_time '2.h'`
-
-### `--max_cpus`
-
-Use to set a top-limit for the default CPU requirement for each process.
-Should be a string in the format integer-unit. eg. `--max_cpus 1`
-
-### `--plaintext_email`
-
-Set to receive plain-text e-mails instead of HTML formatted.
-
-### `--monochrome_logs`
-
-Set to disable colourful command line output and live life in monochrome.

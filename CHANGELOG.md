@@ -1,6 +1,12 @@
 # nf-core/mhcquant: Changelog
 
-## v1.5.1 nf-core/mhcquat "Flying Fish" - 2020/04/24
+## v1.6 nf-core/mhcquant "Beijing Duck" - 2020/09/11
+
+### `Added`
+- Template raise to 1.10.2
+- Added parameter scheme
+
+## v1.5.1 nf-core/mhcquant "Flying Fish" - 2020/04/24
 
 ### `Fixed`
 
@@ -11,7 +17,7 @@
 
 ### `Deprecated`
 
-## v1.5 nf-core/mhcquat "Flying Fish" - 2020/04/18
+## v1.5 nf-core/mhcquant "Flying Fish" - 2020/04/18
 
 ### `Fixed`
 
@@ -26,7 +32,7 @@
 
 ### `Deprecated`
 
-## v1.4 nf-core/mhcquat "Blue Kingfisher" - 2020/03/18
+## v1.4 nf-core/mhcquant "Blue Kingfisher" - 2020/03/18
 
 ### `Fixed`
 

@@ -1,8 +1,0 @@
-{
-    "input": "data/*mzML",
-    "outdir": "./results",
-    "subset_affinity_threshold": 500,
-    "tracedir": "${params.outdir}/pipeline_info",
-    "igenomes_base": "s3://ngi-igenomes/igenomes/",
-    "custom_config_base": "https://raw.githubusercontent.com/nf-core/configs/master"
-}
