@@ -46,7 +46,7 @@ See [usage docs](docs/usage.md) for all of the available options when running th
 
 ## Documentation
 
-The nf-core/mhcquant pipeline comes with documentation about the pipeline which you can read at [https://nf-core/mhcquant](https://nf-core/mhcquant).
+The nf-core/mhcquant pipeline comes with documentation about the pipeline which you can read at [https://nf-co.re/mhcquant](https://nf-co.re/mhcquant).
 
 ## Credits
 
