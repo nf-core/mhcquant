@@ -2,10 +2,15 @@
 
 ## v1.6.0 nf-core/mhcquant "Beijing Duck" - 2020/09/11
 
-### `Added`
+### `Fixed`
 
 - Template raise to 1.10.2
 - Added parameter scheme
+- Added real size AWS test profile
+
+### `Dependencies`
+
+### `Deprecated`
 
 ## v1.5.1 nf-core/mhcquant "Flying Fish" - 2020/04/24
 
