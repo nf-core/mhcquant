@@ -65,46 +65,6 @@ This version number will be logged in reports when you run the pipeline, so that
 
 > **NB:** These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
 
-### `--input`
-
-Use this to specify a sample sheet table including your input raw or mzml files as well as their metainformation such as SampleID and Condition. For example:
-
-| ID   | Sample      | Condition  |   ReplicateFileName                       |
-| -----|:------------:| ----------:|------------------------------------------:|
-| 1    | MM15_Melanom |      A     |   data/MM15_Melanom_W_1_A_standard.raw    |
-| 2    | MM15_Melanom |      B     |   data/MM15_Melanom_W_1_B_standard.raw    |
-| 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |
-
-```bash
---input 'path/samples.tsv'
-```
-
-### `--fasta`
-
-If you prefer, you can specify the full path to your fasta input protein database when you run the pipeline:
-
-```bash
---fasta '[path to Fasta protein database]'
-```
-
-### `--allele_sheet`
-
-Specify a .tsv file containing the MHC class 1 alleles of your probes as well as their metadata such as SampleID. (tab separated)
-
-| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |
-| -------------| :----------------------------------------------:| ------------------------------------------:|
-| MM15_Melanom | A*03:01;A*68:01;B*27:05;B*35:03;C*02:02;C*04:01 |HLA-DRB1*01:01;HLA-DQB1*03:19;HLA-DQA1*05:01|
-| MM17_Melanom | A*02:01;B*07:01;B*26:01;C*11:01;C*01:01         |HLA-DRB1*01:02;HLA-DRB3*02:02;HLA-DRB4*01:03|
-
-### `--vcf_sheet`
-
-Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.
-
-| Sample      | VCF_FileName           |
-| -------------| :---------------------:|
-| MM15_Melanom | data/MM15_variants.vcf |
-| MM17_Melanom | data/MM17_variants.vcf |
-
 ### `-profile`
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
