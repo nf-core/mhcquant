@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - master
-      - dev
-  workflow_dispatch
 
 jobs:
   run-awstest:
