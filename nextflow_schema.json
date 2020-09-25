@@ -270,7 +270,7 @@
                 "allele_sheet": {
                     "type": "string",
                     "description": "Specify a .tsv file containing the MHC alleles of your probes as well as their metadata such as SampleID.",
-                    "help_text": "| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |\n| -------------| :----------------------------------------------:| ------------------------------------------:|\n| MM15_Melanom | A\*03:01;A\*68:01;B\*27:05;B\*35:03;C\*02:02;C\*04:01 |HLA-DRB1\*01:01;HLA-DQB1\*03:19;HLA-DQA1\*05:01|\n| MM17_Melanom | A\*02:01;B\*07:01;B\*26:01;C\*11:01;C\*01:01         |HLA-DRB1\*01:02;HLA-DRB3\*02:02;HLA-DRB4\*01:03|\n"
+                    "help_text": "| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |\n| -------------| :----------------------------------------------:| ------------------------------------------:|\n| MM15_Melanom | A&ast; 03:01;A&ast; 68:01;B&ast; 27:05;B&ast; 35:03;C&ast; 02:02;C&ast; 04:01 |HLA-DRB1&ast; 01:01;HLA-DQB1&ast; 03:19;HLA-DQA1&ast; 05:01|\n| MM17_Melanom | A&ast; 02:01;B&ast; 07:01;B&ast; 26:01;C&ast; 11:01;C&ast; 01:01         |HLA-DRB1&ast; 01:02;HLA-DRB3&ast; 02:02;HLA-DRB4&ast; 01:03|\n"
                 },
                 "predict_class_1": {
                     "type": "boolean",
