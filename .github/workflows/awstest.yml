@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - dev
 
 jobs:
   run-awstest:
