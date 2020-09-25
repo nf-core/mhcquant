@@ -3,8 +3,10 @@ name: nf-core AWS full size tests
 # It runs the -profile 'test_full' on AWS batch
 
 on:
-  branches:
-    - master
+  push:
+    branches:
+      - master
+  workflow_dispatch
   release:
     types: [published]
 
