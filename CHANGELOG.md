@@ -1,6 +1,22 @@
 # nf-core/mhcquant: Changelog
 
-## v1.5.1 nf-core/mhcquat "Flying Fish" - 2020/04/24
+## v1.6.0 nf-core/mhcquant "Beijing Duck" - 2020/09/11
+
+### `Added`
+
+- Template raise to 1.10.2
+- Added parameter scheme
+- Added real size AWS test profile
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Deprecated`
+
+## v1.5.1 nf-core/mhcquant "Flying Fish" - 2020/04/24
+
+### `Added`
 
 ### `Fixed`
 
@@ -11,27 +27,28 @@
 
 ### `Deprecated`
 
-## v1.5 nf-core/mhcquat "Flying Fish" - 2020/04/18
+## v1.5.0 nf-core/mhcquant "Flying Fish" - 2020/04/18
+
+### `Added`
+
+- integrate sample, allele and vcf sheets instead of file dirs
+- branched mzML/raw input
+- introduce param to skip quantification
 
 ### `Fixed`
 
 - raise OpenMS version to 2.5
 - adapt workflow accoringly with new options
-- integrate sample, allele and vcf sheets instead of file dirs
 - remove specifying input as file dirs eg "data/*.mzML"
-- branched mzML/raw input
-- introduce param to skip quantification
 
 ### `Dependencies`
 
 ### `Deprecated`
 
-## v1.4 nf-core/mhcquat "Blue Kingfisher" - 2020/03/18
+## v1.4.0 nf-core/mhcquant "Blue Kingfisher" - 2020/03/18
 
-### `Fixed`
+### `Added`
 
-- output file order in intermediate results
-- increased run times for MS search and variant translation
 - Raw File Reading
 - RT prediction
 - Quantification FDR
@@ -39,17 +56,25 @@
 - nf-core template update 1.8 and 1.9
 - Added version numbers of mhcnuggets and Fred2
 
+### `Fixed`
+
+- output file order in intermediate results
+- increased run times for MS search and variant translation
+
 ### `Dependencies`
 
 ### `Deprecated`
 
-## v1.3 nf-core/mhcquant "Red Parrot" - 2019/08/03
+## v1.3.0 nf-core/mhcquant "Red Parrot" - 2019/08/03
 
-### `Fixed`
+### `Added`
 
 - nf-core template update
 - x,z,a,c ions
-- quantification fdr
+- quantification fdri
+
+### `Fixed`
+
 - empty neoepitope list bugs fixed
 - documentation
 - scrape version numbers
@@ -66,25 +91,49 @@
 - Few fixes
 - RT features for percolator
 
+### `Fixed`
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.2.6 nf-core/mhcquant "Golden Eagle" - 2019/03/05
+
+### `Added`
 
 ### `Fixed`
 
 - linear retention time alignment
 - refine_fdr README
 
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.2.5 nf-core/mhcquant "Golden Eagle" - 2019/02/26
+
+### `Added`
 
 ### `Fixed`
 
 - sort channels by basename
 - fixed psm-level-fdrs
 
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.2.4 nf-core/mhcquant "Golden Eagle" - 2019/02/02
+
+### `Added`
 
 ### `Fixed`
 
 - fixed refine_fdr_on_predicted_subset float error
+
+### `Dependencies`
+
+### `Deprecated`
 
 ## v1.2.3 nf-core/mhcquant "Golden Eagle" - 2019/02/02
 
@@ -94,17 +143,29 @@
 
 ## v1.2.2 nf-core/mhcquant "Golden Eagle" - 2019/01/24
 
+### `Added`
+
 ### `Fixed`
 
 - default params to false
 - change on centroidisation parameter
 - small changes on docu
 
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.2.1 nf-core/mhcquant "Golden Eagle" - 2019/01/24
+
+### `Added`
 
 ### `Fixed`
 
 - process identical names bug
+
+### `Dependencies`
+
+### `Deprecated`
 
 ## v1.2.0 nf-core/mhcquant "Golden Eagle" - 2019/01/19
 
@@ -118,6 +179,10 @@
 
 - Documentation
 
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.1.0 nf-core/mhcquant "Black Crow" - 2019/01/04
 
 ### `Added`
@@ -129,6 +194,10 @@
 
 - adapted a few parameters such as the default fdr threshold
 - updated documentation
+
+### `Dependencies`
+
+### `Deprecated`
 
 ## v1.0.0 nf-core/mhcquant "Naked Chicken" - 2018/11/27
 
