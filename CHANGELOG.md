@@ -5,10 +5,12 @@
 ### `Added`
 
 - Template raise to 1.10.2
-- Added parameter scheme
-- Added real size AWS test profile
+- Added parameter json schema
+- Added full size AWS test profile
 
 ### `Fixed`
+
+- Changed trigger for AWS tests
 
 ### `Dependencies`
 
