@@ -1,10 +1,14 @@
 name: nf-core AWS full size tests
-# This workflow is triggered on push to the master branch.
+# This workflow is triggered after release after the nf-core Docker push workflow finished.
 # It runs the -profile 'test_full' on AWS batch
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["nf-core Docker push"]
+    branches: [master]
+    types: 
+      - completed
+  workflow_dispatch:
 
 jobs:
   run-awstest:
