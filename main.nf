@@ -594,9 +594,9 @@ process db_search_comet {
                    $a_ions \\
                    $c_ions \\
                    $x_ions \\
-                   $z_ions \\    
+                   $z_ions \\
                    $NL_ions \\
-                   $rm_precursor \\ 
+                   $rm_precursor \\
      """
 
 }
