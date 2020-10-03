@@ -7,6 +7,7 @@
 - Template raise to 1.10.2
 - Added parameter scheme
 - Added real size AWS test profile
+- Included new parameters for Neutral loss and precursor ion inclusion
 
 ### `Fixed`
 
