@@ -181,6 +181,15 @@
                     "type": "boolean",
                     "description": "Include c ions into the peptide spectrum matching"
                 },
+                "use_NL_ions": {
+                    "type": "boolean",
+                    "description": "Include NL ions into the peptide spectrum matching"
+                },
+                "remove_precursor_peak": {
+                    "type": "boolean",
+                    "description": "Include precursor ions into the peptide spectrum matching",
+                    "default": true
+                },
                 "spectrum_batch_size": {
                     "type": "integer",
                     "default": 500,

@@ -35,6 +35,8 @@ def helpMessage() {
       --use_z_ions [bool]                       Use z ions for spectral matching in addition
       --use_a_ions [bool]                       Use a ions for spectral matching in addition
       --use_c_ions [bool]                       Use c ions for spectral matching in addition
+      --use_NL_ions [bool]                      Use NL ions for spectral matching in addition
+      --remove_precursor_peak [bool]            Remove the precursor peak from the MS2 spectra
       --fdr_threshold [int]                     Threshold for FDR filtering
       --fdr_level [str]                         Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
       --digest_mass_range [int]                 Mass range of peptides considered for matching
@@ -187,6 +189,10 @@ params.use_a_ions = false
 a_ions = params.use_a_ions ? '-use_A_ions true' : ''
 params.use_c_ions = false
 c_ions = params.use_c_ions ? '-use_C_ions true' : ''
+params.use_NL_ions = false
+NL_ions = params.use_NL_ions ? '-use_NL_ions true' : ''
+params.remove_precursor_peak = false
+rm_precursor = params.remove_precursor_peak ? '-remove_precursor_peak true' : ''
 
 params.skip_decoy_generation = false
 if (params.skip_decoy_generation) {
@@ -581,7 +587,6 @@ process db_search_comet {
                    -allowed_missed_cleavages 0 \\
                    -precursor_charge ${params.prec_charge} \\
                    -activation_method ${params.activation_method} \\
-                   -use_NL_ions true \\
                    -variable_modifications ${params.variable_mods.tokenize(',').collect { "'${it}'" }.join(" ") } \\
                    -fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")} \\
                    -enzyme '${params.enzyme}' \\
@@ -589,7 +594,9 @@ process db_search_comet {
                    $a_ions \\
                    $c_ions \\
                    $x_ions \\
-                   $z_ions \\     
+                   $z_ions \\
+                   $NL_ions \\
+                   $rm_precursor \\
      """
 
 }
