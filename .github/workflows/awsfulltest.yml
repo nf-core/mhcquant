@@ -3,9 +3,11 @@ name: nf-core AWS full size tests
 # It runs the -profile 'test_full' on AWS batch
 
 on:
+  release:
+    types: [published]
   workflow_run:
     workflows: ["nf-core Docker push"]
-    branches: [master]
+    branches: [master, aws-tests]
     types: 
       - completed
   workflow_dispatch:
