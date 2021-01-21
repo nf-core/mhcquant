@@ -117,6 +117,7 @@ if (params.run_centroidisation) {
 
 // Define the raw files if they are available 
 ms_files.raw.set { input_raws }
+println ms_files.raw
 
 // MHC affinity prediction
 // TODO: test this with a allele sheet
@@ -175,7 +176,6 @@ if (params.variant_snp_filter) { variant_snp_filter="-fSNP" } else { variant_snp
 /* --              CREATE CHANNELS             -- */
 ////////////////////////////////////////////////////
 // Input fasta file
-// TODO: take a look at the differences between the else if and the else
 if( params.include_proteins_from_vcf) {
     Channel
         .fromPath( params.fasta )
@@ -346,1127 +346,241 @@ Channel.from(summary.collect{ [it.key, it.value] })
 //     script:
 //     """
 //     markdown_to_html.py $ch_output_docs -o results_description.html
-//     """
-// }
+//     ""
 
+def nfcoreHeader() {
+    // Log colors ANSI codes
+    c_black = params.monochrome_logs ? '' : "\033[0;30m";
+    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
+    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_white = params.monochrome_logs ? '' : "\033[0;37m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
 
-// /*
-//  * STEP 0.5 - If specified translate variants to proteins and include in reference fasta
-//  */
-// process generate_proteins_from_vcf {
-//     publishDir "${params.outdir}/"
+    return """    -${c_dim}--------------------------------------------------${c_reset}-
+                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
+    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
+    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
+    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
+                                            ${c_green}`._,._,\'${c_reset}
+    ${c_purple}  nf-core/mhcquant v${workflow.manifest.version}${c_reset}
+    -${c_dim}--------------------------------------------------${c_reset}-
+    """.stripIndent()
+}
 
-//     label 'process_web'
+def checkHostname() {
+    def c_reset = params.monochrome_logs ? '' : "\033[0m"
+    def c_white = params.monochrome_logs ? '' : "\033[0;37m"
+    def c_red = params.monochrome_logs ? '' : "\033[1;91m"
+    def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
+    if (params.hostnames) {
+        def hostname = "hostname".execute().text.trim()
+        params.hostnames.each { prof, hnames ->
+            hnames.each { hname ->
+                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
+                    log.error "====================================================\n" +
+                            "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
+                            "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
+                            "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
+                            "============================================================"
+                }
+            }
+        }
+    }
+}
 
-//     input:
-//      set val(Sample), val(id), file(fasta_file_vcf), val(d), file(vcf_file) from input_fasta_vcf.combine(input_vcf, by:1)
+// Check file extension
+def hasExtension(it, extension) {
+    it.toString().toLowerCase().endsWith(extension.toLowerCase())
+}
 
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_${fasta_file_vcf.baseName}_added_vcf.fasta") into appended_fasta
+// include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [publish_files : ['tsv':'']]                                )
+// include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [:] ) // warning since it is not called yet
+include { GENERATE_PROTEINS_FROM_VCF }                      from './modules/local/process/generate_proteins_from_vcf'                       addParams( options: [:] )
+include { GENERATE_DECOY_DB }                               from './modules/local/process/generate_decoy_database'                          addParams( options: [:] )
+include { RAW_FILE_CONVERSION }                             from './modules/local/process/raw_file_conversion'                              addParams( options: [:] )
+include { PEAK_PICKING }                                    from './modules/local/process/peak_picking'                                     addParams( options: [:] )
+include { DB_SEARCH_COMET }                                 from './modules/local/process/db_search_comet'                                  addParams( options: [:] )
+include { INDEX_PEPTIDES }                                  from './modules/local/process/index_peptides'                                   addParams( options: [:] )
+include { CALCULATE_FDR_FOR_ID_ALIGNMENT }                  from './modules/local/process/calculate_fdr_for_id_alignment'                   addParams( options: [:] )
+include { FILTER_FDR_FOR_ID_ALIGNMENT }                     from './modules/local/process/filter_fdr_for_id_alignment'                      addParams( options: [:] )
+include { ALIGN_IDS }                                       from './modules/local/process/align_ids'                                        addParams( options: [:] )
+include { ALIGN_MZML_FILES }                                from './modules/local/process/align_mzml_files'                                 addParams( options: [:] )
+include { ALIGN_IDXML_FILES }                               from './modules/local/process/align_idxml_files'                                addParams( options: [:] )
+include { MERGE_ALIGNED_IDMXL_FILES }                       from './modules/local/process/merge_aligned_idxml_files'                        addParams( options: [:] )
+include { EXTRACT_PSM_FEATURES_FOR_PERCOLATOR }             from './modules/local/process/extract_psm_features_for_percolator'              addParams( options: [:] )
+include { RUN_PERCOLATOR }                                  from './modules/local/process/run_percolator'                                   addParams( options: [:] )
+include { FILTER_BY_Q_VALUE }                               from './modules/local/process/filter_by_q_value'                                addParams( options: [:] )
+include { EXPORT_MZTAB_PERC }                               from './modules/local/process/export_mztab_perc'                                addParams( options: [:] )
+include { EXPORT_MZTAB_PSM }                                from './modules/local/process/export_mztab_psm'                                 addParams( options: [:] )
+include { PREDICT_PSMS }                                    from './modules/local/process/predict_psms'                                     addParams( options: [:] )
+include { FILTER_PSMS_BY_PREDICTIONS }                      from './modules/local/process/filter_psms_by_predictions'                       addParams( options: [:] )
+include { RUN_PERCOLATOR_ON_PREDICTED_SUBSET }              from './modules/local/process/run_percolator_on_predicted_subset'               addParams( options: [:] )
+include { FILTER_REFINED_Q_VALUE }                          from './modules/local/process/filter_refined_q_value'                           addParams( options: [:] )
+include { QUANTIFY_IDENTIFICATION_TARGETED }                from './modules/local/process/quantify_identifications_targeted'                addParams( options: [:] )
+include { LINK_EXTRACTED_FEATURES }                         from './modules/local/process/link_extracted_features'                          addParams( options: [:] )
+include { RESOLVE_CONFLICTS }                               from './modules/local/process/resolve_conflicts'                                addParams( options: [:] )
+include { EXPORT_TEXT }                                     from './modules/local/process/export_text'                                      addParams( options: [:] )
+include { EXPORT_MZTAB }                                    from './modules/local/process/export_mztab'                                     addParams( options: [:] )
+include { PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 }              from './modules/local/process/predict_peptides_mhcflurry_class_1'               addParams( options: [:] )
+include { PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 }          from './modules/local/process/preprocess_peptides_mhcnuggets_class_2'           addParams( options: [:] )
+include { PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2 }             from './modules/local/process/predict_peptides_mhcnuggets_class_2'              addParams( options: [:] )
+include { POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 }         from './modules/local/process/postprocess_peptides_mhcnuggets_class_2'          addParams( options: [:] )
+include { PREDICT_POSSIBLE_NEOEPITOPES }                    from './modules/local/process/predict_possible_neoepitopes'                     addParams( options: [:] )
+include { PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES }            from './modules/local/process/predict_possible_class_2_neoepitopes'             addParams( options: [:] )
+include { RESOLVE_FOUND_NEOEPITOPES }                       from './modules/local/process/resolve_found_neoepitopes'                        addParams( options: [:] )
+include { RESOLVE_FOUND_CLASS_2_NEOEPITOPES }               from './modules/local/process/resolve_found_class_2_neoepitopes'                addParams( options: [:] )
+include { PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 }           from './modules/local/process/predict_neoepitopes_mhcflurry_class_1'            addParams( options: [:] )
+include { PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }       from './modules/local/process/preprocess_neoepitopes_mhcnuggets_class_2'        addParams( options: [:] )
+include { PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 }          from './modules/local/process/predict_neoepitopes_mhcnuggets_class_2'           addParams( options: [:] )
+include { POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }      from './modules/local/process/postprocess_neoepitopes_mhcnuggets_class_2'       addParams( options: [:] )
+include { TRAIN_RETENTION_TIME_PREDICTOR }                  from './modules/local/process/train_retention_time_predictor'                   addParams( options: [:] )
+include { PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES }       from './modules/local/process/predict_retention_times_of_found_peptides'        addParams( options: [:] )
+include { PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES } from './modules/local/process/predict_retention_times_of_possible_neoepitopes'  addParams( options: [:] )
 
-//     when:
-//      params.include_proteins_from_vcf
+////////////////////////////////////////////////////
+/* --           RUN MAIN WORKFLOW              -- */
+////////////////////////////////////////////////////
+workflow {
 
-//     script:
-//      """
-//      variants2fasta.py -v ${vcf_file} -t ${params.variant_annotation_style} -r ${params.variant_reference} -f ${fasta_file_vcf} -o ${Sample}_${fasta_file_vcf.baseName}_added_vcf.fasta ${variant_indel_filter} ${variant_snp_filter} ${variant_frameshift_filter}
-//      """
-// }
+    // TODO: reduce the number of modules (combine the same functions into one)
+    // ch_software_versions = Channel.empty()
+    // // Example: ch_software_versions = ch_software_versions.mix(PREPARE_GENOME.out.gffread_version.ifEmpty(null))
+    // GET_SOFTWARE_VERSIONS (ch_software_versions.map { it }.collect())
 
+    // If specified translate variants to proteins and include in reference fasta
+    GENERATE_PROTEINS_FROM_VCF(input_fasta_vcf.combine(input_vcf, by:1))
+    // Generate reversed decoy database
+    // GENERATE_DECOY_DB(input_fasta.mix(appended_fasta), params.skip_decoy_generation) // what is the better solution?
+    GENERATE_DECOY_DB(input_fasta.mix(GENERATE_PROTEINS_FROM_VCF.out))
+    // Raw file conversion
+    RAW_FILE_CONVERSION(input_raws)
+    // Optional: Run Peak Picking as Preprocessing
+    PEAK_PICKING(input_mzmls_unpicked)
+    // Run comet database search
+    DB_SEARCH_COMET(RAW_FILE_CONVERSION.out.mix(input_mzmls.mix(PEAK_PICKING.out)).join(GENERATE_DECOY_DB.out.mix(input_fasta_1), by:1, remainder:true), a_ions, c_ions, x_ions, z_ions,  NL_ions, rm_precursor)
+    // Index decoy and target hits
+    INDEX_PEPTIDES(DB_SEARCH_COMET.out.join(GENERATE_DECOY_DB.out.mix(input_fasta_2), by:1))
+    // Calculate fdr for id based alignment
+    CALCULATE_FDR_FOR_ID_ALIGNMENT(INDEX_PEPTIDES.out)
+    // Filter fdr for id based alignment
+    FILTER_FDR_FOR_ID_ALIGNMENT(CALCULATE_FDR_FOR_ID_ALIGNMENT.out) 
+    // Compute alignment rt transformation
+    ALIGN_IDS(FILTER_FDR_FOR_ID_ALIGNMENT.out)
 
-/*
- * STEP 1 - generate reversed decoy database
- */
-// process generate_decoy_database {
-
-//     input:
-//      set val(id), val(Sample), file(fastafile) from input_fasta.mix(appended_fasta)
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${fastafile.baseName}_decoy.fasta") into (fastafile_decoy_1, fastafile_decoy_2)
+    // Intermediate Step to join RT transformation files with mzml and idxml channels
+    if(!params.skip_quantification) {
+        input_mzmls
+        .mix(RAW_FILE_CONVERSION.out)
+        .mix(PEAK_PICKING.out)
+        .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+        .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+        .set{joined_trafos_mzmls}
     
-//     when:
-//      !params.skip_decoy_generation
- 
-//     script:
-//      """
-//      DecoyDatabase  -in ${fastafile} \\
-//                     -out ${fastafile.baseName}_decoy.fasta \\
-//                     -decoy_string DECOY_ \\
-//                     -decoy_string_position prefix
-//      """
-// }
-
-
-// /*
-//  * STEP 1.1 - Raw file conversion
-//  */
-// process raw_file_conversion {
-
-//     input:
-//      set val(id), val(Sample), val(Condition), file(rawfile) //from input_raws
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${rawfile.baseName}.mzML") //into (raws_converted, raws_converted_align)
-   
-//     script:
-//      """
-//      ThermoRawFileParser.sh -i=${rawfile} -f=2 -b=${rawfile.baseName}.mzML
-//      """
-// }
-
-
-// /*
-//  * STEP 1.5 - Optional: Run Peak Picking as Preprocessing
-//  */
-// process peak_picking {
-
-//     input:
-//      set val(id), val(Sample), val(Condition), file(mzml_unpicked) //from input_mzmls_unpicked
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${mzml_unpicked.baseName}.mzML") //into (input_mzmls_picked, input_mzmls_align_picked)
-
-//     when:
-//      params.run_centroidisation
-
-//     script:
-//      """
-//      PeakPickerHiRes -in ${mzml_unpicked} \\
-//                      -out ${mzml_unpicked.baseName}.mzML \\
-//                      -algorithm:ms_levels ${params.pick_ms_levels}
-//      """
-// }
-
-
-// /*
-//  * STEP 2 - run comet database search
-//  */
-// process db_search_comet {
-//     tag "${Sample}"
-
-//     label 'process_medium_long'
- 
-//     input:
-//      set val(Sample), val(id), val(Condition), file(mzml_file), val(d), file(fasta_decoy) //from raws_converted.mix(input_mzmls.mix(input_mzmls_picked)).join(fastafile_decoy_1.mix(input_fasta_1), by:1, remainder:true) 
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}.idXML") //into id_files
-
-//     script:
-//      """
-//      CometAdapter  -in ${mzml_file} \\
-//                    -out ${Sample}_${Condition}_${id}.idXML \\
-//                    -threads ${task.cpus} \\
-//                    -database ${fasta_decoy} \\
-//                    -precursor_mass_tolerance ${params.precursor_mass_tolerance} \\
-//                    -fragment_bin_tolerance ${params.fragment_mass_tolerance} \\
-//                    -fragment_bin_offset ${params.fragment_bin_offset} \\
-//                    -num_hits ${params.num_hits} \\
-//                    -digest_mass_range ${params.digest_mass_range} \\
-//                    -max_variable_mods_in_peptide ${params.number_mods} \\
-//                    -allowed_missed_cleavages 0 \\
-//                    -precursor_charge ${params.prec_charge} \\
-//                    -activation_method ${params.activation_method} \\
-//                    -variable_modifications ${params.variable_mods.tokenize(',').collect { "'${it}'" }.join(" ") } \\
-//                    -fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")} \\
-//                    -enzyme '${params.enzyme}' \\
-//                    -spectrum_batch_size ${params.spectrum_batch_size} \\
-//                    $a_ions \\
-//                    $c_ions \\
-//                    $x_ions \\
-//                    $z_ions \\
-//                    $NL_ions \\
-//                    $rm_precursor \\
-//      """
-
-// }
-
-
-// /*
-//  * STEP 3 - index decoy and target hits
-//  */
-// process index_peptides {
- 
-//     input:
-//      set val(Sample), val(id), val(Condition), file(id_file), val(d), file(fasta_decoy) //from id_files.join(fastafile_decoy_2.mix(input_fasta_2), by:1)
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML") //into (id_files_idx, id_files_idx_original)
-
-//     script:
-//      """
-//      PeptideIndexer -in ${id_file} \\
-//                     -out ${Sample}_${Condition}_${id}_idx.idXML \\
-//                     -threads ${task.cpus} \\
-//                     -fasta ${fasta_decoy} \\
-//                     -decoy_string DECOY \\
-//                     -enzyme:specificity none
-//      """
-
-// }
-
-
-// /*
-//  * STEP 4 - calculate fdr for id based alignment
-//  */
-// process calculate_fdr_for_idalignment {
- 
-//     input:
-//      set val(id), val(Sample), val(Condition), file(id_file_idx) //from id_files_idx
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx_fdr.idXML") //into id_files_idx_fdr
-
-//     when:
-//      !params.skip_quantification
-
-//     script:
-//      """
-//      FalseDiscoveryRate -in ${id_file_idx} \\
-//                         -protein 'false' \\
-//                         -out ${Sample}_${Condition}_${id}_idx_fdr.idXML \\
-//                         -threads ${task.cpus}
-//      """
-
-// }
-
-
-// /*
-//  * STEP 5 - filter fdr for id based alignment
-//  */
-// process filter_fdr_for_idalignment {
- 
-//     input:
-//      set val(id), val(Sample), val(Condition), file(id_file_idx_fdr) // from id_files_idx_fdr
-
-//     output:
-//      set val(id), val("$Sample"), val(Condition), file("${id}_-_${Sample}_${Condition}_idx_fdr_filtered.idXML") //into (id_files_idx_fdr_filtered, id_files_for_quant_fdr)
-
-//     when:
-//      !params.skip_quantification
-
-//     script:
-//      """
-//      IDFilter -in ${id_file_idx_fdr} \\
-//               -out ${id}_-_${Sample}_${Condition}_idx_fdr_filtered.idXML \\
-//               -threads ${task.cpus} \\
-//               -score:pep ${params.fdr_threshold} \\
-//               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
-//               -remove_decoys \\
-//               -delete_unreferenced_peptide_hits
-//      """
-
-// }
-
-
-// /*
-//  * STEP 6 - compute alignment rt transformation
-//  */
-// process align_ids {
-
-//     input:
-//      set val(id), val(Sample), val(Condition), file(id_names) //from id_files_idx_fdr_filtered.groupTuple(by: 1)
-
-//     output:
-//      set val("$Sample"), file("*.trafoXML") //into (id_files_trafo, id_files_trafo_II)
-
-//     when:
-//      !params.skip_quantification
-
-//     script:
-//      def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
-
-//      """
-//      MapAlignerIdentification -in $id_names \\
-//                               -trafo_out $out_names \\
-//                               -model:type linear \\
-//                               -algorithm:max_rt_shift ${params.max_rt_alignment_shift}
-//      """
-
-// }
-
-
-// /*
-//  * Intermediate Step - join RT transformation files with mzml and idxml channels
-//  */
-
-// if(!params.skip_quantification){
-
-//    input_mzmls_align
-//     .mix(raws_converted_align)
-//     .mix(input_mzmls_align_picked)
-//     .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
-//     .join(id_files_trafo.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
-//     .set{joined_trafos_mzmls}
-
-//    id_files_idx_original
-//     .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
-//     .join(id_files_trafo_II.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
-//     .set{joined_trafos_ids}
-
-//    id_files_idx_original_II = Channel.empty()
-
-// } else {
-
-//    joined_trafos_mzmls = Channel.empty()
-//    joined_trafos_ids = Channel.empty()
-//    id_files_idx_original_II = id_files_idx_original
-
-// }
-// /*
-//  * STEP 7 - align mzML files using trafoXMLs
-//  */
-// process align_mzml_files {
-
-//     input:
-//      set val(id), val(Sample), val(Condition), file(mzml_file_align), file(id_file_trafo) //from joined_trafos_mzmls
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_aligned.mzML") //into mzml_files_aligned
-
-//     when:
-//      !params.skip_quantification
-
-//     script:
-//      """
-//      MapRTTransformer -in ${mzml_file_align} \\
-//                       -trafo_in ${id_file_trafo} \\
-//                       -out ${Sample}_${Condition}_${id}_aligned.mzML \\
-//                       -threads ${task.cpus}
-//      """
-// }
-
-
-// /*
-//  * STEP 8 - align unfiltered idXMLfiles using trafoXMLs
-//  */
-// process align_idxml_files {
-
-//     input:
-//      set val(id), val(Sample), val(Condition), file(idxml_file_align), file(idxml_file_trafo) // from joined_trafos_ids
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx_aligned.idXML") //into idxml_files_aligned
-
-//     when:
-//      !params.skip_quantification
-
-//     script:
-//      """
-//      MapRTTransformer -in ${idxml_file_align} \\
-//                       -trafo_in ${idxml_file_trafo} \\
-//                       -out ${Sample}_${Condition}_${id}_idx_aligned.idXML \\
-//                       -threads ${task.cpus}
-//      """
-
-// }
-
-
-// /*
-//  * STEP 9 - merge aligned idXMLfiles
-//  */
-// process merge_aligned_idxml_files {
-
-//     input:
-//      set val(id), val(Sample), val(Condition), file(ids_aligned) //from idxml_files_aligned.mix(id_files_idx_original_II).groupTuple(by: 1)
-
-//     output:
-//      set val("$id"), val("$Sample"), val(Condition), file("${Sample}_all_ids_merged.idXML") //into (id_merged, id_merged_test)
-
-//     script:
-//      """
-//      IDMerger -in $ids_aligned \\
-//               -out ${Sample}_all_ids_merged.idXML \\
-//               -threads ${task.cpus}  \\
-//               -annotate_file_origin  \\
-//               -merge_proteins_add_PSMs
-//      """
-
-// }
-
-
-// /*
-//  * STEP 10 - extract PSM features for Percolator
-//  */
-// process extract_psm_features_for_percolator {
-//     publishDir "${params.outdir}/Intermediate_Results/"
- 
-//     input:
-//      set val(id), val(Sample), val(Condition), file(id_file_merged)// from id_merged
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_all_ids_merged_psm.idXML") //into (id_files_merged_psm, id_files_merged_psm_refine, id_files_merged_psm_refine_2)
-
-//     script:
-//      """
-//      PSMFeatureExtractor -in ${id_file_merged} \\
-//                          -out ${Sample}_all_ids_merged_psm.idXML \\
-//                          -threads ${task.cpus} 
-//      """
-
-// }
-
-
-// /*
-//  * STEP 11 - run Percolator
-//  */
-// process run_percolator {
-//     publishDir "${params.outdir}/Intermediate_Results/"
-
-//     label 'process_medium'
- 
-//     input:
-//      set val(id), val(Sample), val(Condition), file(id_file_psm) //from id_files_merged_psm
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_all_ids_merged_psm_perc.idXML") //into (id_files_merged_psm_perc, id_files_merged_psm_perc_sub)
-
-//     if (params.klammer && params.description_correct_features == 0) {
-//         log.warn('Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.')
-//         log.warn('Klammer has been turned off!')
-//     }
-
-//     script:
-//     if (params.description_correct_features > 0 && params.klammer){
-
-//     """
-//     OMP_NUM_THREADS=${task.cpus} \\
-//     PercolatorAdapter -in ${id_file_psm} \\
-//                        -out ${Sample}_all_ids_merged_psm_perc.idXML \\
-//                        -seed 4711 \\
-//                        -trainFDR 0.05 \\
-//                        -testFDR 0.05 \\
-//                        -enzyme no_enzyme \\
-//                        $fdr_level \\
-//                        -subset-max-train ${params.subset_max_train} \\
-//                        -doc ${params.description_correct_features} \\
-//                        -klammer
-//     """
-//     } else {
-//     """
-//     OMP_NUM_THREADS=${task.cpus} \\
-//     PercolatorAdapter -in ${id_file_psm} \\
-//                        -out ${Sample}_all_ids_merged_psm_perc.idXML \\
-//                        -seed 4711 \\
-//                        -trainFDR 0.05 \\
-//                        -testFDR 0.05 \\
-//                        -threads ${task.cpus} \\
-//                        -enzyme no_enzyme \\
-//                        $fdr_level \\
-//                        -subset-max-train ${params.subset_max_train} \\
-//                        -doc ${params.description_correct_features} \\
-//     """
-//     }
-     
-
-// }
-
-
-// /*
-//  * STEP 12 - filter by percolator q-value
-//  */
-// process filter_by_q_value {
-//     publishDir "${params.outdir}/Intermediate_Results/"
- 
-//     input:
-//      set val(id), val(Sample), val(Condition), file(id_file_perc) //from id_files_merged_psm_perc
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged_psm_perc_filtered.idXML") //into (id_files_merged_psm_perc_filtered, ids_for_rt_training, ids_for_rt_prediction)
-
-//     when:
-//      !params.refine_fdr_on_predicted_subset
-
-//     script:
-//      """
-//      IDFilter -in ${id_file_perc} \\
-//               -out ${Sample}_all_ids_merged_psm_perc_filtered.idXML \\
-//               -threads ${task.cpus} \\
-//               -score:pep ${params.fdr_threshold} \\
-//               -remove_decoys \\
-//               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
-//               -delete_unreferenced_peptide_hits
-//      """
-
-// }
-
-
-// /*
-//  * STEP 12.0 - option refine_fdr_on_predicted_subset: filter by percolator q-value
-//  */
-// process filter_by_q_value_first {
-//     publishDir "${params.outdir}/Intermediate_Results/"
+        INDEX_PEPTIDES.out
+        .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+        .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+        .set{joined_trafos_ids}
     
-//     input:
-//     set val(id), val(Sample), val(Condition), file(id_file_perc_sub) //from id_files_merged_psm_perc_sub
-    
-//     output:
-//     set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged_psm_perc_filtered.idXML") //into id_files_merged_psm_perc_filtered_refine
-
-//     when:
-//      params.refine_fdr_on_predicted_subset
-    
-//     script:
-//      """
-//      IDFilter -in ${id_file_perc_sub} \\
-//               -out ${Sample}_all_ids_merged_psm_perc_filtered.idXML \\
-//               -threads ${task.cpus} \\
-//               -score:pep ${params.fdr_threshold} \\
-//               -remove_decoys \\
-//               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
-//               -delete_unreferenced_peptide_hits
-//      """
-
-// }
-
-
-// /*
-//  * STEP 12.1 - option refine_fdr_on_predicted_subset: export filtered percolator results as mztab
-//  */
-// process export_mztab_perc {
-//     publishDir "${params.outdir}/Intermediate_Results/"
-
-//     input:
-//      set val(id), val(Sample), file(percolator_mztab) //from id_files_merged_psm_perc_filtered_refine
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged_psm_perc_filtered.mzTab") //into percolator_ids_mztab
-
-//     when:
-//      params.refine_fdr_on_predicted_subset
-
-//     script:
-//      """
-//      MzTabExporter -in ${percolator_mztab} \\
-//                    -out ${Sample}_all_ids_merged_psm_perc_filtered.mzTab \\
-//                    -threads ${task.cpus}
-//      """
-
-// }
-
-
-// /*
-//  * STEP 12.2 - option refine_fdr_on_predicted_subset: export psm results as mztab
-//  */
-// process export_mztab_psm {
-//     publishDir "${params.outdir}/Intermediate_Results/"
-
-//     input:
-//      set val(id), val(Sample), val(Condition), file(psm_mztab) //from id_files_merged_psm_refine
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_all_ids_merged.mzTab") //into psm_ids_mztab
-
-//     when:
-//      params.refine_fdr_on_predicted_subset
-
-//     script:
-//      """
-//      MzTabExporter -in ${psm_mztab} \\
-//                    -out ${Sample}_all_ids_merged.mzTab \\
-//                    -threads ${task.cpus}
-//      """
-
-// }
-
-
-// /*
-//  * STEP 12.3 - option refine_fdr_on_predicted_subset: predict psm results using mhcflurry to shrink search space
-//  */
-// process predict_psms {
-//     publishDir "${params.outdir}/Intermediate_Results/"
-
-//     input:
-//      set val(Sample), val(id), file(perc_mztab_file), file(psm_mztab_file), val(d), val(allotypes_refine)//from percolator_ids_mztab.join(psm_ids_mztab, by:[0,1]).combine(peptides_class_1_alleles_refine, by:1)
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_peptide_filter.idXML") //into peptide_filter
-
-//     when:
-//      params.refine_fdr_on_predicted_subset
-
-//     script:
-//      """
-//      mhcflurry-downloads --quiet fetch models_class1
-//      mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes_refine}' ${perc_mztab_file} ${psm_mztab_file} ${Sample}_peptide_filter.idXML
-//      """
-// }
-
-
-// /*
-//  * STEP 12.4 - option refine_fdr_on_predicted_subset: filter psm results by shrinked search space
-//  */
-// process filter_psms_by_predictions {
-//     publishDir "${params.outdir}/Intermediate_Results/"
-    
-//     input:
-//      set val(id), val(Sample), val(Condition), file(id_file_psm_filtered)// from id_files_merged_psm_refine_2
-//      set val(id), val(Sample), file(peptide_filter_file) //from peptide_filter
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_pred_filtered.idXML") //into id_files_merged_psm_pred_filtered
-
-//     when:
-//      params.refine_fdr_on_predicted_subset    
-
-//     script:
-//      """
-//      IDFilter -in ${id_file_psm_filtered} \\
-//               -out ${Sample}_pred_filtered.idXML \\
-//               -whitelist:ignore_modifications \\
-//               -whitelist:peptides ${peptide_filter_file}\\
-//               -threads ${task.cpus} \\
-//      """
-
-// }
-
-
-// /*
-//  * STEP 12.5 - option refine_fdr_on_predicted_subset: recompute percolator fdr on shrinked search space
-//  */
-// process run_percolator_on_predicted_subset {
-//     publishDir "${params.outdir}/Intermediate_Results/"
-
-//     input:
-//      set val(id), val(Sample), file(id_file_psm_subset) //from id_files_merged_psm_pred_filtered
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_perc_subset.idXML") //into id_files_merged_psm_pred_perc
-
-//     when:
-//      params.refine_fdr_on_predicted_subset
-
-//     script:
-//      """
-//      OMP_NUM_THREADS=${task.cpus} \\
-//      PercolatorAdapter -in ${id_file_psm_subset} \\
-//                        -out ${Sample}_perc_subset.idXML \\
-//                        -seed 4711 \\
-//                        -trainFDR 0.05 \\
-//                        -testFDR 0.05 \\
-//                        -enzyme no_enzyme \\
-//                        -subset-max-train ${params.subset_max_train} \\
-//                        -doc ${params.description_correct_features} \\
-//                        $fdr_level
-//      """
-
-// }
-
-
-// /*
-//  * STEP 12.6 - option refine_fdr_on_predicted_subset: filter results by refined fdr
-//  */
-// process filter_refined_q_value {
-//     publishDir "${params.outdir}/Intermediate_Results/"
-     
-//     input:
-//      set val(id), val(Sample), file(id_file_perc_pred) //from id_files_merged_psm_pred_perc
-     
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_perc_subset_filtered.idXML")// into (id_files_merged_psm_pred_perc_filtered, ids_for_rt_training_subset, ids_for_rt_prediction_subset)
-
-//     when:
-//      params.refine_fdr_on_predicted_subset     
-
-//     script:
-//      """      
-//      IDFilter -in ${id_file_perc_pred} \\
-//               -out ${Sample}_perc_subset_filtered.idXML \\
-//               -threads ${task.cpus} \\
-//               -score:pep ${params.fdr_threshold} \\
-//               -remove_decoys \\
-//               -precursor:length '${params.peptide_min_length}:${params.peptide_max_length}' \\
-//               -delete_unreferenced_peptide_hits
-//      """
-
-// }
-
-// id_files_for_quant_fdr
-//  .flatMap { it -> [tuple(it[0], it[1], it[2], it[3])]}
-//  .join(mzml_files_aligned, by: [0,1,2])
-//  .combine(id_files_merged_psm_perc_filtered.mix(id_files_merged_psm_pred_perc_filtered), by:1)
-//  .set{joined_mzmls_ids_quant}
-
-// /*
-//  * STEP 13 - quantify identifications using targeted feature extraction
-//  */
-// process quantify_identifications_targeted {
-//     publishDir "${params.outdir}/Intermediate_Results/"
- 
-//     input:
-//      set val(Sample), val(id), val(Condition), file(id_file_quant_int), file(mzml_quant), val(all_ids), file(id_file_quant) //from joined_mzmls_ids_quant
-
-//     output:
-//      set val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${id}.featureXML") //into (feature_files, feature_files_II, feature_test)
-
-//     when:
-//      !params.skip_quantification
-
-//     script:
-//     if (!params.quantification_fdr){
-
-//      """
-//      FeatureFinderIdentification -in ${mzml_quant} \\
-//                                  -id ${id_file_quant} \\
-//                                  -out ${Sample}_${id}.featureXML \\
-//                                  -threads ${task.cpus}
-//      """
-//     } else {
-//      """
-//      FeatureFinderIdentification -in ${mzml_quant} \\
-//                                  -id ${id_file_quant_int} \\
-//                                  -id_ext ${id_file_quant} \\
-//                                  -svm:min_prob ${params.quantification_min_prob} \\
-//                                  -out ${Sample}_${id}.featureXML \\
-//                                  -threads ${task.cpus}
-//      """   
-//     }
-// }
-
-
-// /*
-//  * STEP 14 - link extracted features
-//  */
-// process link_extracted_features {
-//     publishDir "${params.outdir}/Intermediate_Results/"
-
-//     input:
-//      set val(id), val(Sample), val(Condition), file(features)// from feature_files.groupTuple(by:1)
-
-//     output:
-//      set val("$Sample"), file("${Sample}_all_features_merged.consensusXML") //into consensus_file
-    
-//     when:
-//      !params.skip_quantification
-
-//     script:
-//      """
-//      FeatureLinkerUnlabeledKD -in ${features} \\
-//                               -out '${Sample}_all_features_merged.consensusXML' \\
-//                               -threads ${task.cpus}
-//      """
-
-// }
-
-
-// /*
-//  * STEP 15 - resolve conflicting ids matching to the same feature
-//  */
-// process resolve_conflicts {
- 
-//     input:
-//      set val(Sample), file(consensus)// from consensus_file
-
-//     output:
-//      set val(Sample), file("${Sample}_resolved.consensusXML") //into (consensus_file_resolved, consensus_file_resolved_2)
-
-//     when:
-//      !params.skip_quantification
-
-//     script:
-//      """
-//      IDConflictResolver -in ${consensus} \\
-//                         -out ${Sample}_resolved.consensusXML \\
-//                         -threads ${task.cpus}
-//      """
-
-// }
-
-
-// /*
-//  * STEP 16 - export all information as text to csv
-//  */
-// process export_text {
-//     publishDir "${params.outdir}/"
- 
-//     input:
-//      set val(Sample), file(consensus_resolved) //from consensus_file_resolved
-
-//     output:
-//      set val(Sample), file("${Sample}.csv") //into consensus_text
-
-//     script:
-//      """
-//      TextExporter -in ${consensus_resolved} \\
-//                   -out ${Sample}.csv \\
-//                   -threads ${task.cpus} \\
-//                   -id:add_hit_metavalues 0 \\
-//                   -id:add_metavalues 0 \\
-//                   -id:peptides_only
-//      """
-
-// }
-
-
-// /*
-//  * STEP 17 - export all information as mzTab
-//  */
-// process export_mztab {
-//     publishDir "${params.outdir}/"
-
-//     input:
-//      set val(Sample), file(feature_file_2)// from consensus_file_resolved_2
-
-//     output:
-//      set val("id"), val("$Sample"), file("${Sample}.mzTab") //into (features_mztab, features_mztab_neoepitopes, features_mztab_neoepitopes_II, mhcnuggets_mztab)
-
-//     script:
-//      """
-//      MzTabExporter -in ${feature_file_2} \\
-//                    -out ${Sample}.mzTab \\
-//                    -threads ${task.cpus}
-//      """
-
-// }
-
-
-// /*
-//  * STEP 18 - If specified predict peptides using MHCFlurry
-//  */
-// process predict_peptides_mhcflurry_class_1 {
-//     publishDir "${params.outdir}/class_1_bindings"
-
-//     input:
-//      set val(Sample), val(id), file(mztab_file), val(d), val(class_1_alleles) from features_mztab.combine(peptides_class_1_alleles, by:1)
-
-//     output:
-//      set val("$Sample"), file("*predicted_peptides_class_1.csv") // into predicted_peptides
-
-//     when:
-//      params.predict_class_1
-
-//     script:
-//      """
-//      mhcflurry-downloads --quiet fetch models_class1
-//      mhcflurry_predict_mztab.py '${class_1_alleles}' ${mztab_file} ${Sample}_predicted_peptides_class_1.csv
-//      """
-// }
-
-
-// /*
-//  * STEP 19 - Preprocess found peptides for MHCNuggets prediction class 2
-//  */ 
-//  process preprocess_peptides_mhcnuggets_class_2 {
-     
-//     input:
-//      set val(id), val(Sample), file(mztab_file) //from mhcnuggets_mztab
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_preprocessed_mhcnuggets_peptides") //into preprocessed_mhcnuggets_peptides
-//      set val("$id"), val("$Sample"), file('peptide_to_geneID') //into peptide_to_geneID
-
-//     when:
-//      params.predict_class_2
-
-//     script:
-//     """
-//     preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output ${Sample}_preprocessed_mhcnuggets_peptides
-//     """
-//  }
-
-
-//  /*
-//  * STEP 20 - Predict found peptides using MHCNuggets class 2
-// */  
-//  process predict_peptides_mhcnuggets_class_2 {
-
-//     input:
-//      set val(Sample), val(id), file(preprocessed_peptides), val(d), val(class_2_alleles) from preprocessed_mhcnuggets_peptides.join(peptides_class_2_alleles, by:1)
-
-//     output:
-//      set val("$id"), val("$Sample"), file("*_predicted_peptides_class_2") //into predicted_mhcnuggets_peptides
-
-//     when:
-//      params.predict_class_2
-
-//     script:
-//     """
-//     mhcnuggets_predict_peptides.py --peptides ${preprocessed_peptides} --alleles '${class_2_alleles}' --output _predicted_peptides_class_2
-//     """
-//  }
-
-
-//  /*
-//  * STEP 21 - Postprocess predicted MHCNuggets peptides class 2
-//  */ 
-//  process postprocess_peptides_mhcnuggets_class_2 {
-//     publishDir "${params.outdir}/class_2_bindings"
-
-//     input:
-//      set val(Sample), val(id), file(predicted_peptides), val(d), file(peptide_to_geneID) //from predicted_mhcnuggets_peptides.join(peptide_to_geneID, by:1)
-
-//     output:
-//      set val("$Sample"), file('*.csv') // into postprocessed_peptides_mhcnuggets
-
-//     when:
-//      params.predict_class_2
-
-//     script:
-//     """
-//     postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID} --output ${Sample}_postprocessed.csv
-//     """
-//  }
- 
-
-// /*
-//  * STEP 22 - Predict all possible neoepitopes from vcf
-//  */
-// process predict_possible_neoepitopes {
-//     publishDir "${params.outdir}/"
-
-//     label 'process_web'
-
-//     input:
-//      set val(id), val(Sample), val(alleles), file(vcf_file) //from neoepitopes_class_1_alleles.join(input_vcf_neoepitope, by:[0,1], remainder:true)
-
-//     output:
-//      set val("id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.csv") into possible_neoepitopes
-//      set val("id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.txt") into possible_neoepitopes_list
- 
-//     when:
-//      params.include_proteins_from_vcf & params.predict_class_1
-
-//     script:
-//      """
-//      vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '${alleles}' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o ${Sample}_vcf_neoepitopes.csv
-//      """
-// }
-
-
-// /*
-//  * STEP 22/2 - Predict all possible class 2 neoepitopes from vcf
-//  */
-// process predict_possible_class_2_neoepitopes {
-//     publishDir "${params.outdir}/"
-
-//     label 'process_web'
-
-//     input:
-//      set val(id), val(Sample), val(alleles_II), file(vcf_file) //from peptides_class_2_alleles_II.join(input_vcf_neoepitope_II, by:[0,1], remainder:true)
-
-//     output:
-//      set val("id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.csv") //into possible_neoepitopes_II
-//      set val("id"), val("$Sample"), file("${Sample}_vcf_neoepitopes.txt") //into possible_neoepitopes_list_II
-
-//     when:
-//      params.include_proteins_from_vcf & !params.predict_class_1 & params.predict_class_2
-
-//     script:
-//      """
-//      vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '${alleles_II}' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o ${Sample}_vcf_neoepitopes.csv
-//      """
-// }
-
-
-// /*
-//  * STEP 23 - Resolve found neoepitopes
-//  */
-// process Resolve_found_neoepitopes {
-//     publishDir "${params.outdir}/"
-//     echo true
-
-//     input:
-//      set val(id), val(Sample), file(mztab), file(neoepitopes) //from features_mztab_neoepitopes.join(possible_neoepitopes, by:[0,1], remainder:true) 
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_found_neoepitopes_class_1.csv") //into found_neoepitopes
-    
-//     when:
-//      params.include_proteins_from_vcf & params.predict_class_1
-
-//     script:
-//      """
-//      resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${Sample}_found_neoepitopes_class_1
-//      """
-// }
-
-
-// /*
-//  * STEP 23/2 - Resolve found class 2 neoepitopes
-//  */
-// process Resolve_found_class_2_neoepitopes {
-//     publishDir "${params.outdir}/"
-//     echo true
-
-//     input:
-//      set val(id), val(Sample), file(mztab), file(neoepitopes) //from features_mztab_neoepitopes_II.join(possible_neoepitopes_II, by:[0,1], remainder:true)
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_found_neoepitopes_class_2.csv") //into found_neoepitopes_II, mhcnuggets_neo_preprocessing, mhcnuggets_neo_postprocessing
-
-//     when:
-//      params.include_proteins_from_vcf & params.predict_class_2
-
-//     script:
-//      """
-//      resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${Sample}_found_neoepitopes_class_2
-//      """
-// }
-
-
-// /*
-//  * STEP 24 - Predict class 1 neoepitopes MHCFlurry
-//  */
-// process Predict_neoepitopes_mhcflurry_class_1 {
-//     publishDir "${params.outdir}/class_1_bindings"
-
-//     input:
-//      set val(Sample), val(id), val(allotypes), val(d), file(neoepitopes) from neoepitopes_class_1_alleles_prediction.join(found_neoepitopes, by:1)
-
-//     output:
-//      set val("$id"), val("$Sample"), file("*_${Sample}_predicted_neoepitopes_class_1.csv") //into predicted_neoepitopes
-    
-//     when:
-//      params.include_proteins_from_vcf & params.predict_class_1
-
-//     script:
-//      """
-//      mhcflurry-downloads --quiet fetch models_class1
-//      mhcflurry_neoepitope_binding_prediction.py '${allotypes}' ${neoepitopes} _${Sample}_predicted_neoepitopes_class_1.csv
-//      """
-// }
-
-
-// /*
-//  * STEP 25 - Preprocess resolved neoepitopes in a format that MHCNuggets understands
-//  */
-// process preprocess_neoepitopes_mhcnuggets_class_2 {
-
-//     input:
-//      set val(id), val(Sample), file(neoepitopes) //from mhcnuggets_neo_preprocessing
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_mhcnuggets_preprocessed") //into preprocessed_mhcnuggets_neoepitopes
-
-//     when:
-//      params.include_proteins_from_vcf & params.predict_class_2
-
-//     script:
-//     """
-//     preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output ${Sample}_mhcnuggets_preprocessed
-//     """
-// }
-
-
-// /*
-//  * STEP 26 - Predict class 2 MHCNuggets
-//  */
-// process predict_neoepitopes_mhcnuggets_class_2 {
-
-//     input:
-//      set val(Sample), val(id), file(preprocessed_neoepitopes), val(d), val(cl_2_alleles) from preprocessed_mhcnuggets_neoepitopes.join(nepepitopes_class_2_alleles, by:1)
-
-//     output:
-//      set val("$id"), val("$Sample"), file("*_predicted_neoepitopes_class_2") //into predicted_neoepitopes_class_2
-
-//     when:
-//      params.include_proteins_from_vcf & params.predict_class_2
-
-//     script:
-//     """
-//     mhcnuggets_predict_peptides.py --peptides ${preprocessed_neoepitopes} --alleles '${cl_2_alleles}' --output _predicted_neoepitopes_class_2
-//     """
-// }
-
-
-// /*
-//  * STEP 27 - Class 2 MHCNuggets Postprocessing
-// */ 
-// process postprocess_neoepitopes_mhcnuggets_class_2 {
-//     publishDir "${params.outdir}/class_2_bindings"
-
-//     input:
-//      set val(Sample), val(id), file(neoepitopes), val(d), file(predicted_cl_2) //from mhcnuggets_neo_postprocessing.join(predicted_neoepitopes_class_2, by:1)
-
-//     output:
-//      set val("$Sample"), file("*.csv") //into postprocessed_predicted_neoepitopes_class_2
-
-//     when:
-//      params.include_proteins_from_vcf & params.predict_class_2
-
-//     script:
-//     """
-//     postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
-//     """
-// }
-
-
-// /*
-//  * STEP 28 - Train Retention Times Predictor
-// */
-// process train_retention_time_predictor {
-
-//     input:
-//      set val(id), val(Sample), file(id_files_for_rt_training) //from ids_for_rt_training.mix(ids_for_rt_training_subset)
-
-//     output:
-//      set val("$id"), val("$Sample"), file("${Sample}_id_files_for_rt_training.txt"), file("${Sample}_id_files_for_rt_training_params.paramXML"), file("${Sample}_id_files_for_rt_training_trainset.txt") //into (trained_rt_model, trained_rt_model_II)
-
-//     when:
-//      params.predict_RT
-
-//     script:
-//     """
-//     RTModel -in ${id_files_for_rt_training} \\
-//             -cv:skip_cv \\
-//             -out ${Sample}_id_files_for_rt_training.txt \\
-//             -out_oligo_params ${Sample}_id_files_for_rt_training_params.paramXML \\
-//             -out_oligo_trainset ${Sample}_id_files_for_rt_training_trainset.txt
-//     """
-// }
-
-
-// /*
-//  * STEP 29 - Retention Times Predictor Found Peptides
-// */
-// process predict_retention_times_of_found_peptides {
-//     publishDir "${params.outdir}/RT_prediction/"
-
-//     input:
-//      set val(id), val(Sample), file(id_files_for_rt_prediction), file(trained_rt_model_file), file(trained_rt_param_file), file(trained_rt_set_file) //from ids_for_rt_prediction.mix(ids_for_rt_prediction_subset).join(trained_rt_model, by:[0,1])
-
-//     output:
-//      set val("$Sample"), file("${Sample}_id_files_for_rt_prediction_RTpredicted.csv") //into rt_predicted
-
-//     when:
-//      params.predict_RT
-
-//     script:
-//     """
-//     RTPredict -in_id ${id_files_for_rt_prediction} \\
-//               -svm_model ${trained_rt_model_file} \\
-//               -in_oligo_params ${trained_rt_param_file} \\
-//               -in_oligo_trainset ${trained_rt_set_file} \\
-//               -out_text:file ${Sample}_id_files_for_rt_prediction_RTpredicted.csv
-//     """
-// }
-
-
-// /*
-//  * STEP 29 - Retention Times Predictor possible Neoepitopes
-// */
-// process predict_retention_times_of_possible_neoepitopes {
-//     publishDir "${params.outdir}/RT_prediction/"
-
-//     input:
-//      set val(id), val(Sample), file(txt_file_for_rt_prediction), file(trained_rt_model_file_II), file(trained_rt_param_file_II), file(trained_rt_set_file_II) //from possible_neoepitopes_list.mix(possible_neoepitopes_list_II).join(trained_rt_model_II, by:[0,1])
-
-//     output:
-//      set val("$Sample"), file("${Sample}_txt_file_for_rt_prediction_RTpredicted.csv") //into rt_predicted_II
-
-//     when:
-//      params.predict_RT
-
-//     script:
-//     """
-//     RTPredict -in_text ${txt_file_for_rt_prediction} \\
-//               -svm_model ${trained_rt_model_file_II} \\
-//               -in_oligo_params ${trained_rt_param_file_II} \\
-//               -in_oligo_trainset ${trained_rt_set_file_II} \\
-//               -out_text:file ${Sample}_txt_file_for_rt_prediction_RTpredicted.csv
-//     """
-// }
+        id_files_idx_original_II = Channel.empty()
+    } else {
+        joined_trafos_mzmls = Channel.empty()
+        joined_trafos_ids = Channel.empty()
+        id_files_idx_original_II = INDEX_PEPTIDES.out
+    }
+    // Align mzML files using trafoXMLs
+    ALIGN_MZML_FILES(joined_trafos_mzmls)
+    // Align unfiltered idXMLfiles using trafoXMLs
+    ALIGN_IDXML_FILES(joined_trafos_ids)
+    // Merge aligned idXMLfiles
+    MERGE_ALIGNED_IDMXL_FILES(ALIGN_IDXML_FILES.out.mix(id_files_idx_original_II).groupTuple(by: 1))
+    // Extract PSM features for Percolator
+    EXTRACT_PSM_FEATURES_FOR_PERCOLATOR(MERGE_ALIGNED_IDMXL_FILES.out)
+    // Run Percolator
+    RUN_PERCOLATOR(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out, fdr_level)
+    // Filter by percolator q-value
+    FILTER_BY_Q_VALUE(RUN_PERCOLATOR.out) // NOTE: Same function was used for (!)params.refine_fdr_on_predicted_subset
+
+    // TODO: Make a subworkflow
+    // START:
+    // Option: Refine_fdr_on_predicted_subset: export filtered percolator results as mztab
+    EXPORT_MZTAB_PERC(FILTER_BY_Q_VALUE.out) 
+    // Option: Refine_fdr_on_predicted_subset: export psm results as mztab
+    EXPORT_MZTAB_PSM(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out)
+    // Option: Refine_fdr_on_predicted_subset: predict psm results using mhcflurry to shrink search space
+    PREDICT_PSMS(EXPORT_MZTAB_PERC.out.join(EXPORT_MZTAB_PSM.out, by:[0,1]).combine(peptides_class_1_alleles, by:1) )
+    // Option: Refine_fdr_on_predicted_subset: filter psm results by shrinked search space
+    FILTER_PSMS_BY_PREDICTIONS(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out, PREDICT_PSMS.out)
+    // Option: Refine_fdr_on_predicted_subset: recompute percolator fdr on shrinked search space
+    RUN_PERCOLATOR_ON_PREDICTED_SUBSET(FILTER_PSMS_BY_PREDICTIONS.out, fdr_level) 
+    // Option: Refine_fdr_on_predicted_subset: filter results by refined fdr
+    FILTER_REFINED_Q_VALUE(RUN_PERCOLATOR_ON_PREDICTED_SUBSET.out)
+
+    FILTER_FDR_FOR_ID_ALIGNMENT.out
+        .flatMap { it -> [tuple(it[0], it[1], it[2], it[3])]}
+        .join(ALIGN_MZML_FILES.out, by: [0,1,2])
+        .combine(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out), by:1)
+        .set{joined_mzmls_ids_quant}
+    // END
+
+    // Quantify identifications using targeted feature extraction
+    QUANTIFY_IDENTIFICATION_TARGETED(joined_mzmls_ids_quant)
+    // Link extracted features
+    LINK_EXTRACTED_FEATURES(QUANTIFY_IDENTIFICATION_TARGETED.out.groupTuple(by:1))  
+    // Resolve conflicting ids matching to the same feature
+    RESOLVE_CONFLICTS(LINK_EXTRACTED_FEATURES.out)
+    // Export all information as text to csv
+    EXPORT_TEXT(RESOLVE_CONFLICTS.out)
+    // Export all information as mzTab
+    EXPORT_MZTAB(RESOLVE_CONFLICTS.out) 
+
+   // TODO: Make a subworkflow
+   // START:
+    // If specified predict peptides using MHCFlurry
+    PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(EXPORT_MZTAB.out.combine(peptides_class_1_alleles, by:1))
+    // Preprocess found peptides for MHCNuggets prediction class 2
+    PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(EXPORT_MZTAB.out)
+    // Predict found peptides using MHCNuggets class 2
+    PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[0].join(peptides_class_2_alleles, by:1))
+    // Postprocess predicted MHCNuggets peptides class 2
+    POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2.out.join(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[1], by:1)) 
+
+    // Predict all possible neoepitopes from vcf
+    PREDICT_POSSIBLE_NEOEPITOPES(peptides_class_1_alleles.join(input_vcf, by:[0,1], remainder:true))
+    // Predict all possible class 2 neoepitopes from vcf
+    PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(input_vcf, by:[0,1], remainder:true)) 
+    // Resolve found neoepitopes
+    RESOLVE_FOUND_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_NEOEPITOPES.out[0], by:[0,1], remainder:true))
+    // Resolve found class 2 neoepitopes
+    RESOLVE_FOUND_CLASS_2_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0], by:[0,1], remainder:true)) 
+    // Predict class 1 neoepitopes MHCFlurry
+    PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1(peptides_class_1_alleles.join(RESOLVE_FOUND_NEOEPITOPES.out, by:1)) 
+    // Preprocess resolved neoepitopes in a format that MHCNuggets understands
+    PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out) 
+    // Predict class 2 MHCNuggets
+    PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2(PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2.out.join(peptides_class_2_alleles, by:1)) 
+    // Class 2 MHCNuggets Postprocessing
+    POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out.join(PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2.out, by:1)) 
+
+    // Train Retention Times Predictor
+    TRAIN_RETENTION_TIME_PREDICTOR(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out))
+    // Retention Times Predictor Found Peptides
+    PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1]))     
+    // Retention Times Predictor possible Neoepitopes
+    PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES(PREDICT_POSSIBLE_NEOEPITOPES.out[1].mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[1]).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1])) 
+    // END
+}
+
+////////////////////////////////////////////////////
+/* --              COMPLETION EMAIL            -- */
+////////////////////////////////////////////////////
+workflow.onComplete {
+    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_percent_mapped)
+    Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
+}
 
 /*
  * Completion e-mail notification
@@ -1572,67 +686,6 @@ Channel.from(summary.collect{ [it.key, it.value] })
 
 // }
 
-
-def nfcoreHeader() {
-    // Log colors ANSI codes
-    c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_white = params.monochrome_logs ? '' : "\033[0;37m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
-
-    return """    -${c_dim}--------------------------------------------------${c_reset}-
-                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
-    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
-    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
-    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
-                                            ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/mhcquant v${workflow.manifest.version}${c_reset}
-    -${c_dim}--------------------------------------------------${c_reset}-
-    """.stripIndent()
-}
-
-def checkHostname() {
-    def c_reset = params.monochrome_logs ? '' : "\033[0m"
-    def c_white = params.monochrome_logs ? '' : "\033[0;37m"
-    def c_red = params.monochrome_logs ? '' : "\033[1;91m"
-    def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
-    if (params.hostnames) {
-        def hostname = "hostname".execute().text.trim()
-        params.hostnames.each { prof, hnames ->
-            hnames.each { hname ->
-                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
-                    log.error "====================================================\n" +
-                            "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
-                            "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
-                            "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
-                            "============================================================"
-                }
-            }
-        }
-    }
-}
-
-// Check file extension
-def hasExtension(it, extension) {
-    it.toString().toLowerCase().endsWith(extension.toLowerCase())
-}
-
-
-include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [publish_files : ['tsv':'']]                                )
-
-
 ////////////////////////////////////////////////////
-/* --           RUN MAIN WORKFLOW              -- */
+/* --                  THE END                 -- */
 ////////////////////////////////////////////////////
-workflow {
-    // ch_software_versions = Channel.empty()
-    // // Example: ch_software_versions = ch_software_versions.mix(PREPARE_GENOME.out.gffread_version.ifEmpty(null))
-    // GET_SOFTWARE_VERSIONS (ch_software_versions.map { it }.collect())
-
-
-}
