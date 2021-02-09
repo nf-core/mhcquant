@@ -3,6 +3,7 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
+// TODO: add python 2.7.15 and mhcflurry 1.4.3
 process PREDICT_PSMS {
     publishDir "${params.outdir}/Intermediate_Results/"
 

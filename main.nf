@@ -397,8 +397,7 @@ def hasExtension(it, extension) {
     it.toString().toLowerCase().endsWith(extension.toLowerCase())
 }
 
-// include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [publish_files : ['tsv':'']]                                )
-// include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [:] ) // warning since it is not called yet
+include { GET_SOFTWARE_VERSIONS }                           from './modules/local/process/get_software_versions'                            addParams( options: [publish_files : ['tsv':'']]                                )
 include { GENERATE_PROTEINS_FROM_VCF }                      from './modules/local/process/generate_proteins_from_vcf'                       addParams( options: [:] )
 include { GENERATE_DECOY_DB }                               from './modules/local/process/generate_decoy_database'                          addParams( options: [:] )
 include { RAW_FILE_CONVERSION }                             from './modules/local/process/raw_file_conversion'                              addParams( options: [:] )
@@ -414,12 +413,9 @@ include { MERGE_ALIGNED_IDMXL_FILES }                       from './modules/loca
 include { EXTRACT_PSM_FEATURES_FOR_PERCOLATOR }             from './modules/local/process/extract_psm_features_for_percolator'              addParams( options: [:] )
 include { RUN_PERCOLATOR }                                  from './modules/local/process/run_percolator'                                   addParams( options: [:] )
 include { FILTER_BY_Q_VALUE }                               from './modules/local/process/filter_by_q_value'                                addParams( options: [:] )
-include { EXPORT_MZTAB_PERC }                               from './modules/local/process/export_mztab_perc'                                addParams( options: [:] )
-include { EXPORT_MZTAB_PSM }                                from './modules/local/process/export_mztab_psm'                                 addParams( options: [:] )
-include { PREDICT_PSMS }                                    from './modules/local/process/predict_psms'                                     addParams( options: [:] )
-include { FILTER_PSMS_BY_PREDICTIONS }                      from './modules/local/process/filter_psms_by_predictions'                       addParams( options: [:] )
-include { RUN_PERCOLATOR_ON_PREDICTED_SUBSET }              from './modules/local/process/run_percolator_on_predicted_subset'               addParams( options: [:] )
-include { FILTER_REFINED_Q_VALUE }                          from './modules/local/process/filter_refined_q_value'                           addParams( options: [:] )
+
+include { REFINE_FDR_ON_PREDICTED_SUBSET }                  from './modules/local/subworkflow/refine_fdr_on_predicted_subset'               addParams( options: [:] )
+
 include { QUANTIFY_IDENTIFICATION_TARGETED }                from './modules/local/process/quantify_identifications_targeted'                addParams( options: [:] )
 include { LINK_EXTRACTED_FEATURES }                         from './modules/local/process/link_extracted_features'                          addParams( options: [:] )
 include { RESOLVE_CONFLICTS }                               from './modules/local/process/resolve_conflicts'                                addParams( options: [:] )
@@ -446,142 +442,138 @@ include { PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES } from './modules/loca
 ////////////////////////////////////////////////////
 workflow {
 
+    //////////////////////////////////////////////////////////////////////////////////////////////
     // TODO: reduce the number of modules (combine the same functions into one)
-    // ch_software_versions = Channel.empty()
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    ch_software_versions = Channel.empty()
     // // Example: ch_software_versions = ch_software_versions.mix(PREPARE_GENOME.out.gffread_version.ifEmpty(null))
     // GET_SOFTWARE_VERSIONS (ch_software_versions.map { it }.collect())
 
     // If specified translate variants to proteins and include in reference fasta
     GENERATE_PROTEINS_FROM_VCF(input_fasta_vcf.combine(input_vcf, by:1))
     // Generate reversed decoy database
-    // GENERATE_DECOY_DB(input_fasta.mix(appended_fasta), params.skip_decoy_generation) // what is the better solution?
-    GENERATE_DECOY_DB(input_fasta.mix(GENERATE_PROTEINS_FROM_VCF.out))
-    // Raw file conversion
-    RAW_FILE_CONVERSION(input_raws)
-    // Optional: Run Peak Picking as Preprocessing
-    PEAK_PICKING(input_mzmls_unpicked)
-    // Run comet database search
-    DB_SEARCH_COMET(RAW_FILE_CONVERSION.out.mix(input_mzmls.mix(PEAK_PICKING.out)).join(GENERATE_DECOY_DB.out.mix(input_fasta_1), by:1, remainder:true), a_ions, c_ions, x_ions, z_ions,  NL_ions, rm_precursor)
-    // Index decoy and target hits
-    INDEX_PEPTIDES(DB_SEARCH_COMET.out.join(GENERATE_DECOY_DB.out.mix(input_fasta_2), by:1))
-    // Calculate fdr for id based alignment
-    CALCULATE_FDR_FOR_ID_ALIGNMENT(INDEX_PEPTIDES.out)
-    // Filter fdr for id based alignment
-    FILTER_FDR_FOR_ID_ALIGNMENT(CALCULATE_FDR_FOR_ID_ALIGNMENT.out) 
-    // Compute alignment rt transformation
-    ALIGN_IDS(FILTER_FDR_FOR_ID_ALIGNMENT.out)
+    //GENERATE_DECOY_DB(input_fasta.mix(GENERATE_PROTEINS_FROM_VCF.out))
+    //// Raw file conversion
+    //RAW_FILE_CONVERSION(input_raws)
+    //// Optional: Run Peak Picking as Preprocessing
+    //PEAK_PICKING(input_mzmls_unpicked)
+    //// Run comet database search
+    //DB_SEARCH_COMET(RAW_FILE_CONVERSION.out.mix(input_mzmls.mix(PEAK_PICKING.out)).join(GENERATE_DECOY_DB.out.decoy.mix(input_fasta_1), by:1, remainder:true), a_ions, c_ions, x_ions, z_ions,  NL_ions, rm_precursor)
+    //// Index decoy and target hits
+    //INDEX_PEPTIDES(DB_SEARCH_COMET.out.join(GENERATE_DECOY_DB.out.decoy.mix(input_fasta_2), by:1))
+    //// Calculate fdr for id based alignment
+    //CALCULATE_FDR_FOR_ID_ALIGNMENT(INDEX_PEPTIDES.out)
+    //// Filter fdr for id based alignment
+    //FILTER_FDR_FOR_ID_ALIGNMENT(CALCULATE_FDR_FOR_ID_ALIGNMENT.out) 
+    //// Compute alignment rt transformation
+    //ALIGN_IDS(FILTER_FDR_FOR_ID_ALIGNMENT.out)
+//
+    //ch_software_versions = ch_software_versions.mix(GENERATE_DECOY_DB.out.version.ifEmpty(null))
+    //ch_software_versions = ch_software_versions.mix(GENERATE_DECOY_DB.out.version.ifEmpty(null))
+//
+    //// Intermediate Step to join RT transformation files with mzml and idxml channels
+    //if(!params.skip_quantification) {
+    //    input_mzmls
+    //    .mix(RAW_FILE_CONVERSION.out)
+    //    .mix(PEAK_PICKING.out)
+    //    .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+    //    .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+    //    .set{joined_trafos_mzmls}
+    //
+    //    INDEX_PEPTIDES.out
+    //    .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+    //    .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+    //    .set{joined_trafos_ids}
+    //
+    //    id_files_idx_original = Channel.empty()
+    //} else {
+    //    joined_trafos_mzmls = Channel.empty()
+    //    joined_trafos_ids = Channel.empty()
+    //    id_files_idx_original = INDEX_PEPTIDES.out
+    //}
+    //// Align mzML files using trafoXMLs
+    //ALIGN_MZML_FILES(joined_trafos_mzmls)
+    //// Align unfiltered idXMLfiles using trafoXMLs
+    //ALIGN_IDXML_FILES(joined_trafos_ids)
+//
+    //// Merge aligned idXMLfiles
+    //MERGE_ALIGNED_IDMXL_FILES(ALIGN_IDXML_FILES.out.mix(id_files_idx_original).groupTuple(by: 1))
+    //// Extract PSM features for Percolator
+    //EXTRACT_PSM_FEATURES_FOR_PERCOLATOR(MERGE_ALIGNED_IDMXL_FILES.out)
+    //// Run Percolator
+    //RUN_PERCOLATOR(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out, fdr_level)
+    //// Filter by percolator q-value
+    //FILTER_BY_Q_VALUE(RUN_PERCOLATOR.out) // NOTE: Same function was used for (!)params.refine_fdr_on_predicted_subset
+    //// Refine_fdr_on_predicted_subset
+    //REFINE_FDR_ON_PREDICTED_SUBSET (
+    //    FILTER_BY_Q_VALUE.out,
+    //    EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out,
+    //    peptides_class_1_alleles,
+    //    fdr_level,
+    //    FILTER_FDR_FOR_ID_ALIGNMENT.out,
+    //    ALIGN_MZML_FILES.out
+    //)
+//
+    //joined_mzmls_ids_quant = REFINE_FDR_ON_PREDICTED_SUBSET.out.joined_mzmls_ids_quant
+//
+    //// Quantify identifications using targeted feature extraction
+    //QUANTIFY_IDENTIFICATION_TARGETED(joined_mzmls_ids_quant)
+    //// Link extracted features
+    //LINK_EXTRACTED_FEATURES(QUANTIFY_IDENTIFICATION_TARGETED.out.groupTuple(by:1))  
+    //// Resolve conflicting ids matching to the same feature
+    //RESOLVE_CONFLICTS(LINK_EXTRACTED_FEATURES.out)
+    //// Export all information as text to csv
+    //EXPORT_TEXT(RESOLVE_CONFLICTS.out)
+    //// Export all information as mzTab
+    //EXPORT_MZTAB(RESOLVE_CONFLICTS.out) 
 
-    // Intermediate Step to join RT transformation files with mzml and idxml channels
-    if(!params.skip_quantification) {
-        input_mzmls
-        .mix(RAW_FILE_CONVERSION.out)
-        .mix(PEAK_PICKING.out)
-        .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
-        .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
-        .set{joined_trafos_mzmls}
-    
-        INDEX_PEPTIDES.out
-        .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
-        .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
-        .set{joined_trafos_ids}
-    
-        id_files_idx_original_II = Channel.empty()
-    } else {
-        joined_trafos_mzmls = Channel.empty()
-        joined_trafos_ids = Channel.empty()
-        id_files_idx_original_II = INDEX_PEPTIDES.out
-    }
-    // Align mzML files using trafoXMLs
-    ALIGN_MZML_FILES(joined_trafos_mzmls)
-    // Align unfiltered idXMLfiles using trafoXMLs
-    ALIGN_IDXML_FILES(joined_trafos_ids)
-    // Merge aligned idXMLfiles
-    MERGE_ALIGNED_IDMXL_FILES(ALIGN_IDXML_FILES.out.mix(id_files_idx_original_II).groupTuple(by: 1))
-    // Extract PSM features for Percolator
-    EXTRACT_PSM_FEATURES_FOR_PERCOLATOR(MERGE_ALIGNED_IDMXL_FILES.out)
-    // Run Percolator
-    RUN_PERCOLATOR(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out, fdr_level)
-    // Filter by percolator q-value
-    FILTER_BY_Q_VALUE(RUN_PERCOLATOR.out) // NOTE: Same function was used for (!)params.refine_fdr_on_predicted_subset
+    //////////////////////////////////////////////////////////////////////////////////////////////
 
-    // TODO: Make a subworkflow
-    // START:
-    // Option: Refine_fdr_on_predicted_subset: export filtered percolator results as mztab
-    EXPORT_MZTAB_PERC(FILTER_BY_Q_VALUE.out) 
-    // Option: Refine_fdr_on_predicted_subset: export psm results as mztab
-    EXPORT_MZTAB_PSM(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out)
-    // Option: Refine_fdr_on_predicted_subset: predict psm results using mhcflurry to shrink search space
-    PREDICT_PSMS(EXPORT_MZTAB_PERC.out.join(EXPORT_MZTAB_PSM.out, by:[0,1]).combine(peptides_class_1_alleles, by:1) )
-    // Option: Refine_fdr_on_predicted_subset: filter psm results by shrinked search space
-    FILTER_PSMS_BY_PREDICTIONS(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out, PREDICT_PSMS.out)
-    // Option: Refine_fdr_on_predicted_subset: recompute percolator fdr on shrinked search space
-    RUN_PERCOLATOR_ON_PREDICTED_SUBSET(FILTER_PSMS_BY_PREDICTIONS.out, fdr_level) 
-    // Option: Refine_fdr_on_predicted_subset: filter results by refined fdr
-    FILTER_REFINED_Q_VALUE(RUN_PERCOLATOR_ON_PREDICTED_SUBSET.out)
+    ////  TODO: Make a subworkflow
+    //  START:
+    //// If specified predict peptides using MHCFlurry
+    //PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(EXPORT_MZTAB.out.combine(peptides_class_1_alleles, by:1)) // Note for replacement epytope
+    //// Preprocess found peptides for MHCNuggets prediction class 2
+    //PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(EXPORT_MZTAB.out) // Note for replacement epytope
+    //// Predict found peptides using MHCNuggets class 2
+    //PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[0].join(peptides_class_2_alleles, by:1)) // Note for replacement epytope
+    //// Postprocess predicted MHCNuggets peptides class 2
+    //POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2.out.join(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[1], by:1))  // Note for replacement epytope
 
-    FILTER_FDR_FOR_ID_ALIGNMENT.out
-        .flatMap { it -> [tuple(it[0], it[1], it[2], it[3])]}
-        .join(ALIGN_MZML_FILES.out, by: [0,1,2])
-        .combine(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out), by:1)
-        .set{joined_mzmls_ids_quant}
-    // END
+    //// Predict all possible neoepitopes from vcf
+    //PREDICT_POSSIBLE_NEOEPITOPES(peptides_class_1_alleles.join(input_vcf, by:[0,1], remainder:true)) // Note for replacement epytope
+    //// Predict all possible class 2 neoepitopes from vcf
+    //PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(input_vcf, by:[0,1], remainder:true)) // Note for replacement epytope
+    //// Resolve found neoepitopes
+    //RESOLVE_FOUND_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_NEOEPITOPES.out[0], by:[0,1], remainder:true))
+    //// Resolve found class 2 neoepitopes
+    //RESOLVE_FOUND_CLASS_2_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0], by:[0,1], remainder:true)) 
+    //// Predict class 1 neoepitopes MHCFlurry
+    //PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1(peptides_class_1_alleles.join(RESOLVE_FOUND_NEOEPITOPES.out, by:1)) // Note for replacement epytope
+    //// Preprocess resolved neoepitopes in a format that MHCNuggets understands
+    //PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out) // Note for replacement epytope
+    //// Predict class 2 MHCNuggets
+    //PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2(PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2.out.join(peptides_class_2_alleles, by:1)) // Note for replacement epytope
+    //// Class 2 MHCNuggets Postprocessing
+    //POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out.join(PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2.out, by:1)) // Note for replacement epytope
 
-    // Quantify identifications using targeted feature extraction
-    QUANTIFY_IDENTIFICATION_TARGETED(joined_mzmls_ids_quant)
-    // Link extracted features
-    LINK_EXTRACTED_FEATURES(QUANTIFY_IDENTIFICATION_TARGETED.out.groupTuple(by:1))  
-    // Resolve conflicting ids matching to the same feature
-    RESOLVE_CONFLICTS(LINK_EXTRACTED_FEATURES.out)
-    // Export all information as text to csv
-    EXPORT_TEXT(RESOLVE_CONFLICTS.out)
-    // Export all information as mzTab
-    EXPORT_MZTAB(RESOLVE_CONFLICTS.out) 
-
-   // TODO: Make a subworkflow
-   // START:
-    // If specified predict peptides using MHCFlurry
-    PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(EXPORT_MZTAB.out.combine(peptides_class_1_alleles, by:1))
-    // Preprocess found peptides for MHCNuggets prediction class 2
-    PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(EXPORT_MZTAB.out)
-    // Predict found peptides using MHCNuggets class 2
-    PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[0].join(peptides_class_2_alleles, by:1))
-    // Postprocess predicted MHCNuggets peptides class 2
-    POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2.out.join(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[1], by:1)) 
-
-    // Predict all possible neoepitopes from vcf
-    PREDICT_POSSIBLE_NEOEPITOPES(peptides_class_1_alleles.join(input_vcf, by:[0,1], remainder:true))
-    // Predict all possible class 2 neoepitopes from vcf
-    PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(input_vcf, by:[0,1], remainder:true)) 
-    // Resolve found neoepitopes
-    RESOLVE_FOUND_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_NEOEPITOPES.out[0], by:[0,1], remainder:true))
-    // Resolve found class 2 neoepitopes
-    RESOLVE_FOUND_CLASS_2_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0], by:[0,1], remainder:true)) 
-    // Predict class 1 neoepitopes MHCFlurry
-    PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1(peptides_class_1_alleles.join(RESOLVE_FOUND_NEOEPITOPES.out, by:1)) 
-    // Preprocess resolved neoepitopes in a format that MHCNuggets understands
-    PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out) 
-    // Predict class 2 MHCNuggets
-    PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2(PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2.out.join(peptides_class_2_alleles, by:1)) 
-    // Class 2 MHCNuggets Postprocessing
-    POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out.join(PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2.out, by:1)) 
-
-    // Train Retention Times Predictor
-    TRAIN_RETENTION_TIME_PREDICTOR(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out))
-    // Retention Times Predictor Found Peptides
-    PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1]))     
-    // Retention Times Predictor possible Neoepitopes
-    PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES(PREDICT_POSSIBLE_NEOEPITOPES.out[1].mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[1]).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1])) 
-    // END
+    //// Train Retention Times Predictor
+    //TRAIN_RETENTION_TIME_PREDICTOR(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out))
+    //// Retention Times Predictor Found Peptides
+    //PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1]))  
+    //// Retention Times Predictor possible Neoepitopes
+    //PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES(PREDICT_POSSIBLE_NEOEPITOPES.out[1].mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[1]).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1])) 
+    //// END
 }
 
 ////////////////////////////////////////////////////
 /* --              COMPLETION EMAIL            -- */
 ////////////////////////////////////////////////////
-workflow.onComplete {
-    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_percent_mapped)
-    Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
-}
-
+// workflow.onComplete {
+    // Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_percent_mapped)
+    // Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
+// }
+// 
 /*
  * Completion e-mail notification
  */

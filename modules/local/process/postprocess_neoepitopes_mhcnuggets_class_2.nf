@@ -3,6 +3,8 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
+// TODO: add python 2.7.15 and mhcnuggets 2.3.2
+
 process POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
     publishDir "${params.outdir}/class_2_bindings"
 

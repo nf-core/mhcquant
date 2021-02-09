@@ -10,14 +10,14 @@ include {
 
 workflow INPUT_CHECK {
     take:
-    samplesheet // file: /path/to/samplesheet.csv
+        samplesheet // file: /path/to/samplesheet.csv
     
     main:
-    SAMPLESHEET_CHECK ( samplesheet )
-        .splitCsv ( header:true, sep:',' )
-        .map { get_samplesheet_paths(it) }
-        .set { reads }
+        SAMPLESHEET_CHECK ( samplesheet )
+            .splitCsv ( header:true, sep:',' )
+            .map { get_samplesheet_paths(it) }
+            .set { reads }
 
     emit:
-    reads // channel: [ val(meta), [ reads ] ]
+        reads // channel: [ val(meta), [ reads ] ]
 }

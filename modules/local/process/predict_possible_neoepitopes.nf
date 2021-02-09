@@ -3,6 +3,7 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
+// TODO: add python 2.7.15 and fred 2.0.6
 process PREDICT_POSSIBLE_NEOEPITOPES {
     publishDir "${params.outdir}/"
 
