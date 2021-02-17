@@ -3,13 +3,13 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
+//TODO: combine in a subflow --> when needs to be removed
 process FILTER_PSMS_BY_PREDICTIONS {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -21,7 +21,8 @@ process FILTER_PSMS_BY_PREDICTIONS {
         tuple val(id), val(Sample), file(peptide_filter_file)
 
     output:
-        tuple val("$id"), val("$Sample"), file("${Sample}_pred_filtered.idXML")
+        tuple val("$id"), val("$Sample"), file("${Sample}_pred_filtered.idXML"), emit: idxml   
+        path  "*.version.txt", emit: version
 
     when:
         params.refine_fdr_on_predicted_subset    
@@ -32,6 +33,8 @@ process FILTER_PSMS_BY_PREDICTIONS {
             -out ${Sample}_pred_filtered.idXML \\
             -whitelist:ignore_modifications \\
             -whitelist:peptides ${peptide_filter_file}\\
-            -threads ${task.cpus} \\
+            -threads ${task.cpus}
+
+        FileInfo --help &> openms.version.txt
     """
 }

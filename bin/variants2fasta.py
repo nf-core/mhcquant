@@ -182,10 +182,7 @@ def main():
             variants = filter(lambda x: x.type != VariationType.SNP, variants)
 
         if args.filterINDEL:
-            variants = filter(lambda x: x.type not in [VariationType.INS,
-                                                       VariationType.DEL,
-                                                       VariationType.FSDEL,
-                                                       VariationType.FSINS], variants)
+            variants = filter(lambda x: x.type not in [VariationType.INS, VariationType.DEL, VariationType.FSDEL, VariationType.FSINS], variants)
 
         if args.filterFSINDEL:
             variants = filter(lambda x: x.type not in [VariationType.FSDEL, VariationType.FSINS], variants)
@@ -200,7 +197,7 @@ def main():
         #generate proteins
         proteins = generate_proteins_from_transcripts(transcripts)
 
-        print proteins
+        print(proteins)
 
         #write fasta file
         with open(args.output.replace('.fasta','_vcf.fasta'), "w") as f:

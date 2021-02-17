@@ -1,24 +1,39 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-// TODO: add python 2.7.15 and mhcnuggets 2.3.2
+def VERSION = '2.3.2'
 
+//TODO: combine in a subflow --> when needs to be removed
 process POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
-    publishDir "${params.outdir}/class_2_bindings"
+    publishDir "${params.outdir}",
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_2_bindings', publish_id:'class_2_bindings') }
+    
+    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2--py_0" : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
+    } else {
+        container "quay.io/biocontainers/mhcnuggets:2.3.2--py_0"
+    }
+
 
     input:
-    tuple val(Sample), val(id), file(neoepitopes), val(d), file(predicted_cl_2) 
+        tuple val(Sample), val(id), file(neoepitopes), val(d), file(predicted_cl_2) 
 
     output:
-    tuple val("$Sample"), file("*.csv")
+        tuple val("$Sample"), file("*.csv"), emit: csv   
+        path  "*.version.txt", emit: version
 
     when:
     params.include_proteins_from_vcf & params.predict_class_2
 
     script:
+
     """
         postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
+
+        echo $VERSION > mhcnuggets.version.txt
     """
 }

@@ -3,13 +3,13 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
+//TODO: combine in a subflow --> when needs to be removed
 process QUANTIFY_IDENTIFICATION_TARGETED  {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -20,7 +20,8 @@ process QUANTIFY_IDENTIFICATION_TARGETED  {
         tuple val(Sample), val(id), val(Condition), file(id_file_quant_int), file(mzml_quant), val(all_ids), file(id_file_quant)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${id}.featureXML")
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${id}.featureXML"), emit: featurexml   
+        path  "*.version.txt", emit: version
 
     when:
         !params.skip_quantification
@@ -32,6 +33,8 @@ process QUANTIFY_IDENTIFICATION_TARGETED  {
                 -id ${id_file_quant} \\
                 -out ${Sample}_${id}.featureXML \\
                 -threads ${task.cpus}
+
+            FileInfo --help &> openms.version.txt
         """
     } else {
         """
@@ -41,6 +44,8 @@ process QUANTIFY_IDENTIFICATION_TARGETED  {
                 -svm:min_prob ${params.quantification_min_prob} \\
                 -out ${Sample}_${id}.featureXML \\
                 -threads ${task.cpus}
+            
+            FileInfo --help &> openms.version.txt
         """   
     }
 }

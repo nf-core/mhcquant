@@ -3,13 +3,13 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
+//TODO: combine in a subflow --> when needs to be removed
 process RUN_PERCOLATOR_ON_PREDICTED_SUBSET {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -21,7 +21,8 @@ process RUN_PERCOLATOR_ON_PREDICTED_SUBSET {
         val fdr_level
 
     output:
-        tuple val("$id"), val("$Sample"), file("${Sample}_perc_subset.idXML")
+        tuple val("$id"), val("$Sample"), file("${Sample}_perc_subset.idXML"), emit: idxml   
+        path  "*.version.txt", emit: version
 
     when:
         params.refine_fdr_on_predicted_subset
@@ -38,5 +39,7 @@ process RUN_PERCOLATOR_ON_PREDICTED_SUBSET {
             -subset-max-train ${params.subset_max_train} \\
             -doc ${params.description_correct_features} \\
             $fdr_level
+
+        FileInfo --help &> openms.version.txt
         """
 }

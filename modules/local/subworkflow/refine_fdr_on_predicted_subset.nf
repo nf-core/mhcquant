@@ -45,4 +45,5 @@ workflow REFINE_FDR_ON_PREDICTED_SUBSET {
     emit:
         // Define the information that is returned by this workflow
         joined_mzmls_ids_quant
+        filter_refined_q_value = FILTER_REFINED_Q_VALUE.out
 }

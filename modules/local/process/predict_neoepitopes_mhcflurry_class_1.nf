@@ -3,15 +3,26 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
-// TODO: add python 2.7.15 and mhcflurry 1.4.3
+//TODO: combine in a subflow --> when needs to be removed
 process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
-    publishDir "${params.outdir}/class_1_bindings"
+    publishDir "${params.outdir}",
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_1_bindings', publish_id:'class_1_bindings') }
+    
+    conda (params.enable_conda ? "bioconda::mhcflurry=1.4.3--py_0" : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        container "https://depot.galaxyproject.org/singularity/mhcflurry:1.4.3--py_0"
+    } else {
+        container "quay.io/biocontainers/mhcflurry:1.4.3--py_0"
+    }
+
 
     input:
-    tuple val(Sample), val(id), val(allotypes), val(d), file(neoepitopes) 
+        tuple val(Sample), val(id), val(allotypes), val(d), file(neoepitopes) 
 
     output:
-    tuple val("$id"), val("$Sample"), file("*_${Sample}_predicted_neoepitopes_class_1.csv")
+        tuple val("$id"), val("$Sample"), file("*_${Sample}_predicted_neoepitopes_class_1.csv"), emit: csv   
+        path  "*.version.txt", emit: version
     
     when:
     params.include_proteins_from_vcf & params.predict_class_1
@@ -20,5 +31,7 @@ process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
     """
         mhcflurry-downloads --quiet fetch models_class1
         mhcflurry_neoepitope_binding_prediction.py '${allotypes}' ${neoepitopes} _${Sample}_predicted_neoepitopes_class_1.csv
+
+        mhcflurry-predict --version &> mhcflurry.version.txt
     """
 }

@@ -6,10 +6,9 @@ params.options = [:]
 process EXPORT_TEXT {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:'') }
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -20,7 +19,8 @@ process EXPORT_TEXT {
         tuple val(Sample), file(consensus_resolved) 
 
     output:
-        tuple val(Sample), file("${Sample}.csv") 
+        tuple val(Sample), file("${Sample}.csv"), emit: csv   
+        path  "*.version.txt", emit: version 
 
     script:
     """
@@ -30,5 +30,7 @@ process EXPORT_TEXT {
             -id:add_hit_metavalues 0 \\
             -id:add_metavalues 0 \\
             -id:peptides_only
+
+        FileInfo --help &> openms.version.txt
     """
 }

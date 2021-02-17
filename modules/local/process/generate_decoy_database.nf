@@ -3,13 +3,9 @@ include {  saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
+//TODO: combine in a subflow --> when needs to be removed
 process GENERATE_DECOY_DB {
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
-
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -20,8 +16,8 @@ process GENERATE_DECOY_DB {
         tuple val(id), val(Sample), file(fastafile)
 
     output:
-        tuple val("$id"), val("$Sample"), file("${fastafile.baseName}_decoy.fasta") , emit: decoy
-        path "*.version.txt"                                                        , emit: version
+        tuple val("$id"), val("$Sample"), file("${fastafile.baseName}_decoy.fasta"), emit: decoy
+        path "*.version.txt", emit: version
     
     when:
         !params.skip_decoy_generation

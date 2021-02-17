@@ -4,12 +4,13 @@ include { initOptions; saveFiles } from './functions'
 params.options = [:]
 
 process RUN_PERCOLATOR {
+    label 'process_medium'
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -21,7 +22,8 @@ process RUN_PERCOLATOR {
         val fdr_level
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_all_ids_merged_psm_perc.idXML")
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_all_ids_merged_psm_perc.idXML"), emit: idxml   
+        path  "*.version.txt", emit: version
 
     if (params.klammer && params.description_correct_features == 0) {
         log.warn('Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.')
@@ -42,6 +44,8 @@ process RUN_PERCOLATOR {
                     -subset-max-train ${params.subset_max_train} \\
                     -doc ${params.description_correct_features} \\
                     -klammer
+
+                FileInfo --help &> openms.version.txt
             """
         } else {
             """
@@ -55,7 +59,9 @@ process RUN_PERCOLATOR {
                     -enzyme no_enzyme \\
                     $fdr_level \\
                     -subset-max-train ${params.subset_max_train} \\
-                    -doc ${params.description_correct_features} \\
+                    -doc ${params.description_correct_features} 
+
+                FileInfo --help &> openms.version.txt
             """
         }
 }

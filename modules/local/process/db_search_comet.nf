@@ -4,15 +4,11 @@ include {  initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 def options    = initOptions(params.options)
 
-// TODO: Check if the params need to be handed down to the process too
-
 process DB_SEARCH_COMET {
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
+    tag "${Sample}"
+    label 'process_medium_long'
     
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -29,7 +25,8 @@ process DB_SEARCH_COMET {
         val rm_precursor
     
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}.idXML")
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}.idXML"), emit: idxml   
+        path  "*.version.txt", emit: version
 
     script:
         """
@@ -55,6 +52,8 @@ process DB_SEARCH_COMET {
             $x_ions \\
             $z_ions \\
             $NL_ions \\
-            $rm_precursor \\
+            $rm_precursor
+
+            FileInfo --help &> openms.version.txt
         """
 }

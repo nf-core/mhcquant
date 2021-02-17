@@ -1,15 +1,11 @@
 // Import generic module functions
-include {  saveFiles } from './functions'
+include {  saveFiles; } from './functions'
 
 params.options = [:]
 
+//TODO: combine in a subflow --> when needs to be removed
 process PEAK_PICKING {
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
-
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -20,7 +16,8 @@ process PEAK_PICKING {
         tuple val(id), val(Sample), val(Condition), file(mzml_unpicked)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${mzml_unpicked.baseName}.mzML")
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("${mzml_unpicked.baseName}.mzML"), emit: mzml   
+        path  "*.version.txt", emit: version
 
     when:
         params.run_centroidisation
@@ -30,5 +27,7 @@ process PEAK_PICKING {
         PeakPickerHiRes -in ${mzml_unpicked} \\
             -out ${mzml_unpicked.baseName}.mzML \\
             -algorithm:ms_levels ${params.pick_ms_levels}
+
+        FileInfo --help &> openms.version.txt
     """
 }

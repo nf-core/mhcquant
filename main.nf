@@ -2,11 +2,11 @@
 
 /*
 ========================================================================================
-                         nf-core/mhcquant
+                            nf-core/mhcquant
 ========================================================================================
- nf-core/mhcquant Analysis Pipeline.
- #### Homepage / Documentation
- https://github.com/nf-core/mhcquant
+    nf-core/mhcquant Analysis Pipeline.
+    #### Homepage / Documentation
+    https://github.com/nf-core/mhcquant
 ----------------------------------------------------------------------------------------
 */
 
@@ -28,8 +28,9 @@ if (params.help) {
 /* --         LOCAL PARAMETER VALUES           -- */
 ////////////////////////////////////////////////////
 // Database options 
-params.inlude_proteins_from_vcf = false
+params.include_proteins_from_vcf = false
 params.skip_decoy_generation = false
+
 
 // Mass Spectronomy data processing options
 params.use_x_ions = false
@@ -108,48 +109,47 @@ ms_files.other.subscribe { row -> log.warn("Unknown format for entry " + row[3] 
 
 // Define the variables depending on when the run_centroidisation parameter was called or not
 if (params.run_centroidisation) {
-      ms_files.mzML.set { input_mzmls_unpicked }
-      Channel.empty().set { input_mzmls }
+    ms_files.mzML.set { input_mzmls_unpicked }
+    Channel.empty().set { input_mzmls }
 } else {
-      ms_files.mzML.set { input_mzmls }
-      Channel.empty().set { input_mzmls_unpicked }
+    ms_files.mzML.set { input_mzmls }
+    Channel.empty().set { input_mzmls_unpicked }
 }  
 
 // Define the raw files if they are available 
 ms_files.raw.set { input_raws }
-println ms_files.raw
 
 // MHC affinity prediction
 // TODO: test this with a allele sheet
 if (params.predict_class_1 || params.predict_class_2)  {
-   allele_sheet = file(params.allele_sheet, checkIfExists: true)
+    allele_sheet = file(params.allele_sheet, checkIfExists: true)
 
-   Channel.from( allele_sheet )
-    .splitCsv(header: true, sep:'\t')
-    .multiMap { col -> 
-    sample: "${col.Sample}"
-    classI: "${col.HLA_Alleles_Class_1}"
-    classII: "${col.HLA_Alleles_Class_2}" }
-    // .map { col -> tuple("${col.Sample}", "${col.HLA_Alleles_Class_1}", "${col.HLA_Alleles_Class_2}") }
-    .set { ch_alleles_from_sheet }
+    Channel.from( allele_sheet )
+        .splitCsv(header: true, sep:'\t')
+        .multiMap { col -> 
+        sample: "${col.Sample}"
+        classI: "${col.HLA_Alleles_Class_1}"
+        classII: "${col.HLA_Alleles_Class_2}" }
+        // .map { col -> tuple("${col.Sample}", "${col.HLA_Alleles_Class_1}", "${col.HLA_Alleles_Class_2}") }
+        .set { ch_alleles_from_sheet }
 } else {
-   Channel.empty().multiMap {
-       sample: ""
-       classI: ""
-       classII: ""
-   }
-   .set { ch_alleles_from_sheet }
+    Channel.empty().multiMap {
+        sample: ""
+        classI: ""
+        classII: ""
+    }
+    .set { ch_alleles_from_sheet }
 }
 
 // Variant
 if (params.include_proteins_from_vcf)  {
-   vcf_sheet = file(params.vcf_sheet, checkIfExists: true)
-   Channel.from( vcf_sheet )
-    .splitCsv(header: true, sep:'\t')
+    vcf_sheet = file(params.vcf_sheet, checkIfExists: true)
+    Channel.from( vcf_sheet )
+    .splitCsv(header: ['Sample', 'VCF_FileName'], sep:'\t', skip: 1)
     .map { col -> tuple("${col.Sample}", file("${col.VCF_FileName}"),) }
     .set { ch_vcf_from_sheet }
 } else {
-   Channel.empty().set { ch_vcf_from_sheet }
+    Channel.empty().set { ch_vcf_from_sheet }
 }
 
 ////////////////////////////////////////////////////
@@ -176,37 +176,13 @@ if (params.variant_snp_filter) { variant_snp_filter="-fSNP" } else { variant_snp
 /* --              CREATE CHANNELS             -- */
 ////////////////////////////////////////////////////
 // Input fasta file
-if( params.include_proteins_from_vcf) {
-    Channel
-        .fromPath( params.fasta )
-        .combine( ch_samples_from_sheet )
-        .flatMap{ it -> [tuple(it[1],it[2],it[0])] }       //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
-        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta_vcf }
 
-    input_fasta = Channel.empty()
-    input_fasta_1 = Channel.empty()
-    input_fasta_2 = Channel.empty()
-} else if( params.skip_decoy_generation ) {
-    Channel
-        .fromPath( params.fasta )
-        .combine( ch_samples_from_sheet )
-        .flatMap{it -> [tuple(it[1],it[2],it[0])] }      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
-        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta}
-    input_fasta_vcf = Channel.empty()
-} else {
-    Channel
-        .fromPath( params.fasta )
-        .combine( ch_samples_from_sheet )
-        .flatMap{it -> [tuple(it[1],it[2],it[0])] }      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
-        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta }
-
-    input_fasta_vcf = Channel.empty()
-    input_fasta_1 = Channel.empty()
-    input_fasta_2 = Channel.empty()
-}
+Channel
+    .fromPath( params.fasta )
+    .combine( ch_samples_from_sheet )
+    .flatMap{it -> [tuple(it[1],it[2],it[0])] }      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
+    .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+    .set { input_fasta }
 
 // Allele class 1
 if( params.predict_class_1){
@@ -397,7 +373,7 @@ def hasExtension(it, extension) {
     it.toString().toLowerCase().endsWith(extension.toLowerCase())
 }
 
-include { GET_SOFTWARE_VERSIONS }                           from './modules/local/process/get_software_versions'                            addParams( options: [publish_files : ['tsv':'']]                                )
+// include { GET_SOFTWARE_VERSIONS }                           from './modules/local/process/get_software_versions'                            addParams( options: [publish_files : ['tsv':'']]                                )
 include { GENERATE_PROTEINS_FROM_VCF }                      from './modules/local/process/generate_proteins_from_vcf'                       addParams( options: [:] )
 include { GENERATE_DECOY_DB }                               from './modules/local/process/generate_decoy_database'                          addParams( options: [:] )
 include { RAW_FILE_CONVERSION }                             from './modules/local/process/raw_file_conversion'                              addParams( options: [:] )
@@ -441,7 +417,7 @@ include { PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES } from './modules/loca
 /* --           RUN MAIN WORKFLOW              -- */
 ////////////////////////////////////////////////////
 workflow {
-
+    // TODO: start with the generation of the subworkflows to call the beloning tool versions 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // TODO: reduce the number of modules (combine the same functions into one)
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -450,120 +426,124 @@ workflow {
     // GET_SOFTWARE_VERSIONS (ch_software_versions.map { it }.collect())
 
     // If specified translate variants to proteins and include in reference fasta
-    GENERATE_PROTEINS_FROM_VCF(input_fasta_vcf.combine(input_vcf, by:1))
+    // TODO: request a combination of tools for the container --> FRED2, mhcflurry
+    //TODO: change the different parameters to an options.args
+    GENERATE_PROTEINS_FROM_VCF(input_fasta.combine(input_vcf, by:1), variant_indel_filter, variant_snp_filter, variant_frameshift_filter)
     // Generate reversed decoy database
-    //GENERATE_DECOY_DB(input_fasta.mix(GENERATE_PROTEINS_FROM_VCF.out))
-    //// Raw file conversion
-    //RAW_FILE_CONVERSION(input_raws)
-    //// Optional: Run Peak Picking as Preprocessing
-    //PEAK_PICKING(input_mzmls_unpicked)
-    //// Run comet database search
-    //DB_SEARCH_COMET(RAW_FILE_CONVERSION.out.mix(input_mzmls.mix(PEAK_PICKING.out)).join(GENERATE_DECOY_DB.out.decoy.mix(input_fasta_1), by:1, remainder:true), a_ions, c_ions, x_ions, z_ions,  NL_ions, rm_precursor)
+    GENERATE_DECOY_DB(input_fasta.mix(GENERATE_PROTEINS_FROM_VCF.out))
+    // Raw file conversion
+    RAW_FILE_CONVERSION(input_raws)
+    // Optional: Run Peak Picking as Preprocessing
+    PEAK_PICKING(input_mzmls_unpicked)
+    // Run comet database search
+    //TODO: change the different parameters to an options.args
+    DB_SEARCH_COMET(RAW_FILE_CONVERSION.out.mix(input_mzmls.mix(PEAK_PICKING.out)).join(GENERATE_DECOY_DB.out.decoy.mix(input_fasta), by:1, remainder:true), a_ions, c_ions, x_ions, z_ions,  NL_ions, rm_precursor)
     //// Index decoy and target hits
-    //INDEX_PEPTIDES(DB_SEARCH_COMET.out.join(GENERATE_DECOY_DB.out.decoy.mix(input_fasta_2), by:1))
-    //// Calculate fdr for id based alignment
-    //CALCULATE_FDR_FOR_ID_ALIGNMENT(INDEX_PEPTIDES.out)
-    //// Filter fdr for id based alignment
-    //FILTER_FDR_FOR_ID_ALIGNMENT(CALCULATE_FDR_FOR_ID_ALIGNMENT.out) 
-    //// Compute alignment rt transformation
-    //ALIGN_IDS(FILTER_FDR_FOR_ID_ALIGNMENT.out)
-//
+    INDEX_PEPTIDES(DB_SEARCH_COMET.out.join(GENERATE_DECOY_DB.out.decoy.mix(input_fasta), by:1))
+    // Calculate fdr for id based alignment
+    CALCULATE_FDR_FOR_ID_ALIGNMENT(INDEX_PEPTIDES.out)
+    // Filter fdr for id based alignment
+    FILTER_FDR_FOR_ID_ALIGNMENT(CALCULATE_FDR_FOR_ID_ALIGNMENT.out) 
+    // Compute alignment rt transformation
+    ALIGN_IDS(FILTER_FDR_FOR_ID_ALIGNMENT.out)
+
     //ch_software_versions = ch_software_versions.mix(GENERATE_DECOY_DB.out.version.ifEmpty(null))
     //ch_software_versions = ch_software_versions.mix(GENERATE_DECOY_DB.out.version.ifEmpty(null))
-//
-    //// Intermediate Step to join RT transformation files with mzml and idxml channels
-    //if(!params.skip_quantification) {
-    //    input_mzmls
-    //    .mix(RAW_FILE_CONVERSION.out)
-    //    .mix(PEAK_PICKING.out)
-    //    .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
-    //    .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
-    //    .set{joined_trafos_mzmls}
-    //
-    //    INDEX_PEPTIDES.out
-    //    .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
-    //    .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
-    //    .set{joined_trafos_ids}
-    //
-    //    id_files_idx_original = Channel.empty()
-    //} else {
-    //    joined_trafos_mzmls = Channel.empty()
-    //    joined_trafos_ids = Channel.empty()
-    //    id_files_idx_original = INDEX_PEPTIDES.out
-    //}
-    //// Align mzML files using trafoXMLs
-    //ALIGN_MZML_FILES(joined_trafos_mzmls)
-    //// Align unfiltered idXMLfiles using trafoXMLs
-    //ALIGN_IDXML_FILES(joined_trafos_ids)
-//
-    //// Merge aligned idXMLfiles
-    //MERGE_ALIGNED_IDMXL_FILES(ALIGN_IDXML_FILES.out.mix(id_files_idx_original).groupTuple(by: 1))
-    //// Extract PSM features for Percolator
-    //EXTRACT_PSM_FEATURES_FOR_PERCOLATOR(MERGE_ALIGNED_IDMXL_FILES.out)
-    //// Run Percolator
-    //RUN_PERCOLATOR(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out, fdr_level)
-    //// Filter by percolator q-value
-    //FILTER_BY_Q_VALUE(RUN_PERCOLATOR.out) // NOTE: Same function was used for (!)params.refine_fdr_on_predicted_subset
-    //// Refine_fdr_on_predicted_subset
-    //REFINE_FDR_ON_PREDICTED_SUBSET (
-    //    FILTER_BY_Q_VALUE.out,
-    //    EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out,
-    //    peptides_class_1_alleles,
-    //    fdr_level,
-    //    FILTER_FDR_FOR_ID_ALIGNMENT.out,
-    //    ALIGN_MZML_FILES.out
-    //)
-//
-    //joined_mzmls_ids_quant = REFINE_FDR_ON_PREDICTED_SUBSET.out.joined_mzmls_ids_quant
-//
-    //// Quantify identifications using targeted feature extraction
-    //QUANTIFY_IDENTIFICATION_TARGETED(joined_mzmls_ids_quant)
-    //// Link extracted features
-    //LINK_EXTRACTED_FEATURES(QUANTIFY_IDENTIFICATION_TARGETED.out.groupTuple(by:1))  
-    //// Resolve conflicting ids matching to the same feature
-    //RESOLVE_CONFLICTS(LINK_EXTRACTED_FEATURES.out)
-    //// Export all information as text to csv
-    //EXPORT_TEXT(RESOLVE_CONFLICTS.out)
-    //// Export all information as mzTab
-    //EXPORT_MZTAB(RESOLVE_CONFLICTS.out) 
+
+    // Intermediate Step to join RT transformation files with mzml and idxml channels
+    if(!params.skip_quantification) {
+        input_mzmls
+        .mix(RAW_FILE_CONVERSION.out)
+        .mix(PEAK_PICKING.out)
+        .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+        .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+        .set{joined_trafos_mzmls}
+    
+        INDEX_PEPTIDES.out
+        .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
+        .join(ALIGN_IDS.out.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+        .set{joined_trafos_ids}
+    
+        id_files_idx_original = Channel.empty()
+    } else {
+        joined_trafos_mzmls = Channel.empty()
+        joined_trafos_ids = Channel.empty()
+        id_files_idx_original = INDEX_PEPTIDES.out
+    }
+    // Align mzML files using trafoXMLs
+    ALIGN_MZML_FILES(joined_trafos_mzmls)
+    // Align unfiltered idXMLfiles using trafoXMLs
+    ALIGN_IDXML_FILES(joined_trafos_ids)
+
+    // Merge aligned idXMLfiles
+    MERGE_ALIGNED_IDMXL_FILES(ALIGN_IDXML_FILES.out.mix(id_files_idx_original).groupTuple(by: 1))
+    // Extract PSM features for Percolator
+    EXTRACT_PSM_FEATURES_FOR_PERCOLATOR(MERGE_ALIGNED_IDMXL_FILES.out)
+    // Run Percolator
+    RUN_PERCOLATOR(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out, fdr_level)
+    // Filter by percolator q-value
+    FILTER_BY_Q_VALUE(RUN_PERCOLATOR.out) // NOTE: Same function was used for (!)params.refine_fdr_on_predicted_subset
+    // Refine_fdr_on_predicted_subset
+    //TODO: change the different parameters to an options.args
+    REFINE_FDR_ON_PREDICTED_SUBSET (
+        FILTER_BY_Q_VALUE.out,
+        EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out,
+        peptides_class_1_alleles,
+        fdr_level,
+        FILTER_FDR_FOR_ID_ALIGNMENT.out,
+        ALIGN_MZML_FILES.out
+    )
+
+    joined_mzmls_ids_quant = REFINE_FDR_ON_PREDICTED_SUBSET.out.joined_mzmls_ids_quant
+
+    // Quantify identifications using targeted feature extraction
+    QUANTIFY_IDENTIFICATION_TARGETED(joined_mzmls_ids_quant)
+    // Link extracted features
+    LINK_EXTRACTED_FEATURES(QUANTIFY_IDENTIFICATION_TARGETED.out.groupTuple(by:1))  
+    // Resolve conflicting ids matching to the same feature
+    RESOLVE_CONFLICTS(LINK_EXTRACTED_FEATURES.out)
+    // Export all information as text to csv
+    EXPORT_TEXT(RESOLVE_CONFLICTS.out)
+    // Export all information as mzTab
+    EXPORT_MZTAB(RESOLVE_CONFLICTS.out) 
 
     //////////////////////////////////////////////////////////////////////////////////////////////
 
-    ////  TODO: Make a subworkflow
+    //  TODO: Make a subworkflow, proceed with the new container
     //  START:
-    //// If specified predict peptides using MHCFlurry
-    //PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(EXPORT_MZTAB.out.combine(peptides_class_1_alleles, by:1)) // Note for replacement epytope
-    //// Preprocess found peptides for MHCNuggets prediction class 2
-    //PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(EXPORT_MZTAB.out) // Note for replacement epytope
-    //// Predict found peptides using MHCNuggets class 2
-    //PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[0].join(peptides_class_2_alleles, by:1)) // Note for replacement epytope
-    //// Postprocess predicted MHCNuggets peptides class 2
-    //POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2.out.join(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[1], by:1))  // Note for replacement epytope
+    // If specified predict peptides using MHCFlurry
+    PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(EXPORT_MZTAB.out.combine(peptides_class_1_alleles, by:1)) // Note for replacement epytope
+    // Preprocess found peptides for MHCNuggets prediction class 2
+    PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(EXPORT_MZTAB.out) // Note for replacement epytope
+    // Predict found peptides using MHCNuggets class 2
+    PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[0].join(peptides_class_2_alleles, by:1)) // Note for replacement epytope
+    // Postprocess predicted MHCNuggets peptides class 2
+    POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2.out.join(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[1], by:1))  // Note for replacement epytope
 
-    //// Predict all possible neoepitopes from vcf
-    //PREDICT_POSSIBLE_NEOEPITOPES(peptides_class_1_alleles.join(input_vcf, by:[0,1], remainder:true)) // Note for replacement epytope
-    //// Predict all possible class 2 neoepitopes from vcf
-    //PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(input_vcf, by:[0,1], remainder:true)) // Note for replacement epytope
-    //// Resolve found neoepitopes
-    //RESOLVE_FOUND_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_NEOEPITOPES.out[0], by:[0,1], remainder:true))
-    //// Resolve found class 2 neoepitopes
-    //RESOLVE_FOUND_CLASS_2_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0], by:[0,1], remainder:true)) 
-    //// Predict class 1 neoepitopes MHCFlurry
-    //PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1(peptides_class_1_alleles.join(RESOLVE_FOUND_NEOEPITOPES.out, by:1)) // Note for replacement epytope
-    //// Preprocess resolved neoepitopes in a format that MHCNuggets understands
-    //PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out) // Note for replacement epytope
-    //// Predict class 2 MHCNuggets
-    //PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2(PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2.out.join(peptides_class_2_alleles, by:1)) // Note for replacement epytope
-    //// Class 2 MHCNuggets Postprocessing
-    //POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out.join(PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2.out, by:1)) // Note for replacement epytope
+    // Predict all possible neoepitopes from vcf
+    PREDICT_POSSIBLE_NEOEPITOPES(peptides_class_1_alleles.join(input_vcf, by:[0,1], remainder:true)) // Note for replacement epytope
+    // Predict all possible class 2 neoepitopes from vcf
+    PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(input_vcf, by:[0,1], remainder:true)) // Note for replacement epytope
+    // Resolve found neoepitopes
+    RESOLVE_FOUND_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_NEOEPITOPES.out[0], by:[0,1], remainder:true))
+    // Resolve found class 2 neoepitopes
+    RESOLVE_FOUND_CLASS_2_NEOEPITOPES(EXPORT_MZTAB.out.join(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0], by:[0,1], remainder:true)) 
+    // Predict class 1 neoepitopes MHCFlurry
+    PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1(peptides_class_1_alleles.join(RESOLVE_FOUND_NEOEPITOPES.out, by:1)) // Note for replacement epytope
+    // Preprocess resolved neoepitopes in a format that MHCNuggets understands
+    PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out) // Note for replacement epytope
+    // Predict class 2 MHCNuggets
+    PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2(PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2.out.join(peptides_class_2_alleles, by:1)) // Note for replacement epytope
+    // Class 2 MHCNuggets Postprocessing
+    POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out.join(PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2.out, by:1)) // Note for replacement epytope
 
-    //// Train Retention Times Predictor
-    //TRAIN_RETENTION_TIME_PREDICTOR(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out))
-    //// Retention Times Predictor Found Peptides
-    //PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES(FILTER_BY_Q_VALUE.out.mix(FILTER_REFINED_Q_VALUE.out).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1]))  
-    //// Retention Times Predictor possible Neoepitopes
-    //PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES(PREDICT_POSSIBLE_NEOEPITOPES.out[1].mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[1]).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1])) 
-    //// END
+    // Train Retention Times Predictor
+    TRAIN_RETENTION_TIME_PREDICTOR(FILTER_BY_Q_VALUE.out.mix(REFINE_FDR_ON_PREDICTED_SUBSET.out.filter_refined_q_value))
+    // Retention Times Predictor Found Peptides
+    PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES(FILTER_BY_Q_VALUE.out.mix(REFINE_FDR_ON_PREDICTED_SUBSET.out.filter_refined_q_value).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1]))  
+    // Retention Times Predictor possible Neoepitopes
+    PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES(PREDICT_POSSIBLE_NEOEPITOPES.out[1].mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[1]).join(TRAIN_RETENTION_TIME_PREDICTOR.out, by:[0,1])) 
+    // END
 }
 
 ////////////////////////////////////////////////////
@@ -574,110 +554,6 @@ workflow {
     // Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
 // }
 // 
-/*
- * Completion e-mail notification
- */
-// workflow.onComplete {
-
-//     // Set up the e-mail variables
-//     def subject = "[nf-core/mhcquant] Successful: $workflow.runName"
-//     if (!workflow.success) {
-//         subject = "[nf-core/mhcquant] FAILED: $workflow.runName"
-//     }
-//     def email_fields = [:]
-//     email_fields['version'] = workflow.manifest.version
-//     email_fields['runName'] = custom_runName ?: workflow.runName
-//     email_fields['success'] = workflow.success
-//     email_fields['dateComplete'] = workflow.complete
-//     email_fields['duration'] = workflow.duration
-//     email_fields['exitStatus'] = workflow.exitStatus
-//     email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
-//     email_fields['errorReport'] = (workflow.errorReport ?: 'None')
-//     email_fields['commandLine'] = workflow.commandLine
-//     email_fields['projectDir'] = workflow.projectDir
-//     email_fields['summary'] = summary
-//     email_fields['summary']['Date Started'] = workflow.start
-//     email_fields['summary']['Date Completed'] = workflow.complete
-//     email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
-//     email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-//     if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-//     if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-//     if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-//     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
-//     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
-//     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
-
-//     // Check if we are only sending emails on failure
-//     email_address = params.email
-//     if (!params.email && params.email_on_fail && !workflow.success) {
-//         email_address = params.email_on_fail
-//     }
-
-//     // Render the TXT template
-//     def engine = new groovy.text.GStringTemplateEngine()
-//     def tf = new File("$baseDir/assets/email_template.txt")
-//     def txt_template = engine.createTemplate(tf).make(email_fields)
-//     def email_txt = txt_template.toString()
-
-//     // Render the HTML template
-//     def hf = new File("$baseDir/assets/email_template.html")
-//     def html_template = engine.createTemplate(hf).make(email_fields)
-//     def email_html = html_template.toString()
-
-//     // Render the sendmail template
-//     def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report ]
-//     def sf = new File("$baseDir/assets/sendmail_template.txt")
-//     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
-//     def sendmail_html = sendmail_template.toString()
-
-//     // Send the HTML e-mail
-//     if (email_address) {
-//         try {
-//             if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
-//             // Try to send HTML e-mail using sendmail
-//             [ 'sendmail', '-t' ].execute() << sendmail_html
-//             log.info "[nf-core/mhcquant] Sent summary e-mail to $email_address (sendmail)"
-//         } catch (all) {
-//             // Catch failures and try with plaintext
-//             def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
-//             if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
-//               mail_cmd += [ '-A', mqc_report ]
-//             }
-//             mail_cmd.execute() << email_html
-//             log.info "[nf-core/mhcquant] Sent summary e-mail to $email_address (mail)"
-//         }
-//     }
-
-//     // Write summary e-mail HTML to a file
-//     def output_d = new File("${params.outdir}/pipeline_info/")
-//     if (!output_d.exists()) {
-//         output_d.mkdirs()
-//     }
-//     def output_hf = new File(output_d, "pipeline_report.html")
-//     output_hf.withWriter { w -> w << email_html }
-//     def output_tf = new File(output_d, "pipeline_report.txt")
-//     output_tf.withWriter { w -> w << email_txt }
-
-//     c_green = params.monochrome_logs ? '' : "\033[0;32m";
-//     c_purple = params.monochrome_logs ? '' : "\033[0;35m";
-//     c_red = params.monochrome_logs ? '' : "\033[0;31m";
-//     c_reset = params.monochrome_logs ? '' : "\033[0m";
-
-//     if (workflow.stats.ignoredCount > 0 && workflow.success) {
-//         log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
-//         log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
-//         log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
-//     }
-
-//     if (workflow.success) {
-//         log.info "-${c_purple}[nf-core/mhcquant]${c_green} Pipeline completed successfully${c_reset}-"
-//     } else {
-//         checkHostname()
-//         log.info "-${c_purple}[nf-core/mhcquant]${c_red} Pipeline completed with errors${c_reset}-"
-//     }
-
-// }
-
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////

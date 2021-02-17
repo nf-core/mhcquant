@@ -3,25 +3,32 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
-// TODO: add python 2.7.15 and mhcnuggets 2.3.2
+def VERSION = '2.3.2'
+
+//TODO: combine in a subflow --> when needs to be removed
 process PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 {
+    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2--py_0" : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
+    } else {
+        container "quay.io/biocontainers/mhcnuggets:2.3.2--py_0"
+    }
 
     input:
-    tuple val(id), val(Sample), file(mztab_file) 
+        tuple val(id), val(Sample), file(mztab_file) 
 
     output:
-    tuple val("$id"), val("$Sample"), file("${Sample}_preprocessed_mhcnuggets_peptides")
-    tuple val("$id"), val("$Sample"), file('peptide_to_geneID') 
+        tuple val("$id"), val("$Sample"), file("${Sample}_preprocessed_mhcnuggets_peptides"), emit: preprocessed
+        tuple val("$id"), val("$Sample"), file('peptide_to_geneID'), emit: geneID   
+        path  "*.version.txt", emit: version
 
-    // emit:
-    // preprocessed_mhcnuggets_peptides
-    // peptide_to_geneID
-// 
     when:
     params.predict_class_2
 
     script:
-    """
-        preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output ${Sample}_preprocessed_mhcnuggets_peptides
-    """
+        """
+            preprocess_peptides_mhcnuggets.py --mztab ${mztab_file} --output ${Sample}_preprocessed_mhcnuggets_peptides
+
+            echo $VERSION > mhcnuggets.version.txt
+        """
 }

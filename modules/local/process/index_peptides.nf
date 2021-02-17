@@ -1,15 +1,11 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
 process INDEX_PEPTIDES {
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
-    
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
     } else {
@@ -20,7 +16,8 @@ process INDEX_PEPTIDES {
         tuple val(Sample), val(id), val(Condition), file(id_file), val(d), file(fasta_decoy)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML")
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx.idXML"), emit: idxml   
+        path  "*.version.txt", emit: version
 
     script:
     """
@@ -30,6 +27,8 @@ process INDEX_PEPTIDES {
             -fasta ${fasta_decoy} \\
             -decoy_string DECOY \\
             -enzyme:specificity none
+
+        FileInfo --help &> openms.version.txt
     """
 }
 
