@@ -29,6 +29,6 @@ process ALIGN_MZML_FILES {
             -out ${Sample}_${Condition}_${id}_aligned.mzML \\
             -threads ${task.cpus}
             
-             FileInfo --help &> openms.version.txt
+            FileInfo --help &> openms.version.txt
         """
 }

@@ -55,7 +55,7 @@ seqs_new_greater_qval=[s for s in seqs_new_greater_qval if 7<len(s)<13 and not '
 #subprocess.call("mhcflurry-predict --peptides {p} --alleles {a} --out {o}".format(p=" ".join(seqs_new), a=" ".join(alleles), o=sys.argv[-1]))
 seqs_filtered=[]
 for allele in alleles:
-   print allele
+   print(allele)
    predictor = Class1AffinityPredictor.load()
    df_pred=predictor.predict_to_dataframe(allele=allele, peptides=seqs_new_greater_qval)
    seqs_filtered+=df_pred[df_pred['prediction']<=float(sys.argv[-5])]['peptide'].values.tolist()
