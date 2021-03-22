@@ -1,5 +1,7 @@
 # nf-core/mhcquant: Output
 
+## Introduction
+
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
 ## Pipeline overview
@@ -81,7 +83,14 @@ peptide sequence   geneID
 
 ## vcf_neoepitopes
 
+<<<<<<< HEAD
 csv file listing theoretically possible neoepitope sequences:
+=======
+* `multiqc/`
+  * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
+  * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
+  * `multiqc_plots/`: directory containing static images from the report in various formats.
+>>>>>>> abca6d0599f1a3c3d4bc26f12d818f017c08edca
 
 ```bash
 Sequence        Antigen ID       Variants

@@ -1,4 +1,4 @@
-FROM nfcore/base:1.10.2
+FROM nfcore/base:1.13.1
 LABEL authors="Leon Bichmann, Lukas Heumos, Alexander Peltzer" \
       description="Docker image containing all software requirements for the nf-core/mhcquant pipeline"
 
