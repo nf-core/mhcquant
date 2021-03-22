@@ -9,7 +9,6 @@
 - Added full size AWS test profile
 - Included new parameters for Neutral loss and precursor ion inclusion
 
-
 ### `Fixed`
 
 - Changed trigger for AWS tests
