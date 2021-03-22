@@ -3,8 +3,8 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
-def VERSION.FRED2 = '2.0.6'
-def VERSION.MHCNUGGETS = '2.3.2'
+def VERSIONFRED2 = '2.0.6'
+def VERSIONMHCNUGGETS = '2.3.2'
 
 //TODO: combine in a subflow --> when needs to be removed
 process RESOLVE_FOUND_CLASS_2_NEOEPITOPES {
@@ -35,8 +35,8 @@ process RESOLVE_FOUND_CLASS_2_NEOEPITOPES {
         """
             resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${Sample}_found_neoepitopes_class_2
 
-            echo $VERSION.FRED2 > fred2.version.txt
-            echo $VERSION.MHCNUGGETS > mhcnuggets.version.txt
+            echo $VERSIONFRED2 > fred2.version.txt
+            echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
             mhcflurry-predict --version &> mhcflurry.version.txt
         """
 }

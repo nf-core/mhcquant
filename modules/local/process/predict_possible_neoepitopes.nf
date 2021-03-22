@@ -3,8 +3,9 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
-def VERSION.FRED2 = '2.0.6'
-def VERSION.MHCNUGGETS = '2.3.2'
+def VERSIONFRED2 = '2.0.6'
+def VERSIONMHCNUGGETS = '2.3.2'
+
 //TODO: combine in a subflow --> when needs to be removed
 process PREDICT_POSSIBLE_NEOEPITOPES {
     label 'process_web'
@@ -35,8 +36,8 @@ process PREDICT_POSSIBLE_NEOEPITOPES {
         """
             vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '${alleles}' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o ${Sample}_vcf_neoepitopes.ch_software_versions
             
-            echo $VERSION.FRED2 > fred2.version.txt
-            echo $VERSION.MHCNUGGETS > mhcnuggets.version.txt
+            echo $VERSIONFRED2 > fred2.version.txt
+            echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
             mhcflurry-predict --version &> mhcflurry.version.txt
         """
 }

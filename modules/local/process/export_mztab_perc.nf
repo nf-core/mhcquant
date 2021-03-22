@@ -20,7 +20,7 @@ process EXPORT_MZTAB_PERC {
         tuple val(id), val(Sample), file(percolator_mztab)
 
     output:
-        tuple val("$id"), val("$Sample"), file("${Sample}_all_ids_merged_psm_perc_filtered.mzTab"), emit: mztab   
+        tuple val("$id"), val("$Sample"), file("*.mzTab"), emit: mztab   
         path  "*.version.txt", emit: version
 
     when:

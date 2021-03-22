@@ -3,8 +3,8 @@ include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
 
-def VERSION.FRED2 = '2.0.6'
-def VERSION.MHCNUGGETS = '2.3.2'
+def VERSIONFRED2 = '2.0.6'
+def VERSIONMHCNUGGETS = '2.3.2'
 
 //TODO: combine in a subflow --> when needs to be removed
 process GENERATE_PROTEINS_FROM_VCF {
@@ -36,8 +36,8 @@ process GENERATE_PROTEINS_FROM_VCF {
     """
         variants2fasta.py -v ${vcf_file} -t ${params.variant_annotation_style} -r ${params.variant_reference} -f ${fasta_file} -o ${Sample}_${fasta_file.baseName}_added_vcf.fasta ${variant_indel_filter} ${variant_snp_filter} ${variant_frameshift_filter}
         
-        echo $VERSION.FRED2 > fred2.version.txt
-        echo $VERSION.MHCNUGGETS > mhcnuggets.version.txt
+        echo $VERSIONFRED2 > fred2.version.txt
+        echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
         mhcflurry-predict --version &> mhcflurry.version.txt
     """
 }

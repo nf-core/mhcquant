@@ -28,22 +28,22 @@ workflow REFINE_FDR_ON_PREDICTED_SUBSET {
         // Export psm results as mztab
         EXPORT_MZTAB_PSM(psm_features)
         // Predict psm results using mhcflurry to shrink search space
-        PREDICT_PSMS(EXPORT_MZTAB_PERC.out.join(EXPORT_MZTAB_PSM.out, by:[0,1]).combine(classI_alleles, by:1) )
+        PREDICT_PSMS(EXPORT_MZTAB_PERC.out.mztab.join(EXPORT_MZTAB_PSM.out.mztab, by:[0,1]).combine(classI_alleles, by:1) )
         // Filter psm results by shrinked search space
-        FILTER_PSMS_BY_PREDICTIONS(psm_features, PREDICT_PSMS.out)
+        FILTER_PSMS_BY_PREDICTIONS(psm_features, PREDICT_PSMS.out.idxml)
         // Recompute percolator fdr on shrinked search space
-        RUN_PERCOLATOR_ON_PREDICTED_SUBSET(FILTER_PSMS_BY_PREDICTIONS.out, fdr_level) 
+        RUN_PERCOLATOR_ON_PREDICTED_SUBSET(FILTER_PSMS_BY_PREDICTIONS.out.idxml, fdr_level) 
         // Filter results by refined fdr
-        FILTER_REFINED_Q_VALUE(RUN_PERCOLATOR_ON_PREDICTED_SUBSET.out)
+        FILTER_REFINED_Q_VALUE(RUN_PERCOLATOR_ON_PREDICTED_SUBSET.out.idxml)
 
         filtered_ids
-           .flatMap { it -> [tuple(it[0], it[1], it[2], it[3])]}
-           .join(aligned_mzml_files, by: [0,1,2])
-           .combine(filtered_perc_output.mix(FILTER_REFINED_Q_VALUE.out), by:1)
-           .set{joined_mzmls_ids_quant}
+            .flatMap { it -> [tuple(it[0], it[1], it[2], it[3])]}
+            .join(aligned_mzml_files, by: [0,1,2])
+            .combine(filtered_perc_output.mix(FILTER_REFINED_Q_VALUE.out.idxml), by:1)
+            .set{joined_mzmls_ids_quant}
 
     emit:
         // Define the information that is returned by this workflow
         joined_mzmls_ids_quant
-        filter_refined_q_value = FILTER_REFINED_Q_VALUE.out
+        filter_refined_q_value = FILTER_REFINED_Q_VALUE.out.idxml
 }

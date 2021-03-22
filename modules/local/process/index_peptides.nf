@@ -3,6 +3,8 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
+def VERSION = '2.5.0'
+
 process INDEX_PEPTIDES {
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
@@ -28,7 +30,7 @@ process INDEX_PEPTIDES {
             -decoy_string DECOY \\
             -enzyme:specificity none
 
-        FileInfo --help &> openms.version.txt
+        echo $VERSION > openms.version.txt
     """
 }
 
