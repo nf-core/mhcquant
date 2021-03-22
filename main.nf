@@ -307,11 +307,10 @@ log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
 // Header log info
 def summary = [:]
 if (workflow.revision) summary['Pipeline Release'] = workflow.revision
-summary['Run Name']           = custom_runName ?: workflow.runName
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 summary['Pipeline Name']      = 'nf-core/mhcquant'
 summary['Pipeline Version']   = workflow.manifest.version
-summary['Run Name']           = custom_runName ?: workflow.runName
+summary['Run Name']           = workflow.runName
 summary['MS Samples']         = input_mzmls_d.mix(input_raws_d)
 summary['Fasta Ref']          = params.fasta
 summary['Class 1 Prediction'] = params.predict_class_1
