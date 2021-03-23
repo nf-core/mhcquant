@@ -1,5 +1,10 @@
 # nf-core/mhcquant: Changelog
 
+## v.dev - [23.03.21]
+
+### `Added`
+Template update to 1.13.2
+
 ## v1.6.0 nf-core/mhcquant "Beijing Duck" - 2020/09/11
 
 ### `Added`
