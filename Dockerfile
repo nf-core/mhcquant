@@ -1,5 +1,5 @@
-FROM nfcore/base:1.13.1
-LABEL authors="Leon Bichmann, Lukas Heumos, Alexander Peltzer" \
+FROM nfcore/base:1.13.2
+LABEL authors="Leon Bichmann" \
       description="Docker image containing all software requirements for the nf-core/mhcquant pipeline"
 
 # Install the conda environment
