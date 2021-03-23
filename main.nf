@@ -425,7 +425,7 @@ include { GENERATE_DECOY_DB }                               from './modules/loca
 include { RAW_FILE_CONVERSION }                             from './modules/local/process/raw_file_conversion'                              addParams( options: [:] )
 include { PEAK_PICKING }                                    from './modules/local/process/peak_picking'                                     addParams( options: [:] )
 // include { DB_SEARCH_COMET }                                 from './modules/local/process/db_search_comet'                                  addParams( options: [:] )
-include { OPENMS_COMET_ADAPTER }                            from './modules/local/process/openms_comet_adapter'                             addParams( options: openms_comet_adapter_options )
+include { OPENMS_COMETADAPTER }                            from './modules/local/process/openms_cometadapter'                             addParams( options: openms_comet_adapter_options )
 include { INDEX_PEPTIDES }                                  from './modules/local/process/index_peptides'                                   addParams( options: [:] )
 include { OPENMS_FALSE_DISCOVERY_RATE }                     from './modules/local/process/openms_false_discovery_rate'                      addParams( options: [:] )
 include { FILTER_FDR_FOR_ID_ALIGNMENT }                     from './modules/local/process/filter_fdr_for_id_alignment'                      addParams( options: [:] )
@@ -443,6 +443,8 @@ include { RUN_PERCOLATOR }                                  from './modules/loca
 include { FILTER_BY_Q_VALUE }                               from './modules/local/process/filter_by_q_value'                                addParams( options: [:] )
 
 include { REFINE_FDR_ON_PREDICTED_SUBSET }                  from './modules/local/subworkflow/refine_fdr_on_predicted_subset'               addParams( options: [:] )
+
+include { OPENMS_MZTAB_EXPORTER }                            from './modules/local/process/openms_mztab_exporter'                           addParams( options: [:] )
 
 include { QUANTIFY_IDENTIFICATION_TARGETED }                from './modules/local/process/quantify_identifications_targeted'                addParams( options: [:] )
 include { LINK_EXTRACTED_FEATURES }                         from './modules/local/process/link_extracted_features'                          addParams( options: [:] )
@@ -477,6 +479,14 @@ workflow {
     // // Example: ch_software_versions = ch_software_versions.mix(PREPARE_GENOME.out.gffread_version.ifEmpty(null))
     // GET_SOFTWARE_VERSIONS (ch_software_versions.map { it }.collect())
 
+    // DONE: Input based on the meta id
+    // INPUT_CHECK(sample_sheet)
+        // .map { meta, raw -> meta.id = meta.id.split('_')[0..-2].join('_')
+        // [ meta, raw ] }.view()
+        // .groupTuple(by: [0])
+        // .map { it -> [ it[0], it[1].flatten() ] }
+        // .set { ch_samples_from_sheet } 
+
     // If specified translate variants to proteins and include in reference fasta
     //////////////////////////////////////////////////////////////////////////////////////////////
     //TODO: Make a subworkflow, proceed with the new container
@@ -495,12 +505,12 @@ workflow {
     // Run comet database search
     //TODO: change the different parameters to an options.args
     // DB_SEARCH_COMET(RAW_FILE_CONVERSION.out[0].mix(input_mzmls.mix(PEAK_PICKING.out[0])).join(GENERATE_DECOY_DB.out[0].mix(input_fasta_1), by:1, remainder:true) , a_ions, c_ions, x_ions, z_ions,  NL_ions, rm_precursor)
-    OPENMS_COMET_ADAPTER(RAW_FILE_CONVERSION.out[0].mix(input_mzmls.mix(PEAK_PICKING.out[0])).join(GENERATE_DECOY_DB.out[0].mix(input_fasta_1), by:1, remainder:true))
+    OPENMS_COMETADAPTER(RAW_FILE_CONVERSION.out[0].mix(input_mzmls.mix(PEAK_PICKING.out[0])).join(GENERATE_DECOY_DB.out[0].mix(input_fasta_1), by:1, remainder:true))
     // Index decoy and target hits
     // input_fasta.view()
     // GENERATE_DECOY_DB.out[0].view()
     // DB_SEARCH_COMET.out[0].join(GENERATE_DECOY_DB.out[0].mix(input_fasta), by:1).view()
-    INDEX_PEPTIDES(OPENMS_COMET_ADAPTER.out[0].join(GENERATE_DECOY_DB.out[0].mix(input_fasta_2), by:1))
+    INDEX_PEPTIDES(OPENMS_COMETADAPTER.out[0].join(GENERATE_DECOY_DB.out[0].mix(input_fasta_2), by:1))
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Calculate fdr for id based alignment
     // TODO: create if statement, remove when from file
@@ -546,8 +556,8 @@ workflow {
     // Align unfiltered idXMLfiles using trafoXMLs
     OPENMS_MAP_RT_TRANSFORMER_IDXML(joined_trafos_ids)
 
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     // Merge aligned idXMLfiles
     MERGE_ALIGNED_IDMXL_FILES(OPENMS_MAP_RT_TRANSFORMER_IDXML.out[0].mix(id_files_idx_original).groupTuple(by: 1))
     // Extract PSM features for Percolator
@@ -560,19 +570,21 @@ workflow {
     // Refine_fdr_on_predicted_subset
     // TODO: change the different parameters to an options.args
     //if ( params.refine_fdr_on_predicted_subset) {
-        REFINE_FDR_ON_PREDICTED_SUBSET (
-            FILTER_BY_Q_VALUE.out[0],
-            EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out[0],
-            peptides_class_1_alleles,
-            fdr_level,
-            FILTER_FDR_FOR_ID_ALIGNMENT.out[0],
-            OPENMS_MAP_RT_TRANSFORMER_MZML.out[0]
-        )
-        // TODO: What if there is no REFINE_FDR_ON_PREDICTED_SUBSET output 
-        joined_mzmls_ids_quant = REFINE_FDR_ON_PREDICTED_SUBSET.out[0]
+
+    REFINE_FDR_ON_PREDICTED_SUBSET (
+        FILTER_BY_Q_VALUE.out[0],
+        EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out[0],
+        peptides_class_1_alleles,
+        fdr_level,
+        FILTER_FDR_FOR_ID_ALIGNMENT.out[0],
+        OPENMS_MAP_RT_TRANSFORMER_MZML.out[0]
+    )
+    // TODO: What if there is no REFINE_FDR_ON_PREDICTED_SUBSET output 
+    joined_mzmls_ids_quant = REFINE_FDR_ON_PREDICTED_SUBSET.out[0]
     // }
-    //////////////////////////////////////////////////////////////////////////////////////////////  
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////  
+    //////////////////////////////////////////////////////////////////////////////////////////////////
     // TODO: create if statement, remove when from file
     // Quantify identifications using targeted feature extraction
     QUANTIFY_IDENTIFICATION_TARGETED(joined_mzmls_ids_quant)
@@ -580,15 +592,21 @@ workflow {
     LINK_EXTRACTED_FEATURES(QUANTIFY_IDENTIFICATION_TARGETED.out.featurexml.groupTuple(by:1))  
     // Resolve conflicting ids matching to the same feature
     RESOLVE_CONFLICTS(LINK_EXTRACTED_FEATURES.out.consensusxml)
-   //////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Export all information as text to csv
+    EXPORT_TEXT(RESOLVE_CONFLICTS.out.consensusxml)
+    // Export all information as mzTab
+    EXPORT_MZTAB(RESOLVE_CONFLICTS.out.consensusxml) 
+
+//    //OPENMS_MZTAB_EXPORTER(
+    //    RESOLVE_CONFLICTS.out.consensusxml
+    //    .flatMap { it -> [tuple("id", it[0], it[0], it[1])]}
+    //)
+
+//    //OPENMS_MZTAB_EXPORTER.out[0].view()
+
 //
-    //// Export all information as text to csv
-    //EXPORT_TEXT(RESOLVE_CONFLICTS.out.consensusxml)
-    //// Export all information as mzTab
-//
-//
-    //RESOLVE_CONFLICTS.out.consensusxml.view()
-    //EXPORT_MZTAB(RESOLVE_CONFLICTS.out.consensusxml) 
 
      //////////////////////////////////////////////////////////////////////////////////////////////
 

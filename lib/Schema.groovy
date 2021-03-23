@@ -33,23 +33,23 @@ class Schema {
         def Map json_params = (Map) new JsonSlurper().parseText(json).get('definitions')
         /* Tree looks like this in nf-core schema
          * definitions <- this is what the first get('definitions') gets us
-             group 1
-               title
-               description
-                 properties
-                   parameter 1
-                     type
-                     description
-                   parameter 2
-                     type
-                     description
-             group 2
-               title
-               description
-                 properties
-                   parameter 1
-                     type
-                     description
+            group 1
+                title
+                description
+                    properties
+                        parameter 1
+                            type
+                            description
+                        parameter 2
+                            type
+                            description
+            group 2
+                title
+                description
+                    properties
+                        parameter 1
+                            type
+                            description
         */
         def params_map = new LinkedHashMap()
         json_params.each { key, val ->
