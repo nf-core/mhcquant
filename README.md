@@ -48,10 +48,12 @@ See [usage docs](https://nf-co.re/mhcquant/usage) for all of the available optio
 
 By default, the pipeline currently performs the following:
 
-<!-- TODO nf-core: Fill in short bullet-pointed list of default steps of pipeline -->
-
-* Sequencing quality control (`FastQC`)
-* Overall pipeline run summaries (`MultiQC`)
+* Protein database addition by mutated genome variants (`Fred2 Immunoinformatics Toolbox`)
+* Database search ('Comet')
+* False discovery rate estimation ('Percolator')
+* Retention time alignment ('OpenMS-MapAlignerIdentification')
+* Targeted peptide quantification ('OpenMS-FeatureFinderIdentification')
+* MHC peptide affinity prediction ('MHCFlurry','MHCNuggets')
 
 ## Documentation
 
