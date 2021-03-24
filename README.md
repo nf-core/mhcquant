@@ -61,12 +61,12 @@ The nf-core/mhcquant pipeline comes with documentation about the pipeline: [usag
 
 ## Credits
 
-nf-core/mhcquant was originally written by Leon Bichmann, Lukas Heumos and Alexander Peltzer.
-
 We thank the following people for their extensive assistance in the development
 of this pipeline:
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+* Leon Bichmann
+* Lukas Heumos
+* Alexander Peltzer.
 
 ## Contributions and Support
 
