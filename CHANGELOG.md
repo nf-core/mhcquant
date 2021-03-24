@@ -1,6 +1,6 @@
 # nf-core/mhcquant: Changelog
 
-## v.dev - [23.03.21]
+## 1.6.1dev - [23.03.21]
 
 ### `Added`
 
