@@ -579,10 +579,6 @@
         "include_proteins_from_vcf": {
             "type": "string"
         },
-        "igenomes_base": {
-            "type": "string",
-            "default": "s3://ngi-igenomes/igenomes/"
-        },
         "multiqc_config": {
             "type": "string"
         }
