@@ -95,4 +95,29 @@ You can cite the `nf-core` publication as follows:
 
 In addition, references of tools and data used in this pipeline are as follows:
 
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+> **Fred2 Immunoinformatics Toolbox:
+>
+> Schubert B. et al, _Bioinformatics_ 2016 Jul 1;32(13):2044-6. doi: 10.1093/bioinformatics/btw113. Epub 2016 Feb 26
+
+> **Comet Search Engine:
+>
+> Eng J.K. et al, _J Am Soc Mass Spectrom._ 2015 Nov;26(11):1865-74. doi: 10.1007/s13361-015-1179-x. Epub 2015 Jun 27.
+
+> **Percolator:
+>
+> Käll L. et al, _Nat Methods_ 2007 Nov;4(11):923-5. doi: 10.1038/nmeth1113. Epub 2007 Oct 21.
+
+> **Identification based RT Alignment
+>
+> Weisser H. et al, _J Proteome Res._ _2013 Apr 5;12(4):1628-44. doi: 10.1021/pr300992u. Epub 2013 Feb 22.
+
+> **Targeted peptide quantification
+>
+> Weisser H. et al, _J Proteome Res._ 2017 Aug 4;16(8):2964-2974. doi: 10.1021/acs.jproteome.7b00248. Epub 2017 Jul 19.
+
+> **MHC affinity prediction
+>
+> O'Donnell T.J., _Cell Syst._ 2018 Jul 25;7(1):129-132.e4. doi: 10.1016/j.cels.2018.05.014. Epub 2018 Jun 27.
+>
+> Shao X.M., _Cancer Immunol Res._ 2020 Mar;8(3):396-408. doi: 10.1158/2326-6066.CIR-19-0464. Epub 2019 Dec 23.
+
