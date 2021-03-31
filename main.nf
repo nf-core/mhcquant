@@ -10,86 +10,6 @@
 ----------------------------------------------------------------------------------------
 */
 
-def helpMessage() {
-    log.info nfcoreHeader()
-    log.info"""
-
-    Usage:
-
-    The typical command for running the pipeline is as follows:
-
-    nextflow run nf-core/mhcquant --input 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker
-
-    Mandatory arguments:
-      --input [file]                            Path to sample sheet (specifying raw or mzml files)
-      --fasta [file]                            Path to Fasta reference
-      -profile [str]                            Configuration profile to use. Can use multiple (comma separated)
-                                                Available: docker, singularity, test, awsbatch and more
-    Mass Spectrometry Search:
-      --peptide_min_length [int]                Minimum peptide length for filtering
-      --peptide_max_length [int]                Maximum peptide length for filtering
-      --precursor_mass_tolerance [int           Mass tolerance of precursor mass (ppm)
-      --fragment_mass_tolerance [int]           Mass tolerance of fragment mass bin (ppm)
-      --fragment_bin_offset [int]               Offset of fragment mass bin (Comet specific parameter)
-      --use_x_ions [bool]                       Use x ions for spectral matching in addition
-      --use_z_ions [bool]                       Use z ions for spectral matching in addition
-      --use_a_ions [bool]                       Use a ions for spectral matching in addition
-      --use_c_ions [bool]                       Use c ions for spectral matching in addition
-      --use_NL_ions [bool]                      Use NL ions for spectral matching in addition
-      --remove_precursor_peak [bool]            Remove the precursor peak from the MS2 spectra
-      --fdr_threshold [int]                     Threshold for FDR filtering
-      --fdr_level [str]                         Level of FDR calculation ('peptide-level-fdrs', 'psm-level-fdrs', 'protein-level-fdrs')
-      --digest_mass_range [int]                 Mass range of peptides considered for matching
-      --activation_method [str]                 Fragmentation method ('ALL', 'CID', 'ECD', 'ETD', 'PQD', 'HCD', 'IRMPD')
-      --enzyme [str]                            Enzymatic cleavage ('unspecific cleavage', 'Trypsin', see OpenMS enzymes)
-      --number_mods [int]                       Maximum number of modifications of PSMs
-      --fixed_mods [str]                        Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
-      --variable_mods [str]                     Variable modifications ('Oxidation (M)', see OpenMS modifications)
-      --num_hits [int]                          Number of reported hits
-      --run_centroidisation [bool]              Specify whether mzml data is peak picked or not (true, false)
-      --pick_ms_levels [int]                    The ms level used for peak picking (eg. 1, 2)
-      --prec_charge [str]                       Precursor charge (eg. "2:3")
-      --max_rt_alignment_shift [int]            Maximal retention time shift (sec) resulting from linear alignment      
-      --spectrum_batch_size [int]               Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)
-      --description_correct_features [int]      Percolator: Description of correct features for Percolator (0, 1, 2, 4, 8, see Percolator retention time and calibration) 
-      --klammer [bool]                          Percolator: Retention time features are calculated as in Klammer et al. instead of with Elude.
-      --subset_max_train [int]                  Percolator: Only train an SVM on a subset of PSMs, and use the resulting score vector to evaluate the other PSMs.
-                                                Recommended when analyzing huge numbers (>1 million) of PSMs. When set to 0, all PSMs are used for training as normal.
-      --predict_RT [bool]                       Retention time prediction for identified peptides
-      --skip_decoy_generation [bool]            Use a fasta database that already includes decoy sequences
-      --skip_quantification [bool]              Do not run steps for peptide quantification (For example in case of problematic RT Alignment)
-      --quantification_fdr [bool]               Assess and assign ids matched between runs with an additional quantification FDR
-      --quantification_min_prob  [int]          Specify a minimum probability cut off for quantification
-
-    Binding Predictions:	
-      --allele_sheet [file]                     Path to file including Sample wise HLA class 1 and class 2 allele information 
-      --predict_class_1 [bool]                  Whether a class 1 affinity prediction using MHCFlurry should be run on the results - check if alleles are supported (true, false)	
-      --predict_class_2 [bool]                  Whether a class 2 affinity prediction using MHCNuggets should be run on the results - check if alleles are supported (true, false) 	
-      --refine_fdr_on_predicted_subset[bool]    Whether affinity predictions using MHCFlurry should be used to subset PSMs and refine the FDR (true, false)	
-      --subset_affinity_threshold [int]         Predicted affinity threshold (nM) which will be applied to subset PSMs in FDR refinement. (eg. 500)	
-
-    Variants:
-      --vcf_sheet [file]                        Path to file including Sample wise vcf information 
-      --include_proteins_from_vcf [bool]        Whether to use a provided vcf file to generate proteins and include them in the database search (true, false)	
-      --variant_annotation_style [str]          Specify which software style was used to carry out the variant annotation in the vcf ("SNPEFF","VEP","ANNOVAR")	
-      --variant_reference [str]                 Specify reference genome used for variant annotation ("GRCH37","GRCH38")	
-      --variant_indel_filter [bool]             Remove insertions and deletions from vcf (true, false)	
-      --variant_frameshift_filter [bool]        Remove insertions and deltionns causing frameshifts from vcf (true, false)	
-      --variant_snp_filter [bool]               Remove snps from vcf (true, false)
-
-    Other options:
-      --outdir [file]                           The output directory where the results will be saved
-      --email [email]                           Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
-      --email_on_fail [email]                   Same as --email, except only send mail if the workflow is not successful
-      -name [str]                               Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
-
-    AWSBatch options:
-      --awsqueue [str]                          The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion [str]                         The AWS Region for your AWS Batch job to run on
-      --awscli [str]                            Path to the AWS CLI tool
-    """.stripIndent()
-}
-
 // Show help message
 if (params.help) {
     helpMessage()
@@ -216,7 +136,7 @@ log.warn "Be aware: subset FDR refinement only considers MHC class I alleles sup
 params.subset_affinity_threshold = 500
 
 //variant params
-params.inlude_proteins_from_vcf = false
+params.include_proteins_from_vcf = false
 params.variant_annotation_style = "SNPEFF"
 params.variant_reference = "GRCH38"
 params.variant_indel_filter = false
@@ -334,34 +254,58 @@ if( params.include_proteins_from_vcf){
 }
 
 
-// Stage config files
-ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+log.info Headers.nf_core(workflow, params.monochrome_logs)
 
-// Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
-custom_runName = params.name
-if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
-    custom_runName = workflow.runName
+////////////////////////////////////////////////////
+/* --               PRINT HELP                 -- */
+////////////////////////////////////////////////////+
+def json_schema = "$projectDir/nextflow_schema.json"
+if (params.help) {
+    def command = "nextflow run nf-core/mhcquant -profile test,docker"
+    log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
+    exit 0
 }
 
+////////////////////////////////////////////////////
+/* --         VALIDATE PARAMETERS              -- */
+////////////////////////////////////////////////////+
+if (params.validate_params) {
+    NfcoreSchema.validateParameters(params, json_schema, log)
+}
+
+////////////////////////////////////////////////////
+/* --     Collect configuration parameters     -- */
+////////////////////////////////////////////////////
+
+// Check AWS batch settings
 if (workflow.profile.contains('awsbatch')) {
     // AWSBatch sanity checking
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+    if (!params.awsqueue || !params.awsregion) exit 1, 'Specify correct --awsqueue and --awsregion parameters on AWSBatch!'
     // Check outdir paths to be S3 buckets if running on AWSBatch
     // related: https://github.com/nextflow-io/nextflow/issues/813
-    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+    if (!params.outdir.startsWith('s3:')) exit 1, 'Outdir not on S3 - specify S3 Bucket to run on AWSBatch!'
     // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+    if (params.tracedir.startsWith('s3:')) exit 1, 'Specify a local tracedir or run without trace! S3 cannot be used for tracefiles.'
 }
 
+// Stage config files
+ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+ch_output_docs = file("$projectDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$projectDir/docs/images/", checkIfExists: true)
+
+////////////////////////////////////////////////////
+/* --         PRINT PARAMETER SUMMARY          -- */
+////////////////////////////////////////////////////
+log.info NfcoreSchema.params_summary_log(workflow, params, json_schema)
+
 // Header log info
-log.info nfcoreHeader()
 def summary = [:]
 if (workflow.revision) summary['Pipeline Release'] = workflow.revision
-summary['Run Name']           = custom_runName ?: workflow.runName
+summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 summary['Pipeline Name']      = 'nf-core/mhcquant'
 summary['Pipeline Version']   = workflow.manifest.version
-summary['Run Name']           = custom_runName ?: workflow.runName
+summary['Run Name']           = workflow.runName
 summary['MS Samples']         = input_mzmls_d.mix(input_raws_d)
 summary['Fasta Ref']          = params.fasta
 summary['Class 1 Prediction'] = params.predict_class_1
@@ -399,8 +343,6 @@ if (params.email || params.email_on_fail) {
     summary['E-mail Address']    = params.email
     summary['E-mail on failure'] = params.email_on_fail
 }
-log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
-log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
 checkHostname()
@@ -1236,7 +1178,6 @@ process export_mztab {
                    -out ${Sample}.mzTab \\
                    -threads ${task.cpus}
      """
-
 }
 
 
@@ -1599,7 +1540,7 @@ workflow.onComplete {
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
-    email_fields['runName'] = custom_runName ?: workflow.runName
+    email_fields['runName'] = workflow.runName
     email_fields['success'] = workflow.success
     email_fields['dateComplete'] = workflow.complete
     email_fields['duration'] = workflow.duration
@@ -1628,18 +1569,18 @@ workflow.onComplete {
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
-    def tf = new File("$baseDir/assets/email_template.txt")
+    def tf = new File("$projectDir/assets/email_template.txt")
     def txt_template = engine.createTemplate(tf).make(email_fields)
     def email_txt = txt_template.toString()
 
     // Render the HTML template
-    def hf = new File("$baseDir/assets/email_template.html")
+    def hf = new File("$projectDir/assets/email_template.html")
     def html_template = engine.createTemplate(hf).make(email_fields)
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report ]
-    def sf = new File("$baseDir/assets/sendmail_template.txt")
+    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, projectDir: "$projectDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
+    def sf = new File("$projectDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
 
@@ -1691,28 +1632,9 @@ workflow.onComplete {
 
 }
 
-
-def nfcoreHeader() {
-    // Log colors ANSI codes
-    c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_white = params.monochrome_logs ? '' : "\033[0;37m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
-
-    return """    -${c_dim}--------------------------------------------------${c_reset}-
-                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
-    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
-    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
-    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
-                                            ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/mhcquant v${workflow.manifest.version}${c_reset}
-    -${c_dim}--------------------------------------------------${c_reset}-
-    """.stripIndent()
+workflow.onError {
+    // Print unexpected parameters - easiest is to just rerun validation
+    NfcoreSchema.validateParameters(params, json_schema, log)
 }
 
 def checkHostname() {
@@ -1721,15 +1643,15 @@ def checkHostname() {
     def c_red = params.monochrome_logs ? '' : "\033[1;91m"
     def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
     if (params.hostnames) {
-        def hostname = "hostname".execute().text.trim()
+        def hostname = 'hostname'.execute().text.trim()
         params.hostnames.each { prof, hnames ->
             hnames.each { hname ->
                 if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
-                    log.error "====================================================\n" +
+                    log.error '====================================================\n' +
                             "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
                             "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
                             "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
-                            "============================================================"
+                            '============================================================'
                 }
             }
         }
