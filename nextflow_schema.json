@@ -522,7 +522,10 @@
                     "fa_icon": "fas fa-users-cog"
                 },
                 "multiqc_config": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
                 }
             }
         }
