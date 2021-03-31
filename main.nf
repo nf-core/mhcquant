@@ -136,7 +136,7 @@ log.warn "Be aware: subset FDR refinement only considers MHC class I alleles sup
 params.subset_affinity_threshold = 500
 
 //variant params
-params.inlude_proteins_from_vcf = false
+params.include_proteins_from_vcf = false
 params.variant_annotation_style = "SNPEFF"
 params.variant_reference = "GRCH38"
 params.variant_indel_filter = false
@@ -276,11 +276,6 @@ if (params.validate_params) {
 ////////////////////////////////////////////////////
 /* --     Collect configuration parameters     -- */
 ////////////////////////////////////////////////////
-
-// Check if genome exists in the config file
-if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-    exit 1, "The provided genome '${params.genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(', ')}"
-}
 
 // Check AWS batch settings
 if (workflow.profile.contains('awsbatch')) {

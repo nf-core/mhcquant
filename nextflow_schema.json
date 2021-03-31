@@ -47,7 +47,7 @@
                     "description": "Input FASTA protein database",
                     "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
                 },
-                "inlude_proteins_from_vcf": {
+                "include_proteins_from_vcf": {
                     "type": "boolean",
                     "description": "Set depending on whether variants should be translated to proteins and included into your fasta for database search."
                 },
@@ -520,6 +520,19 @@
                     "description": "Institutional config URL link.",
                     "hidden": true,
                     "fa_icon": "fas fa-users-cog"
+                },
+                "clusterOptions": {
+                    "type": "string"
+                },
+                "awsqueue": {
+                    "type": "string"
+                },
+                "awsregion": {
+                    "type": "string",
+                    "default": "eu-west-1"
+                },
+                "multiqc_config": {
+                    "type": "string"
                 }
             }
         }
@@ -564,23 +577,5 @@
         {
             "$ref": "#/definitions/institutional_config_options"
         }
-    ],
-    "properties": {
-        "clusterOptions": {
-            "type": "string"
-        },
-        "awsqueue": {
-            "type": "string"
-        },
-        "awsregion": {
-            "type": "string",
-            "default": "eu-west-1"
-        },
-        "include_proteins_from_vcf": {
-            "type": "string"
-        },
-        "multiqc_config": {
-            "type": "string"
-        }
-    }
+    ]
 }
