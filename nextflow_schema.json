@@ -521,16 +521,6 @@
                     "hidden": true,
                     "fa_icon": "fas fa-users-cog"
                 },
-                "clusterOptions": {
-                    "type": "string"
-                },
-                "awsqueue": {
-                    "type": "string"
-                },
-                "awsregion": {
-                    "type": "string",
-                    "default": "eu-west-1"
-                },
                 "multiqc_config": {
                     "type": "string"
                 }
