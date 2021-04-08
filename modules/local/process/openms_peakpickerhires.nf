@@ -1,9 +1,10 @@
 // Import generic module functions
-include {  saveFiles; getSoftwareName } from './functions'
+include {  saveFiles; } from './functions'
 
 params.options = [:]
 
-process RAW_FILE_CONVERSION {
+//TODO: combine in a subflow --> when needs to be removed
+process OPENMS_PEAKPICKERHIRES {
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
@@ -12,16 +13,21 @@ process RAW_FILE_CONVERSION {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), file(rawfile)
-    
+        tuple val(id), val(Sample), val(Condition), file(mzml_unpicked)
+
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${rawfile.baseName}.mzML"), emit: mzml   
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("${mzml_unpicked.baseName}.mzML"), emit: mzml   
         path  "*.version.txt", emit: version
 
+    when:
+        params.run_centroidisation
+
     script:
-        """
-        ThermoRawFileParser.sh -i=${rawfile} -f=2 -b=${rawfile.baseName}.mzML
+    """
+        PeakPickerHiRes -in ${mzml_unpicked} \\
+            -out ${mzml_unpicked.baseName}.mzML \\
+            -algorithm:ms_levels ${params.pick_ms_levels}
 
         FileInfo --help &> openms.version.txt
-        """
+    """
 }

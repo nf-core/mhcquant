@@ -1,7 +1,8 @@
 // Import generic module functions
 include { initOptions; saveFiles } from './functions'
 
-params.options = [:]
+params.option = [:]
+options    = initOptions(params.options)
 
 def VERSIONFRED2 = '2.0.6'
 def VERSIONMHCNUGGETS = '2.3.2'
@@ -21,12 +22,9 @@ process GENERATE_PROTEINS_FROM_VCF {
 
     input:
         tuple val(Sample), val(id), file(fasta_file), val(d), file(vcf_file)
-        val variant_indel_filter
-        val variant_snp_filter
-        val variant_frameshift_filter
     
     output:
-        tuple val("$id"), val("$Sample"), file("${Sample}_${fasta_file.baseName}_added_vcf.fasta"), emit: vcf_fasta
+        tuple val("$id"), val("$Sample"), file("*_vcf.fasta"), emit: vcf_fasta
         path  "*.version.txt", emit: version
 
     when:
@@ -34,10 +32,10 @@ process GENERATE_PROTEINS_FROM_VCF {
 
     script:
     """
-        variants2fasta.py -v ${vcf_file} -t ${params.variant_annotation_style} -r ${params.variant_reference} -f ${fasta_file} -o ${Sample}_${fasta_file.baseName}_added_vcf.fasta ${variant_indel_filter} ${variant_snp_filter} ${variant_frameshift_filter}
+        variants2fasta.py -v ${vcf_file} -f ${fasta_file} -o ${Sample}_${fasta_file.baseName}_added_vcf.fasta $options.args
         
         echo $VERSIONFRED2 > fred2.version.txt
         echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
-        mhcflurry-predict --version &> mhcflurry.version.txt
+        echo \$(mhcflurry-predict --version 2>&1) | sed 's/^.*mhcflurry //; s/ .*\$//' &> mhcflurry.version.txt
     """
 }

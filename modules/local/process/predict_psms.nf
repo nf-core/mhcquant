@@ -23,14 +23,15 @@ process PREDICT_PSMS {
         tuple val("$id"), val("$Sample"), file("${Sample}_peptide_filter.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
 
-    when:
-        params.refine_fdr_on_predicted_subset
-
     script:
     """
         mhcflurry-downloads --quiet fetch models_class1
         mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes_refine}' ${perc_mztab_file} ${psm_mztab_file} ${Sample}_peptide_filter.idXML
-
-        mhcflurry-predict --version &> mhcflurry.version.txt
+    
+        
     """
+// mhcflurry-predict --version &> mhcflurry.version.txt
+    //"""
+    //echo mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes_refine}' ${perc_mztab_file} ${psm_mztab_file} ${Sample}_peptide_filter.idXML
+    //"""
 }

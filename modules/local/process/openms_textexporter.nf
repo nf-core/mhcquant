@@ -1,9 +1,9 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-process EXPORT_TEXT {
+process OPENMS_TEXTEXPORTER {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:'') }
@@ -23,14 +23,15 @@ process EXPORT_TEXT {
         path  "*.version.txt", emit: version 
 
     script:
-    """
-        TextExporter -in ${consensus_resolved} \\
-            -out ${Sample}.csv \\
-            -threads ${task.cpus} \\
-            -id:add_hit_metavalues 0 \\
-            -id:add_metavalues 0 \\
-            -id:peptides_only
+        def software = getSoftwareName(task.process)
+        """
+            TextExporter -in ${consensus_resolved} \\
+                -out ${Sample}.csv \\
+                -threads ${task.cpus} \\
+                -id:add_hit_metavalues 0 \\
+                -id:add_metavalues 0 \\
+                -id:peptides_only
 
-        FileInfo --help &> openms.version.txt
-    """
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+        """
 }

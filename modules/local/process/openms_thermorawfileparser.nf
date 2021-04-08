@@ -1,13 +1,9 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include {  saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-process EXPORT_MZTAB {
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:'') }
-
+process OPENMS_THERMORAWFILEPARSER {
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
@@ -16,18 +12,16 @@ process EXPORT_MZTAB {
     }
 
     input:
-        tuple val(Sample), file(feature_file_2)
-
+        tuple val(id), val(Sample), val(Condition), file(rawfile)
+    
     output:
-        tuple val("id"), val("$Sample"), file("${Sample}.mzTab"), emit: mztab   
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("${rawfile.baseName}.mzML"), emit: mzml   
         path  "*.version.txt", emit: version
 
     script:
-    """
-        MzTabExporter -in ${feature_file_2} \\
-            -out ${Sample}.mzTab \\
-            -threads ${task.cpus}
+        """
+        ThermoRawFileParser.sh -i=${rawfile} -f=2 -b=${rawfile.baseName}.mzML
 
         FileInfo --help &> openms.version.txt
-    """
+        """
 }

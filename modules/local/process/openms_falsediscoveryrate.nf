@@ -4,7 +4,8 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 
 //TODO: combine in a subflow --> when needs to be removed
-process MERGE_ALIGNED_IDMXL_FILES {
+process OPENMS_FALSEDISCOVERYRATE  {
+
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
@@ -13,20 +14,20 @@ process MERGE_ALIGNED_IDMXL_FILES {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), file(ids_aligned)
+        tuple val(id), val(Sample), val(Condition), file(id_file_idx)
 
     output:
-        tuple val("$id"), val("$Sample"), val(Condition), file("${Sample}_all_ids_merged.idXML"), emit: idxml   
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx_fdr.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
 
-    script:
-    """
-        IDMerger -in $ids_aligned \\
-        -out ${Sample}_all_ids_merged.idXML \\
-        -threads ${task.cpus}  \\
-        -annotate_file_origin  \\
-        -merge_proteins_add_PSMs
+    when:
+        !params.skip_quantification
 
-        FileInfo --help &> openms.version.txt
-    """
+    script:
+        def software = getSoftwareName(task.process)
+
+        """
+            FalseDiscoveryRate -in ${id_file_idx} -protein 'false' -out ${Sample}_${Condition}_${id}_idx_fdr.idXML -threads ${task.cpus}     
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+        """
 }

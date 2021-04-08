@@ -19,7 +19,7 @@ process FILTER_BY_Q_VALUE {
         tuple val(id), val(Sample), val(Condition), file(id_file_perc) 
 
     output:
-        tuple val("$id"), val("$Sample"), file("${Sample}_all_ids_merged_psm_perc_filtered.idXML"), emit: idxml   
+        tuple val(id), val(Sample), val(Condition), file("*_all_ids_merged_psm_perc_filtered.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
 
     //when:

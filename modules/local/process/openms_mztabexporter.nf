@@ -1,10 +1,10 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-params.options = [:]
+def options    = initOptions(params.options)
 
-//TODO: combine in a subflow --> when needs to be removed
-process EXPORT_MZTAB_PERC {
+//TODO: combine in a subflow --> "when" needs to be removed
+process OPENMS_MZTABEXPORTER {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
@@ -17,21 +17,18 @@ process EXPORT_MZTAB_PERC {
     }
 
     input:
-        tuple val(id), val(Sample), file(percolator_mztab)
+        tuple val(id), val(Sample), val(Condition), file(mztab)
 
     output:
         tuple val("$id"), val("$Sample"), file("*.mzTab"), emit: mztab   
         path  "*.version.txt", emit: version
 
-    when:
-        params.refine_fdr_on_predicted_subset
-
     script:
-    """
-        MzTabExporter -in ${percolator_mztab} \\
-            -out ${Sample}_all_ids_merged_psm_perc_filtered.mzTab \\
-            -threads ${task.cpus}
-
-        FileInfo --help &> openms.version.txt
-    """
+        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}"
+        def software = getSoftwareName(task.process)
+        
+        """
+            MzTabExporter -in ${mztab} -out ${prefix}.mzTab -threads ${task.cpus}
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+        """
 }

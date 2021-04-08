@@ -1,10 +1,14 @@
 // Import generic module functions
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-params.options = [:]
+def options = initOptions(params.options)
 
 //TODO: combine in a subflow --> when needs to be removed
-process OPENMS_FALSE_DISCOVERY_RATE  {
+/*
+ *
+ */
+
+process OPENMS_MAPALIGNERIDENTIFICATION {
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -14,18 +18,21 @@ process OPENMS_FALSE_DISCOVERY_RATE  {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), file(id_file_idx)
+        tuple val(id), val(Sample), val(Condition), file(id_names)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${Condition}_${id}_idx_fdr.idXML"), emit: idxml   
+        tuple val("$Sample"), file("*.trafoXML"), emit: trafoxml   
         path  "*.version.txt", emit: version
 
     when:
         !params.skip_quantification
 
     script:
+        def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
+        def software = getSoftwareName(task.process)
+
         """
-            FalseDiscoveryRate -in ${id_file_idx} -protein 'false' -out ${Sample}_${Condition}_${id}_idx_fdr.idXML -threads ${task.cpus}     
-            FileInfo --help &> openms.version.txt
+            MapAlignerIdentification -in $id_names -trafo_out $out_names $options.args 
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

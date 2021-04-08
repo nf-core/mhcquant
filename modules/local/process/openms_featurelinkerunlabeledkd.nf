@@ -1,9 +1,10 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-process EXTRACT_PSM_FEATURES_FOR_PERCOLATOR {
+//TODO: combine in a subflow --> when needs to be removed
+process OPENMS_FEATURELINKERUNLABELEDKD {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
@@ -16,18 +17,20 @@ process EXTRACT_PSM_FEATURES_FOR_PERCOLATOR {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), file(id_file_merged)
+        tuple val(id), val(Sample), val(Condition), file(features)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_all_ids_merged_psm.idXML"), emit: idxml   
+        tuple val("$Sample"), file("${Sample}_all_features_merged.consensusXML"), emit: consensusxml   
         path  "*.version.txt", emit: version
-
+        
     script:
-        """
-            PSMFeatureExtractor -in ${id_file_merged} \\
-            -out ${Sample}_all_ids_merged_psm.idXML \\
-            -threads ${task.cpus} 
+        def software = getSoftwareName(task.process)
 
-            FileInfo --help &> openms.version.txt
+        """
+            FeatureLinkerUnlabeledKD -in ${features} \\
+                -out '${Sample}_all_features_merged.consensusXML' \\
+                -threads ${task.cpus}
+
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

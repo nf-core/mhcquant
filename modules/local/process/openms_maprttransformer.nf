@@ -1,10 +1,10 @@
 // Import generic module functions
-include { initOptions } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 def options = initOptions(params.options)
 
 //TODO: combine in a subflow --> when needs to be removed
-process OPENMS_MAP_RT_TRANSFORMER {
+process OPENMS_MAPRTTRANSFORMER {
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -25,11 +25,11 @@ process OPENMS_MAP_RT_TRANSFORMER {
         !params.skip_quantification
 
     script:
-        // def fileExt = file_align.endsWith("mzml") ? "mzML" : "idXML"
         def fileExt = file_align.collect { it.name.tokenize("\\.")[1] }.join(' ')
+        def software = getSoftwareName(task.process)
 
         """
             MapRTTransformer -in ${file_align} -trafo_in ${file_trafo} -out ${Sample}_${Condition}_${id}_aligned.${fileExt} -threads $task.cpus
-            FileInfo --help &> openms.version.txt
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

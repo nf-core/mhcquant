@@ -5,7 +5,7 @@ params.options = [:]
 
 def VERSION = '2.5.0'
 
-process INDEX_PEPTIDES {
+process OPENMS_PEPTIDEINDEXER {
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

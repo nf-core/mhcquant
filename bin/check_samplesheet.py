@@ -41,11 +41,11 @@ def check_samplesheet(file_in, file_out):
     """
     This function checks that the samplesheet follows the following structure:
 
-    ID,Sample,Condition,Filename
-    1,WT,A,WT_A.raw
-    2,WT,B,WT_B.raw
-    3,KO,A,KO_A.raw
-    4,KO,B,KO_B.raw
+    ID\tSample\tCondition\tReplicateFileName
+    1\tWT\tA\tWT_A.raw
+    2\tWT\tB\tWT_B.raw
+    3\tKO\tA\tKO_A.raw
+    4\tKO\tB\tKO_B.raw
     """
 
     sample_run_dict = {}
@@ -53,15 +53,15 @@ def check_samplesheet(file_in, file_out):
 
         ## Check header
         MIN_COLS = 4
-        HEADER = ["ID", "Sample", "Condition", "Filename"]
-        header = [x.strip('"') for x in fin.readline().strip().split(",")]
+        HEADER = ["ID", "Sample", "Condition", "ReplicateFileName"]
+        header = [x.strip('"') for x in fin.readline().strip().split("\t")]
         if header[: len(HEADER)] != HEADER:
-            print("ERROR: Please check samplesheet header -> {} != {}".format(",".join(header), ",".join(HEADER)))
+            print("ERROR: Please check samplesheet header -> {} != {}".format("\t".join(header), "\t".join(HEADER)))
             sys.exit(1)
 
         ## Check sample entries
         for line in fin:
-            lspl = [x.strip().strip('"') for x in line.strip().split(",")]
+            lspl = [x.strip().strip('"') for x in line.strip().split("\t")]
 
             ## Check valid number of columns per row
             if len(lspl) < len(HEADER):
@@ -123,13 +123,13 @@ def check_samplesheet(file_in, file_out):
         make_dir(out_dir)
         with open(file_out, "w") as fout:
 
-            fout.write(",".join(["ID", "Filename"]) + "\n")
+            fout.write("\t".join(["ID", "Filename"]) + "\n")
             for condition in sorted(sample_run_dict.keys()):
                 for sample in sorted(sample_run_dict[condition].keys()):
                     ## Write to file
                     for idx, sample_info in enumerate(sample_run_dict[condition][sample]):
                         sample_id = "{}_{}_{}".format(sample, condition, idx + 1)
-                        fout.write(",".join([sample_id] + sample_info) + "\n")
+                        fout.write("\t".join([sample_id] + sample_info) + "\n")
 
 
 def main(args=None):

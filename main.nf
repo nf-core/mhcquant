@@ -123,14 +123,12 @@ ms_files.raw.set { input_raws }
 // TODO: test this with a allele sheet
 if (params.predict_class_1 || params.predict_class_2)  {
     allele_sheet = file(params.allele_sheet, checkIfExists: true)
-
+    
     Channel.from( allele_sheet )
         .splitCsv(header: true, sep:'\t')
         .multiMap { col -> 
-        sample: "${col.Sample}"
-        classI: "${col.HLA_Alleles_Class_1}"
-        classII: "${col.HLA_Alleles_Class_2}" }
-        // .map { col -> tuple("${col.Sample}", "${col.HLA_Alleles_Class_1}", "${col.HLA_Alleles_Class_2}") }
+        classI: ["${col.Sample}", "${col.HLA_Alleles_Class_1}"]
+        classII: ["${col.Sample}", "${col.HLA_Alleles_Class_2}"] }
         .set { ch_alleles_from_sheet }
 } else {
     Channel.empty().multiMap {
@@ -156,8 +154,15 @@ if (params.include_proteins_from_vcf)  {
 /* --        SET CONFIGURATION VARIABLES       -- */
 ////////////////////////////////////////////////////
 
-// Database options
+// Variant options
+// variant_indel_filter = params.variant_indel_filter ? '-fINDEL' : ''
+// variant_frameshift_filter = params.variant_frameshift_filter ? '-fFS' : '' 
+// variant_snp_filter = params.variant_snp_filter ? '-fSNP' : ''
+
 if (params.variant_indel_filter) { variant_indel_filter="-fINDEL" } else { variant_indel_filter="" }
+if (params.variant_frameshift_filter) { variant_frameshift_filter="-fFS" } else { variant_frameshift_filter="" }
+if (params.variant_snp_filter) { variant_snp_filter="-fSNP" } else { variant_snp_filter="" }
+
 
 // Mass Spectronomy data processing options
 x_ions = params.use_x_ions ? '-use_X_ions true' : ''
@@ -169,18 +174,12 @@ rm_precursor = params.remove_precursor_peak ? '-remove_precursor_peak true' : ''
 fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
 
 
-
-// Variants
-if (params.variant_frameshift_filter) { variant_frameshift_filter="-fFS" } else { variant_frameshift_filter="" }
-if (params.variant_snp_filter) { variant_snp_filter="-fSNP" } else { variant_snp_filter="" }
-
 ////////////////////////////////////////////////////
 /* --              CREATE CHANNELS             -- */
 ////////////////////////////////////////////////////
 // Input fasta file
 
 if( params.include_proteins_from_vcf) {
-    println "include proteins"
     Channel
         .fromPath( params.fasta )
         .combine( ch_samples_from_sheet )
@@ -193,7 +192,6 @@ if( params.include_proteins_from_vcf) {
     input_fasta_2 = Channel.empty()
 
 } else if( params.skip_decoy_generation) {
-    println "skip decoy"
     Channel
         .fromPath( params.fasta )
         .combine( ch_samples_from_sheet )
@@ -204,7 +202,6 @@ if( params.include_proteins_from_vcf) {
     input_fasta_vcf = Channel.empty()
 
 } else {
-    println "other"
     Channel
         .fromPath( params.fasta )
         .combine( ch_samples_from_sheet )
@@ -217,12 +214,12 @@ if( params.include_proteins_from_vcf) {
     input_fasta_2 = Channel.empty()
 
 }
-// Channel
-//     .fromPath( params.fasta )
-//     .combine( ch_samples_from_sheet )
-//     .flatMap{it -> [tuple(it[1],it[2],it[0])] }      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
-//     .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-//     .set { input_fasta }
+Channel
+    .fromPath( params.fasta )
+    .combine( ch_samples_from_sheet )
+    .flatMap{it -> [tuple(it[1],it[2],it[0])] }      //maps tuple to val("id"), val("Sample"), val("Condition"), val("ReplicateFileName")
+    .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
+    .set { input_fasta }
 
 // Allele class 1
 if( params.predict_class_1){
@@ -239,7 +236,7 @@ if( params.predict_class_2){
 
      ch_alleles_from_sheet.classII
         .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
-        .flatMap {it -> [tuple("id", it[0].toString(), it[2])]}     //maps tuple to val("id"), val("Sample"), val("Alleles_Class_2")
+        .flatMap {it -> [tuple("id", it[0].toString(), it[1])]}     //maps tuple to val("id"), val("Sample"), val("Alleles_Class_2")
         .set { peptides_class_2_alleles }
 
 } else {
@@ -416,41 +413,41 @@ def hasExtension(it, extension) {
 def modules = params.modules.clone()
 def openms_map_aligner_identification_options = modules['openms_map_aligner_identification']
 def openms_comet_adapter_options = modules['openms_comet_adapter']
+def generate_proteins_from_vcf_options = modules['generate_proteins_from_vcf']
+// def quantify_id_targeted_options = modules['quantify_id_targeted']
+
 openms_comet_adapter_options.args += x_ions + z_ions + c_ions + a_ions + NL_ions + rm_precursor
+generate_proteins_from_vcf_options.args += variant_indel_filter + variant_snp_filter + variant_frameshift_filter
 
 // include { GET_SOFTWARE_VERSIONS }                           from './modules/local/process/get_software_versions'                            addParams( options: [publish_files : ['tsv':'']]   )
-// Example include {FASTQC} from './modules/fastqc.nf' addParams(option: modules['fastqc'])                            
-include { GENERATE_PROTEINS_FROM_VCF }                      from './modules/local/process/generate_proteins_from_vcf'                       addParams( options: [:] )
-include { GENERATE_DECOY_DB }                               from './modules/local/process/generate_decoy_database'                          addParams( options: [:] )
-include { RAW_FILE_CONVERSION }                             from './modules/local/process/raw_file_conversion'                              addParams( options: [:] )
-include { PEAK_PICKING }                                    from './modules/local/process/peak_picking'                                     addParams( options: [:] )
-// include { DB_SEARCH_COMET }                                 from './modules/local/process/db_search_comet'                                  addParams( options: [:] )
-include { OPENMS_COMETADAPTER }                            from './modules/local/process/openms_cometadapter'                             addParams( options: openms_comet_adapter_options )
-include { INDEX_PEPTIDES }                                  from './modules/local/process/index_peptides'                                   addParams( options: [:] )
-include { OPENMS_FALSE_DISCOVERY_RATE }                     from './modules/local/process/openms_false_discovery_rate'                      addParams( options: [:] )
+include { INPUT_CHECK }                                     from './modules/local/subworkflow/input_check'                                  addParams( options: [:] )           
+include { GENERATE_PROTEINS_FROM_VCF }                      from './modules/local/process/generate_proteins_from_vcf'                       addParams( options: generate_proteins_from_vcf_options )
+include { OPENMS_DECOYDATABASE }                            from './modules/local/process/openms_decoydatabase'                             addParams( options: [:] )
+include { OPENMS_THERMORAWFILEPARSER }                      from './modules/local/process/openms_thermorawfileparser'                       addParams( options: [:] )
+include { OPENMS_PEAKPICKERHIRES }                          from './modules/local/process/openms_peakpickerhires'                           addParams( options: [:] )
+include { OPENMS_COMETADAPTER }                             from './modules/local/process/openms_cometadapter'                              addParams( options: openms_comet_adapter_options )
+include { OPENMS_PEPTIDEINDEXER }                           from './modules/local/process/openms_peptideindexer'                            addParams( options: [:] )
+include { OPENMS_FALSEDISCOVERYRATE }                       from './modules/local/process/openms_falsediscoveryrate'                        addParams( options: [:] )
 include { FILTER_FDR_FOR_ID_ALIGNMENT }                     from './modules/local/process/filter_fdr_for_id_alignment'                      addParams( options: [:] )
-include { OPENMS_MAP_ALIGNER_IDENTIFICATION }               from './modules/local/process/openms_map_aligner_identification'                addParams( options: openms_map_aligner_identification_options )
+include { OPENMS_MAPALIGNERIDENTIFICATION }                 from './modules/local/process/openms_mapaligneridentification'                  addParams( options: openms_map_aligner_identification_options )
 
-// include { ALIGN_MZML_FILES }                                from './modules/local/process/align_mzml_files'                                 addParams( options: [:] )
-// include { ALIGN_IDXML_FILES }                               from './modules/local/process/align_idxml_files'                                addParams( options: [:] )
 include { 
-    OPENMS_MAP_RT_TRANSFORMER as OPENMS_MAP_RT_TRANSFORMER_MZML
-    OPENMS_MAP_RT_TRANSFORMER as OPENMS_MAP_RT_TRANSFORMER_IDXML }        from './modules/local/process/openms_map_rt_transformer'                addParams( options: [:] )
+    OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERMZML
+    OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERIDXML }        from './modules/local/process/openms_maprttransformer'                 addParams( options: [:] )
 
-include { MERGE_ALIGNED_IDMXL_FILES }                       from './modules/local/process/merge_aligned_idxml_files'                        addParams( options: [:] )
-include { EXTRACT_PSM_FEATURES_FOR_PERCOLATOR }             from './modules/local/process/extract_psm_features_for_percolator'              addParams( options: [:] )
+include { OPENMS_IDMERGER }                                 from './modules/local/process/openms_idmerger'                                  addParams( options: [:] )
+include { OPENMS_PSMFEATUREEXTRACTOR }                      from './modules/local/process/openms_psmfeatureextractor'                       addParams( options: [:] )
 include { RUN_PERCOLATOR }                                  from './modules/local/process/run_percolator'                                   addParams( options: [:] )
 include { FILTER_BY_Q_VALUE }                               from './modules/local/process/filter_by_q_value'                                addParams( options: [:] )
 
 include { REFINE_FDR_ON_PREDICTED_SUBSET }                  from './modules/local/subworkflow/refine_fdr_on_predicted_subset'               addParams( options: [:] )
 
-include { OPENMS_MZTAB_EXPORTER }                            from './modules/local/process/openms_mztab_exporter'                           addParams( options: [:] )
+include { OPENMS_FEATUREFINDERIDENTIFICATION }              from './modules/local/process/openms_featurefinderidentification'               addParams( options: [:] )
+include { OPENMS_FEATURELINKERUNLABELEDKD }                 from './modules/local/process/openms_featurelinkerunlabeledkd'                  addParams( options: [:] )
+include { OPENMS_IDCONFLICTRESOLVER }                       from './modules/local/process/openms_idconflictresolver'                        addParams( options: [:] )
+include { OPENMS_TEXTEXPORTER }                             from './modules/local/process/openms_textexporter'                              addParams( options: [:] )
+include { OPENMS_MZTABEXPORTER }                            from './modules/local/process/openms_mztabexporter'                             addParams( options: [:] )
 
-include { QUANTIFY_IDENTIFICATION_TARGETED }                from './modules/local/process/quantify_identifications_targeted'                addParams( options: [:] )
-include { LINK_EXTRACTED_FEATURES }                         from './modules/local/process/link_extracted_features'                          addParams( options: [:] )
-include { RESOLVE_CONFLICTS }                               from './modules/local/process/resolve_conflicts'                                addParams( options: [:] )
-include { EXPORT_TEXT }                                     from './modules/local/process/export_text'                                      addParams( options: [:] )
-include { EXPORT_MZTAB }                                    from './modules/local/process/export_mztab'                                     addParams( options: [:] )
 include { PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 }              from './modules/local/process/predict_peptides_mhcflurry_class_1'               addParams( options: [:] )
 include { PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 }          from './modules/local/process/preprocess_peptides_mhcnuggets_class_2'           addParams( options: [:] )
 include { PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2 }             from './modules/local/process/predict_peptides_mhcnuggets_class_2'              addParams( options: [:] )
@@ -463,7 +460,7 @@ include { PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 }           from './modules/loca
 include { PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }       from './modules/local/process/preprocess_neoepitopes_mhcnuggets_class_2'        addParams( options: [:] )
 include { PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 }          from './modules/local/process/predict_neoepitopes_mhcnuggets_class_2'           addParams( options: [:] )
 include { POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }      from './modules/local/process/postprocess_neoepitopes_mhcnuggets_class_2'       addParams( options: [:] )
-include { TRAIN_RETENTION_TIME_PREDICTOR }                  from './modules/local/process/train_retention_time_predictor'                   addParams( options: [:] )
+include { OPENMS_RTMODEL }                                  from './modules/local/process/openms_rtmodel'                                   addParams( options: [:] )
 include { PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES }       from './modules/local/process/predict_retention_times_of_found_peptides'        addParams( options: [:] )
 include { PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES } from './modules/local/process/predict_retention_times_of_possible_neoepitopes'  addParams( options: [:] )
 
@@ -479,143 +476,142 @@ workflow {
     // // Example: ch_software_versions = ch_software_versions.mix(PREPARE_GENOME.out.gffread_version.ifEmpty(null))
     // GET_SOFTWARE_VERSIONS (ch_software_versions.map { it }.collect())
 
+    // TODO: Include properly
     // DONE: Input based on the meta id
     // INPUT_CHECK(sample_sheet)
-        // .map { meta, raw -> meta.id = meta.id.split('_')[0..-2].join('_')
-        // [ meta, raw ] }.view()
+        // .map { meta, raw -> meta.id = meta.id.split('_')[0..-1].join('_')
+        // [ meta, raw ] }
         // .groupTuple(by: [0])
         // .map { it -> [ it[0], it[1].flatten() ] }
-        // .set { ch_samples_from_sheet } 
+        // .set { ch_samples_from_sheet }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////
     // If specified translate variants to proteins and include in reference fasta
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    //TODO: Make a subworkflow, proceed with the new container
-    //TODO: change the different parameters to an options.args
-    GENERATE_PROTEINS_FROM_VCF(input_fasta.combine(input_vcf, by:1), variant_indel_filter, variant_snp_filter, variant_frameshift_filter)
-    // Generate reversed decoy database
-    GENERATE_DECOY_DB(input_fasta.mix(GENERATE_PROTEINS_FROM_VCF.out[0]))
-    //////////////////////////////////////////////////////////////////////////////////////////////
+    GENERATE_PROTEINS_FROM_VCF(input_fasta.combine(input_vcf, by:1))
+    ch_software_versions = ch_software_versions.mix(GENERATE_PROTEINS_FROM_VCF.out[1].ifEmpty(null))
+    //Generate reversed decoy database
+    OPENMS_DECOYDATABASE(input_fasta.mix(GENERATE_PROTEINS_FROM_VCF.out[0]))
+    ch_software_versions = ch_software_versions.mix(OPENMS_DECOYDATABASE.out[1].first().ifEmpty(null))
     // Raw file conversion
-    RAW_FILE_CONVERSION(input_raws)
+    OPENMS_THERMORAWFILEPARSER(input_raws)
+    ch_software_versions = ch_software_versions.mix(OPENMS_THERMORAWFILEPARSER.out[1].first().ifEmpty(null))
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: create if statement, remove when from file
+    //Optional: Run Peak Picking as Preprocessing
+    OPENMS_PEAKPICKERHIRES(input_mzmls_unpicked)
+    ch_software_versions = ch_software_versions.mix(OPENMS_PEAKPICKERHIRES.out[1].first().ifEmpty(null))
+    //Run comet database search
+    OPENMS_COMETADAPTER(OPENMS_THERMORAWFILEPARSER.out[0].mix(input_mzmls.mix(OPENMS_PEAKPICKERHIRES.out[0])).join(OPENMS_DECOYDATABASE.out[0].mix(input_fasta_1), by:1, remainder:true))
+    ch_software_versions = ch_software_versions.mix(OPENMS_COMETADAPTER.out[1].first().ifEmpty(null))
+    //Index decoy and target hits
+    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out[0].join(OPENMS_DECOYDATABASE.out[0].mix(input_fasta_2), by:1))
+    ch_software_versions = ch_software_versions.mix(OPENMS_PEPTIDEINDEXER.out[1].first().ifEmpty(null))
+    //////////////////////////////////////////////////////////////////////////////////////////
+     //Calculate fdr for id based alignment
+     //TODO: create if statement, remove when from file
+    OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out[0])
+    ch_software_versions = ch_software_versions.mix(OPENMS_FALSEDISCOVERYRATE.out[1].first().ifEmpty(null))
+     //Filter fdr for id based alignment
+    FILTER_FDR_FOR_ID_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml) 
+    ch_software_versions = ch_software_versions.mix(FILTER_FDR_FOR_ID_ALIGNMENT.out[1].first().ifEmpty(null))
+     //Compute alignment rt transformation
+    OPENMS_MAPALIGNERIDENTIFICATION(FILTER_FDR_FOR_ID_ALIGNMENT.out.idxml)
+    ch_software_versions = ch_software_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out[1].first().ifEmpty(null))
 
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    // TODO: create if statement, remove when from file
-    // Optional: Run Peak Picking as Preprocessing
-    PEAK_PICKING(input_mzmls_unpicked)
-    // Run comet database search
-    //TODO: change the different parameters to an options.args
-    // DB_SEARCH_COMET(RAW_FILE_CONVERSION.out[0].mix(input_mzmls.mix(PEAK_PICKING.out[0])).join(GENERATE_DECOY_DB.out[0].mix(input_fasta_1), by:1, remainder:true) , a_ions, c_ions, x_ions, z_ions,  NL_ions, rm_precursor)
-    OPENMS_COMETADAPTER(RAW_FILE_CONVERSION.out[0].mix(input_mzmls.mix(PEAK_PICKING.out[0])).join(GENERATE_DECOY_DB.out[0].mix(input_fasta_1), by:1, remainder:true))
-    // Index decoy and target hits
-    // input_fasta.view()
-    // GENERATE_DECOY_DB.out[0].view()
-    // DB_SEARCH_COMET.out[0].join(GENERATE_DECOY_DB.out[0].mix(input_fasta), by:1).view()
-    INDEX_PEPTIDES(OPENMS_COMETADAPTER.out[0].join(GENERATE_DECOY_DB.out[0].mix(input_fasta_2), by:1))
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    // Calculate fdr for id based alignment
-    // TODO: create if statement, remove when from file
-    OPENMS_FALSE_DISCOVERY_RATE(INDEX_PEPTIDES.out[0])
-    // Filter fdr for id based alignment
-    FILTER_FDR_FOR_ID_ALIGNMENT(OPENMS_FALSE_DISCOVERY_RATE.out.idxml) 
-    // Compute alignment rt transformation
-    OPENMS_MAP_ALIGNER_IDENTIFICATION(FILTER_FDR_FOR_ID_ALIGNMENT.out.idxml)
-    
-    // TODO: resolve the ugly-ness
-    //ch_software_versions = ch_software_versions.mix(GENERATE_PROTEINS_FROM_VCF.out[1].ifEmpty(null))
-    //ch_software_versions = ch_software_versions.mix(GENERATE_DECOY_DB.out[1].first().ifEmpty(null))
-    //ch_software_versions = ch_software_versions.mix(RAW_FILE_CONVERSION.out[1].first().ifEmpty(null))
-    //ch_software_versions = ch_software_versions.mix(PEAK_PICKING.out[1].first().ifEmpty(null))
-    //ch_software_versions = ch_software_versions.mix(DB_SEARCH_COMET.out[1].first().ifEmpty(null))
-    //ch_software_versions = ch_software_versions.mix(INDEX_PEPTIDES.out[1].first().ifEmpty(null))
-    //ch_software_versions = ch_software_versions.mix(FILTER_FDR_FOR_ID_ALIGNMENT.out[1].first().ifEmpty(null))
-    //ch_software_versions = ch_software_versions.mix(OPENMS_MAP_ALIGNER_IDENTIFICATION.out[1].first().ifEmpty(null))
-
-    // Intermediate Step to join RT transformation files with mzml and idxml channels
+    //Intermediate Step to join RT transformation files with mzml and idxml channels
     if(!params.skip_quantification) {
         input_mzmls
-        .mix(RAW_FILE_CONVERSION.out.mzml)
-        .mix(PEAK_PICKING.out.mzml)
+        .mix(OPENMS_THERMORAWFILEPARSER.out.mzml)
+        .mix(OPENMS_PEAKPICKERHIRES.out.mzml)
         .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
-        .join(OPENMS_MAP_ALIGNER_IDENTIFICATION.out.trafoxml.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+        .join(OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
         .set{joined_trafos_mzmls}
 
-        INDEX_PEPTIDES.out.idxml
+        OPENMS_PEPTIDEINDEXER.out.idxml
         .flatMap { it -> [tuple(it[0].toInteger(), it[1], it[2], it[3])]}
-        .join(OPENMS_MAP_ALIGNER_IDENTIFICATION.out.trafoxml.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
+        .join(OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml.transpose().flatMap{ it -> [tuple(it[1].baseName.split('_-_')[0].toInteger(), it[0], it[1])]}, by: [0,1])
         .set{joined_trafos_ids}
 
         id_files_idx_original = Channel.empty()
     } else {
         joined_trafos_mzmls = Channel.empty()
         joined_trafos_ids = Channel.empty()
-        id_files_idx_original = INDEX_PEPTIDES.out.idxml
+        id_files_idx_original = OPENMS_PEPTIDEINDEXER.out.idxml
     }
 
-    // Align mzML files using trafoXMLs
-    OPENMS_MAP_RT_TRANSFORMER_MZML(joined_trafos_mzmls)
-    // Align unfiltered idXMLfiles using trafoXMLs
-    OPENMS_MAP_RT_TRANSFORMER_IDXML(joined_trafos_ids)
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Merge aligned idXMLfiles
-    MERGE_ALIGNED_IDMXL_FILES(OPENMS_MAP_RT_TRANSFORMER_IDXML.out[0].mix(id_files_idx_original).groupTuple(by: 1))
-    // Extract PSM features for Percolator
-    EXTRACT_PSM_FEATURES_FOR_PERCOLATOR(MERGE_ALIGNED_IDMXL_FILES.out.idxml)
-    // Run Percolator
-    RUN_PERCOLATOR(EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out.idxml, fdr_level)
-    // Filter by percolator q-value
+    //Align mzML files using trafoXMLs
+    OPENMS_MAPRTTRANSFORMERMZML(joined_trafos_mzmls)
+    ch_software_versions = ch_software_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out[1].first().ifEmpty(null))
+    //Align unfiltered idXMLfiles using trafoXMLs
+    OPENMS_MAPRTTRANSFORMERIDXML(joined_trafos_ids)
+    ch_software_versions = ch_software_versions.mix(OPENMS_MAPRTTRANSFORMERIDXML.out[1].first().ifEmpty(null))
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    //Merge aligned idXMLfiles
+    OPENMS_IDMERGER(OPENMS_MAPRTTRANSFORMERIDXML.out[0].mix(id_files_idx_original).groupTuple(by: 1))
+    ch_software_versions = ch_software_versions.mix(OPENMS_IDMERGER.out[1].first().ifEmpty(null))
+    //Extract PSM features for Percolator
+    OPENMS_PSMFEATUREEXTRACTOR(OPENMS_IDMERGER.out.idxml)
+    ch_software_versions = ch_software_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out[1].first().ifEmpty(null))
+    //Run Percolator
+    RUN_PERCOLATOR(OPENMS_PSMFEATUREEXTRACTOR.out.idxml, fdr_level)
+    ch_software_versions = ch_software_versions.mix(RUN_PERCOLATOR.out[1].first().ifEmpty(null))
+    //Filter by percolator q-value
     FILTER_BY_Q_VALUE(RUN_PERCOLATOR.out.idxml) // NOTE: Same function was used for (!)params.refine_fdr_on_predicted_subset
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Refine_fdr_on_predicted_subset
-    // TODO: change the different parameters to an options.args
-    //if ( params.refine_fdr_on_predicted_subset) {
-
-    REFINE_FDR_ON_PREDICTED_SUBSET (
-        FILTER_BY_Q_VALUE.out[0],
-        EXTRACT_PSM_FEATURES_FOR_PERCOLATOR.out[0],
-        peptides_class_1_alleles,
-        fdr_level,
-        FILTER_FDR_FOR_ID_ALIGNMENT.out[0],
-        OPENMS_MAP_RT_TRANSFORMER_MZML.out[0]
-    )
-    // TODO: What if there is no REFINE_FDR_ON_PREDICTED_SUBSET output 
-    joined_mzmls_ids_quant = REFINE_FDR_ON_PREDICTED_SUBSET.out[0]
-    // }
-
+    ch_software_versions = ch_software_versions.mix(FILTER_BY_Q_VALUE.out[1].first().ifEmpty(null))
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //Refine_fdr_on_predicted_subset
+    //TODO: change the different parameters to an options.args
+    if ( params.refine_fdr_on_predicted_subset) {
+       // Run the following subworkflow
+        REFINE_FDR_ON_PREDICTED_SUBSET (
+            FILTER_BY_Q_VALUE.out[0], // Added the condition column... might become obsolete later
+            OPENMS_PSMFEATUREEXTRACTOR.out[0],
+            peptides_class_1_alleles,
+            fdr_level // TODO: Add the following parameters to a option.args
+        )
+       // Define the outcome of the paramer to a fixed variable
+        // filter_refined_q_value = REFINE_FDR_ON_PREDICTED_SUBSET.out[0]  
+    // } else {
+        // filter_refined_q_value = Channel.empty()
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////  
+    //FILTER_FDR_FOR_ID_ALIGNMENT.out[0]
+    //.flatMap { it -> [ tuple( it[0], it[1], it[2], it[3] ) ] }
+    //.join( OPENMS_MAPRTTRANSFORMERMZML.out[0], by: [0,1,2] )
+    //.combine( FILTER_BY_Q_VALUE.out[0].flatMap { it -> [ tuple( it[0], it[1], it[3] ) ] }
+    //    .mix( filter_refined_q_value ), by: 1 )
+    //.set{ joined_mzmls_ids_quant }
+    //// .ifEmpty('Hello')
+//
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    // TODO: create if statement, remove when from file
-    // Quantify identifications using targeted feature extraction
-    QUANTIFY_IDENTIFICATION_TARGETED(joined_mzmls_ids_quant)
-    // Link extracted features
-    LINK_EXTRACTED_FEATURES(QUANTIFY_IDENTIFICATION_TARGETED.out.featurexml.groupTuple(by:1))  
-    // Resolve conflicting ids matching to the same feature
-    RESOLVE_CONFLICTS(LINK_EXTRACTED_FEATURES.out.consensusxml)
+    //if (! params.skip_quantification) {
+    //    // Quantify identifications using targeted feature extraction
+    //    OPENMS_FEATUREFINDERIDENTIFICATION(joined_mzmls_ids_quant)
+    //    // Link extracted features
+    //    OPENMS_FEATURELINKERUNLABELEDKD(OPENMS_FEATUREFINDERIDENTIFICATION.out.featurexml.groupTuple(by:1))  
+    //    // Resolve conflicting ids matching to the same feature
+    //    OPENMS_IDCONFLICTRESOLVER(OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml)
+    //}
     //////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Export all information as text to csv
-    EXPORT_TEXT(RESOLVE_CONFLICTS.out.consensusxml)
-    // Export all information as mzTab
-    EXPORT_MZTAB(RESOLVE_CONFLICTS.out.consensusxml) 
-
-//    //OPENMS_MZTAB_EXPORTER(
-    //    RESOLVE_CONFLICTS.out.consensusxml
+//
+    //// Export all information as text to csv
+    //OPENMS_TEXTEXPORTER(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
+    //// Export all information as mzTab
+    //OPENMS_MZTABEXPORTER(
+    //    OPENMS_IDCONFLICTRESOLVER.out.consensusxml
     //    .flatMap { it -> [tuple("id", it[0], it[0], it[1])]}
     //)
 
-//    //OPENMS_MZTAB_EXPORTER.out[0].view()
 
-//
 
      //////////////////////////////////////////////////////////////////////////////////////////////
 
     ////  TODO: Make a subworkflow, proceed with the new container
     ////  START:
     //// If specified predict peptides using MHCFlurry
-    //PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(EXPORT_MZTAB.out.mztab.combine(peptides_class_1_alleles, by:1)) // Note for replacement epytope
+    //PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(OPENMS_MZTABEXPORTER.out.mztab.combine(peptides_class_1_alleles, by:1)) // Note for replacement epytope
     //// Preprocess found peptides for MHCNuggets prediction class 2
-    //PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(EXPORT_MZTAB.out.mztab) // Note for replacement epytope
+    //PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(OPENMS_MZTABEXPORTER.out.mztab) // Note for replacement epytope
     //// Predict found peptides using MHCNuggets class 2
     //PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out[0].join(peptides_class_2_alleles, by:1)) // Note for replacement epytope
     //// Postprocess predicted MHCNuggets peptides class 2
@@ -626,9 +622,9 @@ workflow {
     //// Predict all possible class 2 neoepitopes from vcf
     //PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(input_vcf, by:[0,1], remainder:true)) // Note for replacement epytope
     //// Resolve found neoepitopes
-    //RESOLVE_FOUND_NEOEPITOPES(EXPORT_MZTAB.out.mztab.join(PREDICT_POSSIBLE_NEOEPITOPES.out[0], by:[0,1], remainder:true))
+    //RESOLVE_FOUND_NEOEPITOPES(OPENMS_MZTABEXPORTER.out.mztab.join(PREDICT_POSSIBLE_NEOEPITOPES.out[0], by:[0,1], remainder:true))
     //// Resolve found class 2 neoepitopes
-    //RESOLVE_FOUND_CLASS_2_NEOEPITOPES(EXPORT_MZTAB.out.mztab.join(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0], by:[0,1], remainder:true)) 
+    //RESOLVE_FOUND_CLASS_2_NEOEPITOPES(OPENMS_MZTABEXPORTER.out.mztab.join(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0], by:[0,1], remainder:true)) 
     //// Predict class 1 neoepitopes MHCFlurry
     //PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1(peptides_class_1_alleles.join(RESOLVE_FOUND_NEOEPITOPES.out.csv, by:1)) // Note for replacement epytope
     //// Preprocess resolved neoepitopes in a format that MHCNuggets understands
@@ -639,11 +635,11 @@ workflow {
     //POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out.csv.join(PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2.out.csv, by:1)) // Note for replacement epytope
 //
     //// Train Retention Times Predictor
-    //TRAIN_RETENTION_TIME_PREDICTOR(FILTER_BY_Q_VALUE.out.idxml.mix(REFINE_FDR_ON_PREDICTED_SUBSET.out.filter_refined_q_value))
+    //OPENMS_RTMODEL(FILTER_BY_Q_VALUE.out.idxml.mix(REFINE_FDR_ON_PREDICTED_SUBSET.out.filter_refined_q_value))
     //// Retention Times Predictor Found Peptides
-    //PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES(FILTER_BY_Q_VALUE.out.idxml.mix(REFINE_FDR_ON_PREDICTED_SUBSET.out.filter_refined_q_value).join(TRAIN_RETENTION_TIME_PREDICTOR.out.complete, by:[0,1]))  
+    //PREDICT_RETENTION_TIMES_OF_FOUND_PEPTIDES(FILTER_BY_Q_VALUE.out.idxml.mix(REFINE_FDR_ON_PREDICTED_SUBSET.out.filter_refined_q_value).join(OPENMS_RTMODEL.out.complete, by:[0,1]))  
     //// Retention Times Predictor possible Neoepitopes
-    //PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES(PREDICT_POSSIBLE_NEOEPITOPES.out[1].mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[1]).join(TRAIN_RETENTION_TIME_PREDICTOR.out.complete, by:[0,1])) 
+    //PREDICT_RETENTION_TIMES_OF_POSSIBLE_NEOEPITOPES(PREDICT_POSSIBLE_NEOEPITOPES.out[1].mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[1]).join(OPENMS_RTMODEL.out.complete, by:[0,1])) 
     //// END
 //
 

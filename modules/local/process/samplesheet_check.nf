@@ -22,13 +22,14 @@ process SAMPLESHEET_CHECK {
     path '*.csv'
 
 
-    script:  // This script is bundled with the pipeline, in nf-core/testdsl/bin/
+    script:  
+    
     """
     check_samplesheet.py $samplesheet samplesheet.valid.csv
     """
 }
 
-// Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
+// Function to get list of [ meta, filenames ]
 def get_samplesheet_paths(LinkedHashMap row) {
     def meta = [:]
     meta.id           = row.ID    

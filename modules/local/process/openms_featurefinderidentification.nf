@@ -1,10 +1,10 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
 //TODO: combine in a subflow --> when needs to be removed
-process QUANTIFY_IDENTIFICATION_TARGETED  {
+process OPENMS_FEATUREFINDERIDENTIFICATION  {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
@@ -23,29 +23,17 @@ process QUANTIFY_IDENTIFICATION_TARGETED  {
         tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${id}.featureXML"), emit: featurexml   
         path  "*.version.txt", emit: version
 
-    when:
-        !params.skip_quantification
-
     script:
-    if (!params.quantification_fdr){
-        """
-            FeatureFinderIdentification -in ${mzml_quant} \\
-                -id ${id_file_quant} \\
-                -out ${Sample}_${id}.featureXML \\
-                -threads ${task.cpus}
+        def software = getSoftwareName(task.process)
+        
+        if (!params.quantification_fdr){
+            arguments = "-id ${id_file_quant}"
+        } else {
+            arguments = "-id ${id_file_quant_int} -id_ext ${id_file_quant} -svm:min_prob ${params.quantification_min_prob}"
+        }
 
-            FileInfo --help &> openms.version.txt
         """
-    } else {
+            FeatureFinderIdentification -in ${mzml_quant} -out ${Sample}_${id}.featureXML -threads ${task.cpus} $arguments
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
-            FeatureFinderIdentification -in ${mzml_quant} \\
-                -id ${id_file_quant_int} \\
-                -id_ext ${id_file_quant} \\
-                -svm:min_prob ${params.quantification_min_prob} \\
-                -out ${Sample}_${id}.featureXML \\
-                -threads ${task.cpus}
-            
-            FileInfo --help &> openms.version.txt
-        """   
-    }
-}
+}   
