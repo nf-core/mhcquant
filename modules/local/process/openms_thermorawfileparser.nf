@@ -19,9 +19,12 @@ process OPENMS_THERMORAWFILEPARSER {
         path  "*.version.txt", emit: version
 
     script:
-        """
-        ThermoRawFileParser.sh -i=${rawfile} -f=2 -b=${rawfile.baseName}.mzML
+        def software = getSoftwareName(task.process)
 
-        FileInfo --help &> openms.version.txt
+        """
+            ThermoRawFileParser.sh -i=${rawfile} \\
+            -f=2 \\
+            -b=${rawfile.baseName}.mzML
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

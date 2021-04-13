@@ -24,6 +24,7 @@ process OPENMS_TEXTEXPORTER {
 
     script:
         def software = getSoftwareName(task.process)
+
         """
             TextExporter -in ${consensus_resolved} \\
                 -out ${Sample}.csv \\
@@ -31,7 +32,6 @@ process OPENMS_TEXTEXPORTER {
                 -id:add_hit_metavalues 0 \\
                 -id:add_metavalues 0 \\
                 -id:peptides_only
-
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

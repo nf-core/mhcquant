@@ -27,7 +27,10 @@ process OPENMS_FALSEDISCOVERYRATE  {
         def software = getSoftwareName(task.process)
 
         """
-            FalseDiscoveryRate -in ${id_file_idx} -protein 'false' -out ${Sample}_${Condition}_${id}_idx_fdr.idXML -threads ${task.cpus}     
+            FalseDiscoveryRate -in ${id_file_idx} \\
+            -protein 'false' \\
+            -out ${Sample}_${Condition}_${id}_idx_fdr.idXML \\
+            -threads ${task.cpus}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

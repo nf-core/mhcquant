@@ -1,7 +1,7 @@
 // Import generic module functions
 include { initOptions; saveFiles } from './functions'
 
-params.option = [:]
+params.options = [:]
 options    = initOptions(params.options)
 
 def VERSIONFRED2 = '2.0.6'

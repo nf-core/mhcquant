@@ -29,7 +29,10 @@ process OPENMS_MAPRTTRANSFORMER {
         def software = getSoftwareName(task.process)
 
         """
-            MapRTTransformer -in ${file_align} -trafo_in ${file_trafo} -out ${Sample}_${Condition}_${id}_aligned.${fileExt} -threads $task.cpus
+            MapRTTransformer -in ${file_align} \\
+            -trafo_in ${file_trafo} \\
+            -out ${Sample}_${Condition}_${id}_aligned.${fileExt} \\
+            -threads $task.cpus
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

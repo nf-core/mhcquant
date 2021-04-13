@@ -1,7 +1,7 @@
 // Import generic module functions
 include {  initOptions; saveFiles; getSoftwareName } from './functions'
 
-params.option = [:]
+params.options = [:]
 options    = initOptions(params.options)
 
 process OPENMS_COMETADAPTER {
@@ -26,7 +26,10 @@ process OPENMS_COMETADAPTER {
         def software = getSoftwareName(task.process)
         
         """
-            CometAdapter -in ${mzml_file} -out ${Sample}_${Condition}_${id}.idXML -database ${fasta_decoy} -threads $task.cpus $options.args
+            CometAdapter -in ${mzml_file} \\
+            -out ${Sample}_${Condition}_${id}.idXML \\
+            -database ${fasta_decoy} \\
+            -threads $task.cpus $options.args
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 

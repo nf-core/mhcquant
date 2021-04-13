@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
@@ -23,11 +23,12 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         path  "*.version.txt", emit: version
 
     script:
+        def software = getSoftwareName(task.process)
+
         """
             PSMFeatureExtractor -in ${id_file_merged} \\
             -out ${Sample}_all_ids_merged_psm.idXML \\
             -threads ${task.cpus} 
-
-            FileInfo --help &> openms.version.txt
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

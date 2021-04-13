@@ -2,8 +2,8 @@
 include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
+options    = initOptions(params.options)
 
-//TODO: combine in a subflow --> when needs to be removed
 process RUN_PERCOLATOR_ON_PREDICTED_SUBSET {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -18,14 +18,10 @@ process RUN_PERCOLATOR_ON_PREDICTED_SUBSET {
 
     input:
         tuple val(id), val(Sample), file(id_file_psm_subset)
-        val fdr_level
 
     output:
         tuple val("$id"), val("$Sample"), file("${Sample}_perc_subset.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
-
-    when:
-        params.refine_fdr_on_predicted_subset
 
     script:
         """
@@ -38,7 +34,7 @@ process RUN_PERCOLATOR_ON_PREDICTED_SUBSET {
             -enzyme no_enzyme \\
             -subset-max-train ${params.subset_max_train} \\
             -doc ${params.description_correct_features} \\
-            $fdr_level
+            $options.args
 
         FileInfo --help &> openms.version.txt
         """

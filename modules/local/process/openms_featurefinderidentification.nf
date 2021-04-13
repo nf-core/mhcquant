@@ -1,7 +1,7 @@
 // Import generic module functions
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-params.options = [:]
+def options    = initOptions(params.options)
 
 //TODO: combine in a subflow --> when needs to be removed
 process OPENMS_FEATUREFINDERIDENTIFICATION  {
@@ -23,8 +23,12 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         tuple val("$id"), val("$Sample"), val("$Condition"), file("${Sample}_${id}.featureXML"), emit: featurexml   
         path  "*.version.txt", emit: version
 
+    when:
+        !params.skip_quantification
+
     script:
         def software = getSoftwareName(task.process)
+        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}_${id}"
         
         if (!params.quantification_fdr){
             arguments = "-id ${id_file_quant}"
@@ -33,7 +37,10 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         }
 
         """
-            FeatureFinderIdentification -in ${mzml_quant} -out ${Sample}_${id}.featureXML -threads ${task.cpus} $arguments
+            FeatureFinderIdentification -in ${mzml_quant} \\
+            -out ${prefix}.featureXML \\
+            -threads ${task.cpus} \\
+            $arguments
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }   

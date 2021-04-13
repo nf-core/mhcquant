@@ -23,12 +23,13 @@ process OPENMS_DECOYDATABASE {
         !params.skip_decoy_generation
 
     script:
+        def software = getSoftwareName(task.process)
+
         """
             DecoyDatabase -in ${fastafile} \\
                 -out ${fastafile.baseName}_decoy.fasta \\
                 -decoy_string DECOY_ \\
                 -decoy_string_position prefix
-
-                FileInfo --help &> openms.version.txt
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

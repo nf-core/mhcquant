@@ -2,8 +2,8 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+options    = initOptions(params.options)
 
-//TODO: combine in a subflow --> when needs to be removed
 process OPENMS_RTMODEL {
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -13,23 +13,22 @@ process OPENMS_RTMODEL {
     }
 
     input:
-        tuple val(id), val(Sample), file(id_files_for_rt_training)
+        tuple val(id), val(Sample), file(rt_training_files)
 
     output:
-        tuple val("$id"), val("$Sample"), file("${Sample}_id_files_for_rt_training.txt"), file("${Sample}_id_files_for_rt_training_params.paramXML"), file("${Sample}_id_files_for_rt_training_trainset.txt"), emit: complete   
+        tuple val("$id"), val("$Sample"), file("*rt_training.txt"), file("*.paramXML"), file("*_training_trainset.txt"), emit: complete   
         path  "*.version.txt", emit: version
 
-    when:
-        params.predict_RT
-
     script:
-    """
-        RTModel -in ${id_files_for_rt_training} \\
-            -cv:skip_cv \\
-            -out ${Sample}_id_files_for_rt_training.txt \\
-            -out_oligo_params ${Sample}_id_files_for_rt_training_params.paramXML \\
-            -out_oligo_trainset ${Sample}_id_files_for_rt_training_trainset.txt
+        def software = getSoftwareName(task.process)
+        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}_id_files_for_rt_training"
 
-        FileInfo --help &> openms.version.txt
-    """
+        """
+            RTModel -in ${rt_training_files} \\
+                -cv:skip_cv \\
+                -out ${prefix}.txt \\
+                -out_oligo_params ${prefix}_params.paramXML \\
+                -out_oligo_trainset ${prefix}_trainset.txt
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+        """
 }

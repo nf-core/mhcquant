@@ -28,9 +28,8 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
 
         """
             FeatureLinkerUnlabeledKD -in ${features} \\
-                -out '${Sample}_all_features_merged.consensusXML' \\
-                -threads ${task.cpus}
-
+            -out '${Sample}_all_features_merged.consensusXML' \\
+            -threads ${task.cpus}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

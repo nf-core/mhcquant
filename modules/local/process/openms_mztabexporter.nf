@@ -28,7 +28,9 @@ process OPENMS_MZTABEXPORTER {
         def software = getSoftwareName(task.process)
         
         """
-            MzTabExporter -in ${mztab} -out ${prefix}.mzTab -threads ${task.cpus}
+            MzTabExporter -in ${mztab} \\
+            -out ${prefix}.mzTab \\
+            -threads ${task.cpus}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

@@ -3,8 +3,6 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-def VERSION = '2.5.0'
-
 process OPENMS_PEPTIDEINDEXER {
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
@@ -22,15 +20,16 @@ process OPENMS_PEPTIDEINDEXER {
         path  "*.version.txt", emit: version
 
     script:
-    """
-        PeptideIndexer -in ${id_file} \\
-            -out ${Sample}_${Condition}_${id}_idx.idXML \\
-            -threads ${task.cpus} \\
-            -fasta ${fasta_decoy} \\
-            -decoy_string DECOY \\
-            -enzyme:specificity none
+        def software = getSoftwareName(task.process)
 
-        echo $VERSION > openms.version.txt
-    """
+        """
+            PeptideIndexer -in ${id_file} \\
+                -out ${Sample}_${Condition}_${id}_idx.idXML \\
+                -threads ${task.cpus} \\
+                -fasta ${fasta_decoy} \\
+                -decoy_string DECOY \\
+                -enzyme:specificity none
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+        """
 }
 

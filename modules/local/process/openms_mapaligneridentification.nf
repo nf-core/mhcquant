@@ -32,7 +32,9 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         def software = getSoftwareName(task.process)
 
         """
-            MapAlignerIdentification -in $id_names -trafo_out $out_names $options.args 
+            MapAlignerIdentification -in $id_names \\
+            -trafo_out $out_names \\
+            $options.args 
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

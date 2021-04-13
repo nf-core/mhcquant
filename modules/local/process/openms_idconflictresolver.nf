@@ -24,9 +24,8 @@ process OPENMS_IDCONFLICTRESOLVER {
         
         """
             IDConflictResolver -in ${consensus} \\
-                    -out ${Sample}_resolved.consensusXML \\
-                    -threads ${task.cpus}
-    
+            -out ${Sample}_resolved.consensusXML \\
+            -threads ${task.cpus}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

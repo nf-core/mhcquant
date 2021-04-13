@@ -23,11 +23,12 @@ process OPENMS_PEAKPICKERHIRES {
         params.run_centroidisation
 
     script:
-    """
-        PeakPickerHiRes -in ${mzml_unpicked} \\
+        def software = getSoftwareName(task.process)
+
+        """
+            PeakPickerHiRes -in ${mzml_unpicked} \\
             -out ${mzml_unpicked.baseName}.mzML \\
             -algorithm:ms_levels ${params.pick_ms_levels}
-
-        FileInfo --help &> openms.version.txt
-    """
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+        """
 }
