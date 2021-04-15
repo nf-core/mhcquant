@@ -57,3 +57,10 @@ def saveFiles(Map args) {
         }
     }
 }
+
+/*
+ * Function to check the file extension
+ */
+def hasExtension(it, extension) {
+    it.toString().toLowerCase().endsWith(extension.toLowerCase())
+}

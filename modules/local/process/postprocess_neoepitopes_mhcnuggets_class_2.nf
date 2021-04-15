@@ -5,7 +5,6 @@ params.options = [:]
 
 def VERSION = '2.3.2'
 
-//TODO: combine in a subflow --> when needs to be removed
 process POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -26,14 +25,10 @@ process POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
         tuple val("$Sample"), file("*.csv"), emit: csv   
         path  "*.version.txt", emit: version
 
-    when:
-    params.include_proteins_from_vcf & params.predict_class_2
-
     script:
 
-    """
-        postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
-
-        echo $VERSION > mhcnuggets.version.txt
-    """
+        """
+            postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
+            echo $VERSION > mhcnuggets.version.txt
+        """
 }

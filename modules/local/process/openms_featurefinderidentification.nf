@@ -38,9 +38,9 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
         """
             FeatureFinderIdentification -in ${mzml_quant} \\
-            -out ${prefix}.featureXML \\
-            -threads ${task.cpus} \\
-            $arguments
+                -out ${prefix}.featureXML \\
+                -threads ${task.cpus} \\
+                $arguments
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }   

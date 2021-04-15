@@ -1,9 +1,8 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-//TODO: combine in a subflow --> when needs to be removed
 process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -23,15 +22,11 @@ process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
     output:
         tuple val("$id"), val("$Sample"), file("*_${Sample}_predicted_neoepitopes_class_1.csv"), emit: csv   
         path  "*.version.txt", emit: version
-    
-    when:
-    params.include_proteins_from_vcf & params.predict_class_1
 
     script:
-    """
-        mhcflurry-downloads --quiet fetch models_class1
-        mhcflurry_neoepitope_binding_prediction.py '${allotypes}' ${neoepitopes} _${Sample}_predicted_neoepitopes_class_1.csv
-
-        mhcflurry-predict --version &> mhcflurry.version.txt
-    """
+        """
+            mhcflurry-downloads --quiet fetch models_class1
+            mhcflurry_neoepitope_binding_prediction.py '${allotypes}' ${neoepitopes} _${Sample}_predicted_neoepitopes_class_1.csv
+            mhcflurry-predict --version &> mhcflurry.version.txt
+        """
 }

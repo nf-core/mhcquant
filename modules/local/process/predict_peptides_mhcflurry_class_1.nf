@@ -1,9 +1,8 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-//TODO: combine in a subflow --> when needs to be removed
 process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
     publishDir "${params.outdir}",
     mode: params.publish_dir_mode,
@@ -23,14 +22,10 @@ process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
         tuple val("$Sample"), file("*predicted_peptides_class_1.csv"), emit: csv   
         path  "*.version.txt", emit: version
 
-    when:
-        params.predict_class_1
-
     script:
-    """
-        mhcflurry-downloads --quiet fetch models_class1
-        mhcflurry_predict_mztab.py '${class_1_alleles}' ${mztab_file} ${Sample}_predicted_peptides_class_1.csv
-
-        mhcflurry-predict --version &> mhcflurry.version.txt
-    """
+        """
+            mhcflurry-downloads --quiet fetch models_class1
+            mhcflurry_predict_mztab.py '${class_1_alleles}' ${mztab_file} ${Sample}_predicted_peptides_class_1.csv
+            mhcflurry-predict --version &> mhcflurry.version.txt
+        """
 }

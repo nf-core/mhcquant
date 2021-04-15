@@ -1,11 +1,10 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
 def VERSION = '2.3.2'
 
-//TODO: combine in a subflow --> when needs to be removed
 process POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -25,13 +24,9 @@ process POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 {
         tuple val("$Sample"), file('*.csv'), emit: csv   
         path  "*.version.txt", emit: version
 
-    when:
-    params.predict_class_2
-
     script:
-    """
-        postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID} --output ${Sample}_postprocessed.csv
-
-        echo $VERSION > mhcnuggets.version.txt
-    """
+        """
+            postprocess_peptides_mhcnuggets.py --input ${predicted_peptides} --peptides_seq_ID ${peptide_to_geneID} --output ${Sample}_postprocessed.csv
+            echo $VERSION > mhcnuggets.version.txt
+        """
 }

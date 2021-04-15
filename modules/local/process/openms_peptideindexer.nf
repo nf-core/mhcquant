@@ -24,11 +24,11 @@ process OPENMS_PEPTIDEINDEXER {
 
         """
             PeptideIndexer -in ${id_file} \\
-                -out ${Sample}_${Condition}_${id}_idx.idXML \\
-                -threads ${task.cpus} \\
-                -fasta ${fasta_decoy} \\
-                -decoy_string DECOY \\
-                -enzyme:specificity none
+                    -out ${Sample}_${Condition}_${id}_idx.idXML \\
+                    -threads ${task.cpus} \\
+                    -fasta ${fasta_decoy} \\
+                    -decoy_string DECOY \\
+                    -enzyme:specificity none
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

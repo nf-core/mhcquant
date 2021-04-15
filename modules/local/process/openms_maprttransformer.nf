@@ -1,7 +1,8 @@
 // Import generic module functions
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-def options = initOptions(params.options)
+params.options = [:]
+options    = initOptions(params.options)
 
 //TODO: combine in a subflow --> when needs to be removed
 process OPENMS_MAPRTTRANSFORMER {
@@ -30,9 +31,9 @@ process OPENMS_MAPRTTRANSFORMER {
 
         """
             MapRTTransformer -in ${file_align} \\
-            -trafo_in ${file_trafo} \\
-            -out ${Sample}_${Condition}_${id}_aligned.${fileExt} \\
-            -threads $task.cpus
+                -trafo_in ${file_trafo} \\
+                -out ${Sample}_${Condition}_${id}_aligned.${fileExt} \\
+                -threads $task.cpus
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

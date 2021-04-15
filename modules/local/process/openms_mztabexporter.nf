@@ -1,9 +1,9 @@
 // Import generic module functions
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-def options    = initOptions(params.options)
+params.options = [:]
+options    = initOptions(params.options)
 
-//TODO: combine in a subflow --> "when" needs to be removed
 process OPENMS_MZTABEXPORTER {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -29,8 +29,8 @@ process OPENMS_MZTABEXPORTER {
         
         """
             MzTabExporter -in ${mztab} \\
-            -out ${prefix}.mzTab \\
-            -threads ${task.cpus}
+                -out ${prefix}.mzTab \\
+                -threads ${task.cpus}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

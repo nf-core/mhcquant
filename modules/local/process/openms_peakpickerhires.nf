@@ -1,5 +1,5 @@
 // Import generic module functions
-include {  saveFiles; } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
@@ -13,10 +13,10 @@ process OPENMS_PEAKPICKERHIRES {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), file(mzml_unpicked)
+        tuple val(id), val(Sample), val(Condition), file(mzml_file)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("${mzml_unpicked.baseName}.mzML"), emit: mzml   
+        tuple val("$id"), val("$Sample"), val("$Condition"), file("*.mzML"), emit: mzml   
         path  "*.version.txt", emit: version
 
     when:
@@ -26,9 +26,9 @@ process OPENMS_PEAKPICKERHIRES {
         def software = getSoftwareName(task.process)
 
         """
-            PeakPickerHiRes -in ${mzml_unpicked} \\
-            -out ${mzml_unpicked.baseName}.mzML \\
-            -algorithm:ms_levels ${params.pick_ms_levels}
+            PeakPickerHiRes -in ${mzml_file} \\
+                -out ${mzml_file.baseName}.mzML \\
+                -algorithm:ms_levels ${params.pick_ms_levels}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

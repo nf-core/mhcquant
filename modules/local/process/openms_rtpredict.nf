@@ -4,7 +4,6 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options    = initOptions(params.options)
 
-//TODO: combine in a subflow --> when needs to be removed
 process OPENMS_RTPREDICT {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
@@ -26,7 +26,6 @@ process PREDICT_PSMS {
     """
         mhcflurry-downloads --quiet fetch models_class1
         mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes_refine}' ${perc_mztab_file} ${psm_mztab_file} ${Sample}_peptide_filter.idXML
-    
         mhcflurry-predict --version &> mhcflurry.version.txt
     """
 

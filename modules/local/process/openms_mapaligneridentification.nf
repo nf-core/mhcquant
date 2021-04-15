@@ -1,12 +1,8 @@
 // Import generic module functions
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-def options = initOptions(params.options)
-
-//TODO: combine in a subflow --> when needs to be removed
-/*
- *
- */
+params.options = [:]
+options    = initOptions(params.options)
 
 process OPENMS_MAPALIGNERIDENTIFICATION {
 
@@ -24,17 +20,14 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         tuple val("$Sample"), file("*.trafoXML"), emit: trafoxml   
         path  "*.version.txt", emit: version
 
-    when:
-        !params.skip_quantification
-
     script:
         def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
         def software = getSoftwareName(task.process)
 
         """
             MapAlignerIdentification -in $id_names \\
-            -trafo_out $out_names \\
-            $options.args 
+                -trafo_out $out_names \\
+                $options.args 
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

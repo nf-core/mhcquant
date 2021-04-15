@@ -1,12 +1,11 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
 def VERSIONFRED2 = '2.0.6'
 def VERSIONMHCNUGGETS = '2.3.2'
 
-//TODO: combine in a subflow --> when needs to be removed
 process RESOLVE_FOUND_CLASS_2_NEOEPITOPES {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -28,13 +27,9 @@ process RESOLVE_FOUND_CLASS_2_NEOEPITOPES {
         tuple val("$id"), val("$Sample"), file("${Sample}_found_neoepitopes_class_2.csv"), emit: csv   
         path  "*.version.txt", emit: version
 
-    when:
-        params.include_proteins_from_vcf & params.predict_class_2
-
     script:
         """
             resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${Sample}_found_neoepitopes_class_2
-
             echo $VERSIONFRED2 > fred2.version.txt
             echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
             mhcflurry-predict --version &> mhcflurry.version.txt

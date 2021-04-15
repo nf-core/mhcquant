@@ -27,8 +27,8 @@ process OPENMS_PSMFEATUREEXTRACTOR {
 
         """
             PSMFeatureExtractor -in ${id_file_merged} \\
-            -out ${Sample}_all_ids_merged_psm.idXML \\
-            -threads ${task.cpus} 
+                -out ${Sample}_all_ids_merged_psm.idXML \\
+                -threads ${task.cpus} 
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

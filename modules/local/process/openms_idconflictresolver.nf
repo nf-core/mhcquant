@@ -3,7 +3,6 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-//TODO: combine in a subflow --> when needs to be removed
 process OPENMS_IDCONFLICTRESOLVER {
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -24,8 +23,8 @@ process OPENMS_IDCONFLICTRESOLVER {
         
         """
             IDConflictResolver -in ${consensus} \\
-            -out ${Sample}_resolved.consensusXML \\
-            -threads ${task.cpus}
+                -out ${Sample}_resolved.consensusXML \\
+                -threads ${task.cpus}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

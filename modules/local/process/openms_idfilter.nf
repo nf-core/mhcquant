@@ -1,10 +1,9 @@
 // Import generic module functions
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-params.options = [:]
-options    = initOptions(params.options)
+options = initOptions(params.options)
 
-process OPENMS_PERCOLATORADAPTER {
+process OPENMS_IDFILTER {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
@@ -17,21 +16,26 @@ process OPENMS_PERCOLATORADAPTER {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), file(psm_file)
+        tuple val(id), val(Sample), val(Condition), file(id_file), file(peptide_filter)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), file("*.idXML"), emit: idxml   
+        tuple val(id), val(Sample), val(Condition), file("*.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
 
     script:
         def software = getSoftwareName(task.process)
-        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}_${id}"
+        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${id}_-_${Sample}_${Condition}_idx_fdr_filtered"
+        def whitelist = "${peptide_filter}"
+
+        if (whitelist == "input.2") {
+            whitelist = " "
+        } 
 
         """
-            OMP_NUM_THREADS=${task.cpus} \\
-            PercolatorAdapter -in ${psm_file} \\
+            IDFilter -in ${id_file} \\
                 -out ${prefix}.idXML \\
-                $options.args
+                -threads ${task.cpus} \\
+                $options.args ${whitelist}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }
