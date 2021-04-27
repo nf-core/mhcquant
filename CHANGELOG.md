@@ -1,6 +1,6 @@
 # nf-core/mhcquant: Changelog
 
-## 1.6.1dev - [25.03.21]
+## v1.6.1 nf-core/mhcquant "Lightspeed Hummingbird" - 2020/04/27
 
 ### `Added`
 
