@@ -4,7 +4,7 @@
 
 ### `Added`
 
-Template update to 1.13.3
+Template update to 1.14
 
 ## v1.6.0 nf-core/mhcquant "Beijing Duck" - 2020/09/11
 
