@@ -38,7 +38,7 @@ def get_samplesheet_paths(LinkedHashMap row) {
     if (!file(row.Filename).exists()) {
         exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.Filename}"
     } else {
-        array = [ meta, [ file(row.Filename) ] ]
+        array = [ meta, file(row.Filename) ]
     }
     return array    
 }

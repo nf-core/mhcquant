@@ -3,7 +3,8 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-def VERSION = '2.3.2'
+def VERSIONFRED2 = '2.0.6'
+def VERSIONMHCNUGGETS = '2.3.2'
 
 process PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2 {
 
@@ -24,6 +25,7 @@ process PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2 {
     script:
         """
             mhcnuggets_predict_peptides.py --peptides ${preprocessed_peptides} --alleles '${class_2_alleles}' --output _predicted_peptides_class_2
-            echo $VERSION > mhcnuggets.version.txt
+            echo $VERSIONFRED2 > fred2.version.txt
+            echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
         """
 }

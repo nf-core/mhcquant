@@ -32,10 +32,11 @@ process OPENMS_COMETADAPTER {
     script:
         def software = getSoftwareName(task.process)
         // def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+        def prefix   = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}_${Condition}_${id}"
         
         """
             CometAdapter -in ${mzml_file} \\
-                -out ${Sample}_${Condition}_${id}.idXML \\
+                -out ${prefix}.idXML \\
                 -database ${fasta_decoy} \\
                 -threads $task.cpus $options.args
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt

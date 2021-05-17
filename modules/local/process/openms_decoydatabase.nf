@@ -18,9 +18,6 @@ process OPENMS_DECOYDATABASE {
     output:
         tuple val("$id"), val("$Sample"), file("${fastafile.baseName}_decoy.fasta"), emit: decoy
         path "*.version.txt", emit: version
-    
-    when:
-        !params.skip_decoy_generation
 
     script:
         def software = getSoftwareName(task.process)
