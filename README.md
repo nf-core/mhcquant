@@ -40,12 +40,16 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 4. Start running your own analysis!
 
     ```bash
+<<<<<<< HEAD
     nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
                                   --input 'samples.tsv'
                                   --fasta 'SWISSPROT_2020.fasta'
                                   --allele_sheet 'alleles.tsv' 
                                   --predict_class_1 
                                   --refine_fdr_on_predicted_subset
+=======
+    nextflow run nf-core/mhcquant -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input '*_R{1,2}.fastq.gz' --genome GRCh37
+>>>>>>> TEMPLATE
     ```
 
 See [usage docs](https://nf-co.re/mhcquant/usage) for all of the available options when running the pipeline.

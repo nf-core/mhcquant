@@ -379,12 +379,15 @@
                     "default": true,
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
+<<<<<<< HEAD
                 },
                 "skip_multiqc": {
                     "type": "boolean",
                     "description": "Skip MultiQC.",
                     "fa_icon": "fas fa-fast-forward",
                     "default": true
+=======
+>>>>>>> TEMPLATE
                 },
                 "email_on_fail": {
                     "type": "string",
@@ -421,6 +424,7 @@
                     "description": "Show all params when using `--help`",
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+<<<<<<< HEAD
                 },
                 "max_multiqc_email_size": {
                     "type": "string",
@@ -434,6 +438,8 @@
                     "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
                     "hidden": true,
                     "fa_icon": "fas fa-bacon"    
+=======
+>>>>>>> TEMPLATE
                 }
             }
         },
@@ -457,7 +463,11 @@
                     "description": "Maximum amount of memory that can be requested for any single job.",
                     "default": "128.GB",
                     "fa_icon": "fas fa-memory",
+<<<<<<< HEAD
                     "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
+=======
+                    "pattern": "^[\\d\\.]+\\s*.(K|M|G|T)?B$",
+>>>>>>> TEMPLATE
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
                 },
@@ -466,7 +476,11 @@
                     "description": "Maximum amount of time that can be requested for any single job.",
                     "default": "240.h",
                     "fa_icon": "far fa-clock",
+<<<<<<< HEAD
                     "pattern": "^(\\d+\\.?\\s*(s|m|h|day)\\s*)+$",
+=======
+                    "pattern": "^[\\d\\.]+\\.*(s|m|h|d)$",
+>>>>>>> TEMPLATE
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }

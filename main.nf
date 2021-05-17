@@ -20,7 +20,7 @@ def json_schema = "$projectDir/nextflow_schema.json"
 if (params.help) {
     log.info nfcoreHeader()
     def command = "nextflow run nf-core/mhcquant --input 'sample_sheet.tsv' --fasta 'SWISSPROT_2020.fasta'  --allele_sheet 'alleles.tsv'  --predict_class_1  --refine_fdr_on_predicted_subset -profile standard,docker"
-    log.info Schema.params_help(workflow, params, json_schema, command)
+    log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
     exit 0
 }
 
