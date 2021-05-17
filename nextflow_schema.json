@@ -381,8 +381,10 @@
                     "hidden": true
                 },
                 "skip_multiqc": {
-                    "type": "string",
-                    "default": "true"
+                    "type": "boolean",
+                    "description": "Skip MultiQC.",
+                    "fa_icon": "fas fa-fast-forward",
+                    "default": true
                 },
                 "email_on_fail": {
                     "type": "string",
@@ -422,10 +424,16 @@
                 },
                 "max_multiqc_email_size": {
                     "type": "string",
-                    "default": "25.MB"
+                    "description": "File size limit when attaching MultiQC reports to summary emails.",
+                    "default": "25.MB",
+                    "fa_icon": "fas fa-file-upload",
+                    "hidden": true
                 },
                 "enable_conda": {
-                    "type": "string"
+                    "type": "boolean",
+                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-bacon"    
                 }
             }
         },
