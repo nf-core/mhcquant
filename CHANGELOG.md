@@ -1,5 +1,11 @@
 # nf-core/mhcquant: Changelog
 
+## v1.6.1 nf-core/mhcquant "Lightspeed Hummingbird" - 2020/04/27
+
+### `Added`
+
+Template update to 1.14
+
 ## v1.6.0 nf-core/mhcquant "Beijing Duck" - 2020/09/11
 
 ### `Added`
@@ -8,7 +14,6 @@
 - Added parameter json schema
 - Added full size AWS test profile
 - Included new parameters for Neutral loss and precursor ion inclusion
-
 
 ### `Fixed`
 
