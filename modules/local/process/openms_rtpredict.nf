@@ -9,11 +9,11 @@ process OPENMS_RTPREDICT {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'RT_prediction', publish_id:'RT_prediction') }
 
-    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::openms=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
+        container "https://depot.galaxyproject.org/singularity/openms:2.5.0--h4afb90d_6"
     } else {
-        container "quay.io/biocontainers/openms-thirdparty:2.5.0--6"
+        container "quay.io/biocontainers/openms:2.5.0--h4afb90d_6"
     }
 
     input:

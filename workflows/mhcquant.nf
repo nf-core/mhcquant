@@ -131,8 +131,6 @@ id_filter_qvalue_options.suffix = "_all_ids_merged_psm_perc_filtered"
 
 include { hasExtension }                                    from '../modules/local/process/functions'
 
-include { GET_SOFTWARE_VERSIONS }                           from '../modules/local/process/get_software_versions'                            addParams( options: [publish_files : ['tsv':'']]   )
-
 include { INPUT_CHECK }                                     from '../modules/local/subworkflow/input_check'                                  addParams( options: [:] )           
 include { GENERATE_PROTEINS_FROM_VCF }                      from '../modules/local/process/generate_proteins_from_vcf'                       addParams( options: generate_proteins_from_vcf_options )
 include { OPENMS_DECOYDATABASE }                            from '../modules/local/process/openms_decoydatabase'                             addParams( options: [:] )
@@ -178,6 +176,8 @@ include { POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }      from '../modules/loc
 include { OPENMS_RTMODEL }                                  from '../modules/local/process/openms_rtmodel'                                   addParams( options: [:] )
 include { OPENMS_RTPREDICT as OPENMS_RTPREDICT_FOUND_PEPTIDES}      from '../modules/local/process/openms_rtpredict'                         addParams( options: [suffix:"_id_files_for_rt_prediction_RTpredicted"] )
 include { OPENMS_RTPREDICT as OPENMS_RTPREDICT_NEOEPITOPES}         from '../modules/local/process/openms_rtpredict'                         addParams( options: [suffix:"_txt_file_for_rt_prediction_RTpredicted"] )
+
+include { GET_SOFTWARE_VERSIONS }                           from '../modules/local/process/get_software_versions'                            addParams( options: [publish_files : ['csv':'']]   )
 
 ////////////////////////////////////////////////////
 /* --              CREATE CHANNELS             -- */
@@ -231,7 +231,7 @@ workflow MHCQUANT {
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out[0].join(OPENMS_DECOYDATABASE.out[0], by:1))
 
     if(!params.skip_quantification) {
-        //Calculate fdr for id based alignment
+        // Calculate fdr for id based alignment
         OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out[0])
         // Filter fdr for id based alignment
         OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml.flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]}) 
