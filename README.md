@@ -70,9 +70,11 @@ The nf-core/mhcquant pipeline comes with documentation about the pipeline: [usag
 We thank the following people for their extensive assistance in the development
 of this pipeline:
 
-* Leon Bichmann
-* Lukas Heumos
-* Alexander Peltzer.
+* Leon Bichmann (@Leon-Bichmann)
+* Lukas Heumos (@Zethson)
+* Alexander Peltzer (@apeltzer)
+
+The pipeline was converted to Nextflow DSL2 by Marissa Dubbelaar (@marissaDubbelaar)
 
 ## Contributions and Support
 
