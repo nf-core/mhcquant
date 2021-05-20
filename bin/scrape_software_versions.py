@@ -1,43 +1,17 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from collections import OrderedDict
-import re
+import os
 
-regexes = {
-    'nf-core/mhcquant': ['v_pipeline.txt', r"(\S+)"],
-    'Nextflow': ['v_nextflow.txt', r"(\S+)"],
-    'Comet': ['comet.params.new', r"comet_version (\S+)"],
-    'Percolator': ['v_percolator.txt', r"version (\S+)"],
-    'MHCFlurry': ['v_mhcflurry.txt', r"mhcflurry (\S+)"],
-    'MHCNuggets': ['v_mhcnuggets.txt', r"(\S+)"],
-    'OpenMS': ['v_openms.txt', r"Version: (\S+)"],
-    'Fred2': ['v_fred2.txt', r"(\S+)"]
-}
-results = OrderedDict()
-results['nf-core/mhcquant'] = '<span style="color:#999999;\">N/A</span>'
-results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
-results['Comet'] = '<span style="color:#999999;\">N/A</span>'
-results['Percolator'] = '<span style="color:#999999;\">N/A</span>'
-results['OpenMS'] = '<span style="color:#999999;\">N/A</span>'
-results['MHCFlurry']= '<span style="color:#999999;\">N/A</span>'
-results['MHCNuggets']= '<span style="color:#999999;\">N/A</span>'
-results['Fred2']= '<span style="color:#999999;\">N/A</span>'
+results = {}
+version_files = [x for x in os.listdir('.') if x.endswith('.version.txt')]
+for version_file in version_files:
+    software = version_file.replace('.version.txt','')
+    if software == 'pipeline':
+        software = 'nf-core/mhcquant'
 
-# Search each file using its regex
-for k, v in regexes.items():
-    try:
-        with open(v[0]) as x:
-            versions = x.read()
-            match = re.search(v[1], versions)
-            if match:
-                results[k] = "v{}".format(match.group(1))
-    except IOError:
-        results[k] = False
-
-# Remove software set to false in results
-for k in list(results):
-    if not results[k]:
-        del results[k]
+    with open(version_file) as fin:
+        version = fin.read().strip()
+    results[software] = version
 
 # Dump to YAML
 print(

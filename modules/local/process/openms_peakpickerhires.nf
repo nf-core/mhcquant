@@ -3,7 +3,6 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-//TODO: combine in a subflow --> when needs to be removed
 process OPENMS_PEAKPICKERHIRES {
     conda (params.enable_conda ? "bioconda::openms=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -18,9 +17,6 @@ process OPENMS_PEAKPICKERHIRES {
     output:
         tuple val("$id"), val("$Sample"), val("$Condition"), file("*.mzML"), emit: mzml   
         path  "*.version.txt", emit: version
-
-    when:
-        params.run_centroidisation
 
     script:
         def software = getSoftwareName(task.process)
