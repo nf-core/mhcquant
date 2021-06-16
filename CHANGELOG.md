@@ -16,6 +16,7 @@ DSL1 to DSL2 conversion
 ### `Dependencies`
 
 ### `Deprecated`
+
 ## v1.6.0 nf-core/mhcquant "Beijing Duck" - 2020/09/11
 
 ### `Added`
