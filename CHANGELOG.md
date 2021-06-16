@@ -17,12 +17,6 @@ DSL1 to DSL2 conversion
 
 ### `Deprecated`
 
-## v1.6.1 nf-core/mhcquant "Lightspeed Hummingbird" - 2020/04/27
-
-### `Added`
-
-Template update to 1.14
-
 ## v1.6.0 nf-core/mhcquant "Beijing Duck" - 2020/09/11
 
 ### `Added`

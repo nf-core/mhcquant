@@ -128,7 +128,8 @@ def check_samplesheet(file_in, file_out):
                 for sample in sorted(sample_run_dict[condition].keys()):
                     ## Write to file
                     for idx, sample_info in enumerate(sample_run_dict[condition][sample]):
-                        sample_id = "{}_{}_{}".format(sample, condition, idx + 1)
+                        # sample_id = "{}_{}_{}".format(idx + 1, sample, condition)
+                        sample_id = "{}_{}".format(sample, condition)
                         fout.write("\t".join([sample_id] + sample_info) + "\n")
 
 
