@@ -17,6 +17,7 @@ if (params.input)   { sample_sheet = file(params.input) }   else { exit 1, 'Inpu
 if (params.fasta)   { params.fasta = params.fasta }         else { exit 1, 'No database fasta was provided, make sure you have used the '--fasta' option.' }
 if (params.outdir)  { params.outdir  = './results' }        else { log.warn 'Results into \'./results\'.\nIf you want to define a result directory, please use the --outdir option.' }
 
+
 // Read the content of the sample sheet
 // Reading to content of the sample sheet and defining the different columns for further use
 Channel.from( sample_sheet )
@@ -24,6 +25,8 @@ Channel.from( sample_sheet )
 .map { col -> tuple("${col.ID}", "${col.Sample}", "${col.Condition}", file("${col.ReplicateFileName}", checkifExists: true))}
 // .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])] } 
 .set { ch_samples_from_sheet }
+
+ch_samples_from_sheet.view()
 
 // Checks whether the extentions of the files are known
 ch_samples_from_sheet.branch {
@@ -105,6 +108,7 @@ c_ions = params.use_c_ions ? '-use_C_ions true' : ''
 NL_ions = params.use_NL_ions ? '-use_NL_ions true' : ''
 rm_precursor = params.remove_precursor_peak ? '-remove_precursor_peak true' : ''
 fdr_level = (params.fdr_level == 'psm-level-fdrs') ? '' : '-'+params.fdr_level
+fdr_adj_threshold = (params.fdr_threshold == '0.01') ? '0.05' : params.fdr_threshold
 
 ////////////////////////////////////////////////////
 /* --    IMPORT LOCAL MODULES/SUBWORKFLOWS     -- */
@@ -116,7 +120,11 @@ def openms_comet_adapter_options = modules['openms_comet_adapter']
 def generate_proteins_from_vcf_options = modules['generate_proteins_from_vcf']
 def percolator_adapter_options = modules['percolator_adapter']
 def id_filter_options = modules['id_filter']
+def id_filter_for_alignment_options = id_filter_options.clone()
 def id_filter_whitelist_options = modules['id_filter_whitelist']
+
+id_filter_options.args += " -score:pep " + params.fdr_threshold
+id_filter_for_alignment_options.args += " -score:pep "  + fdr_adj_threshold
 
 openms_comet_adapter_options.args += x_ions + z_ions + c_ions + a_ions + NL_ions + rm_precursor
 generate_proteins_from_vcf_options.args += variant_indel_filter + variant_snp_filter + variant_frameshift_filter
@@ -129,9 +137,13 @@ percolator_adapter_klammer_options.args += " -klammer"
 def id_filter_qvalue_options = id_filter_options.clone()
 id_filter_qvalue_options.suffix = "_all_ids_merged_psm_perc_filtered"
 
+
+
+
+
 include { hasExtension }                                    from '../modules/local/process/functions'
 
-include { INPUT_CHECK }                                     from '../modules/local/subworkflow/input_check'                                  addParams( options: [:] )           
+// include { INPUT_CHECK }                                     from '../modules/local/subworkflow/input_check'                                  addParams( options: [:] )           
 include { GENERATE_PROTEINS_FROM_VCF }                      from '../modules/local/process/generate_proteins_from_vcf'                       addParams( options: generate_proteins_from_vcf_options )
 include { OPENMS_DECOYDATABASE }                            from '../modules/local/process/openms_decoydatabase'                             addParams( options: [:] )
 include { OPENMS_THERMORAWFILEPARSER }                      from '../modules/local/process/openms_thermorawfileparser'                       addParams( options: [:] )
@@ -139,7 +151,7 @@ include { OPENMS_PEAKPICKERHIRES }                          from '../modules/loc
 include { OPENMS_COMETADAPTER }                             from '../modules/local/process/openms_cometadapter'                              addParams( options: openms_comet_adapter_options )
 include { OPENMS_PEPTIDEINDEXER }                           from '../modules/local/process/openms_peptideindexer'                            addParams( options: [:] )
 include { OPENMS_FALSEDISCOVERYRATE }                       from '../modules/local/process/openms_falsediscoveryrate'                        addParams( options: [:] )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }from '../modules/local/process/openms_idfilter'                                  addParams( options: id_filter_options )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }from '../modules/local/process/openms_idfilter'                                  addParams( options: id_filter_for_alignment_options )
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }      from '../modules/local/process/openms_idfilter'                                  addParams( options: id_filter_qvalue_options )
 include { OPENMS_MAPALIGNERIDENTIFICATION }                 from '../modules/local/process/openms_mapaligneridentification'                  addParams( options: openms_map_aligner_identification_options )
 
@@ -195,6 +207,14 @@ params.summary_params = [:]
 /* --           RUN MAIN WORKFLOW              -- */
 ////////////////////////////////////////////////////
 workflow MHCQUANT {
+
+    //INPUT_CHECK(sample_sheet)
+    //.map { meta, raw -> meta.id = meta.id.split('_')[0..-1].join('_')
+    //[ meta, raw ] }
+    //.groupTuple(by: [0])
+    //.map { it -> [ it[0], it[1].flatten() ] }
+    //.set { ch_samples_from_sheet }
+
     ch_software_versions = Channel.empty()
     // A warning message will be given when the format differs from the '.raw' or '.mzML' extention
     ms_files.other.subscribe { row -> log.warn("Unknown format for entry " + row[3] + " in provided sample sheet, line will be ignored."); exit 1 }
@@ -203,7 +223,7 @@ workflow MHCQUANT {
     if ( params.include_proteins_from_vcf ) {
         // If specified translate variants to proteins and include in reference fasta
         GENERATE_PROTEINS_FROM_VCF(input_fasta.combine(input_vcf, by:1))
-        ch_fasta_file = GENERATE_PROTEINS_FROM_VCF.out[0]
+        ch_fasta_file = GENERATE_PROTEINS_FROM_VCF.out.vcf_fasta
     } else {
         ch_fasta_file = input_fasta
     }
@@ -211,24 +231,29 @@ workflow MHCQUANT {
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta_file)
+        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy
+    } else {
+        ch_decoy_db = ch_fasta_file.flatMap { it -> [tuple(it[0], it[1], null)]}
     }
 
     // Raw file conversion
     OPENMS_THERMORAWFILEPARSER(ms_files.raw)
+    ch_software_versions = ch_software_versions.mix(OPENMS_THERMORAWFILEPARSER.out.version.first().ifEmpty(null))
 
     if ( params.run_centroidisation ) {
         // Optional: Run Peak Picking as Preprocessing
         OPENMS_PEAKPICKERHIRES(ms_files.mzML)
-        ch_mzml_file = OPENMS_PEAKPICKERHIRES.out[0]
+        ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
     } else {
         ch_mzml_file = ms_files.mzML
     }
     
     // Run comet database search
-    OPENMS_COMETADAPTER(OPENMS_THERMORAWFILEPARSER.out[0].mix(ch_mzml_file).join(OPENMS_DECOYDATABASE.out[0], by:1, remainder:true))
-    ch_software_versions = ch_software_versions.mix(OPENMS_COMETADAPTER.out[1].first().ifEmpty(null))
+    OPENMS_COMETADAPTER(OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ch_mzml_file).join(ch_decoy_db, by:1, remainder:true))
+    ch_software_versions = ch_software_versions.mix(OPENMS_COMETADAPTER.out.version.first().ifEmpty(null))
+
     // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out[0].join(OPENMS_DECOYDATABASE.out[0], by:1))
+    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db, by:1))
 
     if(!params.skip_quantification) {
         // Calculate fdr for id based alignment
