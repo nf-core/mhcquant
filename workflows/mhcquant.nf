@@ -259,7 +259,8 @@ workflow MHCQUANT {
         // Calculate fdr for id based alignment
         OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out[0])
         // Filter fdr for id based alignment
-        OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml.flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]}) 
+        OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
+                .flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]}) 
         // Compute alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION(OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml.groupTuple(by: 1))
 
