@@ -262,7 +262,8 @@ workflow MHCQUANT {
         OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
                 .flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]}) 
         // Compute alignment rt transformation
-        OPENMS_MAPALIGNERIDENTIFICATION(OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml.groupTuple(by: 1))
+        OPENMS_MAPALIGNERIDENTIFICATION(OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
+                .groupTuple(by: 1))
 
         // Intermediate step to join RT transformation files with mzml and idxml channels
         ms_files.mzML
