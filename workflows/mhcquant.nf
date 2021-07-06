@@ -249,7 +249,10 @@ workflow MHCQUANT {
     }
     
     // Run comet database search
-    OPENMS_COMETADAPTER(OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ch_mzml_file).join(ch_decoy_db, by:1, remainder:true))
+    OPENMS_COMETADAPTER(
+        OPENMS_THERMORAWFILEPARSER.out.mzml
+                .mix(ch_mzml_file)
+                .join(ch_decoy_db, by:1, remainder:true))
     ch_software_versions = ch_software_versions.mix(OPENMS_COMETADAPTER.out.version.first().ifEmpty(null))
 
     // Index decoy and target hits
