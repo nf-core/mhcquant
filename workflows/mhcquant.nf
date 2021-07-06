@@ -141,55 +141,55 @@ id_filter_qvalue_options.suffix = "_all_ids_merged_psm_perc_filtered"
 
 
 
-include { hasExtension }                                    from '../modules/local/process/functions'
+include { hasExtension }                                    from '../modules/local/functions'
 
 // include { INPUT_CHECK }                                     from '../modules/local/subworkflow/input_check'                                  addParams( options: [:] )           
-include { GENERATE_PROTEINS_FROM_VCF }                      from '../modules/local/process/generate_proteins_from_vcf'                       addParams( options: generate_proteins_from_vcf_options )
-include { OPENMS_DECOYDATABASE }                            from '../modules/local/process/openms_decoydatabase'                             addParams( options: [:] )
-include { OPENMS_THERMORAWFILEPARSER }                      from '../modules/local/process/openms_thermorawfileparser'                       addParams( options: [:] )
-include { OPENMS_PEAKPICKERHIRES }                          from '../modules/local/process/openms_peakpickerhires'                           addParams( options: [:] )
-include { OPENMS_COMETADAPTER }                             from '../modules/local/process/openms_cometadapter'                              addParams( options: openms_comet_adapter_options )
-include { OPENMS_PEPTIDEINDEXER }                           from '../modules/local/process/openms_peptideindexer'                            addParams( options: [:] )
-include { OPENMS_FALSEDISCOVERYRATE }                       from '../modules/local/process/openms_falsediscoveryrate'                        addParams( options: [:] )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }from '../modules/local/process/openms_idfilter'                                  addParams( options: id_filter_for_alignment_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }      from '../modules/local/process/openms_idfilter'                                  addParams( options: id_filter_qvalue_options )
-include { OPENMS_MAPALIGNERIDENTIFICATION }                 from '../modules/local/process/openms_mapaligneridentification'                  addParams( options: openms_map_aligner_identification_options )
+include { GENERATE_PROTEINS_FROM_VCF }                      from '../modules/local/generate_proteins_from_vcf'                       addParams( options: generate_proteins_from_vcf_options )
+include { OPENMS_DECOYDATABASE }                            from '../modules/local/openms_decoydatabase'                             addParams( options: [:] )
+include { OPENMS_THERMORAWFILEPARSER }                      from '../modules/local/openms_thermorawfileparser'                       addParams( options: [:] )
+include { OPENMS_PEAKPICKERHIRES }                          from '../modules/local/openms_peakpickerhires'                           addParams( options: [:] )
+include { OPENMS_COMETADAPTER }                             from '../modules/local/openms_cometadapter'                              addParams( options: openms_comet_adapter_options )
+include { OPENMS_PEPTIDEINDEXER }                           from '../modules/local/openms_peptideindexer'                            addParams( options: [:] )
+include { OPENMS_FALSEDISCOVERYRATE }                       from '../modules/local/openms_falsediscoveryrate'                        addParams( options: [:] )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }from '../modules/local/openms_idfilter'                                  addParams( options: id_filter_for_alignment_options )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }      from '../modules/local/openms_idfilter'                                  addParams( options: id_filter_qvalue_options )
+include { OPENMS_MAPALIGNERIDENTIFICATION }                 from '../modules/local/openms_mapaligneridentification'                  addParams( options: openms_map_aligner_identification_options )
 
 include { 
     OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERMZML
-    OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERIDXML }        from '../modules/local/process/openms_maprttransformer'                 addParams( options: [:] )
+    OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERIDXML }        from '../modules/local/openms_maprttransformer'                 addParams( options: [:] )
 
-include { OPENMS_IDMERGER }                                 from '../modules/local/process/openms_idmerger'                                  addParams( options: [:] )
-include { OPENMS_PSMFEATUREEXTRACTOR }                      from '../modules/local/process/openms_psmfeatureextractor'                       addParams( options: [:] )
-include { OPENMS_PERCOLATORADAPTER }                        from '../modules/local/process/openms_percolatoradapter'                         addParams( options: percolator_adapter_options )
-include { OPENMS_PERCOLATORADAPTER as OPENMS_PERCOLATORADAPTER_KLAMMER } from '../modules/local/process/openms_percolatoradapter'            addParams( options: percolator_adapter_klammer_options )
+include { OPENMS_IDMERGER }                                 from '../modules/local/openms_idmerger'                                  addParams( options: [:] )
+include { OPENMS_PSMFEATUREEXTRACTOR }                      from '../modules/local/openms_psmfeatureextractor'                       addParams( options: [:] )
+include { OPENMS_PERCOLATORADAPTER }                        from '../modules/local/openms_percolatoradapter'                         addParams( options: percolator_adapter_options )
+include { OPENMS_PERCOLATORADAPTER as OPENMS_PERCOLATORADAPTER_KLAMMER } from '../modules/local/openms_percolatoradapter'            addParams( options: percolator_adapter_klammer_options )
 
 include { REFINE_FDR_ON_PREDICTED_SUBSET }                  from '../modules/local/subworkflow/refine_fdr_on_predicted_subset'               addParams( run_percolator_options : percolator_adapter_options, filter_options: id_filter_options, whitelist_filter_options: id_filter_whitelist_options)
 
-include { OPENMS_FEATUREFINDERIDENTIFICATION }              from '../modules/local/process/openms_featurefinderidentification'               addParams( options: [:] )
-include { OPENMS_FEATURELINKERUNLABELEDKD }                 from '../modules/local/process/openms_featurelinkerunlabeledkd'                  addParams( options: [:] )
-include { OPENMS_IDCONFLICTRESOLVER }                       from '../modules/local/process/openms_idconflictresolver'                        addParams( options: [:] )
-include { OPENMS_TEXTEXPORTER }                             from '../modules/local/process/openms_textexporter'                              addParams( options: [:] )
-include { OPENMS_MZTABEXPORTER }                            from '../modules/local/process/openms_mztabexporter'                             addParams( options: [:] )
+include { OPENMS_FEATUREFINDERIDENTIFICATION }              from '../modules/local/openms_featurefinderidentification'               addParams( options: [:] )
+include { OPENMS_FEATURELINKERUNLABELEDKD }                 from '../modules/local/openms_featurelinkerunlabeledkd'                  addParams( options: [:] )
+include { OPENMS_IDCONFLICTRESOLVER }                       from '../modules/local/openms_idconflictresolver'                        addParams( options: [:] )
+include { OPENMS_TEXTEXPORTER }                             from '../modules/local/openms_textexporter'                              addParams( options: [:] )
+include { OPENMS_MZTABEXPORTER }                            from '../modules/local/openms_mztabexporter'                             addParams( options: [:] )
 
-include { PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 }              from '../modules/local/process/predict_peptides_mhcflurry_class_1'               addParams( options: [:] )
-include { PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 }          from '../modules/local/process/preprocess_peptides_mhcnuggets_class_2'           addParams( options: [:] )
-include { PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2 }             from '../modules/local/process/predict_peptides_mhcnuggets_class_2'              addParams( options: [:] )
-include { POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 }         from '../modules/local/process/postprocess_peptides_mhcnuggets_class_2'          addParams( options: [:] )
-include { PREDICT_POSSIBLE_NEOEPITOPES }                    from '../modules/local/process/predict_possible_neoepitopes'                     addParams( options: [:] )
-include { PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES }            from '../modules/local/process/predict_possible_class_2_neoepitopes'             addParams( options: [:] )
-include { RESOLVE_FOUND_NEOEPITOPES }                       from '../modules/local/process/resolve_found_neoepitopes'                        addParams( options: [:] )
-include { RESOLVE_FOUND_CLASS_2_NEOEPITOPES }               from '../modules/local/process/resolve_found_class_2_neoepitopes'                addParams( options: [:] )
-include { PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 }           from '../modules/local/process/predict_neoepitopes_mhcflurry_class_1'            addParams( options: [:] )
-include { PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }       from '../modules/local/process/preprocess_neoepitopes_mhcnuggets_class_2'        addParams( options: [:] )
-include { PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 }          from '../modules/local/process/predict_neoepitopes_mhcnuggets_class_2'           addParams( options: [:] )
-include { POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }      from '../modules/local/process/postprocess_neoepitopes_mhcnuggets_class_2'       addParams( options: [:] )
+include { PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 }              from '../modules/local/predict_peptides_mhcflurry_class_1'               addParams( options: [:] )
+include { PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 }          from '../modules/local/preprocess_peptides_mhcnuggets_class_2'           addParams( options: [:] )
+include { PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2 }             from '../modules/local/predict_peptides_mhcnuggets_class_2'              addParams( options: [:] )
+include { POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 }         from '../modules/local/postprocess_peptides_mhcnuggets_class_2'          addParams( options: [:] )
+include { PREDICT_POSSIBLE_NEOEPITOPES }                    from '../modules/local/predict_possible_neoepitopes'                     addParams( options: [:] )
+include { PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES }            from '../modules/local/predict_possible_class_2_neoepitopes'             addParams( options: [:] )
+include { RESOLVE_FOUND_NEOEPITOPES }                       from '../modules/local/resolve_found_neoepitopes'                        addParams( options: [:] )
+include { RESOLVE_FOUND_CLASS_2_NEOEPITOPES }               from '../modules/local/resolve_found_class_2_neoepitopes'                addParams( options: [:] )
+include { PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 }           from '../modules/local/predict_neoepitopes_mhcflurry_class_1'            addParams( options: [:] )
+include { PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }       from '../modules/local/preprocess_neoepitopes_mhcnuggets_class_2'        addParams( options: [:] )
+include { PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 }          from '../modules/local/predict_neoepitopes_mhcnuggets_class_2'           addParams( options: [:] )
+include { POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 }      from '../modules/local/postprocess_neoepitopes_mhcnuggets_class_2'       addParams( options: [:] )
 
-include { OPENMS_RTMODEL }                                  from '../modules/local/process/openms_rtmodel'                                   addParams( options: [:] )
-include { OPENMS_RTPREDICT as OPENMS_RTPREDICT_FOUND_PEPTIDES}      from '../modules/local/process/openms_rtpredict'                         addParams( options: [suffix:"_id_files_for_rt_prediction_RTpredicted"] )
-include { OPENMS_RTPREDICT as OPENMS_RTPREDICT_NEOEPITOPES}         from '../modules/local/process/openms_rtpredict'                         addParams( options: [suffix:"_txt_file_for_rt_prediction_RTpredicted"] )
+include { OPENMS_RTMODEL }                                  from '../modules/local/openms_rtmodel'                                   addParams( options: [:] )
+include { OPENMS_RTPREDICT as OPENMS_RTPREDICT_FOUND_PEPTIDES}      from '../modules/local/openms_rtpredict'                         addParams( options: [suffix:"_id_files_for_rt_prediction_RTpredicted"] )
+include { OPENMS_RTPREDICT as OPENMS_RTPREDICT_NEOEPITOPES}         from '../modules/local/openms_rtpredict'                         addParams( options: [suffix:"_txt_file_for_rt_prediction_RTpredicted"] )
 
-include { GET_SOFTWARE_VERSIONS }                           from '../modules/local/process/get_software_versions'                            addParams( options: [publish_files : ['csv':'']]   )
+include { GET_SOFTWARE_VERSIONS }                           from '../modules/local/get_software_versions'                            addParams( options: [publish_files : ['csv':'']]   )
 
 ////////////////////////////////////////////////////
 /* --              CREATE CHANNELS             -- */

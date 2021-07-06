@@ -32,6 +32,13 @@ def summary_params = Schema.params_summary_map(workflow, params, json_schema)
 log.info Schema.params_summary_log(workflow, params, json_schema)
 
 ////////////////////////////////////////////////////
+/* --         VALIDATE PARAMETERS              -- */
+////////////////////////////////////////////////////
+if (params.validate_params) {
+    NfcoreSchema.validateParameters(params, json_schema, log)
+}
+
+////////////////////////////////////////////////////
 /* --          PARAMETER CHECKS                -- */
 ////////////////////////////////////////////////////
 

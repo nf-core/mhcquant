@@ -18,12 +18,12 @@ def filter_refined_qvalue_options = params.filter_options.clone()
 filter_psms_options.suffix = "pred_filtered"
 filter_refined_qvalue_options.suffix = "perc_subset_filtered"
 
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../process/openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged_psm_perc_filtered" ] )
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../process/openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged" ] )
-include { PREDICT_PSMS }                                     from '../process/predict_psms'                                               addParams( options: [:] )
-include { OPENMS_PERCOLATORADAPTER }                         from '../process/openms_percolatoradapter'                                   addParams( options: percolator_adapter_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../process/openms_idfilter'                                            addParams( options: filter_psms_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../process/openms_idfilter'                                            addParams( options: filter_refined_qvalue_options )
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged_psm_perc_filtered" ] )
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged" ] )
+include { PREDICT_PSMS }                                     from '../predict_psms'                                               addParams( options: [:] )
+include { OPENMS_PERCOLATORADAPTER }                         from '../openms_percolatoradapter'                                   addParams( options: percolator_adapter_options )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../openms_idfilter'                                            addParams( options: filter_psms_options )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../openms_idfilter'                                            addParams( options: filter_refined_qvalue_options )
 
 
 
