@@ -249,7 +249,10 @@ workflow MHCQUANT {
     }
     
     // Run comet database search
-    OPENMS_COMETADAPTER(OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ch_mzml_file).join(ch_decoy_db, by:1, remainder:true))
+    OPENMS_COMETADAPTER(
+        OPENMS_THERMORAWFILEPARSER.out.mzml
+                .mix(ch_mzml_file)
+                .join(ch_decoy_db, by:1, remainder:true))
     ch_software_versions = ch_software_versions.mix(OPENMS_COMETADAPTER.out.version.first().ifEmpty(null))
 
     // Index decoy and target hits
@@ -259,9 +262,11 @@ workflow MHCQUANT {
         // Calculate fdr for id based alignment
         OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out[0])
         // Filter fdr for id based alignment
-        OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml.flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]}) 
+        OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
+                .flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]}) 
         // Compute alignment rt transformation
-        OPENMS_MAPALIGNERIDENTIFICATION(OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml.groupTuple(by: 1))
+        OPENMS_MAPALIGNERIDENTIFICATION(OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
+                .groupTuple(by: 1))
 
         // Intermediate step to join RT transformation files with mzml and idxml channels
         ms_files.mzML
