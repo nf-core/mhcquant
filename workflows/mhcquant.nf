@@ -357,10 +357,13 @@ workflow MHCQUANT {
             PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1(peptides_class_1_alleles.join(RESOLVE_FOUND_NEOEPITOPES.out.csv, by:1))
             // Predict all possible neoepitopes from vcf
             PREDICT_POSSIBLE_NEOEPITOPES(peptides_class_1_alleles.join(input_vcf, by:[0,1], remainder:true))
+            ch_predicted_possible_neoepitopes = PREDICT_POSSIBLE_NEOEPITOPES.out[0]
             // Resolve found neoepitopes
-            RESOLVE_FOUND_NEOEPITOPES(OPENMS_MZTABEXPORTER.out.mztab.join(PREDICT_POSSIBLE_NEOEPITOPES.out[0], by:[0,1], remainder:true))
+            RESOLVE_FOUND_NEOEPITOPES(OPENMS_MZTABEXPORTER.out.mztab.join(ch_predicted_possible_neoepitopes, by:[0,1], remainder:true))
         }
-    } 
+    } else {
+        ch_predicted_possible_neoepitopes = Channel.empty()
+    }
 
     if ( params.predict_class_2 ) {
         // Preprocess found peptides for MHCNuggets prediction class 2
@@ -373,8 +376,9 @@ workflow MHCQUANT {
         if ( params.include_proteins_from_vcf ) { 
             // Predict all possible class 2 neoepitopes from vcf
             PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(input_vcf, by:[0,1], remainder:true))            
+            ch_predicted_possible_neoepitopes_II = PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0]
             // Resolve found class 2 neoepitopes
-            RESOLVE_FOUND_CLASS_2_NEOEPITOPES(OPENMS_MZTABEXPORTER.out.mztab.join(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[0], by:[0,1], remainder:true)) 
+            RESOLVE_FOUND_CLASS_2_NEOEPITOPES(OPENMS_MZTABEXPORTER.out.mztab.join(ch_predicted_possible_neoepitopes_II, by:[0,1], remainder:true)) 
             // Preprocess resolved neoepitopes in a format that MHCNuggets understands
             PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out.csv)
             // Predict class 2 MHCNuggets
@@ -390,6 +394,8 @@ workflow MHCQUANT {
             // Add the information to software versions
             ch_software_versions = ch_software_versions.mix(PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2.out.version.first().ifEmpty(null))
         }
+    } else {
+        ch_predicted_possible_neoepitopes_II = Channel.empty()
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -399,7 +405,7 @@ workflow MHCQUANT {
         // Retention Times Predictor Found Peptides
         OPENMS_RTPREDICT_FOUND_PEPTIDES(filter_q_value.join(OPENMS_RTMODEL.out.complete, by:[0,1]))  
         // Retention Times Predictor possible Neoepitopes
-        OPENMS_RTPREDICT_NEOEPITOPES(PREDICT_POSSIBLE_NEOEPITOPES.out[1].mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out[1]).join(OPENMS_RTMODEL.out.complete, by:[0,1])) 
+        OPENMS_RTPREDICT_NEOEPITOPES(ch_predicted_possible_neoepitopes.mix(ch_predicted_possible_neoepitopes_II).join(OPENMS_RTMODEL.out.complete, by:[0,1])) 
     }
 
     /*
