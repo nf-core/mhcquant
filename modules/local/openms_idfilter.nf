@@ -16,7 +16,7 @@ process OPENMS_IDFILTER {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), path(id_file), path(peptide_filter)
+        tuple val(id), val(Sample), val(Condition), path(id_file), file(peptide_filter)
 
     output:
         tuple val(id), val(Sample), val(Condition), path("*.idXML"), emit: idxml   

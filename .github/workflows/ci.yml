@@ -47,12 +47,6 @@ jobs:
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
-    strategy:
-      matrix:
-        parameters:
-          - "--predict_class_1"
-          - "--predict_class_2"
-          - "--predict_RT"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -63,4 +57,4 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Run pipeline with additional params
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }}
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --predict_RT

@@ -26,8 +26,6 @@ Channel.from( sample_sheet )
 // .flatMap{it -> [tuple(it[0],it[1].toString(),it[2],it[3])] } 
 .set { ch_samples_from_sheet }
 
-ch_samples_from_sheet.view()
-
 // Checks whether the extentions of the files are known
 ch_samples_from_sheet.branch {
     raw: hasExtension(it[3], 'raw')
@@ -263,7 +261,7 @@ workflow MHCQUANT {
         OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out[0])
         // Filter fdr for id based alignment
         OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
-                .flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]}) 
+        .flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]}) 
         // Compute alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION(OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
                 .groupTuple(by: 1))
