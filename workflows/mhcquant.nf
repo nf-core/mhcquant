@@ -348,6 +348,7 @@ workflow MHCQUANT {
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     //  TODO: Replacement of custom scripts with epytope
+    ch_predicted_possible_neoepitopes = Channel.empty()
     if ( params.predict_class_1 ) {
         // If specified predict peptides using MHCFlurry
         PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(OPENMS_MZTABEXPORTER.out.mztab.combine(peptides_class_1_alleles, by:1))
@@ -361,10 +362,9 @@ workflow MHCQUANT {
             // Resolve found neoepitopes
             RESOLVE_FOUND_NEOEPITOPES(OPENMS_MZTABEXPORTER.out.mztab.join(ch_predicted_possible_neoepitopes, by:[0,1], remainder:true))
         }
-    } else {
-        ch_predicted_possible_neoepitopes = Channel.empty()
     }
 
+    ch_predicted_possible_neoepitopes_II = Channel.empty()
     if ( params.predict_class_2 ) {
         // Preprocess found peptides for MHCNuggets prediction class 2
         PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(OPENMS_MZTABEXPORTER.out.mztab)
@@ -394,12 +394,10 @@ workflow MHCQUANT {
             // Add the information to software versions
             ch_software_versions = ch_software_versions.mix(PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2.out.version.first().ifEmpty(null))
         }
-    } else {
-        ch_predicted_possible_neoepitopes_II = Channel.empty()
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
 
-    if ( params.predict_RT ) {
+    if ( params.predict_RT ) {        
         // Train Retention Times Predictor
         OPENMS_RTMODEL(filter_q_value)
         // Retention Times Predictor Found Peptides
