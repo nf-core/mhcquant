@@ -1,9 +1,12 @@
 // Import generic module functions
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-options = initOptions(params.options)
+params.options = [:]
+options        = initOptions(params.options)
 
 process OPENMS_IDFILTER {
+    tag "$meta.id"
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
@@ -16,23 +19,23 @@ process OPENMS_IDFILTER {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), path(id_file), file(peptide_filter)
+        tuple val(meta), path(idxml), file(peptide_filter)
 
     output:
-        tuple val(id), val(Sample), val(Condition), path("*.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
 
     script:
         def software = getSoftwareName(task.process)
-        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${id}_-_${Sample}_${Condition}_idx_fdr_filtered"
         def whitelist = "${peptide_filter}"
+        def prefix = options.suffix ? "${idxml.baseName}_${options.suffix}" : "${meta.id}_-_idx_fdr_filtered"
 
         if (whitelist == "input.2") {
             whitelist = " "
         } 
 
         """
-            IDFilter -in ${id_file} \\
+            IDFilter -in ${idxml} \\
                 -out ${prefix}.idXML \\
                 -threads ${task.cpus} \\
                 $options.args ${whitelist}

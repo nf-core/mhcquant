@@ -2,10 +2,13 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+options        = initOptions(params.options)
 
 def VERSION = '2.3.2'
 
 process PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
+    tag "$meta"
+
     conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2--py_0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
@@ -14,15 +17,17 @@ process PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
     }
 
     input:
-        tuple val(Sample), val(id), path(preprocessed_neoepitopes), val(d), val(cl_2_alleles)
+        tuple val(meta), path(neoepitopes), val(alleles)
 
     output:
-        tuple val("$id"), val("$Sample"), path("*_predicted_neoepitopes_class_2"), emit: csv   
+        tuple val(meta), path("*_predicted_neoepitopes_class_2"), emit: csv   
         path  "*.version.txt", emit: version
 
     script:
-    """
-        mhcnuggets_predict_peptides.py --peptides ${preprocessed_neoepitopes} --alleles '${cl_2_alleles}' --output _predicted_neoepitopes_class_2
-        echo $VERSION > mhcnuggets.version.txt
-    """
+        def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_predicted_neoepitopes_class_2"
+
+        """
+            mhcnuggets_predict_peptides.py --peptides ${neoepitopes} --alleles '${alleles}' --output ${prefix}
+            echo $VERSION > mhcnuggets.version.txt
+        """
 }

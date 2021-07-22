@@ -2,9 +2,11 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
-options    = initOptions(params.options)
+options        = initOptions(params.options)
 
 process OPENMS_PERCOLATORADAPTER {
+    tag "$meta.id"
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
@@ -17,19 +19,19 @@ process OPENMS_PERCOLATORADAPTER {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), path(psm_file)
+        tuple val(meta), path(psm)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), path("*.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
 
     script:
         def software = getSoftwareName(task.process)
-        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}_${id}"
+        def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}"
 
         """
             OMP_NUM_THREADS=${task.cpus} \\
-            PercolatorAdapter -in ${psm_file} \\
+            PercolatorAdapter -in ${psm} \\
                 -out ${prefix}.idXML \\
                 $options.args
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt

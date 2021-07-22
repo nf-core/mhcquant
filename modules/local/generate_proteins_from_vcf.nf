@@ -2,12 +2,11 @@
 include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
-options    = initOptions(params.options)
+options        = initOptions(params.options)
 
 def VERSIONFRED2 = '2.0.6'
 def VERSIONMHCNUGGETS = '2.3.2'
 
-//TODO: combine in a subflow --> when needs to be removed
 process GENERATE_PROTEINS_FROM_VCF {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -21,18 +20,17 @@ process GENERATE_PROTEINS_FROM_VCF {
     }
 
     input:
-        tuple val(Sample), val(id), path(fasta_file), val(d), path(vcf_file)
+        tuple val(meta), path(fasta), path(vcf)
     
     output:
-        tuple val("$id"), val("$Sample"), path("*_vcf.fasta"), emit: vcf_fasta
+        tuple val(meta), path("*_vcf.fasta"), emit: vcf_fasta
         path  "*.version.txt", emit: version
 
-    when:
-        params.include_proteins_from_vcf
-
     script:
+        def prefix   = options.suffix ? "${fasta.baseName}_${options.suffix}" : "${fasta.baseName}_added_vcf"
+
     """
-        variants2fasta.py -v ${vcf_file} -f ${fasta_file} -o ${Sample}_${fasta_file.baseName}_added_vcf.fasta $options.args
+        variants2fasta.py -v ${vcf} -f ${fasta} -o ${meta.sample}_${prefix}.fasta $options.args
         
         echo $VERSIONFRED2 > fred2.version.txt
         echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt

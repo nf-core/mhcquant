@@ -2,9 +2,11 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
-options    = initOptions(params.options)
+options        = initOptions(params.options)
 
 process OPENMS_RTMODEL {
+    tag "$meta.id"
+
     conda (params.enable_conda ? "bioconda::openms=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms:2.5.0--h4afb90d_6"
@@ -13,20 +15,20 @@ process OPENMS_RTMODEL {
     }
 
     input:
-        tuple val(id), val(Sample), path(rt_training_files)
+        tuple val(meta), path(rt_training)
 
     output:
-        tuple val("$id"), val("$Sample"), path("*rt_training.txt"), path("*.paramXML"), path("*_training_trainset.txt"), emit: complete   
+        tuple val(meta), path("*_rt_training.txt"), path("*.paramXML"), path("*_trainset.txt"), emit: complete   
         path  "*.version.txt", emit: version
 
     script:
         def software = getSoftwareName(task.process)
-        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}_id_files_for_rt_training"
+        def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}"
 
         """
-            RTModel -in ${rt_training_files} \\
+            RTModel -in ${rt_training} \\
                 -cv:skip_cv \\
-                -out ${prefix}.txt \\
+                -out ${prefix}_rt_training.txt \\
                 -out_oligo_params ${prefix}_params.paramXML \\
                 -out_oligo_trainset ${prefix}_trainset.txt
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt

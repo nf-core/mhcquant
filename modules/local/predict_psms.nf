@@ -2,8 +2,11 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+options        = initOptions(params.options)
 
 process PREDICT_PSMS {
+    tag "$meta.id"
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
@@ -16,16 +19,18 @@ process PREDICT_PSMS {
     }
 
     input:
-        tuple val(Sample), val(id), path(perc_mztab_file), path(psm_mztab_file), val(d), val(allotypes_refine)
+        tuple val(meta), path(perc_mztab), path(psm_mztab), val(allotypes)
 
     output:
-        tuple val("$id"), val("$Sample"), path("${Sample}_peptide_filter.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
 
     script:
+        def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_peptide_filter"
+
     """
         mhcflurry-downloads --quiet fetch models_class1
-        mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes_refine}' ${perc_mztab_file} ${psm_mztab_file} ${Sample}_peptide_filter.idXML
+        mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes}' ${perc_mztab} ${psm_mztab} ${prefix}.idXML
         mhcflurry-predict --version &> mhcflurry.version.txt
     """
 

@@ -62,7 +62,6 @@ def check_samplesheet(file_in, file_out):
         ## Check sample entries
         for line in fin:
             lspl = [x.strip().strip('"') for x in line.strip().split("\t")]
-
             ## Check valid number of columns per row
             if len(lspl) < len(HEADER):
                 print_error(
@@ -80,13 +79,15 @@ def check_samplesheet(file_in, file_out):
 
             ## Check sample name entries
             ident, sample, condition, filename = lspl[: len(HEADER)]
-
+            # sample, condition, filename = lspl[1: len(HEADER)]
+            
             ## Check replicate entry is integer
             if not ident.isdigit():
-                print_error("ID not an integer!", "Line", line)
-            ident = int(ident)
+                ident = int(ident)
+
+            # identifier = sample + "_" + condition + "_" + ident
+            identifier = ident
             
-            # sample, replicate, fastq_1, fastq_2 = lspl[: len(HEADER)]
             for strCon in [sample, condition]:
                 if strCon:
                     if strCon.find(" ") != -1:
@@ -98,40 +99,37 @@ def check_samplesheet(file_in, file_out):
             if filename:
                 if filename.find(" ") != -1:
                     print_error("FastQ file contains spaces!", "Line", line)
+
                 if not filename.endswith(".raw") and not filename.endswith(".mzML"):
                     print_error(
-                        "FastQ file does not have extension '.raw' or '.fmzML'!",
+                        "FastQ file does not have extension '.raw' or '.mzML'!",
                         "Line",
                         line,
                     )
+                elif filename.endswith(".raw"): 
+                    sample_info = [sample, condition, filename, "raw"]
+                elif filename.lower().endswith(".mzml"): 
+                    sample_info = [sample, condition, filename, "mzml"]
 
-            sample_info = [filename] 
-
-            if condition not in sample_run_dict:
-                sample_run_dict[condition] = {}
-            if sample not in sample_run_dict[condition]:
-                sample_run_dict[condition][sample] = [sample_info]
-            else:
-                if sample_info in sample_run_dict[condition][sample]:
-                    print_error("Samplesheet contains duplicate rows!", "Line", line)
+                ## Create sample mapping dictionary = {sample: [[ single_end, fastq_1, fastq_2, strandedness ]]}
+                if sample not in sample_run_dict:
+                    sample_run_dict[identifier] = [sample_info]
                 else:
-                    sample_run_dict[condition][sample].append(sample_info)
+                    if sample_info in sample_run_dict[identifier]:
+                        print_error("Samplesheet contains duplicate rows!", "Line", line)
+                    else:
+                        sample_run_dict[identifier].append(sample_info)
 
     ## Write validated samplesheet with appropriate columns
     if len(sample_run_dict) > 0:
         out_dir = os.path.dirname(file_out)
         make_dir(out_dir)
         with open(file_out, "w") as fout:
+            fout.write("\t".join(["ID", "Sample", "Condition", "Filename", "FileExt"]) + "\n")
 
-            fout.write("\t".join(["ID", "Filename"]) + "\n")
-            for condition in sorted(sample_run_dict.keys()):
-                for sample in sorted(sample_run_dict[condition].keys()):
-                    ## Write to file
-                    for idx, sample_info in enumerate(sample_run_dict[condition][sample]):
-                        # sample_id = "{}_{}_{}".format(idx + 1, sample, condition)
-                        sample_id = "{}_{}".format(sample, condition)
-                        fout.write("\t".join([sample_id] + sample_info) + "\n")
-
+            for sample in sorted(sample_run_dict.keys()):
+                for idx, val in enumerate(sample_run_dict[sample]):
+                    fout.write("\t".join([sample] + val) + "\n")
 
 def main(args=None):
     args = parse_args(args)

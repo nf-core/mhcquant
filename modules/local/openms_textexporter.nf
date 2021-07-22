@@ -2,8 +2,11 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+options        = initOptions(params.options)
 
 process OPENMS_TEXTEXPORTER {
+    tag "$meta.id"
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:'') }
@@ -16,18 +19,19 @@ process OPENMS_TEXTEXPORTER {
     }
 
     input:
-        tuple val(Sample), path(consensus_resolved) 
+        tuple val(meta), path(consensus_resolved) 
 
     output:
-        tuple val(Sample), path("${Sample}.csv"), emit: csv   
+        tuple val(meta), path("*.csv"), emit: csv   
         path  "*.version.txt", emit: version 
 
     script:
         def software = getSoftwareName(task.process)
+        def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}"
 
         """
             TextExporter -in ${consensus_resolved} \\
-                -out ${Sample}.csv \\
+                -out ${prefix}.csv \\
                 -threads ${task.cpus} \\
                 -id:add_hit_metavalues 0 \\
                 -id:add_metavalues 0 \\

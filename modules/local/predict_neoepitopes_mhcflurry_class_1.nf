@@ -2,6 +2,7 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+options        = initOptions(params.options)
 
 process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
     publishDir "${params.outdir}",
@@ -17,16 +18,18 @@ process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
 
 
     input:
-        tuple val(Sample), val(id), val(allotypes), val(d), path(neoepitopes) 
+        tuple val(meta), val(allotypes), path(neoepitopes) 
 
     output:
-        tuple val("$id"), val("$Sample"), path("*_${Sample}_predicted_neoepitopes_class_1.csv"), emit: csv   
+        tuple val(meta), path("*.csv"), emit: csv   
         path  "*.version.txt", emit: version
 
     script:
+        def prefix = options.suffix ? "${neoepitopes}_${meta}_${options.suffix}" : "${neoepitopes}_${meta}_predicted_neoepitopes_class_1"
+    
         """
             mhcflurry-downloads --quiet fetch models_class1
-            mhcflurry_neoepitope_binding_prediction.py '${allotypes}' ${neoepitopes} _${Sample}_predicted_neoepitopes_class_1.csv
+            mhcflurry_neoepitope_binding_prediction.py '${allotypes}' ${prefix}.csv
             mhcflurry-predict --version &> mhcflurry.version.txt
         """
 }

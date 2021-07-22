@@ -1,9 +1,9 @@
 // Import generic module functions
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
-def options    = initOptions(params.options)
+params.options = [:]
+options        = initOptions(params.options)
 
-//TODO: combine in a subflow --> when needs to be removed
 process OPENMS_FEATUREFINDERIDENTIFICATION  {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -17,27 +17,24 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
     }
 
     input:
-        tuple val(Sample), val(id), val(Condition), path(id_file_quant_int), path(mzml_quant), val(all_ids), path(id_file_quant)
+        tuple val(meta), path(id_quant_int), path(mzml), path(id_quant)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), path("${Sample}_${id}.featureXML"), emit: featurexml   
+        tuple val(meta), path("*.featureXML"), emit: featurexml   
         path  "*.version.txt", emit: version
-
-    when:
-        !params.skip_quantification
 
     script:
         def software = getSoftwareName(task.process)
-        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}_${id}"
+        def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_${meta.id}"
         
         if (!params.quantification_fdr){
-            arguments = "-id ${id_file_quant}"
+            arguments = "-id ${id_quant}"
         } else {
-            arguments = "-id ${id_file_quant_int} -id_ext ${id_file_quant} -svm:min_prob ${params.quantification_min_prob}"
+            arguments = "-id ${id_quant_int} -id_ext ${id_quant} -svm:min_prob ${params.quantification_min_prob}"
         }
 
         """
-            FeatureFinderIdentification -in ${mzml_quant} \\
+            FeatureFinderIdentification -in ${mzml} \\
                 -out ${prefix}.featureXML \\
                 -threads ${task.cpus} \\
                 $arguments

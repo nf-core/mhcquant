@@ -2,9 +2,11 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+options        = initOptions(params.options)
 
 process OPENMS_FALSEDISCOVERYRATE  {
-
+    tag "$meta.id"
+    
     conda (params.enable_conda ? "bioconda::openms=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms:2.5.0--h4afb90d_6"
@@ -13,19 +15,20 @@ process OPENMS_FALSEDISCOVERYRATE  {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), path(id_file_idx)
+        tuple val(meta), path(idxml)
 
     output:
-        tuple val("$id"), val("$Sample"), val("$Condition"), path("${Sample}_${Condition}_${id}_idx_fdr.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml   
         path  "*.version.txt", emit: version
 
     script:
         def software = getSoftwareName(task.process)
+        def prefix   = options.suffix ? "${idxml.baseName}_${options.suffix}" : "${idxml.baseName}_fdr"
 
         """
-            FalseDiscoveryRate -in ${id_file_idx} \\
+            FalseDiscoveryRate -in ${idxml} \\
                 -protein 'false' \\
-                -out ${Sample}_${Condition}_${id}_idx_fdr.idXML \\
+                -out ${prefix}.idXML \\
                 -threads ${task.cpus}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """

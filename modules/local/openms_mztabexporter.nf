@@ -2,9 +2,11 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
-options    = initOptions(params.options)
+options        = initOptions(params.options)
 
 process OPENMS_MZTABEXPORTER {
+    tag "$meta.id"
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
@@ -17,15 +19,15 @@ process OPENMS_MZTABEXPORTER {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), path(mztab)
+        tuple val(meta), path(mztab)
 
     output:
-        tuple val("$id"), val("$Sample"), path("*.mzTab"), emit: mztab   
+        tuple val(meta), path("*.mzTab"), emit: mztab   
         path  "*.version.txt", emit: version
 
     script:
-        def prefix = options.suffix ? "${Sample}_${options.suffix}" : "${Sample}"
         def software = getSoftwareName(task.process)
+        def prefix = options.suffix ? "${meta.sample}_${meta.condition}_${options.suffix}" : "${meta.sample}_${meta.condition}"
         
         """
             MzTabExporter -in ${mztab} \\

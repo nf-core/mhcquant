@@ -6,6 +6,8 @@ params.options = [:]
 def VERSION = '2.3.2'
 
 process POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
+    tag "$meta"
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_2_bindings', publish_id:'class_2_bindings') }
@@ -19,16 +21,16 @@ process POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
 
 
     input:
-        tuple val(Sample), val(id), path(neoepitopes), val(d), path(predicted_cl_2) 
+        tuple val(meta), path(neoepitopes), path(predicted) 
 
     output:
-        tuple val("$Sample"), path("*.csv"), emit: csv   
+        tuple val(meta), path("*.csv"), emit: csv   
         path  "*.version.txt", emit: version
 
     script:
 
         """
-            postprocess_neoepitopes_mhcnuggets.py --input ${predicted_cl_2} --neoepitopes ${neoepitopes}
+            postprocess_neoepitopes_mhcnuggets.py --input ${predicted} --neoepitopes ${neoepitopes}
             echo $VERSION > mhcnuggets.version.txt
         """
 }

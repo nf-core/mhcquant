@@ -2,11 +2,14 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+options        = initOptions(params.options)
 
 def VERSIONFRED2 = '2.0.6'
 def VERSIONMHCNUGGETS = '2.3.2'
 
 process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
+    tag "$meta.id"
+
     publishDir "${params.outdir}",
     mode: params.publish_dir_mode,
     saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_1_bindings', publish_id:'class_1_bindings') }
@@ -19,16 +22,18 @@ process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
     }
 
     input:
-        tuple val(Sample), val(id), path(mztab_file), val(d), val(class_1_alleles)
+        tuple val(meta), path(mztab), val(alleles)
 
     output:
-        tuple val("$Sample"), path("*predicted_peptides_class_1.csv"), emit: csv   
+        tuple val(meta), path("*predicted_peptides_class_1.csv"), emit: csv   
         path  "*.version.txt", emit: version
 
     script:
+        def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_predicted_peptides_class_1"
+
         """
             mhcflurry-downloads --quiet fetch models_class1
-            mhcflurry_predict_mztab.py '${class_1_alleles}' ${mztab_file} ${Sample}_predicted_peptides_class_1.csv
+            mhcflurry_predict_mztab.py '${alleles}' ${mztab} ${prefix}.csv
             echo $VERSIONFRED2 > fred2.version.txt
             echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
             mhcflurry-predict --version &> mhcflurry.version.txt

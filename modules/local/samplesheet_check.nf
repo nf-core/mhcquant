@@ -32,7 +32,10 @@ process SAMPLESHEET_CHECK {
 // Function to get list of [ meta, filenames ]
 def get_samplesheet_paths(LinkedHashMap row) {
     def meta = [:]
-    meta.id             = row.ID    
+    meta.id             = row.ID
+    meta.sample         = row.Sample
+    meta.condition      = row.Condition
+    meta.ext            = row.FileExt
 
     def array = []
     if (!file(row.Filename).exists()) {

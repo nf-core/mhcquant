@@ -2,9 +2,10 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
-options    = initOptions(params.options)
+options        = initOptions(params.options)
 
 process OPENMS_MAPALIGNERIDENTIFICATION {
+    tag "$meta.id"
 
     conda (params.enable_conda ? "bioconda::openms=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -14,19 +15,19 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
     }
 
     input:
-        tuple val(id), val(Sample), val(Condition), path(id_names)
+        tuple val(meta), path(idxml)
 
     output:
-        tuple val("$Sample"), path("*.trafoXML"), emit: trafoxml   
+        tuple val(meta), path("*.trafoXML"), emit: trafoxml   
         path  "*.version.txt", emit: version
 
     script:
-        def out_names = id_names.collect { it.baseName+'.trafoXML' }.join(' ')
         def software = getSoftwareName(task.process)
+        def out_names = idxml.collect { it.baseName+'.trafoXML' }.join(' ')
 
         """
-            MapAlignerIdentification -in $id_names \\
-                -trafo_out $out_names \\
+            MapAlignerIdentification -in ${idxml} \\
+                -trafo_out ${out_names} \\
                 $options.args 
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """

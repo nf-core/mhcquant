@@ -2,11 +2,14 @@
 include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+options        = initOptions(params.options)
 
 def VERSIONFRED2 = '2.0.6'
 def VERSIONMHCNUGGETS = '2.3.2'
 
 process PREDICT_POSSIBLE_NEOEPITOPES {
+    tag "$meta" 
+    
     label 'process_web'
 
     publishDir "${params.outdir}",
@@ -21,16 +24,18 @@ process PREDICT_POSSIBLE_NEOEPITOPES {
     }
 
     input:
-        tuple val(id), val(Sample), val(alleles), path(vcf_file)
+        tuple val(meta), val(alleles), path(vcf)
 
     output:
-        tuple val("id"), val("$Sample"), path("${Sample}_vcf_neoepitopes.csv"), emit: csv   
-        tuple val("id"), val("$Sample"), path("${Sample}_vcf_neoepitopes.txt"), emit: txt   
+        tuple val(meta), path("${prefix}.csv"), emit: csv   
+        tuple val(meta), path("${prefix}.txt"), emit: txt   
         path  "*.version.txt", emit: version
 
     script:
+        def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_vcf_neoepitopes"
+
         """
-            vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '${alleles}' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf_file} -o ${Sample}_vcf_neoepitopes.ch_software_versions
+            vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '${alleles}' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf} -o ${prefix}.csv
             echo $VERSIONFRED2 > fred2.version.txt
             echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
             mhcflurry-predict --version &> mhcflurry.version.txt
