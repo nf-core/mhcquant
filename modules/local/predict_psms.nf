@@ -5,7 +5,8 @@ params.options = [:]
 options        = initOptions(params.options)
 
 process PREDICT_PSMS {
-    tag "$meta.id"
+    tag "$meta"
+    label 'process_medium'
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

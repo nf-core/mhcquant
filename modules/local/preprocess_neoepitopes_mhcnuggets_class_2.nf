@@ -7,7 +7,8 @@ options        = initOptions(params.options)
 def VERSION = '2.3.2'
 
 process PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
-    tag "$meta" 
+    tag "$meta"
+    label 'process_low'
     
     conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2--py_0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

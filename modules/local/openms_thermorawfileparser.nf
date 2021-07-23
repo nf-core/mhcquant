@@ -6,7 +6,8 @@ options        = initOptions(params.options)
 
 process OPENMS_THERMORAWFILEPARSER {
     tag "$meta.id"
-    
+    label 'process_medium'
+
     conda (params.enable_conda ? "bioconda::thermorawfileparser::1.2.3" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/thermorawfileparser:1.2.3--1"

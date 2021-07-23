@@ -6,6 +6,7 @@ options        = initOptions(params.options)
 
 process OPENMS_IDFILTER {
     tag "$meta.id"
+    label 'process_medium'
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

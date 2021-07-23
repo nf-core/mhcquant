@@ -8,7 +8,8 @@ def VERSIONFRED2 = '2.0.6'
 def VERSIONMHCNUGGETS = '2.3.2'
 
 process PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2 {
-    tag "$meta.id"
+    tag "$meta"
+    label 'process_low'
     
     conda (params.enable_conda ? "bioconda::fred2=2.0.6 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

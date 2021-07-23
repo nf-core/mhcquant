@@ -6,6 +6,7 @@ options        = initOptions(params.options)
 
 process OPENMS_MAPRTTRANSFORMER {
     tag "$meta.id"
+    label 'process_low'
 
     conda (params.enable_conda ? "bioconda::openms=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

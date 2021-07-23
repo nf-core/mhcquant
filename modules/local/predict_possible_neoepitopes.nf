@@ -8,9 +8,8 @@ def VERSIONFRED2 = '2.0.6'
 def VERSIONMHCNUGGETS = '2.3.2'
 
 process PREDICT_POSSIBLE_NEOEPITOPES {
-    tag "$meta" 
-    
-    label 'process_web'
+    tag "$meta"
+    label 'process_low'
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

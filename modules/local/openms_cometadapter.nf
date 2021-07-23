@@ -6,7 +6,7 @@ options        = initOptions(params.options)
 
 process OPENMS_COMETADAPTER {
     tag "$meta.id"
-    label 'process_medium_long'
+    label 'process_medium'
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {

@@ -5,6 +5,9 @@ params.options = [:]
 options        = initOptions(params.options)
 
 process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
+    tag "$meta"
+    label 'process_low'
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_1_bindings', publish_id:'class_1_bindings') }

@@ -9,7 +9,8 @@ def VERSIONMHCNUGGETS = '2.3.2'
 
 process PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES {
     tag "$meta"
-    label 'process_web'
+    label 'process_low'
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:'') }

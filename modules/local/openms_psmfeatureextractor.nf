@@ -6,6 +6,7 @@ options        = initOptions(params.options)
 
 process OPENMS_PSMFEATUREEXTRACTOR {
     tag "$meta.id"
+    label 'process_low'
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

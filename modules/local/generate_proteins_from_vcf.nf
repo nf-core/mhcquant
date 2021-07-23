@@ -8,6 +8,9 @@ def VERSIONFRED2 = '2.0.6'
 def VERSIONMHCNUGGETS = '2.3.2'
 
 process GENERATE_PROTEINS_FROM_VCF {
+    tag "$meta"
+    label 'process_medium'
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:meta.id) }

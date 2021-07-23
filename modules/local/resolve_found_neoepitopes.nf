@@ -9,6 +9,7 @@ def VERSIONMHCNUGGETS = '2.3.2'
 
 process RESOLVE_FOUND_NEOEPITOPES {
     tag "$meta"
+    label 'process_low'
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
