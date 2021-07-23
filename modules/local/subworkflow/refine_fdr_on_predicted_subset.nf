@@ -18,14 +18,12 @@ def filter_refined_qvalue_options = params.filter_options.clone()
 filter_psms_options.suffix = "pred_filtered"
 filter_refined_qvalue_options.suffix = "perc_subset_filtered"
 
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../process/openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged_psm_perc_filtered" ] )
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../process/openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged" ] )
-include { PREDICT_PSMS }                                     from '../process/predict_psms'                                               addParams( options: [:] )
-include { OPENMS_PERCOLATORADAPTER }                         from '../process/openms_percolatoradapter'                                   addParams( options: percolator_adapter_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../process/openms_idfilter'                                            addParams( options: filter_psms_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../process/openms_idfilter'                                            addParams( options: filter_refined_qvalue_options )
-
-
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged_psm_perc_filtered" ] )
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged" ] )
+include { PREDICT_PSMS }                                     from '../predict_psms'                                               addParams( options: [:] )
+include { OPENMS_PERCOLATORADAPTER }                         from '../openms_percolatoradapter'                                   addParams( options: percolator_adapter_options )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../openms_idfilter'                                            addParams( options: filter_psms_options )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../openms_idfilter'                                            addParams( options: filter_refined_qvalue_options )
 
 workflow REFINE_FDR_ON_PREDICTED_SUBSET {
     // Define the input parameters
@@ -42,16 +40,20 @@ workflow REFINE_FDR_ON_PREDICTED_SUBSET {
         // Export psm results as mztab
         OPENMS_MZTABEXPORTERPSM( psm_features )
         // Predict psm results using mhcflurry to shrink search space
-        PREDICT_PSMS(OPENMS_MZTABEXPORTERPERC.out.mztab.join( OPENMS_MZTABEXPORTERPSM.out.mztab, by:[0,1] ).combine( classI_alleles, by:1 ) )
+        PREDICT_PSMS(
+            OPENMS_MZTABEXPORTERPERC.out.mztab
+                .join( OPENMS_MZTABEXPORTERPSM.out.mztab, by:[0] )
+                .map{ it -> [it[0].sample, it[0], it[1], it[2]] }
+                .combine( classI_alleles, by:0)
+                .map(it -> [it[1], it[2], it[3], it[4]])
+        )
+
         // Filter psm results by shrinked search space
-        OPENMS_IDFILTER_PSMS(psm_features.combine( PREDICT_PSMS.out.idxml, by: [0, 1] ))
-        // Replace the id's and add the condition (place fillers)
-        ch_predicted_psms = OPENMS_IDFILTER_PSMS.out.idxml.flatMap { it -> [ tuple( "id", it[1], "condition", it[3] ) ] }
+        OPENMS_IDFILTER_PSMS(psm_features.combine( PREDICT_PSMS.out.idxml, by: [0] ))
         // Recompute percolator fdr on shrinked search space
-        OPENMS_PERCOLATORADAPTER( ch_predicted_psms ) 
+        OPENMS_PERCOLATORADAPTER( OPENMS_IDFILTER_PSMS.out.idxml ) 
         // Filter results by refined fdr
-        OPENMS_IDFILTER_REFINED(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], it[2], it[3], null)]})
-        
+        OPENMS_IDFILTER_REFINED(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)]})
     emit:
         // Define the information that is returned by this workflow
         filter_refined_q_value = OPENMS_IDFILTER_REFINED.out.idxml
