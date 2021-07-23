@@ -416,7 +416,7 @@ class NfcoreSchema {
             }
             // Cast Duration to String
             if (p['value'].getClass() == nextflow.util.Duration) {
-                new_params.replace(p.key, p['value'].toString().replaceFirst(/d(?!\S)/, "day"))
+                new_params.replace(p.key, p['value'].toString().replaceFirst(/d(?!\S)/, "d"))
             }
             // Cast LinkedHashMap to String
             if (p['value'].getClass() == LinkedHashMap) {

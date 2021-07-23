@@ -12,10 +12,15 @@ https://github.com/nf-core/mhcquant
 ////////////////////////////////////////////////////
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
+def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+
+// Validate input parameters
+WorkflowMhcquant.initialise(params, log)
+
 // Input/outpout options
-if (params.input)   { sample_sheet = file(params.input) }   else { exit 1, 'Input samplesheet was not specified!' }
-if (params.fasta)   { params.fasta = params.fasta }         else { exit 1, 'No database fasta was provided, make sure you have used the '--fasta' option.' }
-if (params.outdir)  { params.outdir  = './results' }        else { log.warn 'Results into \'./results\'.\nIf you want to define a result directory, please use the --outdir option.' }
+if (params.input)   { sample_sheet = file(params.input) }
+if (params.fasta)   { params.fasta = params.fasta }
+if (params.outdir)  { params.outdir  = './results' }
 
 // MHC affinity prediction
 if (params.predict_class_1 || params.predict_class_2)  {    
@@ -52,25 +57,6 @@ if (params.include_proteins_from_vcf)  {
         .set { ch_vcf_from_sheet }
     }
 
-// Database options
-if (params.skip_decoy_generation) { 
-    log.warn "Be aware: skipping decoy generation will prevent generating variants and subset FDR refinement"
-    log.warn "Decoys have to be named with DECOY_ as prefix in your fasta database" }
-if (params.quantification_fdr) {
-    log.warn "Quantification FDR enabled"
-}
-
-// FDR Scoring
-if (params.klammer && params.description_correct_features == 0) {
-    log.warn('Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.')
-    log.warn('Klammer has been turned off!')
-}
-
-// Quantification options
-if (params.quantification_fdr) {
-    log.warn "Quantification FDR enabled"
-}
-
 if (params.variant_indel_filter) { variant_indel_filter="-fINDEL" } else { variant_indel_filter="" }
 if (params.variant_frameshift_filter) { variant_frameshift_filter="-fFS" } else { variant_frameshift_filter="" }
 if (params.variant_snp_filter) { variant_snp_filter="-fSNP" } else { variant_snp_filter="" }
@@ -92,8 +78,11 @@ def modules = params.modules.clone()
 
 def openms_map_aligner_identification_options = modules['openms_map_aligner_identification']
 def openms_comet_adapter_options = modules['openms_comet_adapter']
+
 def generate_proteins_from_vcf_options = modules['generate_proteins_from_vcf']
+
 def percolator_adapter_options = modules['percolator_adapter']
+
 def id_filter_options = modules['id_filter']
 def id_filter_for_alignment_options = id_filter_options.clone()
 def id_filter_whitelist_options = modules['id_filter_whitelist']
@@ -460,8 +449,8 @@ workflow MHCQUANT {
 /* --              COMPLETION EMAIL            -- */
 ////////////////////////////////////////////////////
 workflow.onComplete {
-    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report)
-    Completion.summary(workflow, params, log)
+    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log)
+    NfcoreTemplate.summary(workflow, params, log)
 }
 
 ////////////////////////////////////////////////////
