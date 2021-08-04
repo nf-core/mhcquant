@@ -1,7 +1,8 @@
 // Import generic module functions
-include { saveFiles } from './functions'
+include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
+options        = initOptions(params.options)
 
 /*
  * Parse software version numbers
@@ -24,7 +25,7 @@ process GET_SOFTWARE_VERSIONS {
         path versions
     
     output:
-        path "software_versions.tsv"     , emit: csv
+        path "software_versions.tsv"     , emit: tsv
         path 'software_versions_mqc.yaml', emit: yaml
 
     script:

@@ -10,6 +10,7 @@ DSL1 to DSL2 conversion
     - Inclusion of one sub workflow: refine fdr on predicted subset
     - The process: openms_cometadapter includes commented lines (which could be used as a reference for future module development)
     - MHCquant pipeline is ran from workflows/mhcquant.nf instead of main
+    - Template update to nf-core tools version 2.1
 
 ### `Fixed`
 

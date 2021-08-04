@@ -35,6 +35,6 @@ process OPENMS_PERCOLATORADAPTER {
             PercolatorAdapter -in ${psm} \\
                 -out ${prefix}.idXML \\
                 $options.args
-            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}-thirdparty.version.txt
         """
 }
