@@ -36,6 +36,6 @@ process OPENMS_RTPREDICT {
                 -in_oligo_params ${rt_params} \\
                 -in_oligo_trainset ${trainset} \\
                 -out_text:file ${prefix}.csv
-            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}-thirdparty.version.txt
         """
 }

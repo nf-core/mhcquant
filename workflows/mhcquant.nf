@@ -149,7 +149,7 @@ include { OPENMS_RTMODEL }                                  from '../modules/loc
 include { OPENMS_RTPREDICT as OPENMS_RTPREDICT_FOUND_PEPTIDES}      from '../modules/local/openms_rtpredict'                         addParams( options: [suffix:"_id_files_for_rt_prediction_RTpredicted"] )
 include { OPENMS_RTPREDICT as OPENMS_RTPREDICT_NEOEPITOPES}         from '../modules/local/openms_rtpredict'                         addParams( options: [suffix:"_txt_file_for_rt_prediction_RTpredicted"] )
 
-include { GET_SOFTWARE_VERSIONS }                           from '../modules/local/get_software_versions'                            addParams( options: [publish_files : ['csv':'']]   )
+include { GET_SOFTWARE_VERSIONS }                           from '../modules/local/get_software_versions'                            addParams( options: [publish_files : ['tsv':'']]   )
 
 ////////////////////////////////////////////////////
 /* --              CREATE CHANNELS             -- */
@@ -227,6 +227,7 @@ workflow MHCQUANT {
 
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
+    ch_software_versions = ch_software_versions.mix(OPENMS_PEPTIDEINDEXER.out.version.first().ifEmpty(null))
 
     if(!params.skip_quantification) {
         // Calculate fdr for id based alignment

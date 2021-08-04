@@ -1,6 +1,3 @@
-files_unchanged:
-  - lib/NfcoreSchema.groovy
-  - docs/README.md
 files_exist:
   - .github/markdownlint.yml
   - bin/markdown_to_html.py

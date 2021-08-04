@@ -31,6 +31,6 @@ process OPENMS_COMETADAPTER {
                 -out ${prefix}.idXML \\
                 -database ${fasta} \\
                 -threads $task.cpus $options.args
-            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}-thirdparty.version.txt
         """
 }

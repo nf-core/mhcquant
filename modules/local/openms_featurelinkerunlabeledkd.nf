@@ -35,7 +35,7 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
                 -out '${prefix}.consensusXML' \\
                 -threads ${task.cpus}
 
-            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt 
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}-thirdparty.version.txt 
         
         """
 }
