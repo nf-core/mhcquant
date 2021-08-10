@@ -19,10 +19,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
     * [Intermediate results](#intermediate-results)
 * [VCF](#vcf)
 * [Class prediction](#class-prediction)
-    * [Class (1|2) bindingss](#class-12-bindings)
+    * [Class (1|2) bindings](#class-12-bindings)
 * [Rotation time prediction](#rotation-time-prediction)
 * [Workflow reporting and documentation](#workflow-reporting-and-documentation)
-    * [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+    * [Pipeline information](#pipeline-information)
 
 ## General
 
