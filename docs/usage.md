@@ -4,19 +4,17 @@
 
 * [Table of contents](#table-of-contents)
 * [Samplesheet input](#samplesheet-input)
-    * [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
-    + [Full samplesheet](#full-samplesheet)
+  * [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
+  * [Full samplesheet](#full-samplesheet)
 * [Running the pipeline](#running-the-pipeline)
-    * [Updating the pipeline](#updating-the-pipeline)
-    * [Reproducibility](#reproducibility)
+  * [Updating the pipeline](#updating-the-pipeline)
+  * [Reproducibility](#reproducibility)
 * [Core Nextflow arguments](#core-nextflow-arguments)
-    * [`-profile`](#-profile)
-    * [`-resume`](#-resume)
+  * [`-profile`](#-profile)
+  * [`-resume`](#-resume)
 * [Custom configuration](#custom-configuration)
 * [Running in the background](#running-in-the-background)
 * [Nextflow memory requirements](#nextflow-memory-requirements)
-
-# nf-core/mhcquant: Usage
 
 ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/mhcquant/usage](https://nf-co.re/mhcquant/usage)
 
@@ -115,7 +113,7 @@ This version number will be logged in reports when you run the pipeline, so that
 
 > **NB:** These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
 
-#### `-profile`
+### `-profile`
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
 
@@ -144,7 +142,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
 
-#### `-resume`
+### `-resume`
 
 Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
 

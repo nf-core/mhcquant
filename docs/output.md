@@ -27,6 +27,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 ## General
 
 ### Quantification
+
 <details markdown="1">
 <summary>Output files</summary>
 
@@ -37,31 +38,37 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 The CSV output file is a table containing all information extracted from a database search throughout the pipeline. See the [OpenMS](https://www.openms.de/) or PSI documentation for more information about [annotated scores and format](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/release/latest/html/TOPP_TextExporter.html).
 
 MAP contains information about the different mzML files that were provided initially
+
 ```bash
 #MAP    id      filename        label   size
 ```
 
 RUN contains information about the search that was performed on each run
+
 ```bash
 #RUN    run_id  score_type      score_direction date_time       search_engine_version   parameters
 ```
 
 PROTEIN contains information about the protein ids corresponding to the peptides that were detected (No protein inference was performed)
+
 ```bash
 #PROTEIN        score   rank    accession       protein_description     coverage        sequence
 ```
 
 UNASSIGNEDPEPTIDE contains information about PSMs that were identified but couldn't be quantified to a precursor feature on MS Level 1
+
 ```bash
 #UNASSIGNEDPEPTIDE      rt      mz      score   rank    sequence        charge  aa_before       aa_after        score_type      search_identifier       accessions      FFId_category   feature_id      file_origin     map_index       spectrum_reference      COMET:IonFrac   COMET:deltCn    COMET:deltLCn   COMET:lnExpect  COMET:lnNumSP   COMET:lnRankSP  MS:1001491      MS:1001492      MS:1001493      MS:1002252      MS:1002253      MS:1002254      MS:1002255      MS:1002256      MS:1002257      MS:1002258      MS:1002259      num_matched_peptides    protein_references      target_decoy
 ```
 
 CONSENSUS contains information about precursor features that were identified in multiple runs (eg. run 1-3 in this case)
+
 ```bash
 #CONSENSUS      rt_cf   mz_cf   intensity_cf    charge_cf       width_cf        quality_cf      rt_0    mz_0    intensity_0     charge_0        width_0 rt_1    mz_1    intensity_1     charge_1        width_1 rt_2    mz_2    intensity_2     charge_2        width_2 rt_3    mz_3    intensity_3     charge_3        width_3
 ```
 
 PEPTIDE contains information about peptide hits that were identified and correspond to the consensus features described below
+
 ```bash
 #PEPTIDE        rt      mz      score   rank    sequence        charge  aa_before       aa_after        score_type      search_identifier       accessions      FFId_category   fea
 ```
@@ -97,6 +104,7 @@ Most important to know that in this format we annotated the q-value of each pept
 ## VCF
 
 ### Reference fasta
+
 <details markdown="1">
 <summary>Output files</summary>
 
@@ -106,7 +114,6 @@ Most important to know that in this format we annotated the q-value of each pept
 The fasta database including mutated proteins used for the database search
 
 ### Neoepitopes
-
 
 These CSV files list all of the theoretically possible neoepitope sequences from the variants specified in the vcf and neoepitopes that are found during the mass spectrometry search, independant of binding predictions, respectively
 
@@ -120,9 +127,9 @@ These CSV files list all of the theoretically possible neoepitope sequences from
 
 </details>
 
-
 This CSV which lists all neoepitopes that are found during the mass spectrometry search, independant of binding predictions
 The format is as follows:
+
 ```bash
 peptide sequence   geneID
 ```
@@ -139,14 +146,15 @@ peptide sequence   geneID
 
 This CSV fils contains all theoretically possible neoepitope sequences from the variants that were specified in the vcf
 The format is shown below
+
 ```bash
 Sequence        Antigen ID       Variants
 ```
 
-
 ## Class prediction
 
 ### Class (1|2) bindings
+
 <details markdown="1">
 <summary>Output files</summary>
 
@@ -172,7 +180,6 @@ peptide   allele   prediction   prediction_low   prediction_high   prediction_pe
     * `*txt_RTpredicted.csv`: If `--predict_RT` is specified, the rotation time predicted neoepitopes are provided
 
 </details>
-
 
 ## Workflow reporting and documentation
 
