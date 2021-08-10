@@ -23,10 +23,10 @@ if (params.fasta)   { params.fasta = params.fasta }
 if (params.outdir)  { params.outdir  = './results' }
 
 // MHC affinity prediction
-if (params.predict_class_1 || params.predict_class_2)  {    
+if (params.predict_class_1 || params.predict_class_2)  {
     Channel.from( file(params.allele_sheet, checkIfExists: true) )
         .splitCsv( header: true, sep:'\t' )
-        .multiMap { col -> 
+        .multiMap { col ->
         classI: ["${col.Sample}", "${col.HLA_Alleles_Class_1}"]
         classII: ["${col.Sample}", "${col.HLA_Alleles_Class_2}"] }
         .set { ch_alleles_from_sheet }
@@ -48,7 +48,7 @@ if (params.predict_class_1 || params.predict_class_2)  {
         }
 }
 
-// Variant 
+// Variant
 if (params.include_proteins_from_vcf)  {
     vcf_sheet = file(params.vcf_sheet, checkIfExists: true)
     Channel.from( vcf_sheet )
@@ -103,7 +103,7 @@ id_filter_qvalue_options.suffix = "filtered"
 
 include { hasExtension }                                    from '../modules/local/functions'
 
-include { INPUT_CHECK }                                     from '../modules/local/subworkflow/input_check'                          addParams( options: [:] )           
+include { INPUT_CHECK }                                     from '../modules/local/subworkflow/input_check'                          addParams( options: [:] )
 include { GENERATE_PROTEINS_FROM_VCF }                      from '../modules/local/generate_proteins_from_vcf'                       addParams( options: generate_proteins_from_vcf_options )
 include { OPENMS_DECOYDATABASE }                            from '../modules/local/openms_decoydatabase'                             addParams( options: [:] )
 include { OPENMS_THERMORAWFILEPARSER }                      from '../modules/local/openms_thermorawfileparser'                       addParams( options: [:] )
@@ -115,7 +115,7 @@ include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }from '../modules/loc
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }      from '../modules/local/openms_idfilter'                                  addParams( options: id_filter_qvalue_options )
 include { OPENMS_MAPALIGNERIDENTIFICATION }                 from '../modules/local/openms_mapaligneridentification'                  addParams( options: openms_map_aligner_identification_options )
 
-include { 
+include {
     OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERMZML
     OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERIDXML }        from '../modules/local/openms_maprttransformer'                 addParams( options: [:] )
 
@@ -197,7 +197,7 @@ workflow MHCQUANT {
     } else {
         ch_fasta_file = input_fasta
     }
-    
+
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta_file)
@@ -240,7 +240,7 @@ workflow MHCQUANT {
             .map {
                 meta, raw ->
                     [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
-                } 
+                }
             .groupTuple(by: [0])
 
         // Compute alignment rt transformatio
@@ -253,7 +253,7 @@ workflow MHCQUANT {
         .join(
             OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
                 .transpose()
-                .flatMap { 
+                .flatMap {
                     meta, trafoxml ->
                         ident = trafoxml.baseName.split('_-_')[0]
                         [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
@@ -264,7 +264,7 @@ workflow MHCQUANT {
         .join(
             OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
                 .transpose()
-                .flatMap { 
+                .flatMap {
                     meta, trafoxml ->
                         ident = trafoxml.baseName.split('_-_')[0]
                         [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
@@ -280,7 +280,7 @@ workflow MHCQUANT {
                 meta, raw ->
                 [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
             }
-            .groupTuple(by: [0])   
+            .groupTuple(by: [0])
 
     } else {
         ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idXML
@@ -288,7 +288,7 @@ workflow MHCQUANT {
                 meta, raw ->
                 [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
             }
-            .groupTuple(by: [0])   
+            .groupTuple(by: [0])
     }
 
     // Merge aligned idXMLfiles
@@ -306,8 +306,8 @@ workflow MHCQUANT {
     }
 
     // Filter by percolator q-value
-    OPENMS_IDFILTER_Q_VALUE(ch_percolator_adapter_outcome.flatMap { it -> [tuple(it[0], it[1], null)]}) 
-    
+    OPENMS_IDFILTER_Q_VALUE(ch_percolator_adapter_outcome.flatMap { it -> [tuple(it[0], it[1], null)]})
+
     // Refine_fdr_on_predicted_subset
     if ( params.refine_fdr_on_predicted_subset && params.predict_class_1 ) {
         // Run the following subworkflow
@@ -393,9 +393,9 @@ workflow MHCQUANT {
         // Postprocess predicted MHCNuggets peptides class 2
         POSTPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2( PREDICT_PEPTIDES_MHCNUGGETS_CLASS_2.out.csv.join(PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2.out.geneID, by:0) )
 
-        if ( params.include_proteins_from_vcf ) { 
+        if ( params.include_proteins_from_vcf ) {
             // Predict all possible class 2 neoepitopes from vcf
-            PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(ch_vcf_from_sheet, by:0, remainder:true))            
+            PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES(peptides_class_2_alleles.join(ch_vcf_from_sheet, by:0, remainder:true))
             ch_predicted_possible_neoepitopes_II = PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out.csv
             // Resolve found class 2 neoepitopes
             RESOLVE_FOUND_CLASS_2_NEOEPITOPES(
@@ -409,7 +409,7 @@ workflow MHCQUANT {
             PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2(PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2.out.preprocessed.join(peptides_class_2_alleles, by:0))
             // Class 2 MHCNuggets Postprocessing
             POSTPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2(RESOLVE_FOUND_CLASS_2_NEOEPITOPES.out.csv.join(PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2.out.csv, by:0))
-            // If there was no prediction performed on class 1 
+            // If there was no prediction performed on class 1
             if ( !params.predict_class_1 ) {
                 // Add information to software versions
                 ch_software_versions = ch_software_versions.mix(PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES.out.version.ifEmpty(null))
@@ -420,14 +420,14 @@ workflow MHCQUANT {
         }
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
-    if ( params.predict_RT ) {        
+    if ( params.predict_RT ) {
         filter_q_value = filter_q_value.map{ it -> [it[1], it[2]] }
         // Train Retention Times Predictor
         OPENMS_RTMODEL(filter_q_value)
         // Retention Times Predictor Found Peptides
-        OPENMS_RTPREDICT_FOUND_PEPTIDES(filter_q_value.join(OPENMS_RTMODEL.out.complete, by:[0]))  
+        OPENMS_RTPREDICT_FOUND_PEPTIDES(filter_q_value.join(OPENMS_RTMODEL.out.complete, by:[0]))
         // Retention Times Predictor possible Neoepitopes
-        OPENMS_RTPREDICT_NEOEPITOPES(ch_predicted_possible_neoepitopes.mix(ch_predicted_possible_neoepitopes_II).join(OPENMS_RTMODEL.out.complete, by:[0])) 
+        OPENMS_RTPREDICT_NEOEPITOPES(ch_predicted_possible_neoepitopes.mix(ch_predicted_possible_neoepitopes_II).join(OPENMS_RTMODEL.out.complete, by:[0]))
     }
 
     /*
@@ -439,11 +439,11 @@ workflow MHCQUANT {
         .map { it[1][0] }
         .flatten()
         .collect()
-        .set { ch_software_versions } 
+        .set { ch_software_versions }
 
-    GET_SOFTWARE_VERSIONS ( 
+    GET_SOFTWARE_VERSIONS (
         ch_software_versions.map { it }.collect()
-    ) 
+    )
 }
 
 ////////////////////////////////////////////////////

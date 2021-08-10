@@ -13,7 +13,7 @@ process RESOLVE_FOUND_NEOEPITOPES {
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_1_bindings', publish_id:'class_1_bindings') }
 
     conda (params.enable_conda ? "bioconda::fred2=2.0.6 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -26,7 +26,7 @@ process RESOLVE_FOUND_NEOEPITOPES {
         tuple val(meta), path(mztab), path(neoepitopes)
 
     output:
-        tuple val(meta), path("*.csv"), emit: csv   
+        tuple val(meta), path("*.csv"), emit: csv
         path  "*.version.txt", emit: version
 
     script:

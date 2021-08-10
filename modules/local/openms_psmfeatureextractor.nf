@@ -23,7 +23,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         tuple val(meta), path(merged)
 
     output:
-        tuple val(meta), path("*_all_ids_merged_psm.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml
         path  "*.version.txt", emit: version
 
     script:
@@ -33,7 +33,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         """
             PSMFeatureExtractor -in ${merged} \\
                 -out ${prefix}.idXML \\
-                -threads ${task.cpus} 
+                -threads ${task.cpus}
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }
