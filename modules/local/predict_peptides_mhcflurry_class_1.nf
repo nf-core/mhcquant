@@ -14,7 +14,7 @@ process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
     publishDir "${params.outdir}",
     mode: params.publish_dir_mode,
     saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_1_bindings', publish_id:'class_1_bindings') }
-    
+
     conda (params.enable_conda ? "bioconda::fred2=2.0.6 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/mulled-v2-689ae0756dd82c61400782baaa8a7a1c2289930d:a9e10ca22d4cbcabf6b54f0fb5d766ea16bb171e-0"
@@ -26,7 +26,7 @@ process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
         tuple val(meta), path(mztab), val(alleles)
 
     output:
-        tuple val(meta), path("*predicted_peptides_class_1.csv"), emit: csv   
+        tuple val(meta), path("*predicted_peptides_class_1.csv"), emit: csv
         path  "*.version.txt", emit: version
 
     script:

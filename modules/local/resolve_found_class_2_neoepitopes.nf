@@ -28,12 +28,12 @@ process RESOLVE_FOUND_CLASS_2_NEOEPITOPES {
         tuple val(meta), path(mztab), path(neoepitopes)
 
     output:
-        tuple val(meta), path("*.csv"), emit: csv 
+        tuple val(meta), path("*.csv"), emit: csv
         path  "*.version.txt", emit: version
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_found_neoepitopes_class_2"
-    
+
         """
             resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${prefix}
             echo $VERSIONFRED2 > fred2.version.txt

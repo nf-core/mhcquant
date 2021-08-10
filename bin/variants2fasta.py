@@ -13,7 +13,7 @@ from vcf_reader import read_vcf
 
 
 MARTDBURL = {"GRCH37": "http://grch37.ensembl.org/biomart/martservice?query=",
-             "GRCH38": "http://www.ensembl.org/biomart/martservice?query="} # is corrently set to GRCh38
+                "GRCH38": "http://www.ensembl.org/biomart/martservice?query="} # is corrently set to GRCh38
 
 def read_variant_effect_predictor(file, gene_filter=None):
     """
@@ -73,7 +73,7 @@ def read_variant_effect_predictor(file, gene_filter=None):
 
                     #positioning in Fred2 is 0-based!!!
                     if transcript_pos != "":
-                        coding[transcript_id] = MutationSyntax(transcript_id, int(transcript_pos)-1, 
+                        coding[transcript_id] = MutationSyntax(transcript_id, int(transcript_pos)-1,
                             -1 if prot_pos  == "" else int(prot_pos)-1, co, "", geneID=HGNC_ID)
 
                 #is variant synonymous?
@@ -223,7 +223,7 @@ def main():
 
     else:
         sys.stderr.write("At least a vcf file or a protein id file has to be provided.\n")
-        return -1              
+        return -1
 
     return 0
 
@@ -231,4 +231,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-    
+

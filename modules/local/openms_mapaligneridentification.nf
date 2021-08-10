@@ -19,7 +19,7 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         tuple val(meta), path(idxml)
 
     output:
-        tuple val(meta), path("*.trafoXML"), emit: trafoxml   
+        tuple val(meta), path("*.trafoXML"), emit: trafoxml
         path  "*.version.txt", emit: version
 
     script:
@@ -29,7 +29,7 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         """
             MapAlignerIdentification -in ${idxml} \\
                 -trafo_out ${out_names} \\
-                $options.args 
+                $options.args
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }

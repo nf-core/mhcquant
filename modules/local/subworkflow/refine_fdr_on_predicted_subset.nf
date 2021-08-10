@@ -1,5 +1,5 @@
 /*
- * Perform an additional step where the process are collected 
+ * Perform an additional step where the process are collected
  * that are called when the paramater "refine_fdr_on_predicted_subset" is provided
  */
 
@@ -51,7 +51,7 @@ workflow REFINE_FDR_ON_PREDICTED_SUBSET {
         // Filter psm results by shrinked search space
         OPENMS_IDFILTER_PSMS(psm_features.combine( PREDICT_PSMS.out.idxml, by: [0] ))
         // Recompute percolator fdr on shrinked search space
-        OPENMS_PERCOLATORADAPTER( OPENMS_IDFILTER_PSMS.out.idxml ) 
+        OPENMS_PERCOLATORADAPTER( OPENMS_IDFILTER_PSMS.out.idxml )
         // Filter results by refined fdr
         OPENMS_IDFILTER_REFINED(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)]})
     emit:

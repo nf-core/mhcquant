@@ -10,7 +10,7 @@ process OPENMS_RTPREDICT {
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'RT_prediction', publish_id:'RT_prediction') }
 
     conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -23,12 +23,12 @@ process OPENMS_RTPREDICT {
         tuple val(meta), path(idxml), path(rt_model), path(rt_params), path(trainset)
 
     output:
-        tuple val(meta), path("*.csv"), emit: csv   
+        tuple val(meta), path("*.csv"), emit: csv
         path  "*.version.txt", emit: version
 
     script:
         def software = getSoftwareName(task.process)
-        def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_file_for_rt_prediction_RTpredicted"
+        def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_RTpredicted"
 
         """
             RTPredict -in_id ${idxml} \\

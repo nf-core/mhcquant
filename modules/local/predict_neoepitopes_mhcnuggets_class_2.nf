@@ -21,7 +21,7 @@ process PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
         tuple val(meta), path(neoepitopes), val(alleles)
 
     output:
-        tuple val(meta), path("*_predicted_neoepitopes_class_2"), emit: csv   
+        tuple val(meta), path("*_predicted_neoepitopes_class_2"), emit: csv
         path  "*.version.txt", emit: version
 
     script:

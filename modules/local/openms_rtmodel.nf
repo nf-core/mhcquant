@@ -19,7 +19,7 @@ process OPENMS_RTMODEL {
         tuple val(meta), path(rt_training)
 
     output:
-        tuple val(meta), path("*_rt_training.txt"), path("*.paramXML"), path("*_trainset.txt"), emit: complete   
+        tuple val(meta), path("*_rt_training.txt"), path("*.paramXML"), path("*_trainset.txt"), emit: complete
         path  "*.version.txt", emit: version
 
     script:

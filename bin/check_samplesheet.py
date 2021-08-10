@@ -80,14 +80,14 @@ def check_samplesheet(file_in, file_out):
             ## Check sample name entries
             ident, sample, condition, filename = lspl[: len(HEADER)]
             # sample, condition, filename = lspl[1: len(HEADER)]
-            
+
             ## Check replicate entry is integer
             if not ident.isdigit():
                 ident = int(ident)
 
             # identifier = sample + "_" + condition + "_" + ident
             identifier = ident
-            
+
             for strCon in [sample, condition]:
                 if strCon:
                     if strCon.find(" ") != -1:
@@ -106,9 +106,9 @@ def check_samplesheet(file_in, file_out):
                         "Line",
                         line,
                     )
-                elif filename.endswith(".raw"): 
+                elif filename.endswith(".raw"):
                     sample_info = [sample, condition, filename, "raw"]
-                elif filename.lower().endswith(".mzml"): 
+                elif filename.lower().endswith(".mzml"):
                     sample_info = [sample, condition, filename, "mzml"]
 
                 ## Create sample mapping dictionary = {sample: [[ single_end, fastq_1, fastq_2, strandedness ]]}

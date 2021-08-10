@@ -23,7 +23,7 @@ process PREDICT_PSMS {
         tuple val(meta), path(perc_mztab), path(psm_mztab), val(allotypes)
 
     output:
-        tuple val(meta), path("*.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml
         path  "*.version.txt", emit: version
 
     script:

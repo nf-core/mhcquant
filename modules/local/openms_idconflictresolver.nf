@@ -14,18 +14,18 @@ process OPENMS_IDCONFLICTRESOLVER {
     } else {
         container "quay.io/biocontainers/openms:2.5.0--h4afb90d_6"
     }
-    
+
     input:
         tuple val(meta), path(consensus)
 
     output:
-        tuple val(meta), path("*.consensusXML"), emit: consensusxml   
+        tuple val(meta), path("*.consensusXML"), emit: consensusxml
         path  "*.version.txt", emit: version
-        
+
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_resolved"
-        
+
         """
             IDConflictResolver -in ${consensus} \\
                 -out ${prefix}.consensusXML \\

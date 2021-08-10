@@ -27,12 +27,12 @@ process PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES {
 
     output:
         tuple val(meta), path("*.csv"), emit: csv
-        tuple val(meta), path("${prefix}.txt"), emit: txt   
+        tuple val(meta), path("${prefix}.txt"), emit: txt
         path  "*.version.txt", emit: version
 
     script:
-        def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_vcf_neoepitopes"
-    
+        def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_vcf_neoepitopes_class2"
+
         """
             vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '${alleles}' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v ${vcf} -o ${prefix}.csv
             echo $VERSIONFRED2 > fred2.version.txt
