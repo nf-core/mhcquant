@@ -4,14 +4,14 @@
 
 * [Table of contents](#table-of-contents)
 * [Samplesheet input](#samplesheet-input)
-  * [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
-  * [Full samplesheet](#full-samplesheet)
+    * [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
+    * [Full samplesheet](#full-samplesheet)
 * [Running the pipeline](#running-the-pipeline)
-  * [Updating the pipeline](#updating-the-pipeline)
-  * [Reproducibility](#reproducibility)
+    * [Updating the pipeline](#updating-the-pipeline)
+    * [Reproducibility](#reproducibility)
 * [Core Nextflow arguments](#core-nextflow-arguments)
-  * [`-profile`](#-profile)
-  * [`-resume`](#-resume)
+    * [`-profile`](#-profile)
+    * [`-resume`](#-resume)
 * [Custom configuration](#custom-configuration)
 * [Running in the background](#running-in-the-background)
 * [Nextflow memory requirements](#nextflow-memory-requirements)
@@ -77,7 +77,6 @@ An [example samplesheet](../assets/samplesheet.tsv) has been provided with the p
 
 The typical command for running the pipeline is as follows:
 
-
 ```console
 nextflow run nf-core/mhcquant --input 'samples.tsv' --fasta 'SWISSPROT_2020.fasta' --allele_sheet 'alleles.tsv' --vcf_sheet 'variants.tsv' --include_proteins_from_vcf --predict_class_1 -profile docker
 ```
@@ -129,18 +128,18 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
 * `docker`
-  * A generic configuration profile to be used with [Docker](https://docker.com/)
-  * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
+    * A generic configuration profile to be used with [Docker](https://docker.com/)
+    * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
 * `singularity`
-  * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-  * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
+    * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+    * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
 * `conda`
-  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
-  * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
+    * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
+    * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
+    * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `test`
-  * A profile with a complete configuration for automated testing
-  * Includes links to test data so needs no other parameters
+    * A profile with a complete configuration for automated testing
+    * Includes links to test data so needs no other parameters
 
 ### `-resume`
 
