@@ -17,9 +17,9 @@ process OPENMS_THERMORAWFILEPARSER {
 
     input:
         tuple val(meta), path(rawfile)
-    
+
     output:
-        tuple val(meta), path("*.mzML"), emit: mzml   
+        tuple val(meta), path("*.mzML"), emit: mzml
         path  "*.version.txt", emit: version
 
     script:
@@ -32,5 +32,4 @@ process OPENMS_THERMORAWFILEPARSER {
                 -b=${prefix}.mzML
             ThermoRawFileParser.sh --version &> ThermoRawFileParser.version.txt
         """
-
 }

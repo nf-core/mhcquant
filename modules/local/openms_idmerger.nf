@@ -7,7 +7,7 @@ options        = initOptions(params.options)
 process OPENMS_IDMERGER {
     tag "$meta.id"
     label 'process_low'
-    
+
     conda (params.enable_conda ? "bioconda::openms=2.5.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/openms:2.5.0--h4afb90d_6"
@@ -19,7 +19,7 @@ process OPENMS_IDMERGER {
         tuple val(meta), path(aligned)
 
     output:
-        tuple val(meta), path("*.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml
         path  "*.version.txt", emit: version
 
     script:

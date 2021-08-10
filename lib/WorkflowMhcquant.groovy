@@ -10,7 +10,7 @@ class WorkflowMhcquant {
     public static void initialise(params, log) {
 
         // Error raise when the database fasta is not included
-        if (!params.fasta) { 
+        if (!params.fasta) {
             log.error "No database fasta was provided, make sure you have used the '--fasta' option."
             System.exit(1)
         }
@@ -21,7 +21,7 @@ class WorkflowMhcquant {
         }
 
         // Database options
-        if (params.skip_decoy_generation) { 
+        if (params.skip_decoy_generation) {
             skipDecoyWarn(log)
         }
 
@@ -62,7 +62,7 @@ class WorkflowMhcquant {
     //
     private static void klammerConflictWarn(log) {
         log.warn "=============================================================================\n" +
-            "  Quantification FDR enabled\n" + 
+            "  Quantification FDR enabled\n" +
             "==================================================================================="
     }
 
@@ -71,8 +71,8 @@ class WorkflowMhcquant {
     //
     private static void enabledFDRWarn(log) {
         log.warn "=============================================================================\n" +
-            "  Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.\n" + 
-            "  Klammer has been turned off!\n" + 
+            "  Klammer was specified, but description of correct features was still 0. Please provide a description of correct features greater than 0.\n" +
+            "  Klammer has been turned off!\n" +
             "==================================================================================="
     }
 

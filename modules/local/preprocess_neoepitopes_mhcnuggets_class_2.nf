@@ -9,7 +9,7 @@ def VERSION = '2.3.2'
 process PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
     tag "$meta"
     label 'process_low'
-    
+
     conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2--py_0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
@@ -21,7 +21,7 @@ process PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
         tuple val(meta), path(neoepitopes)
 
     output:
-        tuple val(meta), path("*${prefix}*"), emit: preprocessed   
+        tuple val(meta), path("*${prefix}*"), emit: preprocessed
         path  "*.version.txt", emit: version
 
     script:

@@ -23,7 +23,7 @@ process OPENMS_IDFILTER {
         tuple val(meta), path(idxml), file(peptide_filter)
 
     output:
-        tuple val(meta), path("*.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml
         path  "*.version.txt", emit: version
 
     script:
@@ -33,7 +33,7 @@ process OPENMS_IDFILTER {
 
         if (whitelist == "input.2") {
             whitelist = " "
-        } 
+        }
 
         """
             IDFilter -in ${idxml} \\

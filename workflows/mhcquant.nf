@@ -174,7 +174,7 @@ workflow MHCQUANT {
             other : true }
         .set { ms_files }
 
-   // Input fasta file
+    // Input fasta file
     Channel.fromPath( params.fasta )
         .combine( ch_samples_from_sheet )
         .flatMap{ it -> [tuple(it[1],it[0])] }

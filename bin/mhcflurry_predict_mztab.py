@@ -17,25 +17,25 @@ LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
 def parse_mztab(identified_peptides_file):
-       """
-       parses an mztab file and returns all identified proteins
-       :param identified_peptides_file: path to the mztab file
-       :return: identified proteins
-       """
-       mztab = open(identified_peptides_file)
-       mztab_read = mztab.readlines()
-       mztab.close()
+    """
+    parses an mztab file and returns all identified proteins
+    :param identified_peptides_file: path to the mztab file
+    :return: identified proteins
+    """
+    mztab = open(identified_peptides_file)
+    mztab_read = mztab.readlines()
+    mztab.close()
 
-       seq_geneIDs = defaultdict(str)
-       for line in mztab_read:
-              if line.startswith("PEP"):
-                     content = line.split('\t')
-                     seq = content[1]
-                     geneID = content[2]
-                     if not 'U' in seq and not 'X' in seq and not 'Z' in seq and not 'J' in seq and not 'B' in seq:
-                            seq_geneIDs[seq] = geneID
+    seq_geneIDs = defaultdict(str)
+    for line in mztab_read:
+        if line.startswith("PEP"):
+            content = line.split('\t')
+            seq = content[1]
+            geneID = content[2]
+            if not 'U' in seq and not 'X' in seq and not 'Z' in seq and not 'J' in seq and not 'B' in seq:
+                seq_geneIDs[seq] = geneID
 
-       return seq_geneIDs
+    return seq_geneIDs
 
 #List of alleles supported by mhcflurry
 supported_alleles = "A*01:01,A*02:01,A*02:02,A*02:03,A*02:05,A*02:06,A*02:07,A*02:11,A*02:12,A*02:16,A*02:17,A*02:19," \
@@ -49,26 +49,26 @@ supported_alleles = "A*01:01,A*02:01,A*02:02,A*02:03,A*02:05,A*02:06,A*02:07,A*0
 #read provided allotypes
 alleles=sys.argv[-3].split(";")
 
-#extract and verify alleles 
+#extract and verify alleles
 unsupported_alleles=[a for a in alleles if a not in supported_alleles]
 alleles=[a for a in alleles if a in supported_alleles]
 
 if unsupported_alleles:
-       for allele in unsupported_alleles:
-              LOG.warning("Allele: " + allele + " is not supported by MHCFlurry!")
+    for allele in unsupported_alleles:
+        LOG.warning("Allele: " + allele + " is not supported by MHCFlurry!")
 if not alleles:
-   LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
+    LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
 
- # read identified peptides
+# read identified peptides
 seqs_to_geneID = parse_mztab(sys.argv[-2])
 
-if len(seqs_to_geneID) > 0: 
-   # call mhcflurry
-   for allele in alleles:
-       predictor = Class1AffinityPredictor.load()
-       df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_to_geneID.keys())
-       df_pred.insert(1, 'geneID', pd.Series(np.array(seqs_to_geneID.values())))
-       df_pred.to_csv(allele + '_' + sys.argv[-1])
+if len(seqs_to_geneID) > 0:
+    # call mhcflurry
+    for allele in alleles:
+        predictor = Class1AffinityPredictor.load()
+        df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_to_geneID.keys())
+        df_pred.insert(1, 'geneID', pd.Series(np.array(seqs_to_geneID.values())))
+        df_pred.to_csv(allele + '_' + sys.argv[-1])
 else:
-   op=open(sys.argv[-1],'w')
-   op.close()
+    op=open(sys.argv[-1],'w')
+    op.close()

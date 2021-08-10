@@ -2,41 +2,41 @@
 """
 Commandline tool for (neo)epitope prediction
 usage: neoepitopeprediction.py [-h]
-                               [-m {netmhc,smmpmbec,syfpeithi,netmhcpan,netctlpan,smm,tepitopepan,arb,pickpocket,epidemix,netmhcii,netmhciipan,comblibsidney,unitope,hammer,svmhc,bimas}]
-                               [-v VCF] [-t {VEP,ANNOVAR,SNPEFF}] [-p PROTEINS]
-                               [-minl, -maxl {8,9,10,11,12,13,14,15,16,17}]
-                               -a ALLELES
-                               [-r REFERENCE] [-fINDEL] [-fFS] [-fSNP]
+                                [-m {netmhc,smmpmbec,syfpeithi,netmhcpan,netctlpan,smm,tepitopepan,arb,pickpocket,epidemix,netmhcii,netmhciipan,comblibsidney,unitope,hammer,svmhc,bimas}]
+                                [-v VCF] [-t {VEP,ANNOVAR,SNPEFF}] [-p PROTEINS]
+                                [-minl, -maxl {8,9,10,11,12,13,14,15,16,17}]
+                                -a ALLELES
+                                [-r REFERENCE] [-fINDEL] [-fFS] [-fSNP]
                                 -o OUTPUT
 Neoepitope prediction for TargetInsepctor.
 optional arguments:
-  -h, --help            show this help message and exit
-  -m, --method {netmhc,smmpmbec,syfpeithi,netmhcpan,netctlpan,smm,tepitopepan,arb,pickpocket,epidemix,netmhcii,netmhciipan,comblibsidney,unitope,hammer,svmhc,bimas},
+    -h, --help            show this help message and exit
+    -m, --method {netmhc,smmpmbec,syfpeithi,netmhcpan,netctlpan,smm,tepitopepan,arb,pickpocket,epidemix,netmhcii,netmhciipan,comblibsidney,unitope,hammer,svmhc,bimas},
                         The name of the prediction method
-  -v VCF, --vcf VCF     Path to the vcf input file
-  -t, --type {VEP,ANNOVAR, SNPEFF}
+    -v VCF, --vcf VCF     Path to the vcf input file
+    -t, --type {VEP,ANNOVAR, SNPEFF}
                         Type of annotation tool used (Variant Effect
                         Predictor, ANNOVAR exonic gene annotation, SnpEff)
-  -p, --proteins PROTEINS
+    -p, --proteins PROTEINS
                         Path to the protein ID input file (in HGNC-ID)
-  -minl, --peptide_min_length {8,9,10,11,12,13,14,15,16,17}
+    -minl, --peptide_min_length {8,9,10,11,12,13,14,15,16,17}
                         The minimal length of peptides
-  -maxl, --peptide_max_length {8,9,10,11,12,13,14,15,16,17}
+    -maxl, --peptide_max_length {8,9,10,11,12,13,14,15,16,17}
                         The maximal length of peptides
-  -a, --alleles ALLELES
+    -a, --alleles ALLELES
                         Alleles string separated by semicolon
-  -r, --reference REFERENCE
+    -r, --reference REFERENCE
                         The reference genome used for varinat annotation and
                         calling.
-  -fINDEL, --filterINDEL
+    -fINDEL, --filterINDEL
                         Filter insertions and deletions (including
                         frameshifts)
-  -fFS, --filterFSINDEL
+    -fFS, --filterFSINDEL
                         Filter frameshift INDELs
-  -fSNP, --filterSNP    Filter SNPs
-  -bind, --predict_bindings
+    -fSNP, --filterSNP    Filter SNPs
+    -bind, --predict_bindings
                         Whether to predict bindings or not
-  -o OUTPUT, --output OUTPUT
+    -o OUTPUT, --output OUTPUT
                         Path to the output file
 Neoepitope prediction node Consumes a VCF file containing the identified somatic genomic variants, besides a text
 file containing HLA alleles, and generates all possible neo-epitopes based on the annotated variants contained in the
@@ -67,7 +67,7 @@ LOG.addHandler(console)
 LOG.setLevel(logging.INFO)
 
 MARTDBURL = {"GRCH37": "http://grch37.ensembl.org/biomart/martservice?query=",
-             "GRCH38": "http://www.ensembl.org/biomart/martservice?query="}  # is correctly set to GRCh38
+                "GRCH38": "http://www.ensembl.org/biomart/martservice?query="}  # is correctly set to GRCh38
 
 
 def read_variant_effect_predictor(file, gene_filter=None):
@@ -134,9 +134,7 @@ def read_variant_effect_predictor(file, gene_filter=None):
 
                     # positioning in Fred2 is 0-based!!!
                     if transcript_pos != "" and '?' not in transcript_pos:
-                        coding[transcript_id] = MutationSyntax(transcript_id, int(transcript_pos.split("-")[0]) - 1,
-                                                               -1 if prot_pos == "" else int(
-                                                                   prot_pos.split("-")[0]) - 1, co, "", geneID=gene)
+                        coding[transcript_id] = MutationSyntax(transcript_id, int(transcript_pos.split("-")[0]) - 1, -1 if prot_pos == "" else int(prot_pos.split("-")[0]) - 1, co, "", geneID=gene)
                 # is variant synonymous?
                 is_synonymous = any(t == "synonymous_variant" for t in var_type.split("&"))
 
@@ -373,10 +371,9 @@ def main():
                 vars_str = ""
 
                 if args.vcf is not None:
-                    vars_str = "\t" + "|".join(set(prot_id.split(":FRED2")[0] + ":" + ",".join(
-                        repr(v) for v in set(p.get_variants_by_protein(prot_id)))
-                                                   for prot_id in p.proteins.iterkeys()
-                                                   if p.get_variants_by_protein(prot_id)))
+                    vars_str = "\t" + "|".join(set(prot_id.split(":FRED2")[0] + ":" + ",".join( repr(v) for v in set(p.get_variants_by_protein(prot_id)) )
+                    for prot_id in p.proteins.iterkeys()
+                        if p.get_variants_by_protein(prot_id)))
 
                 f.write(str(p) + "\t" + proteins + vars_str + "\n")
 
@@ -389,4 +386,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-    
+

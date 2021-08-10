@@ -17,7 +17,7 @@ process OPENMS_COMETADAPTER {
 
     input:
         tuple val(meta), path(mzml), path(fasta)
-    
+
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
         path  "*.version.txt", emit: version
@@ -25,7 +25,7 @@ process OPENMS_COMETADAPTER {
     script:
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${mzml.baseName}_${options.suffix}" : "${mzml.baseName}"
-        
+
         """
             CometAdapter -in ${mzml} \\
                 -out ${prefix}.idXML \\

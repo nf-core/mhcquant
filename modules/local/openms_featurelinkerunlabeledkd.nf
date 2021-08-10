@@ -23,9 +23,9 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
         tuple val(meta), path(features)
 
     output:
-        tuple val(meta), path("*.consensusXML"), emit: consensusxml   
+        tuple val(meta), path("*.consensusXML"), emit: consensusxml
         path  "*.version.txt", emit: version
-        
+
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_all_features_merged"
@@ -35,7 +35,7 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
                 -out '${prefix}.consensusXML' \\
                 -threads ${task.cpus}
 
-            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}-thirdparty.version.txt 
-        
+            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}-thirdparty.version.txt
+
         """
 }

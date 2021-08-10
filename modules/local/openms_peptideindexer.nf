@@ -19,7 +19,7 @@ process OPENMS_PEPTIDEINDEXER {
         tuple val(meta), path(idxml), path(fasta)
 
     output:
-        tuple val(meta), path("*.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml
         path  "*.version.txt", emit: version
 
     script:
@@ -36,4 +36,3 @@ process OPENMS_PEPTIDEINDEXER {
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
 }
-

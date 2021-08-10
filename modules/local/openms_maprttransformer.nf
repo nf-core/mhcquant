@@ -18,8 +18,8 @@ process OPENMS_MAPRTTRANSFORMER {
     input:
         tuple val(meta), path(alignment_file), path(trafoxml)
 
-    output:   
-        tuple val(meta), path("*_aligned.*"), emit: aligned   
+    output:
+        tuple val(meta), path("*_aligned.*"), emit: aligned
         path  "*.version.txt", emit: version
 
     script:

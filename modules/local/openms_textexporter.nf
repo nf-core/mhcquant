@@ -20,11 +20,11 @@ process OPENMS_TEXTEXPORTER {
     }
 
     input:
-        tuple val(meta), path(consensus_resolved) 
+        tuple val(meta), path(consensus_resolved)
 
     output:
-        tuple val(meta), path("*.csv"), emit: csv   
-        path  "*.version.txt", emit: version 
+        tuple val(meta), path("*.csv"), emit: csv
+        path  "*.version.txt", emit: version
 
     script:
         def software = getSoftwareName(task.process)

@@ -1,22 +1,22 @@
 #!/usr/bin/env python
 """
-Commandline tool for extracting unique neoepitopes from mztab files and the 
+Commandline tool for extracting unique neoepitopes from mztab files and the
 and the FRED2 vcf_neoepitope_predictor.py script.
 usage: found_neoepitopes.py [-h]
                                 -m MZTAB
                                 -n NEOEPITOPES
-                               [-f FILEFORMAT {raw, csv, json}]
+                                [-f FILEFORMAT {raw, csv, json}]
                                 -o OUTPUT
 Neoepitope prediction for TargetInsepctor.
 optional arguments:
-  -h, --help            show this help message and exit
-  -m, --mztab           MZTAB
+    -h, --help            show this help message and exit
+    -m, --mztab           MZTAB
                         Path to the mzab file
-  -n, --neoepitopes NEOEPITOPES
+    -n, --neoepitopes NEOEPITOPES
                         Path to the neoepitopes input file
-  -f, --file_format {raw, csv, json}
+    -f, --file_format {raw, csv, json}
                         File format to report result in
-  -o, --output OUTPUT
+    -o, --output OUTPUT
                         Path to the output file
 """
 import argparse

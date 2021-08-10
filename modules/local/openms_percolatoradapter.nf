@@ -23,7 +23,7 @@ process OPENMS_PERCOLATORADAPTER {
         tuple val(meta), path(psm)
 
     output:
-        tuple val(meta), path("*.idXML"), emit: idxml   
+        tuple val(meta), path("*.idXML"), emit: idxml
         path  "*.version.txt", emit: version
 
     script:

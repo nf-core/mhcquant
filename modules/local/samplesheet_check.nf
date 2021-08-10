@@ -20,13 +20,13 @@ process SAMPLESHEET_CHECK {
 
     input:
     path samplesheet
-    
+
     output:
     path '*.csv'
 
 
-    script:  
-    
+    script:
+
     """
     check_samplesheet.py $samplesheet samplesheet.valid.csv
     """
@@ -46,5 +46,5 @@ def get_samplesheet_paths(LinkedHashMap row) {
     } else {
         array = [ meta, file(row.Filename) ]
     }
-    return array    
+    return array
 }
