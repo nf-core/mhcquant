@@ -68,7 +68,7 @@ seqs_new_all=seqs_new_all+[s[::-1] for s in seqs_new_all]
 op=open(sys.argv[-1],'w')
 op.write('<PeptideIdentification score_type="q-value" higher_score_better="false">' + '\n')
 for pep in seqs_new_all:
-	op.write('\t\t\t' + '<PeptideHit sequence="' + pep + '" score="0" charge="0" >' + '\n')
-	op.write('\t\t\t' + '</PeptideHit>' + '\n')
+    op.write('\t\t\t' + '<PeptideHit sequence="' + pep + '" score="0" charge="0" >' + '\n')
+    op.write('\t\t\t' + '</PeptideHit>' + '\n')
 op.write('</PeptideIdentification>' + '\n')
 op.close()

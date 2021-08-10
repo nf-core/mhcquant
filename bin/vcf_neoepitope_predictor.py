@@ -275,9 +275,9 @@ def main():
 
         if args.filterINDEL:
             variants = filter(lambda x: x.type not in [VariationType.INS,
-                                                       VariationType.DEL,
-                                                       VariationType.FSDEL,
-                                                       VariationType.FSINS], variants)
+                                                        VariationType.DEL,
+                                                        VariationType.FSDEL,
+                                                        VariationType.FSINS], variants)
 
         if args.filterFSINDEL:
             variants = filter(lambda x: x.type not in [VariationType.FSDEL, VariationType.FSINS], variants)
@@ -340,10 +340,9 @@ def main():
                 vars_str = ""
 
                 if args.vcf is not None:
-                    vars_str = "\t" + "|".join(set(prot_id.split(":FRED2")[0] + ":" + ",".join(
-                        repr(v) for v in set(p.get_variants_by_protein(prot_id)))
-                                                   for prot_id in p.proteins.iterkeys()
-                                                   if p.get_variants_by_protein(prot_id)))
+                    vars_str = "\t" + "|".join(set(prot_id.split(":FRED2")[0] + ":" + ",".join( repr(v) for v in set(p.get_variants_by_protein(prot_id)) )
+                    for prot_id in p.proteins.iterkeys()
+                        if p.get_variants_by_protein(prot_id)))
 
                 f.write(str(p) + "\t" + method + "\t" + "\t".join(
                     "%.3f" % row[a] for a in alleles) + "\t" + proteins + vars_str + "\n")
