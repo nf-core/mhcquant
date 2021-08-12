@@ -1,4 +1,4 @@
-# nf-core/rnaseq: Output
+# nf-core/mhcquant: Output
 
 ## Introduction
 
