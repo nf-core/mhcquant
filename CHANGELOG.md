@@ -1,6 +1,6 @@
 # nf-core/mhcquant: Changelog
 
-## v2.0.0 nf-core/mhcquant "Steel Beagle" - 2021/05/20
+## v2.0.0 nf-core/mhcquant "Steel Beagle" - 2021/09/03
 
 ### `Added`
 
