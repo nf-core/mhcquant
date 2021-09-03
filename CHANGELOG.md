@@ -1,5 +1,23 @@
 # nf-core/mhcquant: Changelog
 
+## v2.0.0 nf-core/mhcquant "Steel Beagle" - 2021/09/03
+
+### `Added`
+
+DSL1 to DSL2 conversion
+
+    - Different processes based on a unique step in the pipeline
+    - Inclusion of one sub workflow: refine fdr on predicted subset
+    - The process: openms_cometadapter includes commented lines (which could be used as a reference for future module development)
+    - MHCquant pipeline is ran from workflows/mhcquant.nf instead of main
+    - Template update to nf-core tools version 2.1
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v1.6.0 nf-core/mhcquant "Beijing Duck" - 2020/09/11
 
 ### `Added`
@@ -8,7 +26,6 @@
 - Added parameter json schema
 - Added full size AWS test profile
 - Included new parameters for Neutral loss and precursor ion inclusion
-
 
 ### `Fixed`
 

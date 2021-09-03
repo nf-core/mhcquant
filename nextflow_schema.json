@@ -1,5 +1,5 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/mhcquant/master/nextflow_schema.json",
     "title": "nf-core/mhcquant pipeline parameters",
     "description": "Identify and quantify peptides from mass spectrometry raw data",
@@ -18,7 +18,7 @@
                     "type": "string",
                     "fa_icon": "fab fa-think-peaks",
                     "description": "Input raw / mzML files listed in a tsv file (see help for details)",
-                    "help_text": "Use this to specify a sample sheet table including your input raw or mzml files as well as their metainformation such as SampleID and Condition. For example:\n\n| ID   | Sample      | Condition  |   ReplicateFileName                       |\n| -----|:------------:| ----------:|------------------------------------------:|\n| 1    | MM15_Melanom |      A     |   data/MM15_Melanom_W_1_A_standard.raw    |\n| 2    | MM15_Melanom |      B     |   data/MM15_Melanom_W_1_B_standard.raw    |\n| 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |\n\n```bash\n--input 'path/samples.tsv'\n```"
+                    "help_text": "Use this to specify a sample sheet table including your input raw or mzml files as well as their meta information such as SampleID and Condition. For example:\n\n| ID   | Sample      | Condition  |   ReplicateFileName                       |\n| -----|:------------:| ----------:|------------------------------------------:|\n| 1    | MM15_Melanom |      A     |   data/MM15_Melanom_W_1_A_standard.raw    |\n| 2    | MM15_Melanom |      B     |   data/MM15_Melanom_W_1_B_standard.raw    |\n| 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |\n\n```bash\n--input 'path/samples.tsv'\n```"
                 },
                 "outdir": {
                     "type": "string",
@@ -47,14 +47,14 @@
                     "description": "Input FASTA protein database",
                     "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
                 },
-                "inlude_proteins_from_vcf": {
+                "include_proteins_from_vcf": {
                     "type": "boolean",
                     "description": "Set depending on whether variants should be translated to proteins and included into your fasta for database search."
                 },
                 "skip_decoy_generation": {
                     "type": "boolean",
                     "description": "Set depending on whether own decoy database should be used",
-                    "help_text": "If you want to use your own decoys, you can specify a databaset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.\nOne should consider though that this option will then prevent to append variants to the database and if not using reversed decoys the subset refinement FDR option will not work."
+                    "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.\nOne should consider though that this option will then prevent to append variants to the database and if not using reversed decoys the subset refinement FDR option will not work."
                 }
             }
         },
@@ -121,12 +121,12 @@
                 "digest_mass_range": {
                     "type": "string",
                     "default": "800:2500",
-                    "description": "Specify the mass range that peptides should fullfill to be considered for peptide spectrum matching."
+                    "description": "Specify the mass range that peptides should fulfill to be considered for peptide spectrum matching."
                 },
                 "prec_charge": {
                     "type": "string",
                     "default": "2:3",
-                    "description": "Specifiy the precursor charge range that peptides should fullfill to be considered for peptide spectrum matching."
+                    "description": "Specify the precursor charge range that peptides should fulfill to be considered for peptide spectrum matching."
                 },
                 "activation_method": {
                     "type": "string",
@@ -230,7 +230,7 @@
                 },
                 "subset_affinity_threshold": {
                     "type": "integer",
-                    "default": "500",
+                    "default": 500,
                     "description": "Affinity threshold (nM) used to define binders for PSM subset selection in the FDR refinement procedure"
                 },
                 "description_correct_features": {
@@ -370,15 +370,21 @@
                         "link",
                         "copy",
                         "copyNoFollow",
-                        "mov"
+                        "move"
                     ]
                 },
-                "name": {
-                    "type": "string",
-                    "description": "Workflow name.",
-                    "fa_icon": "fas fa-fingerprint",
-                    "hidden": true,
-                    "help_text": "A custom name for the pipeline run. Unlike the core nextflow `-name` option with one hyphen this parameter can be reused multiple times, for example if using `-resume`. Passed through to steps such as MultiQC and used for things like report filenames and titles."
+                "validate_params": {
+                    "type": "boolean",
+                    "description": "Boolean whether to validate parameters against the schema at runtime",
+                    "default": true,
+                    "fa_icon": "fas fa-check-square",
+                    "hidden": true
+                },
+                "skip_multiqc": {
+                    "type": "boolean",
+                    "description": "Skip MultiQC.",
+                    "fa_icon": "fas fa-fast-forward",
+                    "default": true
                 },
                 "email_on_fail": {
                     "type": "string",
@@ -408,21 +414,26 @@
                     "default": "${params.outdir}/pipeline_info",
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
-                }
-            }
-        },
-        "reference_genome_options": {
-            "title": "Reference genome options",
-            "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "Options for the reference genome indices used to align reads.",
-            "properties": {
-                "igenomes_ignore": {
+                },
+                "show_hidden_params": {
                     "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
+                    "fa_icon": "far fa-eye-slash",
+                    "description": "Show all params when using `--help`",
                     "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+                },
+                "max_multiqc_email_size": {
+                    "type": "string",
+                    "description": "File size limit when attaching MultiQC reports to summary emails.",
+                    "default": "25.MB",
+                    "fa_icon": "fas fa-file-upload",
+                    "hidden": true
+                },
+                "enable_conda": {
+                    "type": "boolean",
+                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-bacon"
                 }
             }
         },
@@ -446,6 +457,7 @@
                     "description": "Maximum amount of memory that can be requested for any single job.",
                     "default": "128.GB",
                     "fa_icon": "fas fa-memory",
+                    "pattern": "^[\\d\\.]+\\s*.(K|M|G|T)?B$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
                 },
@@ -454,6 +466,7 @@
                     "description": "Maximum amount of time that can be requested for any single job.",
                     "default": "240.h",
                     "fa_icon": "far fa-clock",
+                    "pattern": "^[\\d\\.]+\\.*(s|m|h|d|day)$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }
@@ -488,6 +501,12 @@
                     "hidden": true,
                     "fa_icon": "fas fa-users-cog"
                 },
+                "config_profile_name": {
+                    "type": "string",
+                    "description": "Institutional config name.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
                 "config_profile_description": {
                     "type": "string",
                     "description": "Institutional config description.",
@@ -505,6 +524,12 @@
                     "description": "Institutional config URL link.",
                     "hidden": true,
                     "fa_icon": "fas fa-users-cog"
+                },
+                "multiqc_config": {
+                    "type": "string",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
                 }
             }
         }
@@ -541,39 +566,10 @@
             "$ref": "#/definitions/generic_options"
         },
         {
-            "$ref": "#/definitions/reference_genome_options"
-        },
-        {
             "$ref": "#/definitions/max_job_request_options"
         },
         {
             "$ref": "#/definitions/institutional_config_options"
         }
-    ],
-    "properties": {
-        "clusterOptions": {
-            "type": "string"
-        },
-        "awsqueue": {
-            "type": "string"
-        },
-        "awsregion": {
-            "type": "string",
-            "default": "eu-west-1"
-        },
-        "include_proteins_from_vcf": {
-            "type": "string"
-        },
-        "config_profile_name": {
-            "type": "string",
-            "default": "Full test profile"
-        },
-        "igenomes_base": {
-            "type": "string",
-            "default": "s3://ngi-igenomes/igenomes/"
-        },
-        "multiqc_config": {
-            "type": "string"
-        }
-    }
+    ]
 }
