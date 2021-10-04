@@ -283,7 +283,7 @@ workflow MHCQUANT {
             .groupTuple(by: [0])
 
     } else {
-        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idXML
+        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
             .map {
                 meta, raw ->
                 [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
@@ -324,14 +324,14 @@ workflow MHCQUANT {
         filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml.map{ it -> [it[0].sample, it[0], it[1]] }
     }
 
-    OPENMS_IDFILTER_FOR_ALIGNMENT.out[0]
-        .join( OPENMS_MAPRTTRANSFORMERMZML.out[0], by: [0] )
-        .map { it -> [it[0].sample, it[0], it[1], it[2]] }
-        .combine( filter_q_value , by: [0] )
-        .map { it -> [it[1], it[2], it[3], it[5]] }
-        .set{ joined_mzmls_ids_quant }
-
     if ( !params.skip_quantification) {
+        // Combining the necessary information into one channel
+        OPENMS_IDFILTER_FOR_ALIGNMENT.out[0]
+            .join( OPENMS_MAPRTTRANSFORMERMZML.out[0], by: [0] )
+            .map { it -> [it[0].sample, it[0], it[1], it[2]] }
+            .combine( filter_q_value , by: [0] )
+            .map { it -> [it[1], it[2], it[3], it[5]] }
+            .set{ joined_mzmls_ids_quant }
         // Quantify identifications using targeted feature extraction
         OPENMS_FEATUREFINDERIDENTIFICATION(joined_mzmls_ids_quant)
         // Link extracted features
@@ -344,12 +344,17 @@ workflow MHCQUANT {
                 .groupTuple(by:[0]))
         // Resolve conflicting ids matching to the same feature
         OPENMS_IDCONFLICTRESOLVER(OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml)
+        // Assign the outcome of the id conflict resolver as export content
+        export_content = OPENMS_IDCONFLICTRESOLVER.out.consensusxml
+    } else {
+        // Assign the outcome of the filter q value as export content
+        export_content = filter_q_value.map { it -> [it[1], it[2]] }
     }
 
     // Export all information as text to csv
-    OPENMS_TEXTEXPORTER(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
+    OPENMS_TEXTEXPORTER(export_content)
     // Export all information as mzTab
-    OPENMS_MZTABEXPORTER(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
+    OPENMS_MZTABEXPORTER(export_content)
     //////////////////////////////////////////////////////////////////////////////////////////////
     //  TODO: Replacement of custom scripts with epytope
     ch_predicted_possible_neoepitopes = Channel.empty()
