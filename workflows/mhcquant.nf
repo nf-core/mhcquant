@@ -358,7 +358,7 @@ workflow MHCQUANT {
     //////////////////////////////////////////////////////////////////////////////////////////////
     //  TODO: Replacement of custom scripts with epytope
     ch_predicted_possible_neoepitopes = Channel.empty()
-    if ( params.predict_class_1 ) {
+    if ( params.predict_class_1  & !params.skip_quantification ) {
         // If specified predict peptides using MHCFlurry
         PREDICT_PEPTIDES_MHCFLURRY_CLASS_1(
             OPENMS_MZTABEXPORTER.out.mztab
@@ -385,7 +385,7 @@ workflow MHCQUANT {
     }
 
     ch_predicted_possible_neoepitopes_II = Channel.empty()
-    if ( params.predict_class_2 ) {
+    if ( params.predict_class_2  & !params.skip_quantification ) {
         // Preprocess found peptides for MHCNuggets prediction class 2
         PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2(OPENMS_MZTABEXPORTER.out.mztab)
         // Predict found peptides using MHCNuggets class 2
