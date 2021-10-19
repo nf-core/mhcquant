@@ -6,7 +6,7 @@ options        = initOptions(params.options)
 
 process OPENMS_FEATUREFINDERIDENTIFICATION  {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_intensive'
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

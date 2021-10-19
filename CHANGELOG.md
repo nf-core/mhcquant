@@ -1,5 +1,19 @@
 # nf-core/mhcquant: Changelog
 
+## v2.0.1 nf-core/mhcquant - 2021/10/19
+
+### `Added`
+* Includes the "process_intensive" in the conf/base.config
+* Output is generated when the --skip-quantification is used (outcome q value filtering)
+### `Fixed`
+
+* Changes output dir of featurelinkerunlabeledkd (RT_prediction > Intermediate_Results)
+* [#165] - Raise memory requirements of FeatureFinderIdentification step
+* [#176] - Pipeline crashes when setting the --skip_quantification flag
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.0.0 nf-core/mhcquant "Steel Beagle" - 2021/09/03
 
 ### `Added`
