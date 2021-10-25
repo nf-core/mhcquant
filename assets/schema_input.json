@@ -1,0 +1,46 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/mhcquant/master/assets/schema_input.json",
+    "title": "nf-core/mhcquant pipeline - params.input schema",
+    "description": "Schema for the file provided with params.input",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "ID": {
+                "type": "integer",
+                "errorMessage": "Provide an unique identifier for the replicate, must be a numeric value"
+            },
+            "Sample": {
+                "type": "string",
+                "pattern": "^\\S+-?",
+                "errorMessage": "Sample name must be provided and cannot contain spaces"
+            },
+            "Condition": {
+                "type": "string",
+                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                "errorMessage": "Sample condition must be provided and cannot contain spaces"
+            },
+            "ReplicateFileName": {
+                "type": "string",
+                "errorMessage": "MS file spaces and must have extension '.raw' or '.mzml'",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+-?\\.raw$"
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+-?\\.mzml$"
+                    }
+                ]
+            }
+        },
+        "required": [
+            "ID",
+            "Sample",
+            "Condition",
+            "ReplicateFileName"
+        ]
+    }
+}

@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
@@ -12,11 +12,11 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
 
-    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.6.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
+        container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.6.0--0"
     } else {
-        container "quay.io/biocontainers/openms-thirdparty:2.5.0--6"
+        container "quay.io/biocontainers/openms-thirdparty:2.6.0--0"
     }
 
     input:
@@ -24,7 +24,7 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
 
     output:
         tuple val(meta), path("*.consensusXML"), emit: consensusxml
-        path  "*.version.txt", emit: version
+        path "versions.yml", emit: versions
 
     script:
         def software = getSoftwareName(task.process)
@@ -35,7 +35,9 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
                 -out '${prefix}.consensusXML' \\
                 -threads ${task.cpus}
 
-            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}-thirdparty.version.txt
-
+            cat <<-END_VERSIONS > versions.yml
+            ${getProcessName(task.process)}:
+                openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+            END_VERSIONS
         """
 }

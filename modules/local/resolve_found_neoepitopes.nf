@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
@@ -27,15 +27,19 @@ process RESOLVE_FOUND_NEOEPITOPES {
 
     output:
         tuple val(meta), path("*.csv"), emit: csv
-        path  "*.version.txt", emit: version
+        path "versions.yml", emit: versions
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_found_neoepitopes_class_1"
 
         """
             resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${prefix}
-            echo $VERSIONFRED2 > fred2.version.txt
-            echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
-            mhcflurry-predict --version &> mhcflurry.version.txt
+
+            cat <<-END_VERSIONS > versions.yml
+            ${getProcessName(task.process)}:
+                mhcflurry: \$(mhcflurry-predict --version | sed 's/^mhcflurry //; s/ .*\$//' )
+                mhcnuggets: \$(echo $VERSIONMHCNUGGETS)
+                FRED2: \$(echo $VERSIONFRED2)
+            END_VERSIONS
         """
 }

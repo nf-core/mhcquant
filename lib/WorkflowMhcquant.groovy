@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the workflow/rnaseq.nf in the nf-core/rnaseq pipeline
+// This file holds several functions specific to the workflow/mhcquant.nf in the nf-core/mhcquant pipeline
 //
 
 class WorkflowMhcquant {

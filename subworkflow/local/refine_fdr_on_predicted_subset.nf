@@ -18,12 +18,12 @@ def filter_refined_qvalue_options = params.filter_options.clone()
 filter_psms_options.suffix = "pred_filtered"
 filter_refined_qvalue_options.suffix = "perc_subset_filtered"
 
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged_psm_perc_filtered" ] )
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged" ] )
-include { PREDICT_PSMS }                                     from '../predict_psms'                                               addParams( options: [:] )
-include { OPENMS_PERCOLATORADAPTER }                         from '../openms_percolatoradapter'                                   addParams( options: percolator_adapter_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../openms_idfilter'                                            addParams( options: filter_psms_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../openms_idfilter'                                            addParams( options: filter_refined_qvalue_options )
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../../modules/local/openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged_psm_perc_filtered" ] )
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../../modules/local/openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged" ] )
+include { PREDICT_PSMS }                                     from '../../modules/local/predict_psms'                                               addParams( options: [:] )
+include { OPENMS_PERCOLATORADAPTER }                         from '../../modules/local/openms_percolatoradapter'                                   addParams( options: percolator_adapter_options )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../../modules/local/openms_idfilter'                                            addParams( options: filter_psms_options )
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../../modules/local/openms_idfilter'                                            addParams( options: filter_refined_qvalue_options )
 
 workflow REFINE_FDR_ON_PREDICTED_SUBSET {
     // Define the input parameters
@@ -36,9 +36,10 @@ workflow REFINE_FDR_ON_PREDICTED_SUBSET {
         ch_software_versions = Channel.empty()
         // Export filtered percolator results as mztab
         OPENMS_MZTABEXPORTERPERC( filtered_perc_output )
-        ch_software_versions = ch_software_versions.mix(OPENMS_MZTABEXPORTERPERC.out.version.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTERPERC.out.versions)
         // Export psm results as mztab
         OPENMS_MZTABEXPORTERPSM( psm_features )
+        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTERPSM.out.versions)
         // Predict psm results using mhcflurry to shrink search space
         PREDICT_PSMS(
             OPENMS_MZTABEXPORTERPERC.out.mztab
@@ -47,15 +48,19 @@ workflow REFINE_FDR_ON_PREDICTED_SUBSET {
                 .combine( classI_alleles, by:0)
                 .map(it -> [it[1], it[2], it[3], it[4]])
         )
+        ch_versions = ch_versions.mix(PREDICT_PSMS.out.versions)
 
         // Filter psm results by shrinked search space
         OPENMS_IDFILTER_PSMS(psm_features.combine( PREDICT_PSMS.out.idxml, by: [0] ))
+        ch_versions = ch_versions.mix(OPENMS_IDFILTER_PSMS.out.versions)
         // Recompute percolator fdr on shrinked search space
         OPENMS_PERCOLATORADAPTER( OPENMS_IDFILTER_PSMS.out.idxml )
+        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         // Filter results by refined fdr
         OPENMS_IDFILTER_REFINED(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)]})
+        ch_versions = ch_versions.mix(OPENMS_IDFILTER_REFINED.out.versions)
     emit:
         // Define the information that is returned by this workflow
         filter_refined_q_value = OPENMS_IDFILTER_REFINED.out.idxml
-        version = ch_software_versions
+        versions = ch_software_versions
 }

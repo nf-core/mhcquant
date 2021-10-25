@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
@@ -12,11 +12,11 @@ process PREDICT_PSMS {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
 
-    conda (params.enable_conda ? "bioconda::fred2=2.0.6 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2" : null)
+    conda (params.enable_conda ? "bioconda::mhcflurry=2.0.1" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/mulled-v2-689ae0756dd82c61400782baaa8a7a1c2289930d:a9e10ca22d4cbcabf6b54f0fb5d766ea16bb171e-0"
+        container "https://depot.galaxyproject.org/singularity/mhcflurry:2.0.1--pyh864c0ab_0"
     } else {
-        container "quay.io/biocontainers/mulled-v2-689ae0756dd82c61400782baaa8a7a1c2289930d:a9e10ca22d4cbcabf6b54f0fb5d766ea16bb171e-0"
+        container "quay.io/biocontainers/mhcflurry:2.0.1--pyh864c0ab_0"
     }
 
     input:
@@ -24,7 +24,7 @@ process PREDICT_PSMS {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path  "*.version.txt", emit: version
+        path "versions.yml", emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_peptide_filter"
@@ -32,7 +32,11 @@ process PREDICT_PSMS {
     """
         mhcflurry-downloads --quiet fetch models_class1
         mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes}' ${perc_mztab} ${psm_mztab} ${prefix}.idXML
-        mhcflurry-predict --version &> mhcflurry.version.txt
+
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcflurry: \$(mhcflurry-predict --version | sed 's/^mhcflurry //; s/ .*\$//' )
+        END_VERSIONS
     """
 
 }

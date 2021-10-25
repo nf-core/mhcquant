@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
@@ -22,13 +22,17 @@ process PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
 
     output:
         tuple val(meta), path("*_predicted_neoepitopes_class_2"), emit: csv
-        path  "*.version.txt", emit: version
+        path "versions.yml", emit: versions
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_predicted_neoepitopes_class_2"
 
         """
             mhcnuggets_predict_peptides.py --peptides ${neoepitopes} --alleles '${alleles}' --output ${prefix}
-            echo $VERSION > mhcnuggets.version.txt
+
+            cat <<-END_VERSIONS > versions.yml
+            ${getProcessName(task.process)}:
+                mhcnuggets: \$(echo $VERSION)
+            END_VERSIONS
         """
 }

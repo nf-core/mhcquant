@@ -1,16 +1,29 @@
 # nf-core/mhcquant: Changelog
 
-## v2.0.1 nf-core/mhcquant - 2021/10/19
+## v2.1.0 nf-core/mhcquant "Olive Tin Hamster" - 2021/10/25
 
 ### `Added`
-* Includes the "process_intensive" in the conf/base.config
-* Output is generated when the --skip-quantification is used (outcome q value filtering)
-### `Fixed`
+* Inclusion of assets/schema_input.json
 
-* Changes output dir of featurelinkerunlabeledkd (RT_prediction > Intermediate_Results)
+### `Fixed`
+* Fixed typos
 * [#165] - Raise memory requirements of FeatureFinderIdentification step
 * [#176] - Pipeline crashes when setting the --skip_quantification flag
 ### `Dependencies`
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+
+| Dependency            | Old version | New version |
+|-----------------------|-------------|-------------|
+| `openms`              | 2.5.0       | 2.6.0       |
+| `openms-thirdparty`   | 2.5.0       | 2.6.0       |
+| `thermorawfileparser` | 1.2.3       | 1.3.4       |
+| `mhcflurry`           | 1.4.3       | 2.0.1       |
+
+> **NB:** Dependency has been __updated__ if both old and new version information is present.
+> **NB:** Dependency has been __added__ if just the new version information is present.
+> **NB:** Dependency has been __removed__ if version information isn't present.
 
 ### `Deprecated`
 

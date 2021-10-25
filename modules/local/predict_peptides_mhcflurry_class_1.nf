@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
@@ -27,7 +27,7 @@ process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
 
     output:
         tuple val(meta), path("*predicted_peptides_class_1.csv"), emit: csv
-        path  "*.version.txt", emit: version
+        path "versions.yml", emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_predicted_peptides_class_1"
@@ -35,8 +35,12 @@ process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
         """
             mhcflurry-downloads --quiet fetch models_class1
             mhcflurry_predict_mztab.py '${alleles}' ${mztab} ${prefix}.csv
-            echo $VERSIONFRED2 > fred2.version.txt
-            echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
-            mhcflurry-predict --version &> mhcflurry.version.txt
+
+            cat <<-END_VERSIONS > versions.yml
+            ${getProcessName(task.process)}:
+                mhcflurry: \$(mhcflurry-predict --version | sed 's/^mhcflurry //; s/ .*\$//' )
+                mhcnuggets: \$(echo $VERSIONMHCNUGGETS)
+                FRED2: \$(echo $VERSIONFRED2)
+            END_VERSIONS
         """
 }

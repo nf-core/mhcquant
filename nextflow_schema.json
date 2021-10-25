@@ -210,12 +210,12 @@
             "properties": {
                 "fdr_level": {
                     "type": "string",
-                    "default": "peptide-level-fdrs",
+                    "default": "peptide_level_fdrs",
                     "description": "Specify the level at which the false discovery rate should be computed.",
                     "enum": [
-                        "peptide-level-fdrs",
+                        "peptide_level_fdrs",
                         "psm-level-fdrs",
-                        "protein-level-fdrs"
+                        "protein_level_fdrs"
                     ]
                 },
                 "fdr_threshold": {
@@ -384,6 +384,7 @@
                     "type": "boolean",
                     "description": "Skip MultiQC.",
                     "fa_icon": "fas fa-fast-forward",
+                    "hidden": true,
                     "default": true
                 },
                 "email_on_fail": {

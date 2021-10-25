@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
@@ -10,7 +10,7 @@ process PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
     tag "$meta"
     label 'process_low'
 
-    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2--py_0" : null)
+    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
     } else {
@@ -22,13 +22,19 @@ process PREPROCESS_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
 
     output:
         tuple val(meta), path("*${prefix}*"), emit: preprocessed
-        path  "*.version.txt", emit: version
+        path "versions.yml", emit: versions
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_mhcnuggets_preprocessed"
 
         """
             preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output ${prefix}
-            echo $VERSION > mhcnuggets.version.txt
+
+            cat <<-END_VERSIONS > versions.yml
+            ${getProcessName(task.process)}:
+                mhcnuggets: \$(echo $VERSION)
+            END_VERSIONS
         """
 }
+
+// ${getSoftwareName(task.process)}: \$(echo $VERSION)
