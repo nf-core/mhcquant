@@ -72,17 +72,17 @@ class NfcoreTemplate {
         misc_fields['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
         def email_fields = [:]
-        email_fields['version']             = workflow.manifest.version
-        email_fields['runName']             = workflow.runName
-        email_fields['success']             = workflow.success
-        email_fields['dateComplete']        = workflow.complete
-        email_fields['duration']            = workflow.duration
-        email_fields['exitStatus']          = workflow.exitStatus
-        email_fields['errorMessage']        = (workflow.errorMessage ?: 'None')
-        email_fields['errorReport']         = (workflow.errorReport ?: 'None')
-        email_fields['commandLine']         = workflow.commandLine
-        email_fields['projectDir']          = workflow.projectDir
-        email_fields['summary']             = summary << misc_fields
+        email_fields['version']      = workflow.manifest.version
+        email_fields['runName']      = workflow.runName
+        email_fields['success']      = workflow.success
+        email_fields['dateComplete'] = workflow.complete
+        email_fields['duration']     = workflow.duration
+        email_fields['exitStatus']   = workflow.exitStatus
+        email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
+        email_fields['errorReport']  = (workflow.errorReport ?: 'None')
+        email_fields['commandLine']  = workflow.commandLine
+        email_fields['projectDir']   = workflow.projectDir
+        email_fields['summary']      = summary << misc_fields
 
         // On success try attach the multiqc report
         def mqc_report = null
