@@ -4,13 +4,13 @@
 
 ### `Added`
 
--   Inclusion of assets/schema_input.json
+- Inclusion of assets/schema_input.json
 
 ### `Fixed`
 
--   Fixed typos
--   [#165] - Raise memory requirements of FeatureFinderIdentification step
--   [#176] - Pipeline crashes when setting the --skip_quantification flag
+- Fixed typos
+- [#165] - Raise memory requirements of FeatureFinderIdentification step
+- [#176] - Pipeline crashes when setting the --skip_quantification flag
 
 ### `Dependencies`
 
@@ -51,14 +51,14 @@ DSL1 to DSL2 conversion
 
 ### `Added`
 
--   Template raise to 1.10.2
--   Added parameter json schema
--   Added full size AWS test profile
--   Included new parameters for Neutral loss and precursor ion inclusion
+- Template raise to 1.10.2
+- Added parameter json schema
+- Added full size AWS test profile
+- Included new parameters for Neutral loss and precursor ion inclusion
 
 ### `Fixed`
 
--   Changed trigger for AWS tests
+- Changed trigger for AWS tests
 
 ### `Dependencies`
 
@@ -70,8 +70,8 @@ DSL1 to DSL2 conversion
 
 ### `Fixed`
 
--   set optimal config for cluster execution
--   fix duplication of ids / mixing of channels
+- set optimal config for cluster execution
+- fix duplication of ids / mixing of channels
 
 ### `Dependencies`
 
@@ -81,15 +81,15 @@ DSL1 to DSL2 conversion
 
 ### `Added`
 
--   integrate sample, allele and vcf sheets instead of file dirs
--   branched mzML/raw input
--   introduce param to skip quantification
+- integrate sample, allele and vcf sheets instead of file dirs
+- branched mzML/raw input
+- introduce param to skip quantification
 
 ### `Fixed`
 
--   raise OpenMS version to 2.5
--   adapt workflow accoringly with new options
--   remove specifying input as file dirs eg "data/\*.mzML"
+- raise OpenMS version to 2.5
+- adapt workflow accoringly with new options
+- remove specifying input as file dirs eg "data/\*.mzML"
 
 ### `Dependencies`
 
@@ -99,17 +99,17 @@ DSL1 to DSL2 conversion
 
 ### `Added`
 
--   Raw File Reading
--   RT prediction
--   Quantification FDR
--   Variant pass filter
--   nf-core template update 1.8 and 1.9
--   Added version numbers of mhcnuggets and Fred2
+- Raw File Reading
+- RT prediction
+- Quantification FDR
+- Variant pass filter
+- nf-core template update 1.8 and 1.9
+- Added version numbers of mhcnuggets and Fred2
 
 ### `Fixed`
 
--   output file order in intermediate results
--   increased run times for MS search and variant translation
+- output file order in intermediate results
+- increased run times for MS search and variant translation
 
 ### `Dependencies`
 
@@ -119,15 +119,15 @@ DSL1 to DSL2 conversion
 
 ### `Added`
 
--   nf-core template update
--   x,z,a,c ions
--   quantification fdri
+- nf-core template update
+- x,z,a,c ions
+- quantification fdri
 
 ### `Fixed`
 
--   empty neoepitope list bugs fixed
--   documentation
--   scrape version numbers
+- empty neoepitope list bugs fixed
+- documentation
+- scrape version numbers
 
 ### `Dependencies`
 
@@ -137,9 +137,9 @@ DSL1 to DSL2 conversion
 
 ### `Added`
 
--   MHCnugget predictor
--   Few fixes
--   RT features for percolator
+- MHCnugget predictor
+- Few fixes
+- RT features for percolator
 
 ### `Fixed`
 
@@ -153,8 +153,8 @@ DSL1 to DSL2 conversion
 
 ### `Fixed`
 
--   linear retention time alignment
--   refine_fdr README
+- linear retention time alignment
+- refine_fdr README
 
 ### `Dependencies`
 
@@ -166,8 +166,8 @@ DSL1 to DSL2 conversion
 
 ### `Fixed`
 
--   sort channels by basename
--   fixed psm-level-fdrs
+- sort channels by basename
+- fixed psm-level-fdrs
 
 ### `Dependencies`
 
@@ -179,7 +179,7 @@ DSL1 to DSL2 conversion
 
 ### `Fixed`
 
--   fixed refine_fdr_on_predicted_subset float error
+- fixed refine_fdr_on_predicted_subset float error
 
 ### `Dependencies`
 
@@ -189,7 +189,7 @@ DSL1 to DSL2 conversion
 
 ### `Fixed`
 
--   filter out uncommon aminoacids U,X,B,J,Z
+- filter out uncommon aminoacids U,X,B,J,Z
 
 ## v1.2.2 nf-core/mhcquant "Golden Eagle" - 2019/01/24
 
@@ -197,9 +197,9 @@ DSL1 to DSL2 conversion
 
 ### `Fixed`
 
--   default params to false
--   change on centroidisation parameter
--   small changes on docu
+- default params to false
+- change on centroidisation parameter
+- small changes on docu
 
 ### `Dependencies`
 
@@ -211,7 +211,7 @@ DSL1 to DSL2 conversion
 
 ### `Fixed`
 
--   process identical names bug
+- process identical names bug
 
 ### `Dependencies`
 
@@ -221,13 +221,13 @@ DSL1 to DSL2 conversion
 
 ### `Added`
 
--   Subset FDR refinement option
--   Fred2 dependency
--   vcf parser and translation to proteins
+- Subset FDR refinement option
+- Fred2 dependency
+- vcf parser and translation to proteins
 
 ### `Fixed`
 
--   Documentation
+- Documentation
 
 ### `Dependencies`
 
@@ -237,13 +237,13 @@ DSL1 to DSL2 conversion
 
 ### `Added`
 
--   optional mhcflurry binding predictions
--   peak picking as optional preprocessing step
+- optional mhcflurry binding predictions
+- peak picking as optional preprocessing step
 
 ### `Fixed`
 
--   adapted a few parameters such as the default fdr threshold
--   updated documentation
+- adapted a few parameters such as the default fdr threshold
+- updated documentation
 
 ### `Dependencies`
 
@@ -251,4 +251,4 @@ DSL1 to DSL2 conversion
 
 ## v1.0.0 nf-core/mhcquant "Naked Chicken" - 2018/11/27
 
--   Initial release of nf-core/mhcquant, created with the [nf-core](http://nf-co.re/) template.
+- Initial release of nf-core/mhcquant, created with the [nf-core](http://nf-co.re/) template.
