@@ -5,6 +5,7 @@
 ### `Added`
 
 - Inclusion of assets/schema_input.json
+- Added the multiQC again to report the versions
 
 ### `Fixed`
 

@@ -1,5 +1,5 @@
 // Import generic module functions
-include { saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
@@ -18,15 +18,21 @@ process SAMPLESHEET_CHECK {
     }
 
     input:
-    path samplesheet
+        path samplesheet
 
     output:
-    path '*.csv'
+        path '*.csv', emit: csv
+        path "versions.yml", emit: versions
 
     script: // This script is bundled with the pipeline, in nf-core/mhcquant/bin/
     """
     check_samplesheet.py \\
         $samplesheet \\
         samplesheet.valid.csv
+
+    cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            python: \$(python --version | sed 's/Python //g')
+        END_VERSIONS
     """
 }
