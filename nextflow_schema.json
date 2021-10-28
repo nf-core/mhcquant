@@ -462,6 +462,7 @@
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
                 },
+
                 "publish_dir_mode": {
                     "type": "string",
                     "default": "copy",
