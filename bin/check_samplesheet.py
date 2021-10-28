@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# This script is based on the example at: https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
+
 import os
 import sys
 import errno
@@ -33,6 +35,7 @@ def print_error(error, context="Line", context_str=""):
         )
     print(error_str)
     sys.exit(1)
+
 
 def check_samplesheet(file_in, file_out):
     """

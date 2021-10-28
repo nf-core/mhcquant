@@ -1,12 +1,7 @@
 // Import generic module functions
-include { initOptions; saveFiles; getProcessName } from './functions'
+include { saveFiles } from './functions'
 
 params.options = [:]
-options        = initOptions(params.options)
-
-/*
- * Reformat design file and check validity
- */
 
 process SAMPLESHEET_CHECK {
     tag "$samplesheet"
@@ -25,23 +20,12 @@ process SAMPLESHEET_CHECK {
     path samplesheet
 
     output:
-    path '*.csv'       , emit: csv
-    path "versions.yml", emit: versions
+    path '*.csv'
 
-    script: // This script is bundled with the pipeline, in nf-core/rnaseq/bin/
+    script: // This script is bundled with the pipeline, in nf-core/mhcquant/bin/
     """
     check_samplesheet.py \\
         $samplesheet \\
         samplesheet.valid.csv
-
-
-    cat <<-END_VERSIONS > versions.yml
-    ${getProcessName(task.process)}:
-        python: \$(python --version | sed 's/Python //g')
-    END_VERSIONS
-
-
     """
 }
-
-        // echo Python: \$(python --version) | sed 's/Python //g' &> versions.yml
