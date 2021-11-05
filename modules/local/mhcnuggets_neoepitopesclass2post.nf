@@ -4,11 +4,15 @@ include { initOptions; saveFiles; getSoftwareName; getProcessName } from './func
 params.options = [:]
 options        = initOptions(params.options)
 
-def VERSION = '2.3.2'
+// def VERSION = '2.3.2'
 
-process PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 {
+process MHCNUGGETS_NEOEPITOPESCLASS2POST {
     tag "$meta"
     label 'process_low'
+
+    publishDir "${params.outdir}",
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_2_bindings', publish_id:'class_2_bindings') }
 
     conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
@@ -17,23 +21,22 @@ process PREPROCESS_PEPTIDES_MHCNUGGETS_CLASS_2 {
         container "quay.io/biocontainers/mhcnuggets:2.3.2--py_0"
     }
 
+
     input:
-        tuple val(meta), path(mztab)
+        tuple val(meta), path(neoepitopes), path(predicted)
 
     output:
-        tuple val(meta), path("*_preprocessed_mhcnuggets_peptides"), emit: preprocessed
-        tuple val(meta), path('*peptide_to_geneID*'), emit: geneID
+        tuple val(meta), path("*.csv"), emit: csv
         path "versions.yml", emit: versions
 
     script:
-        def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_preprocessed_mhcnuggets_peptides"
 
         """
-            preprocess_peptides_mhcnuggets.py --mztab ${mztab} --output ${prefix}
+            postprocess_neoepitopes_mhcnuggets.py --input ${predicted} --neoepitopes ${neoepitopes}
 
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo $VERSION)
+                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
             END_VERSIONS
         """
 }

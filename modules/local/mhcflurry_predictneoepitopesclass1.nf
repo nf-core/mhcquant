@@ -4,7 +4,7 @@ include { initOptions; saveFiles; getSoftwareName; getProcessName } from './func
 params.options = [:]
 options        = initOptions(params.options)
 
-process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
+process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
     tag "$meta"
     label 'process_low'
 
@@ -12,11 +12,11 @@ process PREDICT_NEOEPITOPES_MHCFLURRY_CLASS_1 {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_1_bindings', publish_id:'class_1_bindings') }
 
-    conda (params.enable_conda ? "bioconda::mhcflurry=2.0.1" : null)
+    conda (params.enable_conda ? "bioconda::mhcflurry=1.4.3" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/mhcflurry:2.0.1--pyh864c0ab_0"
+        container "https://depot.galaxyproject.org/singularity/mhcflurry:1.4.3--py_0"
     } else {
-        container "quay.io/biocontainers/mhcflurry:2.0.1--pyh864c0ab_0"
+        container "quay.io/biocontainers/mhcflurry:1.4.3--py_0"
     }
 
 

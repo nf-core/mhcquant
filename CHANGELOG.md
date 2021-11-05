@@ -1,11 +1,12 @@
 # nf-core/mhcquant: Changelog
 
-## v2.1.0 nf-core/mhcquant "Olive Tin Hamster" - 2021/10/25
+## v2.1.0 nf-core/mhcquant "Olive Tin Hamster" - 2021/MM/DD
 
 ### `Added`
 
 - Inclusion of assets/schema_input.json
-- Added the multiQC again to report the versions45
+- Added the multiQC again to report the versions
+- MHCquant parameters are now directly assigned to the argument of the
 
 ### `Fixed`
 
@@ -22,7 +23,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `openms`              | 2.5.0       | 2.6.0       |
 | `openms-thirdparty`   | 2.5.0       | 2.6.0       |
 | `thermorawfileparser` | 1.2.3       | 1.3.4       |
-| `mhcflurry`           | 1.4.3       | 2.0.1       |
+
 
 > **NB:** Dependency has been **updated** if both old and new version information is present.
 > **NB:** Dependency has been **added** if just the new version information is present.

@@ -372,7 +372,7 @@
                     "description": "Skip MultiQC.",
                     "fa_icon": "fas fa-fast-forward",
                     "hidden": true,
-                    "default": true
+                    "default": false
                 },
                 "custom_config_base": {
                     "type": "string",

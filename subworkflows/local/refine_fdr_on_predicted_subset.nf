@@ -20,7 +20,7 @@ filter_refined_qvalue_options.suffix = "perc_subset_filtered"
 
 include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../../modules/local/openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged_psm_perc_filtered" ] )
 include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../../modules/local/openms_mztabexporter'                                       addParams( options: [ suffix: "all_ids_merged" ] )
-include { PREDICT_PSMS }                                     from '../../modules/local/predict_psms'                                               addParams( options: [:] )
+include { MHCFLURRY_PREDICTPSMS }                            from '../../modules/local/mhcflurry_predictpsms'                                      addParams( options: [:] )
 include { OPENMS_PERCOLATORADAPTER }                         from '../../modules/local/openms_percolatoradapter'                                   addParams( options: percolator_adapter_options )
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../../modules/local/openms_idfilter'                                            addParams( options: filter_psms_options )
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../../modules/local/openms_idfilter'                                            addParams( options: filter_refined_qvalue_options )

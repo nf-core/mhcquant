@@ -6,11 +6,11 @@ options        = initOptions(params.options)
 
 def VERSION = '2.3.2'
 
-process PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
+process MHCNUGGETS_NEOEPITOPESCLASS2RE {
     tag "$meta"
     label 'process_low'
 
-    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2--py_0" : null)
+    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
     } else {
@@ -18,21 +18,23 @@ process PREDICT_NEOEPITOPES_MHCNUGGETS_CLASS_2 {
     }
 
     input:
-        tuple val(meta), path(neoepitopes), val(alleles)
+        tuple val(meta), path(neoepitopes)
 
     output:
-        tuple val(meta), path("*_predicted_neoepitopes_class_2"), emit: csv
+        tuple val(meta), path("*${prefix}*"), emit: preprocessed
         path "versions.yml", emit: versions
 
     script:
-        def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_predicted_neoepitopes_class_2"
+        def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_mhcnuggets_preprocessed"
 
         """
-            mhcnuggets_predict_peptides.py --peptides ${neoepitopes} --alleles '${alleles}' --output ${prefix}
+            preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output ${prefix}
 
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo $VERSION)
+                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
             END_VERSIONS
         """
 }
+
+// ${getSoftwareName(task.process)}: \$(echo $VERSION)
