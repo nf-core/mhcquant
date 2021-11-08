@@ -74,6 +74,7 @@ ID\tSample\tCondition\tReplicateFileName
 | `ReplicateFileName` | Full path to the MS outcome file. These files have the extentions ".raw" or ".mzML"                                                                                  |
 
 An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
