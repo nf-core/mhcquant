@@ -2,21 +2,21 @@
 
 ## Table of contents
 
--   [Table of contents](#table-of-contents)
--   [Samplesheet input](#samplesheet-input)
-    -   [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
-    -   [Full samplesheet](#full-samplesheet)
--   [Running the pipeline](#running-the-pipeline)
-    -   [Updating the pipeline](#updating-the-pipeline)
-    -   [Reproducibility](#reproducibility)
--   [Core Nextflow arguments](#core-nextflow-arguments)
-    -   [`-profile`](#-profile)
-    -   [`-resume`](#-resume)
--   [Custom configuration](#custom-configuration)
-    -   [Resource requests](#resource-requests)
-    -   [nf-core/configs](#nf-core-configs)
--   [Running in the background](#running-in-the-background)
--   [Nextflow memory requirements](#nextflow-memory-requirements)
+- [Table of contents](#table-of-contents)
+- [Samplesheet input](#samplesheet-input)
+    - [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
+    - [Full samplesheet](#full-samplesheet)
+- [Running the pipeline](#running-the-pipeline)
+    - [Updating the pipeline](#updating-the-pipeline)
+    - [Reproducibility](#reproducibility)
+- [Core Nextflow arguments](#core-nextflow-arguments)
+    - [`-profile`](#-profile)
+    - [`-resume`](#-resume)
+- [Custom configuration](#custom-configuration)
+    - [Resource requests](#resource-requests)
+    - [nf-core/configs](#nf-core-configs)
+- [Running in the background](#running-in-the-background)
+- [Nextflow memory requirements](#nextflow-memory-requirements)
 
 ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/mhcquant/usage](https://nf-co.re/mhcquant/usage)
 
@@ -74,34 +74,6 @@ ID\tSample\tCondition\tReplicateFileName
 | `ReplicateFileName` | Full path to the MS outcome file. These files have the extentions ".raw" or ".mzML"                                                                                  |
 
 An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
-
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
-```
-
-### Full samplesheet
-
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
-
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
-
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
-```
 
 | Column    | Description                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -165,21 +137,21 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
--   `docker`
-    -   A generic configuration profile to be used with [Docker](https://docker.com/)
--   `singularity`
-    -   A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
--   `podman`
-    -   A generic configuration profile to be used with [Podman](https://podman.io/)
--   `shifter`
-    -   A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
--   `charliecloud`
-    -   A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
--   `conda`
-    -   A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
--   `test`
-    -   A profile with a complete configuration for automated testing
-    -   Includes links to test data so needs no other parameters
+- `docker`
+    - A generic configuration profile to be used with [Docker](https://docker.com/)
+- `singularity`
+    - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+- `podman`
+    - A generic configuration profile to be used with [Podman](https://podman.io/)
+- `shifter`
+    - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
+- `charliecloud`
+    - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
+- `conda`
+    - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
+- `test`
+    - A profile with a complete configuration for automated testing
+    - Includes links to test data so needs no other parameters
 
 ### `-resume`
 
