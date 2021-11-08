@@ -13,6 +13,14 @@ nextflow.enable.dsl = 2
 
 /*
 ========================================================================================
+    GENOME PARAMETER VALUES
+========================================================================================
+*/
+
+params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
+
+/*
+========================================================================================
     VALIDATE & PRINT PARAMETER SUMMARY
 ========================================================================================
 */
@@ -28,7 +36,7 @@ WorkflowMain.initialise(workflow, params, log)
 include { MHCQUANT } from './workflows/mhcquant'
 
 //
-// WORKFLOW: Run main nf-core/rnaseq analysis pipeline
+// WORKFLOW: Run main nf-core/mhcquant analysis pipeline
 //
 workflow NFCORE_MHCQUANT {
     MHCQUANT ()
@@ -47,3 +55,9 @@ workflow NFCORE_MHCQUANT {
 workflow {
     NFCORE_MHCQUANT ()
 }
+
+/*
+========================================================================================
+    THE END
+========================================================================================
+*/

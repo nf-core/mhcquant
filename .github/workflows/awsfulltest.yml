@@ -21,12 +21,10 @@ jobs:
           compute_env: ${{ secrets.TOWER_COMPUTE_ENV }}
           pipeline: ${{ github.repository }}
           revision: ${{ github.sha }}
-          workdir: s3://${{ secrets.AWS_S3_BUCKET }}/mhcquant/work-${{ github.sha }}
-          # Add full size test data (but still relatively small datasets for few samples)
-          # on the `test_full.config` test runs with only one set of parameters
-          # Then specify `-profile test_full` instead of `-profile test` on the AWS batch command
+          workdir: s3://${{ secrets.AWS_S3_BUCKET }}/work/mhcquant/work-${{ github.sha }}
           parameters: |
             {
-              "outdir" : "s3://${{ secrets.AWS_S3_BUCKET }}/mhcquant/results-${{ github.sha }}",
+              "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/mhcquant/results-${{ github.sha }}"
             }
           profiles: '[ "test_full", "aws_tower" ]'
+

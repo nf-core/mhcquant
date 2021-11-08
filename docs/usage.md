@@ -2,21 +2,21 @@
 
 ## Table of contents
 
-* [Table of contents](#table-of-contents)
-* [Samplesheet input](#samplesheet-input)
-    * [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
-    * [Full samplesheet](#full-samplesheet)
-* [Running the pipeline](#running-the-pipeline)
-    * [Updating the pipeline](#updating-the-pipeline)
-    * [Reproducibility](#reproducibility)
-* [Core Nextflow arguments](#core-nextflow-arguments)
-    * [`-profile`](#-profile)
-    * [`-resume`](#-resume)
-* [Custom configuration](#custom-configuration)
-    * [Resource requests](#resource-requests)
-    * [nf-core/configs](#nf-core-configs)
-* [Running in the background](#running-in-the-background)
-* [Nextflow memory requirements](#nextflow-memory-requirements)
+- [Table of contents](#table-of-contents)
+- [Samplesheet input](#samplesheet-input)
+    - [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
+    - [Full samplesheet](#full-samplesheet)
+- [Running the pipeline](#running-the-pipeline)
+    - [Updating the pipeline](#updating-the-pipeline)
+    - [Reproducibility](#reproducibility)
+- [Core Nextflow arguments](#core-nextflow-arguments)
+    - [`-profile`](#-profile)
+    - [`-resume`](#-resume)
+- [Custom configuration](#custom-configuration)
+    - [Resource requests](#resource-requests)
+    - [nf-core/configs](#nf-core-configs)
+- [Running in the background](#running-in-the-background)
+- [Nextflow memory requirements](#nextflow-memory-requirements)
 
 ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/mhcquant/usage](https://nf-co.re/mhcquant/usage)
 
@@ -66,12 +66,12 @@ ID\tSample\tCondition\tReplicateFileName
 
 ```
 
-| Column         | Description                                                                                                                                                                            |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ID`       | An incrementing value which acts as a unique number for the given sample |
-| `Sample`      | Custom sample name. This entry will be identical for multiple MS runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `Condition`      | Additional information of the sample can be defined here.|
-| `ReplicateFileName` | Full path to the MS outcome file. These files have the extentions ".raw" or ".mzML" |
+| Column              | Description                                                                                                                                                          |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ID`                | An incrementing value which acts as a unique number for the given sample                                                                                             |
+| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
+| `Condition`         | Additional information of the sample can be defined here.                                                                                                            |
+| `ReplicateFileName` | Full path to the MS outcome file. These files have the extentions ".raw" or ".mzML"                                                                                  |
 
 An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
 
@@ -118,7 +118,7 @@ This version number will be logged in reports when you run the pipeline, so that
 
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments.
 
-Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Conda) - see below.
+Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Conda) - see below. When using Biocontainers, most of these software packaging methods pull Docker containers from quay.io e.g [FastQC](https://quay.io/repository/biocontainers/fastqc) except for Singularity which directly downloads Singularity images via https hosted by the [Galaxy project](https://depot.galaxyproject.org/singularity/) and Conda which downloads and installs software locally from [Bioconda](https://bioconda.github.io/).
 
 > We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
 
@@ -129,28 +129,21 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
-* `docker`
-    * A generic configuration profile to be used with [Docker](https://docker.com/)
-    * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
-* `singularity`
-    * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-    * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
-* `conda`
-    * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
-    * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
-    * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `test`
-    * A profile with a complete configuration for automated testing
-    * Includes links to test data so needs no other parameters
-* `podman`
-    * A generic configuration profile to be used with [Podman](https://podman.io/)
-    * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
-* `shifter`
-    * A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-    * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
-* `charliecloud`
-    * A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
-    * Pulls software from Docker Hub: [`nfcore/mhcquant`](https://hub.docker.com/r/nfcore/mhcquant/)
+- `docker`
+    - A generic configuration profile to be used with [Docker](https://docker.com/)
+- `singularity`
+    - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+- `podman`
+    - A generic configuration profile to be used with [Podman](https://podman.io/)
+- `shifter`
+    - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
+- `charliecloud`
+    - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
+- `conda`
+    - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
+- `test`
+    - A profile with a complete configuration for automated testing
+    - Includes links to test data so needs no other parameters
 
 ### `-resume`
 
@@ -197,7 +190,7 @@ Work dir:
 Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
 ```
 
-To bypass this error you would need to find exactly which resources are set by the `STAR_ALIGN` process. The quickest way is to search for `process STAR_ALIGN` in the [nf-core/rnaseq Github repo](https://github.com/nf-core/rnaseq/search?q=process+STAR_ALIGN). We have standardised the structure of Nextflow DSL2 pipelines such that all module files will be present in the `modules/` directory and so based on the search results the file we want is `modules/nf-core/software/star/align/main.nf`. If you click on the link to that file you will notice that there is a `label` directive at the top of the module that is set to [`label process_high`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/modules/nf-core/software/star/align/main.nf#L9). The [Nextflow `label`](https://www.nextflow.io/docs/latest/process.html#label) directive allows us to organise workflow processes in separate groups which can be referenced in a configuration file to select and configure subset of processes having similar computing requirements. The default values for the `process_high` label are set in the pipeline's [`base.config`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L33-L37) which in this case is defined as 72GB. Providing you haven't set any other standard nf-core parameters to __cap__ the [maximum resources](https://nf-co.re/usage/configuration#max-resources) used by the pipeline then we can try and bypass the `STAR_ALIGN` process failure by creating a custom config file that sets at least 72GB of memory, in this case increased to 100GB. The custom config below can then be provided to the pipeline via the [`-c`](#-c) parameter as highlighted in previous sections.
+To bypass this error you would need to find exactly which resources are set by the `STAR_ALIGN` process. The quickest way is to search for `process STAR_ALIGN` in the [nf-core/rnaseq Github repo](https://github.com/nf-core/rnaseq/search?q=process+STAR_ALIGN). We have standardised the structure of Nextflow DSL2 pipelines such that all module files will be present in the `modules/` directory and so based on the search results the file we want is `modules/nf-core/software/star/align/main.nf`. If you click on the link to that file you will notice that there is a `label` directive at the top of the module that is set to [`label process_high`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/modules/nf-core/software/star/align/main.nf#L9). The [Nextflow `label`](https://www.nextflow.io/docs/latest/process.html#label) directive allows us to organise workflow processes in separate groups which can be referenced in a configuration file to select and configure subset of processes having similar computing requirements. The default values for the `process_high` label are set in the pipeline's [`base.config`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L33-L37) which in this case is defined as 72GB. Providing you haven't set any other standard nf-core parameters to **cap** the [maximum resources](https://nf-co.re/usage/configuration#max-resources) used by the pipeline then we can try and bypass the `STAR_ALIGN` process failure by creating a custom config file that sets at least 72GB of memory, in this case increased to 100GB. The custom config below can then be provided to the pipeline via the [`-c`](#-c) parameter as highlighted in previous sections.
 
 ```nextflow
 process {
