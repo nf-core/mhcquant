@@ -4,8 +4,6 @@ include { initOptions; saveFiles; getSoftwareName; getProcessName } from './func
 params.options = [:]
 options        = initOptions(params.options)
 
-// def VERSION = '2.3.2'
-
 process MHCNUGGETS_PEPTIDESCLASS2POST {
     tag "$meta"
     label 'process_low'

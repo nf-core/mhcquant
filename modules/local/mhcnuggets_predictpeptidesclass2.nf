@@ -4,9 +4,6 @@ include { initOptions; saveFiles; getSoftwareName; getProcessName } from './func
 params.options = [:]
 options        = initOptions(params.options)
 
-// def VERSIONFRED2 = '2.0.6'
-// def VERSIONMHCNUGGETS = '2.3.2'
-
 process MHCNUGGETS_PREDICTPEPTIDESCLASS2 {
     tag "$meta"
     label 'process_low'
@@ -34,7 +31,7 @@ process MHCNUGGETS_PREDICTPEPTIDESCLASS2 {
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
                 mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-                FRED2: \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//')
+                fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
             END_VERSIONS
         """
 }

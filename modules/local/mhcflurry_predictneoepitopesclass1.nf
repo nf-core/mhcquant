@@ -36,7 +36,7 @@ process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
 
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
-                mhcflurry: \$(mhcflurry-predict --version | sed 's/^mhcflurry //; s/ .*\$//' )
+                mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
             END_VERSIONS
         """
 }

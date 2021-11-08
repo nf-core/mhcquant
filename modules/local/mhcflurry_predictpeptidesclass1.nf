@@ -4,9 +4,6 @@ include { initOptions; saveFiles; getSoftwareName; getProcessName } from './func
 params.options = [:]
 options        = initOptions(params.options)
 
-// def VERSIONFRED2 = '2.0.6'
-// def VERSIONMHCNUGGETS = '2.3.2'
-
 process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
     tag "$meta"
     label 'process_low'
@@ -38,9 +35,9 @@ process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
 
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
-                mhcflurry: \$(mhcflurry-predict --version | sed 's/^mhcflurry //; s/ .*\$//' )
                 mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-                FRED2: \$(echo \$(python -c "import pkg_resources; print 'fred2 ' + pkg_resources.get_distribution('Fred2').version" | sed 's/^fred2 //; s/ .*\$//'))
+                mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+                fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
             END_VERSIONS
         """
 }
