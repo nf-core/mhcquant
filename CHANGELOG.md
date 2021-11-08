@@ -24,7 +24,6 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `openms-thirdparty`   | 2.5.0       | 2.6.0       |
 | `thermorawfileparser` | 1.2.3       | 1.3.4       |
 
-
 > **NB:** Dependency has been **updated** if both old and new version information is present.
 > **NB:** Dependency has been **added** if just the new version information is present.
 > **NB:** Dependency has been **removed** if version information isn't present.
