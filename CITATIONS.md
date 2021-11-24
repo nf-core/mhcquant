@@ -21,6 +21,7 @@
 
 * [OpenMS](https://pubmed.ncbi.nlm.nih.gov/27575624/)
     > Röst H, Sachsenberg T, Aiche S, Bielow C, Weisser H, Aicheler F, Andreotti S, Ehrlich HC, Gutenbrunner P, Kenar E, Liang X, Nahnsen S, Nilse L,  Pfeuffer J, Rosenberger G, Rurik M, Schmitt U, Veit J, Walzer M, Wojnar D, Wolski WE, Schilling O, Choudhary JS, Malmström L, Aebersold R, Reinert K, Kohlbacher O. OpenMS: a flexible open-source software platform for mass spectrometry data analysis. Nat Methods 13, 741–748 (2016). doi: 10.1038/nmeth.3959. PubMed PMID: 27575624
+
 * [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
 * [MultiQC](https://www.ncbi.nlm.nih.gov/pubmed/27312411/)
