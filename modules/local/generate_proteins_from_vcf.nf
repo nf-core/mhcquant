@@ -4,9 +4,6 @@ include { initOptions; saveFiles } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-def VERSIONFRED2 = '2.0.6'
-def VERSIONMHCNUGGETS = '2.3.2'
-
 process GENERATE_PROTEINS_FROM_VCF {
     tag "$meta"
     label 'process_medium'

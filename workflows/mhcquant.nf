@@ -193,7 +193,7 @@ workflow MHCQUANT {
             .map(it -> [it[1], it[2], it[3]])
         // If specified translate variants to proteins and include in reference fasta
         GENERATE_PROTEINS_FROM_VCF( ch_vcf )
-        // ch_versions = ch_versions.mix(GENERATE_PROTEINS_FROM_VCF.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(GENERATE_PROTEINS_FROM_VCF.out.versions.first().ifEmpty(null))
         ch_fasta_file = GENERATE_PROTEINS_FROM_VCF.out.vcf_fasta
     } else {
         ch_fasta_file = input_fasta
