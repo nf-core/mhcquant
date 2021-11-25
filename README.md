@@ -28,8 +28,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
 
 ## Pipeline summary
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+1. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
 ![overview](assets/MHCquant_scheme.png)
 (This chart was created with the help of [Lucidchart](https://www.lucidchart.com))

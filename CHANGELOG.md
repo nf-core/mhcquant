@@ -6,7 +6,7 @@
 
 - Inclusion of assets/schema_input.json
 - Added the multiQC again to report the versions
-- MHCquant parameters are now directly assigned to the argument of the
+- MHCquant parameters are now directly assigned to the argument of the process
 
 ### `Fixed`
 

@@ -193,7 +193,7 @@ workflow MHCQUANT {
             .map(it -> [it[1], it[2], it[3]])
         // If specified translate variants to proteins and include in reference fasta
         GENERATE_PROTEINS_FROM_VCF( ch_vcf )
-        // ch_versions = ch_versions.mix(GENERATE_PROTEINS_FROM_VCF.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(GENERATE_PROTEINS_FROM_VCF.out.versions.first().ifEmpty(null))
         ch_fasta_file = GENERATE_PROTEINS_FROM_VCF.out.vcf_fasta
     } else {
         ch_fasta_file = input_fasta
@@ -361,11 +361,6 @@ workflow MHCQUANT {
         // Resolve conflicting ids matching to the same feature
         OPENMS_IDCONFLICTRESOLVER(OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml)
         ch_versions = ch_versions.mix(OPENMS_IDCONFLICTRESOLVER.out.versions.first().ifEmpty(null))
-        // Assign the outcome of the id conflict resolver as export content
-        //OPENMS_IDCONFLICTRESOLVER.out.consensusxml
-    //} else {
-    //    // Assign the outcome of the filter q value as export content
-    //    export_content = filter_q_value.map { it -> [it[1], it[2]] }
         // Export all information as text to csv
         OPENMS_TEXTEXPORTER(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
         ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions.first().ifEmpty(null))
