@@ -361,11 +361,6 @@ workflow MHCQUANT {
         // Resolve conflicting ids matching to the same feature
         OPENMS_IDCONFLICTRESOLVER(OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml)
         ch_versions = ch_versions.mix(OPENMS_IDCONFLICTRESOLVER.out.versions.first().ifEmpty(null))
-        // Assign the outcome of the id conflict resolver as export content
-        //OPENMS_IDCONFLICTRESOLVER.out.consensusxml
-    //} else {
-    //    // Assign the outcome of the filter q value as export content
-    //    export_content = filter_q_value.map { it -> [it[1], it[2]] }
         // Export all information as text to csv
         OPENMS_TEXTEXPORTER(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
         ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions.first().ifEmpty(null))
