@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-# This script is based on the example at: https://raw.githubusercontent.com/nf-core/test-datasets/atacseq/design.csv
-
+# This script is based on the example at: https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
 import os
 import sys
@@ -10,7 +9,7 @@ import argparse
 
 
 def parse_args(args=None):
-    Description = "Reformat nf-core/MHCquant samplesheet file and check its contents."
+    Description = "Reformat nf-core/mhcquant samplesheet file and check its contents."
     Epilog = "Example usage: python check_samplesheet.py <FILE_IN> <FILE_OUT>"
 
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
@@ -36,6 +35,7 @@ def print_error(error, context="Line", context_str=""):
         )
     print(error_str)
     sys.exit(1)
+
 
 def check_samplesheet(file_in, file_out):
     """

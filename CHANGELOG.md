@@ -1,5 +1,35 @@
 # nf-core/mhcquant: Changelog
 
+## v2.1.0 nf-core/mhcquant "Olive Tin Hamster" - 2021/MM/DD
+
+### `Added`
+
+- Inclusion of assets/schema_input.json
+- Added the multiQC again to report the versions
+- MHCquant parameters are now directly assigned to the argument of the
+
+### `Fixed`
+
+- Fixed typos
+- [#165] - Raise memory requirements of FeatureFinderIdentification step
+- [#176] - Pipeline crashes when setting the --skip_quantification flag
+
+### `Dependencies`
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+| Dependency            | Old version | New version |
+| --------------------- | ----------- | ----------- |
+| `openms`              | 2.5.0       | 2.6.0       |
+| `openms-thirdparty`   | 2.5.0       | 2.6.0       |
+| `thermorawfileparser` | 1.2.3       | 1.3.4       |
+
+> **NB:** Dependency has been **updated** if both old and new version information is present.
+> **NB:** Dependency has been **added** if just the new version information is present.
+> **NB:** Dependency has been **removed** if version information isn't present.
+
+### `Deprecated`
+
 ## v2.0.0 nf-core/mhcquant "Steel Beagle" - 2021/09/03
 
 ### `Added`
@@ -60,7 +90,7 @@ DSL1 to DSL2 conversion
 
 - raise OpenMS version to 2.5
 - adapt workflow accoringly with new options
-- remove specifying input as file dirs eg "data/*.mzML"
+- remove specifying input as file dirs eg "data/\*.mzML"
 
 ### `Dependencies`
 
