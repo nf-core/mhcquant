@@ -29,7 +29,7 @@ process OPENMS_MAPRTTRANSFORMER {
         """
         MapRTTransformer -in $alignment_file \\
             -trafo_in $trafoxml \\
-            -out $meta.id_aligned.${fileExt} \\
+            -out ${meta.id}_aligned.${fileExt} \\
             -threads $task.cpus
             
         cat <<-END_VERSIONS > versions.yml
