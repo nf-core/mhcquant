@@ -33,6 +33,7 @@ process OPENMS_PEPTIDEINDEXER {
                 -fasta $fasta \\
                 -decoy_string DECOY \\
                 -enzyme:specificity none
+                
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
