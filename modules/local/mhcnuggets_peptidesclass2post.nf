@@ -23,14 +23,17 @@ process MHCNUGGETS_PEPTIDESCLASS2POST {
         tuple val(meta), path(peptides), path(peptide_to_geneID)
 
     output:
-        tuple val(meta), path('*.csv')  , emit: csv
-        path "versions.yml"             , emit: versions
+        tuple val(meta), path('*.csv'), emit: csv
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_postprocessed"
 
         """
-        postprocess_peptides_mhcnuggets.py --input $peptides --peptides_seq_ID $peptide_to_geneID --output ${prefix}.csv
+        postprocess_peptides_mhcnuggets.py --input $peptides \\
+            --peptides_seq_ID $peptide_to_geneID \\
+            --output ${prefix}.csv
+            
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
