@@ -31,16 +31,17 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_${meta.id}"
 
         if (!params.quantification_fdr){
-            arguments = "-id ${id_quant}"
+            arguments = "-id $id_quant"
         } else {
-            arguments = "-id ${id_quant_int} -id_ext ${id_quant} -svm:min_prob ${params.quantification_min_prob}"
+            arguments = "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}"
         }
 
         """
-        FeatureFinderIdentification -in ${mzml} \\
+        FeatureFinderIdentification -in $mzml \\
             -out ${prefix}.featureXML \\
-            -threads ${task.cpus} \\
+            -threads $task.cpus \\
             $options.args
+            
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
