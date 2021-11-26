@@ -36,7 +36,7 @@ process OPENMS_RTPREDICT {
             -in_oligo_params $rt_params \\
             -in_oligo_trainset $trainset \\
             -out_text:file ${prefix}.csv
-            
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
