@@ -31,7 +31,14 @@ process PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES {
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_vcf_neoepitopes_class2"
 
         """
-        vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} -r ${params.variant_reference} -a '$alleles' -minl ${params.peptide_min_length} -maxl ${params.peptide_max_length} -v $vcf -o ${prefix}.csv
+        vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} \\
+            -r ${params.variant_reference} \\
+            -a '$alleles' \\
+            -minl ${params.peptide_min_length} \\
+            -maxl ${params.peptide_max_length} \\
+            -v $vcf \\
+            -o ${prefix}.csv
+            
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
