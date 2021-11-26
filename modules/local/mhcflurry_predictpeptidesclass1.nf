@@ -24,7 +24,7 @@ process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
 
     output:
         tuple val(meta), path("*predicted_peptides_class_1.csv"), emit: csv
-        path "versions.yml", emit: versions
+        path "versions.yml"                                     , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_predicted_peptides_class_1"
