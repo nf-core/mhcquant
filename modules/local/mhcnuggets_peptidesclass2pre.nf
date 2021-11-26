@@ -19,7 +19,7 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
         tuple val(meta), path(mztab)
 
     output:
-        tuple val(meta), path("*_preprocessed_mhcnuggets_peptides"), emit: preprocessed
+        tuple val(meta), path("*${prefix}"), emit: preprocessed
         tuple val(meta), path('*peptide_to_geneID*'), emit: geneID
         path "versions.yml", emit: versions
 
