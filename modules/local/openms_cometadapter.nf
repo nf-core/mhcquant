@@ -29,7 +29,7 @@ process OPENMS_COMETADAPTER {
         """
             CometAdapter -in ${mzml} \\
                 -out ${prefix}.idXML \\
-                -database ${fasta} \\
+                -database $fasta \\
                 -threads $task.cpus $options.args
 
             cat <<-END_VERSIONS > versions.yml
