@@ -27,7 +27,7 @@ process GENERATE_PROTEINS_FROM_VCF {
 
     output:
         tuple val(meta), path("*.fasta"), emit: vcf_fasta
-        path  "*.version.txt", emit: version
+        path  "*.version.txt"           , emit: version
 
     script:
         def prefix   = options.suffix ? "${fasta.baseName}_${options.suffix}" : "${fasta.baseName}_added_vcf"
