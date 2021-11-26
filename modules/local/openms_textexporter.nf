@@ -37,7 +37,7 @@ process OPENMS_TEXTEXPORTER {
             -id:add_hit_metavalues 0 \\
             -id:add_metavalues 0 \\
             -id:peptides_only
-            
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
