@@ -24,8 +24,8 @@ process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
         tuple val(meta), val(allotypes), path(neoepitopes)
 
     output:
-        tuple val(meta), path("*.csv"), emit: csv
-        path "versions.yml", emit: versions
+        tuple val(meta), path("*.csv")  , emit: csv
+        path "versions.yml"             , emit: versions
 
     script:
         def prefix = options.suffix ? "${neoepitopes}_${meta}_${options.suffix}" : "${neoepitopes}_${meta}_predicted_neoepitopes_class_1"
