@@ -24,22 +24,21 @@ process OPENMS_RTPREDICT {
 
     output:
         tuple val(meta), path("*.csv"), emit: csv
-        path "versions.yml", emit: versions
+        path "versions.yml"           , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_RTpredicted"
 
         """
-            RTPredict -in_id ${idxml} \\
-                -svm_model ${rt_model} \\
-                -in_oligo_params ${rt_params} \\
-                -in_oligo_trainset ${trainset} \\
-                -out_text:file ${prefix}.csv
-
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        RTPredict -in_id $idxml \\
+            -svm_model $rt_model \\
+            -in_oligo_params $rt_params \\
+            -in_oligo_trainset $trainset \\
+            -out_text:file ${prefix}.csv
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }
