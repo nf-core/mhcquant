@@ -31,6 +31,7 @@ process OPENMS_MAPRTTRANSFORMER {
             -trafo_in $trafoxml \\
             -out $meta.id_aligned.${fileExt} \\
             -threads $task.cpus
+            
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
