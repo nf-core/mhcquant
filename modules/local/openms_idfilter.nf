@@ -36,11 +36,10 @@ process OPENMS_IDFILTER {
         }
 
         """
-            IDFilter -in ${idxml} \\
+            IDFilter -in $idxml \\
                 -out ${prefix}.idXML \\
-                -threads ${task.cpus} \\
-                $options.args ${whitelist}
-
+                -threads $task.cpus \\
+                $options.args $whitelist
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
                 openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
