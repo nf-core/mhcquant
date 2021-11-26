@@ -24,7 +24,7 @@ process OPENMS_MZTABEXPORTER {
 
     output:
         tuple val(meta), path("*.mzTab"), emit: mztab
-        path "versions.yml", emit: versions
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
