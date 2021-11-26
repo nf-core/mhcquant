@@ -19,8 +19,8 @@ process OPENMS_DECOYDATABASE {
         tuple val(meta), path(fasta)
 
     output:
-        tuple val(meta), path("*.fasta")  , emit: decoy
-        path "versions.yml"               , emit: versions
+        tuple val(meta), path("*.fasta"), emit: decoy
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
@@ -31,6 +31,7 @@ process OPENMS_DECOYDATABASE {
             -out ${prefix}.fasta \\
             -decoy_string DECOY_ \\
             -decoy_string_position prefix
+            
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
