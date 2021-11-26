@@ -29,7 +29,7 @@ process MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 {
         mhcnuggets_predict_peptides.py --peptides $neoepitopes \\
             --alleles '$alleles' \\
             --output ${prefix}
-        
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
