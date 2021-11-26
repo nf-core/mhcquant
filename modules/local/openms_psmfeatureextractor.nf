@@ -24,20 +24,19 @@ process OPENMS_PSMFEATUREEXTRACTOR {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path "versions.yml", emit: versions
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${merged.baseName}_${options.suffix}" : "${merged.baseName}_psm"
 
         """
-            PSMFeatureExtractor -in ${merged} \\
-                -out ${prefix}.idXML \\
-                -threads ${task.cpus}
-
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        PSMFeatureExtractor -in $merged \\
+            -out ${prefix}.idXML \\
+            -threads $task.cpus
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }
