@@ -26,7 +26,7 @@ process GENERATE_PROTEINS_FROM_VCF {
         tuple val(meta), path(fasta), path(vcf)
 
     output:
-        tuple val(meta), path("*_vcf.fasta"), emit: vcf_fasta
+        tuple val(meta), path("*.fasta"), emit: vcf_fasta
         path  "*.version.txt", emit: version
 
     script:
