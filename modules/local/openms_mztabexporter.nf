@@ -31,13 +31,12 @@ process OPENMS_MZTABEXPORTER {
         def prefix = options.suffix ? "${meta.sample}_${meta.condition}_${options.suffix}" : "${meta.sample}_${meta.condition}"
 
         """
-            MzTabExporter -in ${mztab} \\
-                -out ${prefix}.mzTab \\
-                -threads ${task.cpus}
-
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        MzTabExporter -in $mztab \\
+            -out ${prefix}.mzTab \\
+            -threads $task.cpus
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }
