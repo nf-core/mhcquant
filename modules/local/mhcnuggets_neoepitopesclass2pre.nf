@@ -27,6 +27,7 @@ process MHCNUGGETS_NEOEPITOPESCLASS2RE {
 
         """
         preprocess_neoepitopes_mhcnuggets.py --neoepitopes $neoepitopes --output ${prefix}
+        
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
