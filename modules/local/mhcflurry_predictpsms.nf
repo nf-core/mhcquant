@@ -30,12 +30,12 @@ process MHCFLURRY_PREDICTPSMS {
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_peptide_filter"
 
         """
-            mhcflurry-downloads --quiet fetch models_class1
-            mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '$allotypes' $perc_mztab $psm_mztab ${prefix}.idXML
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
-            END_VERSIONS
+        mhcflurry-downloads --quiet fetch models_class1
+        mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '$allotypes' $perc_mztab $psm_mztab ${prefix}.idXML
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+        END_VERSIONS
         """
 
 }
