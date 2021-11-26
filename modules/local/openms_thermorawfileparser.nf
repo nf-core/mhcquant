@@ -20,20 +20,19 @@ process OPENMS_THERMORAWFILEPARSER {
 
     output:
         tuple val(meta), path("*.mzML"), emit: mzml
-        path "versions.yml", emit: versions
+        path "versions.yml"            , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${rawfile.baseName}_${options.suffix}" : "${rawfile.baseName}"
 
         """
-            ThermoRawFileParser.sh -i=${rawfile} \\
-                -f=2 \\
-                -b=${prefix}.mzML
-
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                thermorawfileparser: \$(ThermoRawFileParser.sh --version)
-            END_VERSIONS
+        ThermoRawFileParser.sh -i=$rawfile \\
+            -f=2 \\
+            -b=${prefix}.mzML
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            thermorawfileparser: \$(ThermoRawFileParser.sh --version)
+        END_VERSIONS
         """
 }
