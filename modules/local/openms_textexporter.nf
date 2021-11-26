@@ -24,23 +24,22 @@ process OPENMS_TEXTEXPORTER {
 
     output:
         tuple val(meta), path("*.tsv"), emit: tsv
-        path "versions.yml", emit: versions
+        path "versions.yml"           , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}"
 
         """
-            TextExporter -in ${consensus_resolved} \\
-                -out ${prefix}.tsv \\
-                -threads ${task.cpus} \\
-                -id:add_hit_metavalues 0 \\
-                -id:add_metavalues 0 \\
-                -id:peptides_only
-
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        TextExporter -in $consensus_resolved \\
+            -out ${prefix}.tsv \\
+            -threads $task.cpus \\
+            -id:add_hit_metavalues 0 \\
+            -id:add_metavalues 0 \\
+            -id:peptides_only
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }
