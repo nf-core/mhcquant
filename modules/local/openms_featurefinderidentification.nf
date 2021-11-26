@@ -40,7 +40,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
             FeatureFinderIdentification -in ${mzml} \\
                 -out ${prefix}.featureXML \\
                 -threads ${task.cpus} \\
-                $arguments
+                $options.args
 
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
