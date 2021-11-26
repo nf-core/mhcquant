@@ -30,13 +30,13 @@ process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_predicted_peptides_class_1"
 
         """
-            mhcflurry-downloads --quiet fetch models_class1
-            mhcflurry_predict_mztab.py '$alleles' $mztab ${prefix}.csv
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-                mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
-                fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
-            END_VERSIONS
+        mhcflurry-downloads --quiet fetch models_class1
+        mhcflurry_predict_mztab.py '$alleles' $mztab ${prefix}.csv
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+            fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
+        END_VERSIONS
         """
 }
