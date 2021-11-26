@@ -27,9 +27,9 @@ process OPENMS_IDCONFLICTRESOLVER {
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_resolved"
 
         """
-        IDConflictResolver -in ${consensus} \\
+        IDConflictResolver -in $consensus \\
             -out ${prefix}.consensusXML \\
-            -threads ${task.cpus}
+            -threads $task.cpus
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
