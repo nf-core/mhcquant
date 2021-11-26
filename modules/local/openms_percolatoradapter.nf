@@ -35,7 +35,7 @@ process OPENMS_PERCOLATORADAPTER {
         PercolatorAdapter -in $psm \\
             -out ${prefix}.idXML \\
             $options.args
-            
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
