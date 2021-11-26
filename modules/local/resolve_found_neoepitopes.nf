@@ -34,7 +34,7 @@ process RESOLVE_FOUND_NEOEPITOPES {
             -m $mztab \\
             -f csv \\
             -o ${prefix}
-            
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
