@@ -30,10 +30,10 @@ process MHCNUGGETS_PEPTIDESCLASS2POST {
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_postprocessed"
 
         """
-            postprocess_peptides_mhcnuggets.py --input ${peptides} --peptides_seq_ID ${peptide_to_geneID} --output ${prefix}.csv
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-            END_VERSIONS
+        postprocess_peptides_mhcnuggets.py --input ${peptides} --peptides_seq_ID ${peptide_to_geneID} --output ${prefix}.csv
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+        END_VERSIONS
         """
 }
