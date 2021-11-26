@@ -26,11 +26,11 @@ process MHCNUGGETS_NEOEPITOPESCLASS2RE {
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_mhcnuggets_preprocessed"
 
         """
-            preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output ${prefix}
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-            END_VERSIONS
+        preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output ${prefix}
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+        END_VERSIONS
         """
 }
 
