@@ -19,11 +19,11 @@ process MHCNUGGETS_PREDICTPEPTIDESCLASS2 {
         tuple val(meta), path(peptides), val(alleles)
 
     output:
-        tuple val(meta), path("${prefix}"), emit: csv
-        path "versions.yml"                 , emit: versions
+        tuple val(meta), path("*_class_2"), emit: csv
+        path "versions.yml"               , emit: versions
 
     script:
-        def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_predicted_peptides_class_2"
+        def prefix = options.suffix ? "${meta.sample}_${options.suffix}_class_2" : "${meta.sample}_predicted_peptides_class_2"
 
         """
         mhcnuggets_predict_peptides.py --peptides $peptides \\
