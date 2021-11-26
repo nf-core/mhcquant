@@ -19,7 +19,7 @@ process MHCNUGGETS_NEOEPITOPESCLASS2RE {
         tuple val(meta), path(neoepitopes)
 
     output:
-        tuple val(meta), path("*${prefix}*"), emit: preprocessed
+        tuple val(meta), path("*${prefix}"), emit: preprocessed
         path "versions.yml"                 , emit: versions
 
     script:
