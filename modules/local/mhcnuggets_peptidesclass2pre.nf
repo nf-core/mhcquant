@@ -19,9 +19,9 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
         tuple val(meta), path(mztab)
 
     output:
-        tuple val(meta), path("*${prefix}*"), emit: preprocessed
+        tuple val(meta), path("*${prefix}*")        , emit: preprocessed
         tuple val(meta), path('*peptide_to_geneID*'), emit: geneID
-        path "versions.yml", emit: versions
+        path "versions.yml"                         , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_preprocessed_mhcnuggets_peptides"
