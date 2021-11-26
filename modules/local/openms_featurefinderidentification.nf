@@ -24,7 +24,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
     output:
         tuple val(meta), path("*.featureXML"), emit: featurexml
-        path "versions.yml", emit: versions
+        path "versions.yml"                  , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
@@ -37,14 +37,14 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         }
 
         """
-            FeatureFinderIdentification -in ${mzml} \\
-                -out ${prefix}.featureXML \\
-                -threads ${task.cpus} \\
-                $options.args
+        FeatureFinderIdentification -in ${mzml} \\
+            -out ${prefix}.featureXML \\
+            -threads ${task.cpus} \\
+            $options.args
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }
