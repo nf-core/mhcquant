@@ -26,9 +26,9 @@ process GET_SOFTWARE_VERSIONS {
     path 'software_versions_mqc.yaml', emit: yaml
 
     script: // This script is bundled with the pipeline, in nf-core/mhcquant/bin/
-    """
-    echo $workflow.manifest.version > pipeline.version.txt
-    echo $workflow.nextflow.version > nextflow.version.txt
-    scrape_software_versions.py &> software_versions_mqc.yaml
-    """
+        """
+            echo $workflow.manifest.version > pipeline.version.txt
+            echo $workflow.nextflow.version > nextflow.version.txt
+            scrape_software_versions.py &> software_versions_mqc.yaml
+        """
 }
