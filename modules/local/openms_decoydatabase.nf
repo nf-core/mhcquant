@@ -20,14 +20,14 @@ process OPENMS_DECOYDATABASE {
 
     output:
         tuple val(meta), path("*.fasta")  , emit: decoy
-        path "versions.yml"                     , emit: versions
+        path "versions.yml"               , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${fasta.baseName}_${options.suffix}" : "${fasta.baseName}_decoy"
 
         """
-        DecoyDatabase -in $fasta} \\
+        DecoyDatabase -in $fasta \\
             -out ${prefix}.fasta \\
             -decoy_string DECOY_ \\
             -decoy_string_position prefix
