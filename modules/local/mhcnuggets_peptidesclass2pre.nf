@@ -19,7 +19,7 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
         tuple val(meta), path(mztab)
 
     output:
-        tuple val(meta), path("*${prefix}"), emit: preprocessed
+        tuple val(meta), path("*${prefix}*"), emit: preprocessed
         tuple val(meta), path('*peptide_to_geneID*'), emit: geneID
         path "versions.yml", emit: versions
 
@@ -28,7 +28,6 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
 
         """
             preprocess_peptides_mhcnuggets.py --mztab ${mztab} --output ${prefix}
-
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
                 mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
