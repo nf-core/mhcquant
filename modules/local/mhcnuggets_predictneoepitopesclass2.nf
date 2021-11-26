@@ -19,7 +19,7 @@ process MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 {
         tuple val(meta), path(neoepitopes), val(alleles)
 
     output:
-        tuple val(meta), path("*${prefix}*"), emit: csv
+        tuple val(meta), path("*${prefix}"), emit: csv
         path "versions.yml"                 , emit: versions
 
     script:
