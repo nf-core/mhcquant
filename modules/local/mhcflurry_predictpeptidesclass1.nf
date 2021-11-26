@@ -31,7 +31,7 @@ process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
 
         """
             mhcflurry-downloads --quiet fetch models_class1
-            mhcflurry_predict_mztab.py '${alleles}' ${mztab} ${prefix}.csv
+            mhcflurry_predict_mztab.py '$alleles' $mztab ${prefix}.csv
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
                 mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
