@@ -24,7 +24,7 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
 
     output:
         tuple val(meta), path("*.consensusXML"), emit: consensusxml
-        path "versions.yml", emit: versions
+        path "versions.yml"                    , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
