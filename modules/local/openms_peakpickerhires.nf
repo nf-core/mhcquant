@@ -30,6 +30,7 @@ process OPENMS_PEAKPICKERHIRES {
         PeakPickerHiRes -in $mzml \\
             -out ${prefix}.mzML \\
             -algorithm:ms_levels ${params.pick_ms_levels}
+            
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
