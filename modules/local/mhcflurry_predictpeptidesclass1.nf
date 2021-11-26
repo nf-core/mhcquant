@@ -23,7 +23,7 @@ process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
         tuple val(meta), path(mztab), val(alleles)
 
     output:
-        tuple val(meta), path("${prefix}.csv")  , emit: csv
+        tuple val(meta), path("*.csv")  , emit: csv
         path "versions.yml"                     , emit: versions
 
     script:
