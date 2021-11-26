@@ -24,7 +24,7 @@ process MHCFLURRY_PREDICTPSMS {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path "versions.yml", emit: versions
+        path "versions.yml"             , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_peptide_filter"
