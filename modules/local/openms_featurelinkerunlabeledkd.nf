@@ -34,6 +34,7 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
         FeatureLinkerUnlabeledKD -in $features \\
             -out '${prefix}.consensusXML' \\
             -threads $task.cpus
+            
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
