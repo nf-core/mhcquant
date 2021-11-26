@@ -33,5 +33,3 @@ process MHCNUGGETS_NEOEPITOPESCLASS2RE {
         END_VERSIONS
         """
 }
-
-// ${getSoftwareName(task.process)}: \$(echo $VERSION)
