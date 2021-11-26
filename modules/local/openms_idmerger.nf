@@ -32,7 +32,7 @@ process OPENMS_IDMERGER {
             -threads $task.cpus \\
             -annotate_file_origin \\
             -merge_proteins_add_PSMs
-            
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
