@@ -32,7 +32,7 @@ process OPENMS_RTMODEL {
             -out ${prefix}_rt_training.txt \\
             -out_oligo_params ${prefix}_params.paramXML \\
             -out_oligo_trainset ${prefix}_trainset.txt
-            
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
