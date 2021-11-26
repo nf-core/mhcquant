@@ -24,7 +24,7 @@ process OPENMS_IDFILTER {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path "versions.yml", emit: versions
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
