@@ -8,7 +8,7 @@ process OPENMS_THERMORAWFILEPARSER {
     tag "$meta.id"
     label 'process_medium'
 
-    conda (params.enable_conda ? "bioconda::thermorawfileparser::1.2.3" : null)
+    conda (params.enable_conda ? "bioconda::thermorawfileparser::1.3.4" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/thermorawfileparser:1.3.4--ha8f3691_0"
     } else {
