@@ -19,7 +19,7 @@ process MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 {
         tuple val(meta), path(neoepitopes), val(alleles)
 
     output:
-        tuple val(meta), path("*_predicted_neoepitopes_class_2"), emit: csv
+        tuple val(meta), path("*${prefix}*"), emit: csv
         path "versions.yml", emit: versions
 
     script:
@@ -27,7 +27,6 @@ process MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 {
 
         """
             mhcnuggets_predict_peptides.py --peptides ${neoepitopes} --alleles '${alleles}' --output ${prefix}
-
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:
                 mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
