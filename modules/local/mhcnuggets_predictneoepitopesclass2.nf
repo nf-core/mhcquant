@@ -20,7 +20,7 @@ process MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 {
 
     output:
         tuple val(meta), path("*${prefix}*"), emit: csv
-        path "versions.yml", emit: versions
+        path "versions.yml"                 , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_predicted_neoepitopes_class_2"
