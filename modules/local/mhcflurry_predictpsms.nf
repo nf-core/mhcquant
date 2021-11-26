@@ -32,7 +32,7 @@ process MHCFLURRY_PREDICTPSMS {
         """
         mhcflurry-downloads --quiet fetch models_class1
         mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '$allotypes' $perc_mztab $psm_mztab ${prefix}.idXML
-        
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
