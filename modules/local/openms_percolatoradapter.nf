@@ -24,21 +24,20 @@ process OPENMS_PERCOLATORADAPTER {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path "versions.yml", emit: versions
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}"
 
         """
-            OMP_NUM_THREADS=${task.cpus} \\
-            PercolatorAdapter -in ${psm} \\
-                -out ${prefix}.idXML \\
-                $options.args
-
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        OMP_NUM_THREADS=$task.cpus \\
+        PercolatorAdapter -in $psm \\
+            -out ${prefix}.idXML \\
+            $options.args
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }
