@@ -30,7 +30,7 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         MapAlignerIdentification -in $idxml \\
             -trafo_out ${out_names} \\
             $options.args
-            
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
