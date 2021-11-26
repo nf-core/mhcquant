@@ -20,17 +20,17 @@ process MHCNUGGETS_PREDICTPEPTIDESCLASS2 {
 
     output:
         tuple val(meta), path("*${prefix}*"), emit: csv
-        path "versions.yml", emit: versions
+        path "versions.yml"                 , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_predicted_peptides_class_2"
 
         """
-            mhcnuggets_predict_peptides.py --peptides $peptides --alleles '$alleles' --output ${prefix}
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-                fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
-            END_VERSIONS
+        mhcnuggets_predict_peptides.py --peptides $peptides --alleles '$alleles' --output ${prefix}
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+            fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
+        END_VERSIONS
         """
 }
