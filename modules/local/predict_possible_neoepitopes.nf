@@ -38,6 +38,7 @@ process PREDICT_POSSIBLE_NEOEPITOPES {
             -maxl ${params.peptide_max_length} \\
             -v $vcf \\
             -o ${prefix}.csv
+            
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
