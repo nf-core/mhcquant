@@ -27,7 +27,7 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_preprocessed_mhcnuggets_peptides"
 
         """
-        preprocess_peptides_mhcnuggets.py --mztab ${mztab} --output ${prefix}
+        preprocess_peptides_mhcnuggets.py --mztab $mztab --output ${prefix}
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
