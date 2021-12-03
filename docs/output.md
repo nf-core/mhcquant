@@ -22,6 +22,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
     * [Class (1|2) bindings](#class-12-bindings)
 * [Rotation time prediction](#rotation-time-prediction)
 * [Workflow reporting and documentation](#workflow-reporting-and-documentation)
+    * [MultiQC](#multiqc)
     * [Pipeline information](#pipeline-information)
 
 ## General
@@ -31,7 +32,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 <details markdown="1">
 <summary>Output files</summary>
 
-* `csv` : If `--skip_quantification` is not specified.
+* `*.tsv` : If `--skip_quantification` is not specified.
 
 </details>
 
@@ -122,8 +123,11 @@ These CSV files list all of the theoretically possible neoepitope sequences from
 <details markdown="1">
 <summary>Output files</summary>
 
-* `*found_neoepitopes_class1.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_1` are specified
-* `*found_neoepitopes_class2.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_2` are specified
+* `class_1_bindings/`
+    * `*found_neoepitopes_class1.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_1` are specified
+
+* `class_2_bindings/`
+    * `*found_neoepitopes_class2.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_2` are specified
 
 </details>
 
@@ -139,8 +143,11 @@ peptide sequence   geneID
 <details markdown="1">
 <summary>Output files</summary>
 
-* `*vcf_neoepitopes_class1.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_1` are specified
-* `*vcf_neoepitopes_class2.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_2` are specified
+* `class_1_bindings/`
+   * `*vcf_neoepitopes_class1.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_1` are specified
+
+* `class_2_bindings/`
+    * `*vcf_neoepitopes_class2.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_2` are specified
 
 </details>
 
@@ -158,8 +165,11 @@ Sequence        Antigen ID       Variants
 <details markdown="1">
 <summary>Output files</summary>
 
-* `*predicted_peptides_class_1.csv`: If `--predict_class_1` is specified, then this CSV is generated
-* `*predicted_peptides_class_2.csv`: If `--predict_class_2` is specified, then this CSV is generated
+* `class_1_bindings/`
+   * `*predicted_peptides_class_1.csv`: If `--predict_class_1` is specified, then this CSV is generated
+
+* `class_2_bindings/`
+    * `*predicted_peptides_class_2.csv`: If `--predict_class_2` is specified, then this CSV is generated
 
 </details>
 
@@ -182,6 +192,21 @@ peptide   allele   prediction   prediction_low   prediction_high   prediction_pe
 </details>
 
 ## Workflow reporting and documentation
+
+### MultiQC
+<details markdown="1">
+<summary>Output files</summary>
+
+* `multiqc/`
+    * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
+    * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
+</details>
+
+MultiQC is a visualization tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
+
+The pipeline has special steps which  allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see http://multiqc.info.
+
+
 
 ### Pipeline information
 
