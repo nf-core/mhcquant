@@ -144,7 +144,7 @@ peptide sequence   geneID
 <summary>Output files</summary>
 
 * `class_1_bindings/`
-   * `*vcf_neoepitopes_class1.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_1` are specified
+    * `*vcf_neoepitopes_class1.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_1` are specified
 
 * `class_2_bindings/`
     * `*vcf_neoepitopes_class2.csv`: Generated when `--include_proteins_from_vcf` and `--predict_class_2` are specified
@@ -166,7 +166,7 @@ Sequence        Antigen ID       Variants
 <summary>Output files</summary>
 
 * `class_1_bindings/`
-   * `*predicted_peptides_class_1.csv`: If `--predict_class_1` is specified, then this CSV is generated
+    * `*predicted_peptides_class_1.csv`: If `--predict_class_1` is specified, then this CSV is generated
 
 * `class_2_bindings/`
     * `*predicted_peptides_class_2.csv`: If `--predict_class_2` is specified, then this CSV is generated
@@ -194,19 +194,19 @@ peptide   allele   prediction   prediction_low   prediction_high   prediction_pe
 ## Workflow reporting and documentation
 
 ### MultiQC
+
 <details markdown="1">
 <summary>Output files</summary>
 
 * `multiqc/`
     * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
     * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
+
 </details>
 
 MultiQC is a visualization tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
 
-The pipeline has special steps which  allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see http://multiqc.info.
-
-
+The pipeline has special steps which  allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see <http://multiqc.info>.
 
 ### Pipeline information
 
