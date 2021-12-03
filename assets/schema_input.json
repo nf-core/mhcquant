@@ -18,7 +18,7 @@
             },
             "Condition": {
                 "type": "string",
-                "pattern": "^\S+-?",
+                "pattern": "^\\S+-?",
                 "errorMessage": "Sample condition must be provided and cannot contain spaces"
             },
             "ReplicateFileName": {
