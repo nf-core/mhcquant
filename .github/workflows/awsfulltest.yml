@@ -17,7 +17,7 @@ jobs:
         uses: nf-core/tower-action@v2
         with:
           workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
-          bearer_token: ${{ secrets.TOWER_BEARER_TOKEN }} to access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
+          access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
           compute_env: ${{ secrets.TOWER_COMPUTE_ENV }}
           pipeline: ${{ github.repository }}
           revision: ${{ github.sha }}
