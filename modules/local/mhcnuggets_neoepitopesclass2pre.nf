@@ -7,7 +7,7 @@ options        = initOptions(params.options)
 process MHCNUGGETS_NEOEPITOPESCLASS2RE {
     tag "$meta"
     label 'process_low'
-    
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_2_bindings', publish_id:'class_2_bindings') }
