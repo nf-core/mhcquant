@@ -36,6 +36,7 @@ process MHCNUGGETS_PREDICTPEPTIDESCLASS2 {
 
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
             fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
         END_VERSIONS
