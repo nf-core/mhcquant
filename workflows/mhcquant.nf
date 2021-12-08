@@ -134,15 +134,15 @@ include { OPENMS_TEXTEXPORTER }                             from '../modules/loc
 include { OPENMS_MZTABEXPORTER }                            from '../modules/local/openms_mztabexporter'                             addParams( options: [:] )
 
 include { MHCFLURRY_PREDICTPEPTIDESCLASS1 }                 from '../modules/local/mhcflurry_predictpeptidesclass1'                  addParams( options: [:] )
-include { MHCNUGGETS_PEPTIDESCLASS2PRE }          from '../modules/local/mhcnuggets_peptidesclass2pre'           addParams( options: [:] )
-include { MHCNUGGETS_PREDICTPEPTIDESCLASS2 }             from '../modules/local/mhcnuggets_predictpeptidesclass2'              addParams( options: [:] )
+include { MHCNUGGETS_PEPTIDESCLASS2PRE }                    from '../modules/local/mhcnuggets_peptidesclass2pre'                     addParams( options: [:] )
+include { MHCNUGGETS_PREDICTPEPTIDESCLASS2 }                from '../modules/local/mhcnuggets_predictpeptidesclass2'                 addParams( options: [:] )
 include { MHCNUGGETS_PEPTIDESCLASS2POST }                   from '../modules/local/mhcnuggets_peptidesclass2post'                    addParams( options: [:] )
 include { PREDICT_POSSIBLE_NEOEPITOPES }                    from '../modules/local/predict_possible_neoepitopes'                     addParams( options: [:] )
 include { PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES }            from '../modules/local/predict_possible_class_2_neoepitopes'             addParams( options: [:] )
 include { RESOLVE_FOUND_NEOEPITOPES }                       from '../modules/local/resolve_found_neoepitopes'                        addParams( options: [:] )
 include { RESOLVE_FOUND_CLASS_2_NEOEPITOPES }               from '../modules/local/resolve_found_class_2_neoepitopes'                addParams( options: [:] )
 include { MHCFLURRY_PREDICTNEOEPITOPESCLASS1 }              from '../modules/local/mhcflurry_predictneoepitopesclass1'               addParams( options: [:] )
-include { MHCNUGGETS_NEOEPITOPESCLASS2RE }       from '../modules/local/mhcnuggets_neoepitopesclass2pre'        addParams( options: [:] )
+include { MHCNUGGETS_NEOEPITOPESCLASS2RE }                  from '../modules/local/mhcnuggets_neoepitopesclass2pre'                  addParams( options: [:] )
 include { MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 }             from '../modules/local/mhcnuggets_predictneoepitopesclass2'              addParams( options: [:] )
 include { MHCNUGGETS_NEOEPITOPESCLASS2POST }                from '../modules/local/mhcnuggets_neoepitopesclass2post'                 addParams( options: [:] )
 
