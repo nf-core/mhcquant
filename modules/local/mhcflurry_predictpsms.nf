@@ -1,10 +1,10 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
 
-process PREDICT_PSMS {
+process MHCFLURRY_PREDICTPSMS {
     tag "$meta"
     label 'process_medium'
 
@@ -24,15 +24,21 @@ process PREDICT_PSMS {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path  "*.version.txt", emit: version
+        path "versions.yml"             , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_peptide_filter"
 
-    """
+        """
         mhcflurry-downloads --quiet fetch models_class1
-        mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '${allotypes}' ${perc_mztab} ${psm_mztab} ${prefix}.idXML
-        mhcflurry-predict --version &> mhcflurry.version.txt
-    """
+        mhcflurry_predict_mztab_for_filtering.py ${params.subset_affinity_threshold} '$allotypes' $perc_mztab $psm_mztab ${prefix}.idXML
+
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+            fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
+        END_VERSIONS
+        """
 
 }

@@ -1,5 +1,5 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
@@ -12,11 +12,11 @@ process OPENMS_PERCOLATORADAPTER {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'Intermediate_Results', publish_id:'Intermediate_Results') }
 
-    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.6.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.5.0--6"
+        container "https://depot.galaxyproject.org/singularity/openms-thirdparty:2.6.0--0"
     } else {
-        container "quay.io/biocontainers/openms-thirdparty:2.5.0--6"
+        container "quay.io/biocontainers/openms-thirdparty:2.6.0--0"
     }
 
     input:
@@ -24,17 +24,21 @@ process OPENMS_PERCOLATORADAPTER {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path  "*.version.txt", emit: version
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}"
 
         """
-            OMP_NUM_THREADS=${task.cpus} \\
-            PercolatorAdapter -in ${psm} \\
-                -out ${prefix}.idXML \\
-                $options.args
-            echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}-thirdparty.version.txt
+        OMP_NUM_THREADS=$task.cpus \\
+        PercolatorAdapter -in $psm \\
+            -out ${prefix}.idXML \\
+            $options.args
+
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }

@@ -1,50 +1,38 @@
 // Import generic module functions
-include { initOptions; saveFiles } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
 
-/*
- * Reformat design file and check validity
- */
 process SAMPLESHEET_CHECK {
     tag "$samplesheet"
-    label 'process_low'
-
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'pipeline_info', publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'pipeline_info', meta:[:], publish_by_meta:[]) }
 
-    conda     (params.enable_conda ? "conda-forge::python=3.8.3" : null)
-    container "quay.io/biocontainers/python:3.8.3"
+    conda (params.enable_conda ? "conda-forge::python=3.8.3" : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        container "https://depot.galaxyproject.org/singularity/python:3.8.3"
+    } else {
+        container "quay.io/biocontainers/python:3.8.3"
+    }
 
     input:
-    path samplesheet
+        path samplesheet
 
     output:
-    path '*.csv'
+        path '*.csv'       , emit: csv
+        path "versions.yml", emit: versions
 
-
-    script:
-
+    script: // This script is bundled with the pipeline, in nf-core/mhcquant/bin/
     """
-    check_samplesheet.py $samplesheet samplesheet.valid.csv
+    check_samplesheet.py \\
+        $samplesheet \\
+        samplesheet.valid.csv
+
+    cat <<-END_VERSIONS > versions.yml
+    ${getProcessName(task.process)}:
+        python: \$(echo \$(python --version | sed 's/Python //g'))
+    END_VERSIONS
     """
-}
-
-// Function to get list of [ meta, filenames ]
-def get_samplesheet_paths(LinkedHashMap row) {
-    def meta = [:]
-    meta.id             = row.ID
-    meta.sample         = row.Sample
-    meta.condition      = row.Condition
-    meta.ext            = row.FileExt
-
-    def array = []
-    if (!file(row.Filename).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.Filename}"
-    } else {
-        array = [ meta, file(row.Filename) ]
-    }
-    return array
 }

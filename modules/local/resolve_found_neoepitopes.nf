@@ -1,11 +1,8 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
-
-def VERSIONFRED2 = '2.0.6'
-def VERSIONMHCNUGGETS = '2.3.2'
 
 process RESOLVE_FOUND_NEOEPITOPES {
     tag "$meta"
@@ -27,15 +24,22 @@ process RESOLVE_FOUND_NEOEPITOPES {
 
     output:
         tuple val(meta), path("*.csv"), emit: csv
-        path  "*.version.txt", emit: version
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_found_neoepitopes_class_1"
 
         """
-            resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${prefix}
-            echo $VERSIONFRED2 > fred2.version.txt
-            echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
-            mhcflurry-predict --version &> mhcflurry.version.txt
+        resolve_neoepitopes.py -n $neoepitopes \\
+            -m $mztab \\
+            -f csv \\
+            -o ${prefix}
+
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//'))
+            fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
+        END_VERSIONS
         """
 }

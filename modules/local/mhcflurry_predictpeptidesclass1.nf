@@ -1,13 +1,10 @@
 // Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
 
 params.options = [:]
 options        = initOptions(params.options)
 
-def VERSIONFRED2 = '2.0.6'
-def VERSIONMHCNUGGETS = '2.3.2'
-
-process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
+process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
     tag "$meta"
     label 'process_low'
 
@@ -26,17 +23,21 @@ process PREDICT_PEPTIDES_MHCFLURRY_CLASS_1 {
         tuple val(meta), path(mztab), val(alleles)
 
     output:
-        tuple val(meta), path("*predicted_peptides_class_1.csv"), emit: csv
-        path  "*.version.txt", emit: version
+        tuple val(meta), path("*.csv"), emit: csv
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_predicted_peptides_class_1"
 
         """
-            mhcflurry-downloads --quiet fetch models_class1
-            mhcflurry_predict_mztab.py '${alleles}' ${mztab} ${prefix}.csv
-            echo $VERSIONFRED2 > fred2.version.txt
-            echo $VERSIONMHCNUGGETS > mhcnuggets.version.txt
-            mhcflurry-predict --version &> mhcflurry.version.txt
+        mhcflurry-downloads --quiet fetch models_class1
+        mhcflurry_predict_mztab.py '$alleles' $mztab ${prefix}.csv
+
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+            fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
+        END_VERSIONS
         """
 }
