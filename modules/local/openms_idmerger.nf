@@ -30,7 +30,7 @@ process OPENMS_IDMERGER {
             IDMerger -in $aligned \\
                 -out ${prefix}.idXML \\
                 -threads ${task.cpus} \\
-                -annotate_file_origin \\
+                -annotate_file_origin true \\
                 -merge_proteins_add_PSMs
             echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/ .*\$//' &> ${software}.version.txt
         """
