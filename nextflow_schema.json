@@ -197,7 +197,7 @@
                 "remove_precursor_peak": {
                     "type": "boolean",
                     "description": "Include precursor ions into the peptide spectrum matching",
-                    "default": true
+                    "default": false
                 },
                 "spectrum_batch_size": {
                     "type": "integer",
@@ -328,12 +328,12 @@
                 "variant_indel_filter": {
                     "type": "boolean",
                     "description": "Specify whether insertions and deletions should not be considered for variant translation",
-                    "default": true
+                    "default": false
                 },
                 "variant_frameshift_filter": {
                     "type": "boolean",
                     "description": "Specify whether frameshifts should not be considered for variant translation",
-                    "default": true
+                    "default": false
                 },
                 "variant_snp_filter": {
                     "type": "boolean",
