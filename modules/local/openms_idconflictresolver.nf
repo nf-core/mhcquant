@@ -20,20 +20,20 @@ process OPENMS_IDCONFLICTRESOLVER {
 
     output:
         tuple val(meta), path("*.consensusXML"), emit: consensusxml
-        path "versions.yml", emit: versions
+        path "versions.yml"                    , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_resolved"
 
         """
-            IDConflictResolver -in ${consensus} \\
-                -out ${prefix}.consensusXML \\
-                -threads ${task.cpus}
+        IDConflictResolver -in $consensus \\
+            -out ${prefix}.consensusXML \\
+            -threads $task.cpus
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }

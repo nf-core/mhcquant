@@ -20,22 +20,22 @@ process OPENMS_RTMODEL {
 
     output:
         tuple val(meta), path("*_rt_training.txt"), path("*.paramXML"), path("*_trainset.txt"), emit: complete
-        path "versions.yml", emit: versions
+        path "versions.yml"                                                                   , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}"
 
         """
-            RTModel -in ${rt_training} \\
-                -cv:skip_cv \\
-                -out ${prefix}_rt_training.txt \\
-                -out_oligo_params ${prefix}_params.paramXML \\
-                -out_oligo_trainset ${prefix}_trainset.txt
+        RTModel -in $rt_training \\
+            -cv:skip_cv \\
+            -out ${prefix}_rt_training.txt \\
+            -out_oligo_params ${prefix}_params.paramXML \\
+            -out_oligo_trainset ${prefix}_trainset.txt
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }

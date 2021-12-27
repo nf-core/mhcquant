@@ -10,7 +10,7 @@ process RESOLVE_FOUND_CLASS_2_NEOEPITOPES {
 
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:'') }
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_2_bindings', publish_id:'class_2_bindings') }
 
     echo true
 
@@ -26,13 +26,16 @@ process RESOLVE_FOUND_CLASS_2_NEOEPITOPES {
 
     output:
         tuple val(meta), path("*.csv"), emit: csv
-        path "versions.yml", emit: versions
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_found_neoepitopes_class_2"
 
         """
-            resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${prefix}
+            resolve_neoepitopes.py -n $neoepitopes \\
+                -m $mztab \\
+                -f csv \\
+                -o ${prefix}
 
             cat <<-END_VERSIONS > versions.yml
             ${getProcessName(task.process)}:

@@ -8,6 +8,10 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
     tag "$meta"
     label 'process_low'
 
+    publishDir "${params.outdir}",
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_2_bindings', publish_id:'class_2_bindings') }
+
     conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
@@ -19,19 +23,20 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
         tuple val(meta), path(mztab)
 
     output:
-        tuple val(meta), path("*_preprocessed_mhcnuggets_peptides"), emit: preprocessed
-        tuple val(meta), path('*peptide_to_geneID*'), emit: geneID
-        path "versions.yml", emit: versions
+        tuple val(meta), path("*_peptides")       , emit: preprocessed
+        tuple val(meta), path('peptide_to_geneID'), emit: geneID
+        path "versions.yml"                       , emit: versions
 
     script:
-        def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_preprocessed_mhcnuggets_peptides"
+        def prefix = options.suffix ? "${meta.sample}_${options.suffix}_peptides" : "${meta.sample}_preprocessed_mhcnuggets_peptides"
 
         """
-            preprocess_peptides_mhcnuggets.py --mztab ${mztab} --output ${prefix}
+        preprocess_peptides_mhcnuggets.py --mztab $mztab \\
+            --output ${prefix}
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+        END_VERSIONS
         """
 }

@@ -24,20 +24,20 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
 
     output:
         tuple val(meta), path("*.consensusXML"), emit: consensusxml
-        path "versions.yml", emit: versions
+        path "versions.yml"                    , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_all_features_merged"
 
         """
-            FeatureLinkerUnlabeledKD -in ${features} \\
-                -out '${prefix}.consensusXML' \\
-                -threads ${task.cpus}
+        FeatureLinkerUnlabeledKD -in $features \\
+            -out '${prefix}.consensusXML' \\
+            -threads $task.cpus
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }

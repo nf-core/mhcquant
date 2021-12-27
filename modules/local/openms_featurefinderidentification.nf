@@ -24,27 +24,28 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
     output:
         tuple val(meta), path("*.featureXML"), emit: featurexml
-        path "versions.yml", emit: versions
+        path "versions.yml"                  , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix = options.suffix ? "${meta.sample}_${options.suffix}" : "${meta.sample}_${meta.id}"
 
         if (!params.quantification_fdr){
-            arguments = "-id ${id_quant}"
+            arguments = "-id $id_quant"
         } else {
-            arguments = "-id ${id_quant_int} -id_ext ${id_quant} -svm:min_prob ${params.quantification_min_prob}"
+            arguments = "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}"
         }
 
         """
-            FeatureFinderIdentification -in ${mzml} \\
-                -out ${prefix}.featureXML \\
-                -threads ${task.cpus} \\
-                $arguments
+        FeatureFinderIdentification -in $mzml \\
+            -out ${prefix}.featureXML \\
+            -threads $task.cpus \\
+            ${arguments} \\
+            $options.args
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }

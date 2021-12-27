@@ -20,21 +20,21 @@ process OPENMS_FALSEDISCOVERYRATE  {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path "versions.yml", emit: versions
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${idxml.baseName}_${options.suffix}" : "${idxml.baseName}_fdr"
 
         """
-            FalseDiscoveryRate -in ${idxml} \\
-                -protein 'false' \\
-                -out ${prefix}.idXML \\
-                -threads ${task.cpus}
+        FalseDiscoveryRate -in $idxml \\
+            -protein 'false' \\
+            -out ${prefix}.idXML \\
+            -threads $task.cpus
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }

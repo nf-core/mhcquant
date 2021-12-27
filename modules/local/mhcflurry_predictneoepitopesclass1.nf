@@ -25,18 +25,18 @@ process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
 
     output:
         tuple val(meta), path("*.csv"), emit: csv
-        path "versions.yml", emit: versions
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix = options.suffix ? "${neoepitopes}_${meta}_${options.suffix}" : "${neoepitopes}_${meta}_predicted_neoepitopes_class_1"
 
         """
-            mhcflurry-downloads --quiet fetch models_class1
-            mhcflurry_neoepitope_binding_prediction.py '${allotypes}' ${prefix}.csv
+        mhcflurry-downloads --quiet fetch models_class1
+        mhcflurry_neoepitope_binding_prediction.py '$allotypes' ${prefix}.csv
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+        END_VERSIONS
         """
 }

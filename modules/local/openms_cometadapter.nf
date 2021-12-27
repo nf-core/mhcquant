@@ -20,21 +20,22 @@ process OPENMS_COMETADAPTER {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path "versions.yml", emit: versions
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${mzml.baseName}_${options.suffix}" : "${mzml.baseName}"
 
         """
-            CometAdapter -in ${mzml} \\
-                -out ${prefix}.idXML \\
-                -database ${fasta} \\
-                -threads $task.cpus $options.args
+        CometAdapter -in $mzml \\
+            -out ${prefix}.idXML \\
+            -database $fasta \\
+            -threads $task.cpus \\
+            $options.args
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }

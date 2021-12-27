@@ -20,22 +20,22 @@ process OPENMS_IDMERGER {
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
-        path "versions.yml", emit: versions
+        path "versions.yml"             , emit: versions
 
     script:
         def software = getSoftwareName(task.process)
         def prefix   = options.suffix ? "${aligned.baseName}_${options.suffix}" : "${meta.sample}_${meta.condition}_all_ids_merged"
 
         """
-            IDMerger -in $aligned \\
-                -out ${prefix}.idXML \\
-                -threads ${task.cpus} \\
-                -annotate_file_origin \\
-                -merge_proteins_add_PSMs
+        IDMerger -in $aligned \\
+            -out ${prefix}.idXML \\
+            -threads $task.cpus \\
+            -annotate_file_origin \\
+            -merge_proteins_add_PSMs
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
         """
 }

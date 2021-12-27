@@ -1,6 +1,6 @@
 # nf-core/mhcquant: Changelog
 
-## v2.1.0 nf-core/mhcquant "Olive Tin Hamster" - 2021/MM/DD
+## v2.1.0 nf-core/mhcquant "Olive Tin Hamster" - 2021/12/09
 
 ### `Added`
 

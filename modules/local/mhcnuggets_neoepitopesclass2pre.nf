@@ -8,6 +8,10 @@ process MHCNUGGETS_NEOEPITOPESCLASS2RE {
     tag "$meta"
     label 'process_low'
 
+    publishDir "${params.outdir}",
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_2_bindings', publish_id:'class_2_bindings') }
+
     conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
@@ -19,20 +23,18 @@ process MHCNUGGETS_NEOEPITOPESCLASS2RE {
         tuple val(meta), path(neoepitopes)
 
     output:
-        tuple val(meta), path("*${prefix}*"), emit: preprocessed
-        path "versions.yml", emit: versions
+        tuple val(meta), path("*${prefix}"), emit: preprocessed
+        path "versions.yml"                 , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_mhcnuggets_preprocessed"
 
         """
-            preprocess_neoepitopes_mhcnuggets.py --neoepitopes ${neoepitopes} --output ${prefix}
+        preprocess_neoepitopes_mhcnuggets.py --neoepitopes $neoepitopes --output ${prefix}
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+        END_VERSIONS
         """
 }
-
-// ${getSoftwareName(task.process)}: \$(echo $VERSION)

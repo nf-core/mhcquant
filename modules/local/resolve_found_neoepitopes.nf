@@ -24,19 +24,22 @@ process RESOLVE_FOUND_NEOEPITOPES {
 
     output:
         tuple val(meta), path("*.csv"), emit: csv
-        path "versions.yml", emit: versions
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_found_neoepitopes_class_1"
 
         """
-            resolve_neoepitopes.py -n ${neoepitopes} -m ${mztab} -f csv -o ${prefix}
+        resolve_neoepitopes.py -n $neoepitopes \\
+            -m $mztab \\
+            -f csv \\
+            -o ${prefix}
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
-                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//'))
-                fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//'))
+            fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
+        END_VERSIONS
         """
 }

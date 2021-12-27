@@ -23,21 +23,21 @@ process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
         tuple val(meta), path(mztab), val(alleles)
 
     output:
-        tuple val(meta), path("*predicted_peptides_class_1.csv"), emit: csv
-        path "versions.yml", emit: versions
+        tuple val(meta), path("*.csv"), emit: csv
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix = options.suffix ? "${meta.id}_${options.suffix}" : "${meta.id}_predicted_peptides_class_1"
 
         """
-            mhcflurry-downloads --quiet fetch models_class1
-            mhcflurry_predict_mztab.py '${alleles}' ${mztab} ${prefix}.csv
+        mhcflurry-downloads --quiet fetch models_class1
+        mhcflurry_predict_mztab.py '$alleles' $mztab ${prefix}.csv
 
-            cat <<-END_VERSIONS > versions.yml
-            ${getProcessName(task.process)}:
-                mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
-                mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
-                fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
-            END_VERSIONS
+        cat <<-END_VERSIONS > versions.yml
+        ${getProcessName(task.process)}:
+            mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
+            mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
+            fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
+        END_VERSIONS
         """
 }

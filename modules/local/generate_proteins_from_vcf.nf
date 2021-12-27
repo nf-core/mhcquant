@@ -23,19 +23,23 @@ process GENERATE_PROTEINS_FROM_VCF {
         tuple val(meta), path(fasta), path(vcf)
 
     output:
-        tuple val(meta), path("*_vcf.fasta"), emit: vcf_fasta
-        path  "*.version.txt", emit: version
+        tuple val(meta), path("*.fasta"), emit: vcf_fasta
+        path  "*.version.txt"           , emit: version
 
     script:
         def prefix   = options.suffix ? "${fasta.baseName}_${options.suffix}" : "${fasta.baseName}_added_vcf"
 
-    """
-        variants2fasta.py -v ${vcf} -f ${fasta} -o ${meta.sample}_${prefix}.fasta $options.args
+        """
+        variants2fasta.py -v $vcf \\
+            -f $fasta \\
+            -o $meta.sample_${prefix}.fasta \\
+            $options.args
+
         cat <<-END_VERSIONS > versions.yml
         ${getProcessName(task.process)}:
             fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
             mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
         END_VERSIONS
-    """
+        """
 }
