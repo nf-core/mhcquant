@@ -1,3 +1,5 @@
+//TODO: find a solution for the hasExtension function
+
 //
 //  Utility functions used in nf-core DSL2 module files
 //
