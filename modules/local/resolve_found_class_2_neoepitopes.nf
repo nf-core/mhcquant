@@ -16,7 +16,7 @@ process RESOLVE_FOUND_CLASS_2_NEOEPITOPES {
         path "versions.yml"           , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta}_${task.ext.suffix}" : "${meta}_found_neoepitopes_class_2"        
+        def prefix           = task.ext.suffix ? "${meta}_${task.ext.suffix}" : "${meta}_found_neoepitopes_class_2"
 
         """
         resolve_neoepitopes.py -n $neoepitopes \\

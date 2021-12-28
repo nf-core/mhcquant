@@ -21,7 +21,7 @@ process OPENMS_THERMORAWFILEPARSER {
         ThermoRawFileParser.sh -i=$rawfile \\
             -f=2 \\
             -b=${prefix}.mzML
-            
+
         cat <<-END_VERSIONS > versions.yml
         ${task.process}:
             thermorawfileparser: \$(ThermoRawFileParser.sh --version)

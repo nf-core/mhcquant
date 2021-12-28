@@ -17,7 +17,7 @@ process OPENMS_COMETADAPTER {
     script:
         def prefix           = task.ext.suffix ? "${mzml.baseName}_${task.ext.suffix}" : "${mzml.baseName}"
         def args             = task.ext.args  ?: ''
-        
+
         def mods             = params.fixed_mods != " " ? "-fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")}" : ""
         def xions            = params.use_x_ions ? "-use_X_ions true" : ""
         def zions            = params.use_z_ions ? "-use_Z_ions true" : ""
@@ -25,7 +25,7 @@ process OPENMS_COMETADAPTER {
         def cions            = params.use_c_ions ? "-use_C_ions true" : ""
         def nlions           = params.use_NL_ions ? "-use_NL_ions true" : ""
         def remove_precursor = params.remove_precursor_peak ? "-remove_precursor_peak yes" : ""
- 
+
         """
         CometAdapter -in $mzml \\
             -out ${prefix}.idXML \\
@@ -39,7 +39,7 @@ process OPENMS_COMETADAPTER {
             $cions \\
             $nlions \\
             $remove_precursor
- 
+
         cat <<-END_VERSIONS > versions.yml
         ${task.process}:
             openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')

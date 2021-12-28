@@ -71,7 +71,7 @@ include { OPENMS_PEAKPICKERHIRES }                                          from
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
 include { OPENMS_FALSEDISCOVERYRATE }                                       from '../modules/local/openms_falsediscoveryrate'
-include { 
+include {
     OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT
     OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                            from '../modules/local/openms_idfilter'
 include { OPENMS_MAPALIGNERIDENTIFICATION }                                 from '../modules/local/openms_mapaligneridentification'
@@ -82,8 +82,8 @@ include {
 
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
-include { 
-    OPENMS_PERCOLATORADAPTER 
+include {
+    OPENMS_PERCOLATORADAPTER
     OPENMS_PERCOLATORADAPTER as OPENMS_PERCOLATORADAPTER_KLAMMER }          from '../modules/local/openms_percolatoradapter'
 
 include { REFINE_FDR_ON_PREDICTED_SUBSET }                                  from '../subworkflows/local/refine_fdr_on_predicted_subset'
@@ -108,7 +108,7 @@ include { MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 }                             from
 include { MHCNUGGETS_NEOEPITOPESCLASS2POST }                                from '../modules/local/mhcnuggets_neoepitopesclass2post'
 
 include { OPENMS_RTMODEL }                                                  from '../modules/local/openms_rtmodel'
-include { 
+include {
     OPENMS_RTPREDICT as OPENMS_RTPREDICT_FOUND_PEPTIDES
     OPENMS_RTPREDICT as OPENMS_RTPREDICT_NEOEPITOPES}                       from '../modules/local/openms_rtpredict'
 
@@ -215,6 +215,7 @@ workflow MHCQUANT {
         // Compute alignment rt transformatio
         OPENMS_MAPALIGNERIDENTIFICATION(ch_grouped_fdr_filtered)
         ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions.first().ifEmpty(null))
+        OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml.view()
         // Intermediate step to join RT transformation files with mzml and idxml channels
         ms_files.mzml
         .mix(OPENMS_THERMORAWFILEPARSER.out.mzml)

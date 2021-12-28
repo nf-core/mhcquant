@@ -27,7 +27,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         FeatureFinderIdentification -in $mzml \\
             -out ${prefix}.featureXML \\
             -threads $task.cpus \\
-            ${arguments} 
+            ${arguments}
 
         cat <<-END_VERSIONS > versions.yml
         ${task.process}:

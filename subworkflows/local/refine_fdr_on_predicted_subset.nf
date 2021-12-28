@@ -2,7 +2,7 @@
  * Perform an additional step where the process are collected
  * that are called when the paramater "refine_fdr_on_predicted_subset" is provided
  */
- 
+
 include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../../modules/local/openms_mztabexporter'
 include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../../modules/local/openms_mztabexporter'
 include { MHCFLURRY_PREDICTPSMS }                            from '../../modules/local/mhcflurry_predictpsms'
