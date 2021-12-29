@@ -215,7 +215,6 @@ workflow MHCQUANT {
         // Compute alignment rt transformatio
         OPENMS_MAPALIGNERIDENTIFICATION(ch_grouped_fdr_filtered)
         ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions.first().ifEmpty(null))
-        OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml.view()
         // Intermediate step to join RT transformation files with mzml and idxml channels
         ms_files.mzml
         .mix(OPENMS_THERMORAWFILEPARSER.out.mzml)
