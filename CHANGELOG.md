@@ -1,5 +1,20 @@
 # nf-core/mhcquant: Changelog
 
+## v2.1.1 nfcore/mhcquant "Silver Titanium Ostrich" - 2021/mm/dd
+
+### `Added`
+
+- Included the newest nf-core template (version 2.2)
+- Adjustment of the README, including all contributors
+
+### `Fixed`
+
+- Changed parameters in the nextflow_schema.json to be in coherence with the nextflow.config
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.1.0 nf-core/mhcquant "Olive Tin Hamster" - 2021/12/09
 
 ### `Added`
