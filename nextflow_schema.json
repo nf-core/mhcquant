@@ -206,6 +206,7 @@
                 },
                 "vcf_sheet": {
                     "type": "string",
+                    "pattern": "^\\S+\\.tsv$",
                     "description": "Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.",
                     "help_text": "| Sample      | VCF_FileName           |\n| -------------| :---------------------:|\n| MM15_Melanom | data/MM15_variants.vcf |\n| MM17_Melanom | data/MM17_variants.vcf |"
                 }
