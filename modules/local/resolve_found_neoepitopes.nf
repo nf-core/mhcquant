@@ -1,5 +1,5 @@
 process RESOLVE_FOUND_NEOEPITOPES {
-    tag "$meta"
+    tag "$meta.sample"
     label 'process_low'
 
     conda (params.enable_conda ? "bioconda::fred2=2.0.6 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2" : null)
@@ -15,7 +15,7 @@ process RESOLVE_FOUND_NEOEPITOPES {
         path "versions.yml"           , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta}_${task.ext.suffix}" : "${meta}_found_neoepitopes_class_1"
+        def prefix           = task.ext.suffix ? "${meta.sample}_${task.ext.suffix}" : "${meta.sample}_found_neoepitopes_class_1"
 
         """
         resolve_neoepitopes.py -n $neoepitopes \\
