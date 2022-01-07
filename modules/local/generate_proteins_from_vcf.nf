@@ -12,24 +12,17 @@ process GENERATE_PROTEINS_FROM_VCF {
 
     output:
         tuple val(meta), path("*.fasta"), emit: vcf_fasta
-        path  "*.version.txt"           , emit: version
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix           = task.ext.suffix ? "${fasta.baseName}_${task.ext.suffix}" : "${fasta.baseName}_added_vcf"
         def args             = task.ext.args  ?: ''
 
-        def indel            = params.variant_indel_filter ? "-fINDEL" : ""
-        def frameshift       = params.variant_frameshift_filter ? "-fFS" : ""
-        def snp              = params.variant_snp_filter ? "-fSNP" : ""
-
         """
         variants2fasta.py -v $vcf \\
             -f $fasta \\
-            -o $meta.sample_${prefix}.fasta \\
-            $args \\
-            $indel \\
-            $frameshift \\
-            $snp
+            -o ${meta.sample}_${prefix}.fasta \\
+            $args 
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
