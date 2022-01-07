@@ -88,11 +88,12 @@ workflow MHCQUANT {
 
     ch_versions = Channel.empty()
 
-    // Subworkflow: preparation_files
+    //
+    // SUBWORKFLOW: Check the input file
+    //
     INPUT_CHECK( params.input )
     .reads
     .set { ch_samples_from_sheet }
-
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     ch_samples_from_sheet
@@ -104,7 +105,6 @@ workflow MHCQUANT {
                 return [ meta, filename ]
             other : true }
         .set { ms_files }
-
     // A warning message will be given when the format differs from the '.raw' or '.mzML' extention
     ms_files.other.subscribe { row -> log.warn("Unknown format for entry " + row[3] + " in provided sample sheet, line will be ignored."); exit 1 }
 
@@ -115,6 +115,9 @@ workflow MHCQUANT {
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .set { input_fasta }
 
+    //
+    // SUBWORKFLOW: Include protein information
+    //
     if ( params.include_proteins_from_vcf ) {
         // Include the proteins from the vcf file to the fasta file
         INCLUDE_PROTEINS( input_fasta )
@@ -138,7 +141,6 @@ workflow MHCQUANT {
     // Raw file conversion
     OPENMS_THERMORAWFILEPARSER(ms_files.raw)
     ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.first().ifEmpty(null))
-
     if ( params.run_centroidisation ) {
         // Optional: Run Peak Picking as Preprocessing
         OPENMS_PEAKPICKERHIRES(ms_files.mzml)
@@ -147,14 +149,12 @@ workflow MHCQUANT {
     } else {
         ch_mzml_file = ms_files.mzml
     }
-
     // Run comet database search
     OPENMS_COMETADAPTER(
         OPENMS_THERMORAWFILEPARSER.out.mzml
                 .mix(ch_mzml_file)
                 .join(ch_decoy_db, remainder:true))
     ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.first().ifEmpty(null))
-
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.first().ifEmpty(null))
@@ -225,7 +225,6 @@ workflow MHCQUANT {
         ch_versions = ch_versions.mix(POST_QUANTIFICATION.out.versions.first().ifEmpty(null))
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
     //
@@ -255,7 +254,7 @@ workflow MHCQUANT {
     } else {
         ch_predicted_possible_neoepitopes_II = Channel.empty()
     }
-    //////////////////////////////////////////////////////////////////////////////////////////////
+
     //
     // SUBWORKFLOW: Predict retention time
     //
