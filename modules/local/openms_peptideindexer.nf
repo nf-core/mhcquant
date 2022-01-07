@@ -15,7 +15,7 @@ process OPENMS_PEPTIDEINDEXER {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${idxml.baseName}_${task.ext.suffix}" : "${idxml.baseName}_idx"
+        def prefix           = task.ext.suffix ? "${idxml.baseName}_${task.ext.suffix}" : "${idxml.baseName}_-_idx"
 
         """
         PeptideIndexer -in $idxml \\
