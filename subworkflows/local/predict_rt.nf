@@ -1,5 +1,5 @@
 /*
- * Perform the Retention time prediction when the parameter --predict_RT is provided 
+ * Perform the Retention time prediction when the parameter --predict_RT is provided
  */
 
 include { OPENMS_RTMODEL }                                                  from '../../modules/local/openms_rtmodel'
@@ -13,7 +13,7 @@ workflow PREDICT_RT {
         filter_q_value
         ch_predicted_possible_neoepitopes
         ch_predicted_possible_neoepitopes_II
-       
+
     main:
         ch_versions = Channel.empty()
 

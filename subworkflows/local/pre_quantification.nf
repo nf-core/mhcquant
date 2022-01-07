@@ -17,7 +17,7 @@ workflow PRE_QUANTIFICATION {
         ch_mzml_file
         mzml_files
         raw_files
-       
+
     main:
         ch_versions = Channel.empty()
         // Calculate fdr for id based alignment
@@ -90,5 +90,4 @@ workflow PRE_QUANTIFICATION {
         ch_proceeding_idx
         aligned_mzml = OPENMS_MAPRTTRANSFORMERMZML.out.aligned
         psms_outcome = OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
-
 }

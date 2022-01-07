@@ -12,11 +12,11 @@ workflow PREDICT_CLASS1 {
         mztab
         peptides_class_1_alleles
         ch_vcf_from_sheet
-       
+
     main:
         ch_versions = Channel.empty()
         ch_predicted_possible_neoepitopes = Channel.empty()
-        
+
         // If specified predict peptides using MHCFlurry
         MHCFLURRY_PREDICTPEPTIDESCLASS1(
             mztab

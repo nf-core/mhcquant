@@ -83,7 +83,7 @@ class WorkflowMhcquant {
     //
     private static void enabledFDRWarn(log) {
         log.warn "================================================================================================\n" +
-            "  Klammer was specified, but description of correct features was still 0\n."+ 
+            "  Klammer was specified, but description of correct features was still 0\n."+
             "  Please provide a description of correct features greater than 0.\n" +
             "  Klammer has been turned off!\n" +
             "======================================================================================================"

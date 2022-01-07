@@ -22,7 +22,7 @@ process GENERATE_PROTEINS_FROM_VCF {
         variants2fasta.py -v $vcf \\
             -f $fasta \\
             -o ${meta.sample}_${prefix}.fasta \\
-            $args 
+            $args
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

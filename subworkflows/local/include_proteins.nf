@@ -7,7 +7,7 @@ include { GENERATE_PROTEINS_FROM_VCF }                                      from
 workflow INCLUDE_PROTEINS {
     take:
         input_fasta
-       
+
     main:
         ch_versions = Channel.empty()
 

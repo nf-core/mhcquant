@@ -16,10 +16,10 @@ workflow PREDICT_CLASS2 {
         mztab
         peptides_class_2_alleles
         ch_vcf_from_sheet
-       
+
     main:
         ch_versions = Channel.empty()
-        ch_predicted_possible_neoepitopes = Channel.empty() 
+        ch_predicted_possible_neoepitopes = Channel.empty()
 
         // Preprocess found peptides for MHCNuggets prediction class 2
         MHCNUGGETS_PEPTIDESCLASS2PRE(mztab)

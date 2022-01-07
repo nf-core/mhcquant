@@ -233,7 +233,7 @@ workflow MHCQUANT {
         PREDICT_CLASS1 (
             POST_QUANTIFICATION.out.mztab,
             peptides_class_1_alleles,
-            INCLUDE_PROTEINS.out.ch_vcf_from_sheet
+            ch_vcf_from_sheet
         )
         ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.first().ifEmpty(null))
         ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
@@ -248,20 +248,20 @@ workflow MHCQUANT {
         PREDICT_CLASS2 (
             POST_QUANTIFICATION.out.mztab,
             peptides_class_2_alleles,
-            INCLUDE_PROTEINS.out.ch_vcf_from_sheet
+            ch_vcf_from_sheet
         )
         ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.first().ifEmpty(null))
         ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
     } else {
-        ch_predicted_possible_neoepitopes_II = Channel.empty()        
+        ch_predicted_possible_neoepitopes_II = Channel.empty()
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
     //
     // SUBWORKFLOW: Predict retention time
     //
     if ( params.predict_RT ) {
-        PREDICT_RT ( 
-            filter_q_value.map{ it -> [it[1], it[2]] }, 
+        PREDICT_RT (
+            filter_q_value.map{ it -> [it[1], it[2]] },
             ch_predicted_possible_neoepitopes,
             ch_predicted_possible_neoepitopes_II
         )
