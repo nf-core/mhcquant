@@ -11,9 +11,9 @@ process PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES {
         tuple val(meta), val(alleles), path(vcf)
 
     output:
-        tuple val(meta), path("*.csv")        , emit: csv
-        tuple val(meta), path("${prefix}.txt"), emit: txt
-        path "versions.yml"                   , emit: versions
+        tuple val(meta), path("*.csv"), emit: csv
+        tuple val(meta), path("*.txt"), emit: txt
+        path "versions.yml"           , emit: versions
 
     script:
         def prefix           = task.ext.suffix ? "${meta}_${task.ext.suffix}" : "${meta}_vcf_neoepitopes_class2"
