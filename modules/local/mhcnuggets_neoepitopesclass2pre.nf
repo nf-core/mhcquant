@@ -11,14 +11,16 @@ process MHCNUGGETS_NEOEPITOPESCLASS2PRE {
         tuple val(meta), path(neoepitopes)
 
     output:
-        tuple val(meta), path("*${prefix}"), emit: preprocessed
+        tuple val(meta), path("*.csv")     , emit: preprocessed
         path "versions.yml"                , emit: versions
 
     script:
         def prefix           = task.ext.suffix ? "${meta}_${task.ext.suffix}" : "${meta}_mhcnuggets_preprocessed"
 
         """
-        preprocess_neoepitopes_mhcnuggets.py --neoepitopes $neoepitopes --output ${prefix}
+        preprocess_neoepitopes_mhcnuggets.py \\
+            --neoepitopes $neoepitopes \\
+            --output ${prefix}.csv
 
         cat <<-END_VERSIONS > versions.yml
         ${task.process}:
