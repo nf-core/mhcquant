@@ -16,14 +16,15 @@ process OPENMS_TEXTEXPORTER {
 
     script:
         def prefix           = task.ext.suffix ? "${meta.id}_${task.ext.suffix}" : "${meta.id}"
+        def args             = task.ext.args  ?: ''
 
         """
         TextExporter -in $consensus_resolved \\
             -out ${prefix}.tsv \\
             -threads $task.cpus \\
             -id:add_hit_metavalues 0 \\
-            -id:add_metavalues 0 \\
-            -id:peptides_only
+            -id:peptides_only \\
+            $args
 
         cat <<-END_VERSIONS > versions.yml
         ${task.process}:
