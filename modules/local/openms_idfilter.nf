@@ -16,9 +16,6 @@ process OPENMS_IDFILTER {
 
     script:
         def whitelist        = "$peptide_filter"
-
-
-
         def prefix           = task.ext.suffix ? "${meta.id}_-_${idxml.baseName}_${task.ext.suffix}" : "${meta.id}_-_${idxml.baseName}_filtered"
         def args             = task.ext.args  ?: ''
 
