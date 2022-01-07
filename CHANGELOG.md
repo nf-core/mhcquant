@@ -14,7 +14,7 @@
 - Changed parameters in the nextflow_schema.json to be in coherence with the nextflow.config
 - Error that was raised in generate_proteins_from_vcf
 - Problems that were detected in predict_possible_neoepitopes and predict_possible_class_2_neoepitopes
-- Error that occured in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
+- Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
 
 ### `Dependencies`
 
