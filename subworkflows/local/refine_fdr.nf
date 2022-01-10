@@ -1,28 +1,16 @@
 /*
  * Perform an additional step where the process are collected
- * that are called when the paramater "refine_fdr_on_predicted_subset" is provided
+ * that are called when the parameter "refine_fdr" is provided
  */
 
-params.exporter_prec_options  = [:]
-params.exporter_psm_options  = [:]
-params.percolator_adapter_refine_options = [:]
-params.whitelist_filter_options = [:]
-params.filter_options = [:]
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../../modules/local/openms_mztabexporter'
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../../modules/local/openms_mztabexporter'
+include { MHCFLURRY_PREDICTPSMS }                            from '../../modules/local/mhcflurry_predictpsms'
+include { OPENMS_PERCOLATORADAPTER }                         from '../../modules/local/openms_percolatoradapter'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../../modules/local/openms_idfilter'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../../modules/local/openms_idfilter'
 
-def openms_mztab_exporter_prec_options = params.exporter_prec_options.clone()
-def openms_mztab_exporter_psm_options = params.exporter_psm_options.clone()
-def openms_percolator_adapter_options = params.percolator_adapter_refine_options.clone()
-def openms_id_filter_psms_options = params.whitelist_filter_options.clone()
-def openms_id_filter_qvalue_options = params.filter_options.clone()
-
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../../modules/local/openms_mztabexporter'                                       addParams( options: openms_mztab_exporter_prec_options )
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../../modules/local/openms_mztabexporter'                                       addParams( options: openms_mztab_exporter_psm_options )
-include { MHCFLURRY_PREDICTPSMS }                            from '../../modules/local/mhcflurry_predictpsms'                                      addParams( options: [:] )
-include { OPENMS_PERCOLATORADAPTER }                         from '../../modules/local/openms_percolatoradapter'                                   addParams( options: openms_percolator_adapter_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../../modules/local/openms_idfilter'                                            addParams( options: openms_id_filter_psms_options )
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../../modules/local/openms_idfilter'                                            addParams( options: openms_id_filter_qvalue_options )
-
-workflow REFINE_FDR_ON_PREDICTED_SUBSET {
+workflow REFINE_FDR {
     // Define the input parameters
     take:
         filtered_perc_output
@@ -55,6 +43,7 @@ workflow REFINE_FDR_ON_PREDICTED_SUBSET {
         ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         // Filter results by refined fdr
         OPENMS_IDFILTER_REFINED(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)]})
+        //TODO: does this needs to overwrite the tsv files as well?
         ch_versions = ch_versions.mix(OPENMS_IDFILTER_REFINED.out.versions)
     emit:
         // Define the information that is returned by this workflow

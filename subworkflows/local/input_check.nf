@@ -2,24 +2,22 @@
 // Check input samplesheet and get read channels
 //
 
-params.options = [:]
-
-include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check' addParams(options: [:])
+include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
 
 workflow INPUT_CHECK {
     take:
-        samplesheet // file: /path/to/samplesheet.csv
+    samplesheet // file: /path/to/samplesheet.csv
 
     main:
-        SAMPLESHEET_CHECK ( samplesheet )
+    SAMPLESHEET_CHECK ( samplesheet )
         .csv
         .splitCsv ( header:true, sep:"\t" )
         .map { get_samplesheet_paths(it) }
         .set { reads }
 
     emit:
-        reads // channel: [ val(meta), [ reads ] ]
-        versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
+    reads                                     // channel: [ val(meta), [ reads ] ]
+    versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
 // Function to get list of [ meta, filenames ]
