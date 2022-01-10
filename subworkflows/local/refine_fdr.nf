@@ -43,7 +43,6 @@ workflow REFINE_FDR {
         ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         // Filter results by refined fdr
         OPENMS_IDFILTER_REFINED(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)]})
-        //TODO: does this needs to overwrite the tsv files as well?
         ch_versions = ch_versions.mix(OPENMS_IDFILTER_REFINED.out.versions)
     emit:
         // Define the information that is returned by this workflow

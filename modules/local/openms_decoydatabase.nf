@@ -15,7 +15,7 @@ process OPENMS_DECOYDATABASE {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${fasta.baseName}_${task.ext.suffix}" : "${fasta.baseName}_decoy"
+        def prefix           = task.ext.prefix ?: "${fasta.baseName}_decoy"
 
         """
         DecoyDatabase -in $fasta \\

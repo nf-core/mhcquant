@@ -15,7 +15,7 @@ process OPENMS_PEAKPICKERHIRES {
         path "versions.yml"            , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${mzml.baseName}_${task.ext.suffix}" : "${mzml.baseName}"
+        def prefix           = task.ext.prefix ?: "${mzml.baseName}"
 
         """
         PeakPickerHiRes -in $mzml \\

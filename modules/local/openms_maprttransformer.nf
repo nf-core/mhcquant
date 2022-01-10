@@ -15,12 +15,13 @@ process OPENMS_MAPRTTRANSFORMER {
         path "versions.yml"                 , emit: versions
 
     script:
+        def prefix           = task.ext.prefix ?: "${meta.id}_aligned"
         def fileExt          = alignment_file.collect { it.name.tokenize("\\.")[1] }.join(' ')
 
         """
         MapRTTransformer -in $alignment_file \\
             -trafo_in $trafoxml \\
-            -out ${meta.id}_aligned.${fileExt} \\
+            -out ${prefix}.${fileExt} \\
             -threads $task.cpus
 
         cat <<-END_VERSIONS > versions.yml

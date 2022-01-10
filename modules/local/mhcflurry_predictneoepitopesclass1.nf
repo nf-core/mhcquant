@@ -15,7 +15,7 @@ process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
         path "versions.yml"           , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${neoepitopes}_${meta}_${task.ext.suffix}" : "${neoepitopes}_${meta}_predicted_neoepitopes_class_1"
+        def prefix           = task.ext.suffix ?: "${neoepitopes}_${meta}_predicted_neoepitopes_class_1"
 
         """
         mhcflurry-downloads --quiet fetch models_class1

@@ -15,8 +15,8 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${merged.baseName}_${task.ext.suffix}" : "${merged.baseName}_psm"
-        def args             = task.ext.args  ?: ''
+        def prefix           = task.ext.prefix ?: "${merged.baseName}_psm"
+        def args             = task.ext.args ?: ''
 
         """
         PSMFeatureExtractor -in $merged \\

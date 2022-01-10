@@ -15,7 +15,7 @@ process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
         path "versions.yml"           , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.id}_${task.ext.suffix}" : "${meta.id}_predicted_peptides_class_1"
+        def prefix           = task.ext.suffix ?: "${meta.id}_predicted_peptides_class_1"
 
         """
         mhcflurry-downloads --quiet fetch models_class1

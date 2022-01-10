@@ -15,7 +15,7 @@ process OPENMS_IDCONFLICTRESOLVER {
         path "versions.yml"                    , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.id}_${task.ext.suffix}" : "${meta.id}_resolved"
+        def prefix           = task.ext.prefix ?: "${meta.id}_resolved"
 
         """
         IDConflictResolver -in $consensus \\

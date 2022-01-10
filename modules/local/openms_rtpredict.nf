@@ -15,7 +15,7 @@ process OPENMS_RTPREDICT {
         path "versions.yml"           , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.sample}_${task.ext.suffix}" : "${meta.sample}_RTpredicted"
+        def prefix           = task.ext.prefix ?: "${meta.sample}_RTpredicted"
 
         """
         RTPredict -in_id $idxml \\

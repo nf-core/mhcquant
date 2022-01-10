@@ -15,7 +15,7 @@ process OPENMS_IDMERGER {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.sample}_${meta.condition}_${task.ext.suffix}" : "${meta.sample}_${meta.condition}_all_ids_merged"
+        def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.condition}_all_ids_merged"
 
         """
         IDMerger -in $aligned \\

@@ -15,7 +15,7 @@ process OPENMS_THERMORAWFILEPARSER {
         path "versions.yml"            , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${rawfile.baseName}_${task.ext.suffix}" : "${rawfile.baseName}"
+        def prefix           = task.ext.prefix ?: "${rawfile.baseName}"
 
         """
         ThermoRawFileParser.sh -i=$rawfile \\

@@ -15,7 +15,7 @@ process OPENMS_COMETADAPTER {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${mzml.baseName}_${task.ext.suffix}" : "${mzml.baseName}"
+        def prefix           = task.ext.prefix ?: "${mzml.baseName}"
         def args             = task.ext.args  ?: ''
 
         def mods             = params.fixed_mods != " " ? "-fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")}" : ""

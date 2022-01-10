@@ -16,7 +16,7 @@ process PREDICT_POSSIBLE_CLASS_2_NEOEPITOPES {
         path "versions.yml"           , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta}_${task.ext.suffix}" : "${meta}_vcf_neoepitopes_class2"
+        def prefix           = task.ext.prefix ?: "${meta}_vcf_neoepitopes_class2"
 
         """
         vcf_neoepitope_predictor.py -t ${params.variant_annotation_style} \\
