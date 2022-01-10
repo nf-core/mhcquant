@@ -15,7 +15,7 @@ process OPENMS_MZTABEXPORTER {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.sample}_${meta.condition}_${task.ext.suffix}" : "${meta.sample}_${meta.condition}"
+        def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.condition}"
         def args             = task.ext.args  ?: ''
 
         """

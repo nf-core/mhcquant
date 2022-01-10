@@ -16,7 +16,7 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
         path "versions.yml"                    , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.id}_${task.ext.suffix}" : "${meta.id}_all_features_merged"
+        def prefix           = task.ext.prefix ?: "${meta.id}_all_features_merged"
 
         """
         FeatureLinkerUnlabeledKD -in $features \\

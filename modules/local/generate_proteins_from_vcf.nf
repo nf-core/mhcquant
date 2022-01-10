@@ -15,7 +15,7 @@ process GENERATE_PROTEINS_FROM_VCF {
         path "versions.yml"           , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${fasta.baseName}_${task.ext.suffix}" : "${fasta.baseName}_added_vcf"
+        def prefix           = task.ext.prefix ?: "${fasta.baseName}_added_vcf"
         def args             = task.ext.args  ?: ''
 
         """

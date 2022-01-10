@@ -15,7 +15,7 @@ process MHCNUGGETS_PREDICTPEPTIDESCLASS2 {
         path "versions.yml"               , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.sample}_${task.ext.suffix}_class_2" : "${meta.sample}_predicted_peptides_class_2"
+        def prefix           = task.ext.prefix ?: "${meta.sample}_predicted_peptides_class_2"
 
         """
         mhcnuggets_predict_peptides.py --peptides $peptides \\

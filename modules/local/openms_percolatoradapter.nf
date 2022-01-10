@@ -15,7 +15,7 @@ process OPENMS_PERCOLATORADAPTER {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.id}_${task.ext.suffix}" : "${meta.id}"
+        def prefix           = task.ext.prefix ?: "${meta.id}"
         def args             = task.ext.args  ?: ''
         def klammer          = (params.description_correct_features > 0 && params.klammer) ? "-klammer" : ""
 

@@ -15,7 +15,7 @@ process OPENMS_RTMODEL {
         path "versions.yml"                                                                   , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.sample}_${task.ext.suffix}" : "${meta.sample}"
+        def prefix           = task.ext.prefix ?: "${meta.sample}"
 
         """
         RTModel -in $rt_training \\

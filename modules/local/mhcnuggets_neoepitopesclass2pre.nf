@@ -15,7 +15,7 @@ process MHCNUGGETS_NEOEPITOPESCLASS2PRE {
         path "versions.yml"                , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta}_${task.ext.suffix}" : "${meta}_mhcnuggets_preprocessed"
+        def prefix           = task.ext.prefix ?: "${meta}_mhcnuggets_preprocessed"
 
         """
         preprocess_neoepitopes_mhcnuggets.py \\

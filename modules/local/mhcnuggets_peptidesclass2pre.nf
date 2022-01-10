@@ -16,7 +16,7 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
         path "versions.yml"                       , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.sample}_${task.ext.suffix}_peptides" : "${meta.sample}_preprocessed_mhcnuggets_peptides"
+        def prefix           = task.ext.prefix ?: "${meta.sample}_preprocessed_mhcnuggets_peptides"
 
         """
         preprocess_peptides_mhcnuggets.py --mztab $mztab \\

@@ -15,7 +15,7 @@ process OPENMS_FALSEDISCOVERYRATE  {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${idxml.baseName}_${task.ext.suffix}" : "${idxml.baseName}_fdr"
+        def prefix           = task.ext.prefix ?: "${idxml.baseName}_fdr"
 
         """
         FalseDiscoveryRate -in $idxml \\

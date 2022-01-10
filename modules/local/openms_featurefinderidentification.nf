@@ -15,7 +15,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         path "versions.yml"                  , emit: versions
 
     script:
-        def prefix           = task.ext.suffix ? "${meta.sample}_${task.ext.suffix}" : "${meta.sample}_${meta.id}"
+        def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.id}"
 
         if (!params.quantification_fdr){
             arguments = "-id $id_quant"
