@@ -1,12 +1,32 @@
 # nf-core/mhcquant: Changelog
 
+## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2021/mm/dd
+
+### `Added`
+
+- Included the newest nf-core template (version 2.2)
+- Adjustment of the README, including all contributors
+- Inclusion of the PSMs files (tsv format) per replicates in `results/PSMs`
+- Include check in WorkflowMhcquant, to determine if the allele and vcf sheet has been provided under specific circumstances
+
+### `Fixed`
+
+- Changed parameters in the nextflow_schema.json to be in coherence with the nextflow.config
+- Error that was raised in generate_proteins_from_vcf
+- Problems that were detected in predict_possible_neoepitopes and predict_possible_class_2_neoepitopes
+- Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.1.0 nf-core/mhcquant "Olive Tin Hamster" - 2021/12/09
 
 ### `Added`
 
 - Inclusion of assets/schema_input.json
 - Added the multiQC again to report the versions
-- MHCquant parameters are now directly assigned to the argument of the
+- MHCquant parameters are now directly assigned to the argument of the process
 
 ### `Fixed`
 

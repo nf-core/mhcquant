@@ -197,17 +197,15 @@ def main():
         #generate proteins
         proteins = generate_proteins_from_transcripts(transcripts)
 
-        print(proteins)
-
         #write fasta file
-        with open(args.output.replace('.fasta','_vcf.fasta'), "w") as f:
+        with open(args.output, "w") as f:
             for p in proteins:
                 f.write('>' + str(p.transcript_id) + '|' + str(p.vars) + '_var_' + '\n')
                 f.write(str(p)+ '\n')
 
 
         #concatenate fasta file with fasta reference
-        op=open(args.output.replace('.fasta','_vcf.fasta'))
+        op=open(args.output)
         opr1=op.read()
         op.close()
 
