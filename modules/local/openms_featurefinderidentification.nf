@@ -16,12 +16,13 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
     script:
         def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.id}"
+        def arguments        = params.quantification_fdr ? "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}" : "-id $id_quant"
 
-        if (!params.quantification_fdr){
-            arguments = "-id $id_quant"
-        } else {
-            arguments = "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}"
-        }
+        //if (!params.quantification_fdr){
+        //    arguments = "-id $id_quant"
+        //} else {
+        //    arguments = "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}"
+        //}
 
         """
         FeatureFinderIdentification -in $mzml \\
@@ -30,7 +31,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
             ${arguments}
 
         cat <<-END_VERSIONS > versions.yml
-        ${task.process}:
+        "${task.process}":
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
         END_VERSIONS
         """

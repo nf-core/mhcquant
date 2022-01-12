@@ -22,7 +22,7 @@ process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
         mhcflurry_neoepitope_binding_prediction.py '$allotypes' ${prefix}.csv
 
         cat <<-END_VERSIONS > versions.yml
-        ${task.process}:
+        "${task.process}":
             mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )
         END_VERSIONS
         """

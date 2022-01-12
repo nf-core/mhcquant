@@ -27,7 +27,7 @@ process OPENMS_PERCOLATORADAPTER {
             $args
 
         cat <<-END_VERSIONS > versions.yml
-        ${task.process}:
+        "${task.process}":
             openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
         END_VERSIONS
         """

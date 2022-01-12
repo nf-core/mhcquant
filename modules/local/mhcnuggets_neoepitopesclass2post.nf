@@ -20,7 +20,7 @@ process MHCNUGGETS_NEOEPITOPESCLASS2POST {
         postprocess_neoepitopes_mhcnuggets.py --input $predicted --neoepitopes $neoepitopes
 
         cat <<-END_VERSIONS > versions.yml
-        ${task.process}:
+        "${task.process}":
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
         END_VERSIONS
         """
