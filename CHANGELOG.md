@@ -13,10 +13,13 @@
 
 - Changed parameters in the nextflow_schema.json to be in coherence with the nextflow.config
 - Error that was raised in generate_proteins_from_vcf
-- Problems that were detected in predict_possible_neoepitopes and predict_possible_class_2_neoepitopes
+- Problems that were detected in predict_possible_class1_neoepitopes and predict_possible_class2_neoepitopes
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
 
 ### `Dependencies`
+| Dependency            | Old version | New version |
+| --------------------- | ----------- | ----------- |
+| `fred2`              | 2.0.6       | 2.0.7       |
 
 ### `Deprecated`
 
