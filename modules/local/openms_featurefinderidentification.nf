@@ -18,12 +18,6 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.id}"
         def arguments        = params.quantification_fdr ? "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}" : "-id $id_quant"
 
-        //if (!params.quantification_fdr){
-        //    arguments = "-id $id_quant"
-        //} else {
-        //    arguments = "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}"
-        //}
-
         """
         FeatureFinderIdentification -in $mzml \\
             -out ${prefix}.featureXML \\
