@@ -17,6 +17,7 @@
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
 
 ### `Dependencies`
+
 | Dependency            | Old version | New version |
 | --------------------- | ----------- | ----------- |
 | `fred2`              | 2.0.6       | 2.0.7       |
