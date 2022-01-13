@@ -121,7 +121,7 @@ workflow MHCQUANT {
     if ( params.include_proteins_from_vcf ) {
         // Include the proteins from the vcf file to the fasta file
         INCLUDE_PROTEINS( input_fasta )
-        ch_versions = ch_versions.mix(INCLUDE_PROTEINS.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(INCLUDE_PROTEINS.out.versions.ifEmpty(null))
         ch_fasta_file = INCLUDE_PROTEINS.out.ch_fasta_file
         ch_vcf_from_sheet = INCLUDE_PROTEINS.out.ch_vcf_from_sheet
     } else {
@@ -132,7 +132,7 @@ workflow MHCQUANT {
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta_file)
-        ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions.ifEmpty(null))
         ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy
     } else {
         ch_decoy_db = ch_fasta_file
@@ -140,11 +140,11 @@ workflow MHCQUANT {
 
     // Raw file conversion
     OPENMS_THERMORAWFILEPARSER(ms_files.raw)
-    ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.ifEmpty(null))
     if ( params.run_centroidisation ) {
         // Optional: Run Peak Picking as Preprocessing
         OPENMS_PEAKPICKERHIRES(ms_files.mzml)
-        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.ifEmpty(null))
         ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
     } else {
         ch_mzml_file = ms_files.mzml
@@ -154,10 +154,10 @@ workflow MHCQUANT {
         OPENMS_THERMORAWFILEPARSER.out.mzml
                 .mix(ch_mzml_file)
                 .join(ch_decoy_db, remainder:true))
-    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
-    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
     //
     // SUBWORKFLOW: Pre-process step for the quantification of the data
@@ -170,7 +170,7 @@ workflow MHCQUANT {
             OPENMS_THERMORAWFILEPARSER.out.mzml
         )
         ch_proceeding_idx = PRE_QUANTIFICATION.out.ch_proceeding_idx
-        ch_versions = ch_versions.mix(PRE_QUANTIFICATION.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(PRE_QUANTIFICATION.out.versions.ifEmpty(null))
     } else {
         ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
             .map {
@@ -182,18 +182,17 @@ workflow MHCQUANT {
 
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_proceeding_idx)
-    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
     // Extract PSM features for Percolator
     OPENMS_PSMFEATUREEXTRACTOR(OPENMS_IDMERGER.out.idxml)
-    ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
     // Run Percolator
     OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-    ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
     ch_percolator_adapter_outcome = OPENMS_PERCOLATORADAPTER.out.idxml
-    // }
     // Filter by percolator q-value
     OPENMS_IDFILTER_Q_VALUE(ch_percolator_adapter_outcome.flatMap { it -> [tuple(it[0], it[1], null)]})
-    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
 
     //
     // SUBWORKFLOW: Refine the FDR values on the predicted subset
@@ -205,7 +204,7 @@ workflow MHCQUANT {
             OPENMS_PSMFEATUREEXTRACTOR.out.idxml,
             peptides_class_1_alleles
         )
-        ch_versions = ch_versions.mix(REFINE_FDR.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(REFINE_FDR.out.versions.ifEmpty(null))
         // Define the outcome of the paramer to a fixed variable
         filter_q_value = REFINE_FDR.out.filter_refined_q_value.flatMap { it -> [ tuple(it[0].sample, it[0], it[1]) ] }
     } else {
@@ -222,7 +221,7 @@ workflow MHCQUANT {
             PRE_QUANTIFICATION.out.aligned_mzml,
             filter_q_value
             )
-        ch_versions = ch_versions.mix(POST_QUANTIFICATION.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(POST_QUANTIFICATION.out.versions.ifEmpty(null))
     }
 
     //
@@ -234,7 +233,7 @@ workflow MHCQUANT {
             peptides_class_1_alleles,
             ch_vcf_from_sheet
         )
-        ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.ifEmpty(null))
         ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
     } else {
         ch_predicted_possible_neoepitopes = Channel.empty()
@@ -249,7 +248,7 @@ workflow MHCQUANT {
             peptides_class_2_alleles,
             ch_vcf_from_sheet
         )
-        ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.ifEmpty(null))
         ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
     } else {
         ch_predicted_possible_neoepitopes_II = Channel.empty()
