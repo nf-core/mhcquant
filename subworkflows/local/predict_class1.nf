@@ -2,10 +2,10 @@
  * Perform the class 1 prediction when the parameter --predict_class_1 is provided and --skip_quantification is not
  */
 
-include { MHCFLURRY_PREDICTPEPTIDESCLASS1 }                                 from '../../modules/local/mhcflurry_predictpeptidesclass1'
-include { PREDICT_POSSIBLE_CLASS1_NEOEPITOPES }                             from '../../modules/local/predict_possible_class1_neoepitopes'
-include { RESOLVE_FOUND_CLASS1_NEOEPITOPES }                                from '../../modules/local/resolve_found_class1_neoepitopes'
-include { MHCFLURRY_PREDICTNEOEPITOPESCLASS1 }                              from '../../modules/local/mhcflurry_predictneoepitopesclass1'
+include { MHCFLURRY_PREDICTPEPTIDESCLASS1 }                                     from '../../modules/local/mhcflurry_predictpeptidesclass1'
+include { PREDICT_POSSIBLE_NEOEPITOPES as PREDICT_POSSIBLE_CLASS1_NEOEPITOPES } from '../../modules/local/predict_possible_neoepitopes'
+include { RESOLVE_FOUND_NEOEPITOPES as RESOLVE_FOUND_CLASS1_NEOEPITOPES }       from '../../modules/local/resolve_found_neoepitopes'
+include { MHCFLURRY_PREDICTNEOEPITOPESCLASS1 }                                  from '../../modules/local/mhcflurry_predictneoepitopesclass1'
 
 workflow PREDICT_CLASS1 {
     take:

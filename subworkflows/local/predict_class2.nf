@@ -2,14 +2,14 @@
  * Perform the class 2 prediction when the parameter --predict_class_2 is provided and --skip_quantification is not
  */
 
-include { MHCNUGGETS_PEPTIDESCLASS2PRE }                                    from '../../modules/local/mhcnuggets_peptidesclass2pre'
-include { MHCNUGGETS_PREDICTPEPTIDESCLASS2 }                                from '../../modules/local/mhcnuggets_predictpeptidesclass2'
-include { MHCNUGGETS_PEPTIDESCLASS2POST }                                   from '../../modules/local/mhcnuggets_peptidesclass2post'
-include { PREDICT_POSSIBLE_CLASS2_NEOEPITOPES }                             from '../../modules/local/predict_possible_class2_neoepitopes'
-include { RESOLVE_FOUND_CLASS2_NEOEPITOPES }                                from '../../modules/local/resolve_found_class2_neoepitopes'
-include { MHCNUGGETS_NEOEPITOPESCLASS2PRE }                                 from '../../modules/local/mhcnuggets_neoepitopesclass2pre'
-include { MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 }                             from '../../modules/local/mhcnuggets_predictneoepitopesclass2'
-include { MHCNUGGETS_NEOEPITOPESCLASS2POST }                                from '../../modules/local/mhcnuggets_neoepitopesclass2post'
+include { MHCNUGGETS_PEPTIDESCLASS2PRE }                                        from '../../modules/local/mhcnuggets_peptidesclass2pre'
+include { MHCNUGGETS_PREDICTPEPTIDESCLASS2 }                                    from '../../modules/local/mhcnuggets_predictpeptidesclass2'
+include { MHCNUGGETS_PEPTIDESCLASS2POST }                                       from '../../modules/local/mhcnuggets_peptidesclass2post'
+include { PREDICT_POSSIBLE_NEOEPITOPES as PREDICT_POSSIBLE_CLASS2_NEOEPITOPES } from '../../modules/local/predict_possible_neoepitopes'
+include { RESOLVE_FOUND_NEOEPITOPES as RESOLVE_FOUND_CLASS2_NEOEPITOPES }       from '../../modules/local/resolve_found_neoepitopes'
+include { MHCNUGGETS_NEOEPITOPESCLASS2PRE }                                     from '../../modules/local/mhcnuggets_neoepitopesclass2pre'
+include { MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 }                                 from '../../modules/local/mhcnuggets_predictneoepitopesclass2'
+include { MHCNUGGETS_NEOEPITOPESCLASS2POST }                                    from '../../modules/local/mhcnuggets_neoepitopesclass2post'
 
 workflow PREDICT_CLASS2 {
     take:

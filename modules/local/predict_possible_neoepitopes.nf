@@ -1,4 +1,4 @@
-process PREDICT_POSSIBLE_CLASS1_NEOEPITOPES {
+process PREDICT_POSSIBLE_NEOEPITOPES {
     tag "$meta"
     label 'process_low'
 
@@ -16,13 +16,14 @@ process PREDICT_POSSIBLE_CLASS1_NEOEPITOPES {
         path "versions.yml"           , emit: versions
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta}_vcf_neoepitopes_class1"
+        def prefix           = task.ext.prefix ?: "${meta}_vcf_neoepitopes"
 
         """
         vcf_neoepitope_predictor.py \\
             -t ${params.variant_annotation_style} \\
             -r ${params.variant_reference} \\
-            -a '$alleles' -minl ${params.peptide_min_length} \\
+            -a '$alleles' \\
+            -minl ${params.peptide_min_length} \\
             -maxl ${params.peptide_max_length} \\
             -v $vcf \\
             -o ${prefix}.csv
