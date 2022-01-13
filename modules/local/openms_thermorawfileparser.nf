@@ -18,9 +18,10 @@ process OPENMS_THERMORAWFILEPARSER {
         def prefix           = task.ext.prefix ?: "${rawfile.baseName}"
 
         """
-        ThermoRawFileParser.sh -i=$rawfile \\
-            -f=2 \\
-            -b=${prefix}.mzML
+        ThermoRawFileParser.sh \\
+            -i $rawfile \\
+            -f 2 \\
+            -b ${prefix}.mzML
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
