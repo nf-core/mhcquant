@@ -197,29 +197,24 @@ def main():
         #generate proteins
         proteins = generate_proteins_from_transcripts(transcripts)
 
-        print(proteins)
-
         #write fasta file
-        with open(args.output.replace('.fasta','_vcf.fasta'), "w") as f:
+        with open(args.output, "w") as f:
             for p in proteins:
                 f.write('>' + str(p.transcript_id) + '|' + str(p.vars) + '_var_' + '\n')
                 f.write(str(p)+ '\n')
 
 
         #concatenate fasta file with fasta reference
-        op=open(args.output.replace('.fasta','_vcf.fasta'))
-        opr1=op.read()
-        op.close()
+        with open(args.output) as op:
+            opr1 = op.read()
 
-        op=open(args.fasta_ref)
-        opr2=op.read()
-        op.close()
+        with open(args.fasta_ref) as op:
+            opr2 = op.read()
 
-        concat=opr1+opr2
+        concat = opr1+opr2
 
-        op=open(args.output,'w')
-        op.write(concat)
-        op.close()
+        with open(args.output, "w") as op:
+            op.write(concat)
 
     else:
         sys.stderr.write("At least a vcf file or a protein id file has to be provided.\n")

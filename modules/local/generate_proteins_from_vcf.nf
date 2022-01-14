@@ -1,42 +1,31 @@
-// Import generic module functions
-include { initOptions; saveFiles } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process GENERATE_PROTEINS_FROM_VCF {
     tag "$meta"
     label 'process_medium'
 
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'.', publish_id:meta.id) }
-
-    conda (params.enable_conda ? "bioconda::fred2=2.0.6 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/mulled-v2-689ae0756dd82c61400782baaa8a7a1c2289930d:a9e10ca22d4cbcabf6b54f0fb5d766ea16bb171e-0"
-    } else {
-        container "quay.io/biocontainers/mulled-v2-689ae0756dd82c61400782baaa8a7a1c2289930d:a9e10ca22d4cbcabf6b54f0fb5d766ea16bb171e-0"
-    }
+    conda (params.enable_conda ? "bioconda::fred2=2.0.7 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2" : null)
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-c3f301504f7fa2e7bf81c3783de19a9990ea3001:12b1b9f040fd92a80629d58f8a558dde4820eb15-0' :
+        'quay.io/biocontainers/mulled-v2-c3f301504f7fa2e7bf81c3783de19a9990ea3001:12b1b9f040fd92a80629d58f8a558dde4820eb15-0' }"
 
     input:
         tuple val(meta), path(fasta), path(vcf)
 
     output:
         tuple val(meta), path("*.fasta"), emit: vcf_fasta
-        path  "*.version.txt"           , emit: version
+        path "versions.yml"           , emit: versions
 
     script:
-        def prefix   = options.suffix ? "${fasta.baseName}_${options.suffix}" : "${fasta.baseName}_added_vcf"
+        def prefix           = task.ext.prefix ?: "${fasta.baseName}_added_vcf"
+        def args             = task.ext.args  ?: ''
 
         """
         variants2fasta.py -v $vcf \\
             -f $fasta \\
-            -o $meta.sample_${prefix}.fasta \\
-            $options.args
+            -o ${meta.sample}_${prefix}.fasta \\
+            $args
 
         cat <<-END_VERSIONS > versions.yml
-        ${getProcessName(task.process)}:
+        "${task.process}":
             fred2: \$(echo \$(python -c "import pkg_resources; print('fred2' + pkg_resources.get_distribution('Fred2').version)" | sed 's/^fred2//; s/ .*\$//'))
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
             mhcflurry: \$(echo \$(mhcflurry-predict --version 2>&1 | sed 's/^mhcflurry //; s/ .*\$//') )

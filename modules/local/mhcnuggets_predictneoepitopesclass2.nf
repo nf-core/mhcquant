@@ -1,41 +1,29 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName; getProcessName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process MHCNUGGETS_PREDICTNEOEPITOPESCLASS2 {
     tag "$meta"
     label 'process_low'
 
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:'class_2_bindings', publish_id:'class_2_bindings') }
-
-    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2--py_0" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0"
-    } else {
-        container "quay.io/biocontainers/mhcnuggets:2.3.2--py_0"
-    }
+    conda (params.enable_conda ? "bioconda::fred2=2.0.7 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2" : null)
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-c3f301504f7fa2e7bf81c3783de19a9990ea3001:12b1b9f040fd92a80629d58f8a558dde4820eb15-0' :
+        'quay.io/biocontainers/mulled-v2-c3f301504f7fa2e7bf81c3783de19a9990ea3001:12b1b9f040fd92a80629d58f8a558dde4820eb15-0' }"
 
     input:
         tuple val(meta), path(neoepitopes), val(alleles)
 
     output:
-        tuple val(meta), path("*${prefix}"), emit: csv
-        path "versions.yml"                 , emit: versions
+        tuple val(meta), path("*.csv"), emit: csv
+        path "versions.yml"           , emit: versions
 
     script:
-        def prefix = options.suffix ? "${meta}_${options.suffix}" : "${meta}_predicted_neoepitopes_class_2"
+        def prefix           = task.ext.prefix ?: "${meta}_predicted_neoepitopes_class_2"
 
         """
         mhcnuggets_predict_peptides.py --peptides $neoepitopes \\
             --alleles '$alleles' \\
-            --output ${prefix}
+            --output ${prefix}.csv
 
         cat <<-END_VERSIONS > versions.yml
-        ${getProcessName(task.process)}:
+        "${task.process}":
             mhcnuggets: \$(echo \$(python -c "import pkg_resources; print('mhcnuggets' + pkg_resources.get_distribution('mhcnuggets').version)" | sed 's/^mhcnuggets//; s/ .*\$//' ))
         END_VERSIONS
         """

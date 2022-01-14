@@ -20,11 +20,11 @@ jobs:
           access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
           compute_env: ${{ secrets.TOWER_COMPUTE_ENV }}
           pipeline: ${{ github.repository }}
-          revision: ${{ github.sha } }
+          revision: ${{ github.sha }}
           workdir: s3://${{ secrets.AWS_S3_BUCKET }}/work/mhcquant/work-${{ github.sha }}
           parameters: |
             {
               "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/mhcquant/results-${{ github.sha }}"
             }
-          profiles: test,aws_tower
+          profiles: test_full,aws_tower
           pre_run_script: 'export NXF_VER=21.10.3'
