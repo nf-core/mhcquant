@@ -1,6 +1,6 @@
 # nf-core/mhcquant: Changelog
 
-## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2021/mm/dd
+## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2021/01/14
 
 ### `Added`
 
