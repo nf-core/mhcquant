@@ -36,11 +36,11 @@ You will need to create a samplesheet with information about the samples you wou
 The `sample` identifiers have to be the same when you have multiple runs. The `Condition` identifiers can be used to further distinguish the sample groups.
 Below is an example for the same sample sequenced across 3 lanes:
 
-```console
-ID\tSample\tCondition\tReplicateFileName
-1\tWT\tA\t/path/to/MS/files/WT_A1.raw
-2\tWT\tA\t/path/to/MS/files/WT_A2.raw
-3\tWT\tA\t/path/to/MS/files/WT_A3.raw
+```tsv
+ID  Sample  Condition  ReplicateFileName
+1   WT      A    /path/to/MS/files/WT_A1.raw
+2   WT      A    /path/to/MS/files/WT_A2.raw
+3   WT      A    /path/to/MS/files/WT_A3.raw
 
 ```
 
@@ -50,20 +50,20 @@ The pipeline will auto-detect whether a sample is either a mzML or raw files usi
 
 A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
 
-```console
-ID\tSample\tCondition\tReplicateFileName
-1\tWT\tA\t/path/to/MS/files/WT_A1.raw
-2\tWT\tA\t/path/to/MS/files/WT_A2.raw
-3\tWT\tA\t/path/to/MS/files/WT_A3.raw
-4\tWT\tB\t/path/to/MS/files/WT_B1.raw
-5\tWT\tB\t/path/to/MS/files/WT_B2.raw
-6\tWT\tB\t/path/to/MS/files/WT_B3.raw
-7\tKO\tA\t/path/to/MS/files/KO_A1.raw
-8\tKO\tA\t/path/to/MS/files/KO_A2.raw
-9\tKO\tA\t/path/to/MS/files/KO_A3.raw
-10\tKO\tB\t/path/to/MS/files/KO_B1.raw
-11\tKO\tB\t/path/to/MS/files/KO_B2.raw
-12\tKO\tB\t/path/to/MS/files/KO_B3.raw
+```tsv
+ID  Sample  Condition  ReplicateFileName
+1   WT  A  /path/to/MS/files/WT_A1.raw
+2   WT  A  /path/to/MS/files/WT_A2.raw
+3   WT  A  /path/to/MS/files/WT_A3.raw
+4   WT  B  /path/to/MS/files/WT_B1.raw
+5   WT  B  /path/to/MS/files/WT_B2.raw
+6   WT  B  /path/to/MS/files/WT_B3.raw
+7   KO  A  /path/to/MS/files/KO_A1.raw
+8   KO  A  /path/to/MS/files/KO_A2.raw
+9   KO  A  /path/to/MS/files/KO_A3.raw
+10  KO  B  /path/to/MS/files/KO_B1.raw
+11  KO  B  /path/to/MS/files/KO_B2.raw
+12  KO  B  /path/to/MS/files/KO_B3.raw
 
 ```
 
