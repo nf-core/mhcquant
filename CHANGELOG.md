@@ -16,6 +16,10 @@
 - Problems that were detected in predict_possible_class1_neoepitopes and predict_possible_class2_neoepitopes
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
 
+### `Deprecated`
+
+- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
+
 ### `Dependencies`
 
 | Dependency            | Old version | New version |

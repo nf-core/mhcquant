@@ -1,24 +1,5 @@
 # nf-core/mhcquant: Usage
 
-## Table of contents
-
-- [Table of contents](#table-of-contents)
-- [Samplesheet input](#samplesheet-input)
-    - [Multiple runs of the same sample](#multiple-runs-of-the-same-sample)
-    - [Full samplesheet](#full-samplesheet)
-- [Running the pipeline](#running-the-pipeline)
-    - [Updating the pipeline](#updating-the-pipeline)
-    - [Reproducibility](#reproducibility)
-- [Core Nextflow arguments](#core-nextflow-arguments)
-    - [`-profile`](#-profile)
-    - [`-resume`](#-resume)
-- [Custom configuration](#custom-configuration)
-    - [Resource requests](#resource-requests)
-    - [Updating containers](#updating-containers)
-    - [nf-core/configs](#nf-core-configs)
-- [Running in the background](#running-in-the-background)
-- [Nextflow memory requirements](#nextflow-memory-requirements)
-
 ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/mhcquant/usage](https://nf-co.re/mhcquant/usage)
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
