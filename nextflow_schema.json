@@ -63,7 +63,7 @@
                 },
                 "skip_decoy_generation": {
                     "type": "boolean",
-                    "description": "Set depending on whether own decoy database should be used",
+                    "description": "Add this parameter when you want to skip the generation of the decoy database, the consequence is that it prevents the generation of variants and FDR refinement",
                     "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.\nOne should consider though that this option will then prevent appending variants to the database and if not using reversed decoys the subset refinement FDR option will not work."
                 }
             }
@@ -77,7 +77,7 @@
                 "pick_ms_levels": {
                     "type": "integer",
                     "default": 2,
-                    "description": "If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)"
+                    "description": "Specify the MS levels for which the peak picking is applied (unless you use `--run_centroidisation`)."
                 },
                 "run_centroidisation": {
                     "type": "boolean",
@@ -199,7 +199,7 @@
                 },
                 "remove_precursor_peak": {
                     "type": "boolean",
-                    "description": "Include precursor ions into the peptide spectrum matching",
+                    "description": "Include when you want to remove all peaks around precursor m/z,
                     "default": false
                 },
                 "spectrum_batch_size": {
