@@ -15,6 +15,7 @@
 - Error that was raised in generate_proteins_from_vcf
 - Problems that were detected in predict_possible_class1_neoepitopes and predict_possible_class2_neoepitopes
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
+- [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
 
 ### `Dependencies`
 
