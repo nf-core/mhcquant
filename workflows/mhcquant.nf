@@ -62,6 +62,11 @@ include { OPENMS_THERMORAWFILEPARSER }                                      from
 include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
+
+include { OPENMS_FALSEDISCOVERYRATE }                                       from '../modules/local/openms_falsediscoveryrate'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }                from '../modules/local/openms_idfilter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_PSMS }                 from '../modules/local/openms_textexporter'
+
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
@@ -162,12 +167,31 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Pre-process step for the quantification of the data
     //
+
+    // Calculate fdr for id based alignment
+    OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out.idxml)
+    ch_versions = ch_versions.mix(OPENMS_FALSEDISCOVERYRATE.out.versions.first().ifEmpty(null))
+    // Filter fdr for id based alignment
+    OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
+        .flatMap { it -> [tuple(it[0], it[1], null)]})
+    ch_versions = ch_versions.mix(OPENMS_IDFILTER_FOR_ALIGNMENT.out.versions.first().ifEmpty(null))
+    // Write the content to a PSMs file
+    OPENMS_TEXTEXPORTER_PSMS(
+        OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
+        .flatMap {
+            meta, idxml ->
+                ident = idxml.baseName.split('_-_')[1]
+                [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], idxml]]
+        }
+    )
+
     if(!params.skip_quantification) {
         PRE_QUANTIFICATION(
+            OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
             OPENMS_PEPTIDEINDEXER.out.idxml,
-            ch_mzml_file,
-            ms_files.mzml,
-            OPENMS_THERMORAWFILEPARSER.out.mzml
+            ms_files.mzml
+                .mix(OPENMS_THERMORAWFILEPARSER.out.mzml)
+                .mix(ch_mzml_file)
         )
         ch_proceeding_idx = PRE_QUANTIFICATION.out.ch_proceeding_idx
         ch_versions = ch_versions.mix(PRE_QUANTIFICATION.out.versions.ifEmpty(null))
@@ -217,7 +241,7 @@ workflow MHCQUANT {
     //
     if ( !params.skip_quantification) {
         POST_QUANTIFICATION (
-            PRE_QUANTIFICATION.out.psms_outcome,
+            OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
             PRE_QUANTIFICATION.out.aligned_mzml,
             filter_q_value
             )
