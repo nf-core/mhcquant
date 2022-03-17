@@ -158,11 +158,6 @@ workflow MHCQUANT {
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
- /*
-========================================================================================
-    Under construction
-========================================================================================
-*/
 
     //
     // SUBWORKFLOW: Pre-process step for the quantification of the data
@@ -184,11 +179,6 @@ workflow MHCQUANT {
             }
             .groupTuple(by: [0])
     }
- /*
-========================================================================================
-    Under construction
-========================================================================================
-*/
 
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_proceeding_idx)
