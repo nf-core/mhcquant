@@ -71,6 +71,7 @@ include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_UNQUANTIFIED }         from '../modules/local/openms_textexporter'
 include { CUSTOM_DUMPSOFTWAREVERSIONS }                                     from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 include { MULTIQC }                                                         from '../modules/nf-core/modules/multiqc/main'
 
@@ -164,10 +165,6 @@ workflow MHCQUANT {
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
-    //
-    // SUBWORKFLOW: Pre-process step for the quantification of the data
-    //
-
     // Calculate fdr for id based alignment
     OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out.idxml)
     ch_versions = ch_versions.mix(OPENMS_FALSEDISCOVERYRATE.out.versions.first().ifEmpty(null))
@@ -184,6 +181,10 @@ workflow MHCQUANT {
                 [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], idxml]]
         }
     )
+
+    //
+    // SUBWORKFLOW: Pre-process step for the quantification of the data
+    //
 
     if(!params.skip_quantification) {
         PRE_QUANTIFICATION(
@@ -246,6 +247,8 @@ workflow MHCQUANT {
             filter_q_value
             )
         ch_versions = ch_versions.mix(POST_QUANTIFICATION.out.versions.ifEmpty(null))
+    } else {
+        OPENMS_TEXTEXPORTER_UNQUANTIFIED (filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] })
     }
 
     //

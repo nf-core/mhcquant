@@ -1,6 +1,21 @@
 # nf-core/mhcquant: Changelog
 
-## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2021/01/14
+## v2.3.0 nfcore/mhcquant for "White Gold Swallow" - 2022/mm/dependency
+
+### `Added`
+
+- NF-core template update (version 2.3)
+- Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
+
+### `Fixed`
+
+- Typo in previous release date
+
+### `Dependencies`
+
+### `Deprecated`
+
+## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2022/01/14
 
 ### `Added`
 

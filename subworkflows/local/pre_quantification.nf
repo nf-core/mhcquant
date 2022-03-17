@@ -23,7 +23,7 @@ workflow PRE_QUANTIFICATION {
                     [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
                 }
             .groupTuple(by: [0])
-        // Compute alignment rt transformatio
+        // Compute alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION(ch_grouped_fdr_filtered)
         ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions.first().ifEmpty(null))
         // Intermediate step to join RT transformation files with mzml and idxml channels
