@@ -1,6 +1,6 @@
 # nf-core/mhcquant: Changelog
 
-## v2.3.0 nfcore/mhcquant for "White Gold Swallow" - 2022/mm/dependency
+## v2.3.0 nfcore/mhcquant "White Gold Swallow" - 2022/mm/dependency
 
 ### `Added`
 
