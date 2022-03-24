@@ -23,11 +23,11 @@ workflow INPUT_CHECK {
 // Function to get list of [ meta, filenames ]
 def get_samplesheet_paths(LinkedHashMap row) {
     def meta = [:]
-    meta.id             = row.ID
-    meta.sample         = row.Sample
-    meta.condition      = row.Condition
-    meta.ext            = row.FileExt
-
+    meta.id        = row.ID
+    meta.sample    = row.Sample
+    meta.condition = row.Condition
+    meta.ext       = row.FileExt
+    // add path(s) of the fastq file(s) to the meta map
     def array = []
     if (!file(row.Filename).exists()) {
         exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.Filename}"

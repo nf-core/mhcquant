@@ -2,15 +2,12 @@ name: Bug report
 description: Report something that is broken or incorrect
 labels: bug
 body:
-
   - type: markdown
     attributes:
       value: |
         Before you post this issue, please check the documentation:
-
         - [nf-core website: troubleshooting](https://nf-co.re/usage/troubleshooting)
         - [nf-core/mhcquant pipeline documentation](https://nf-co.re/mhcquant/usage)
-
   - type: textarea
     id: description
     attributes:
@@ -27,9 +24,7 @@ body:
       render: console
       placeholder: |
         $ nextflow run ...
-
         Some output where something broke
-
   - type: textarea
     id: files
     attributes:
@@ -37,7 +32,6 @@ body:
       description: |
         Please drag and drop the relevant files here. Create a `.zip` archive if the extension is not allowed.
         Your verbose log file `.nextflow.log` is often useful _(this is a hidden file in the directory where you launched the pipeline)_ as well as custom Nextflow configuration files.
-
   - type: textarea
     id: system
     attributes:

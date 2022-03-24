@@ -21,7 +21,7 @@ class NfcoreTemplate {
     //
     //  Warn if a -profile or Nextflow config has not been provided to run the pipeline
     //
-    public static void checkConfigProvided(workflow, log) {
+     public static void checkConfigProvided(workflow, log) {
         if (workflow.profile == 'standard' && workflow.configFiles.size() <= 1) {
             log.warn "[$workflow.manifest.name] You are attempting to run the pipeline without any custom configuration!\n\n" +
                     "This will be dependent on your local compute environment but can be achieved via one or more of the following:\n" +
