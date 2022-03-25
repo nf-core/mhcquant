@@ -1,4 +1,4 @@
-# ![nf-core/mhcquant](docs/images/nf-core/mhcquant_logo_light.png#gh-light-mode-only) ![nf-core/mhcquant](docs/images/nf-core/mhcquant_logo_dark.png#gh-dark-mode-only)
+# ![nf-core/mhcquant](docs/images/nf-core-mhcquant_logo_light.png#gh-light-mode-only) ![nf-core/mhcquant](docs/images/nf-core-mhcquant_logo_dark.png#gh-dark-mode-only)
 
 [![GitHub Actions CI Status](https://github.com/nf-core/mhcquant/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/mhcquant/actions?query=workflow%3A%22nf-core+CI%22)
 [![GitHub Actions Linting Status](https://github.com/nf-core/mhcquant/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/mhcquant/actions?query=workflow%3A%22nf-core+linting%22)
@@ -61,6 +61,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
                                  --allele_sheet 'alleles.tsv'
                                  --predict_class_1
                                  --refine_fdr_on_predicted_subset
+                                 --outdir ./results
    ```
 
 ## Documentation
