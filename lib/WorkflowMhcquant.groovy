@@ -53,7 +53,6 @@ class WorkflowMhcquant {
     // Print a warning when the output directory is undefined
     //
     private static void outdirWarn(log) {
-                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         log.warn "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  Results into \'./results\'.\n" +
             "  If you want to define a result directory, please use the --outdir option" +
