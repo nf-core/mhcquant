@@ -45,7 +45,7 @@ if (params.predict_class_1 || params.predict_class_2)  {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 /*
@@ -107,12 +107,10 @@ workflow MHCQUANT {
         meta, filename ->
             raw : meta.ext == 'raw'
                 return [ meta, filename ]
-            mzml :  meta.ext == 'mzml'
+            mzml : meta.ext == 'mzml'
                 return [ meta, filename ]
             other : true }
-        .set { ms_files }
-    // A warning message will be given when the format differs from the '.raw' or '.mzML' extention
-    ms_files.other.subscribe { row -> log.warn("Unknown format for entry " + row[3] + " in provided sample sheet, line will be ignored."); exit 1 }
+    .set { ms_files }
 
     // Input fasta file
     Channel.fromPath( params.fasta )

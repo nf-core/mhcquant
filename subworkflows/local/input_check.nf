@@ -9,11 +9,16 @@ workflow INPUT_CHECK {
     samplesheet // file: /path/to/samplesheet.csv
 
     main:
+    //SAMPLESHEET_CHECK ( samplesheet )
+    //    .csv
+    //    .splitCsv ( header:true, sep:"," )
+    //    .map { get_samplesheet_paths(it) }
+    //    .set { reads }
     SAMPLESHEET_CHECK ( samplesheet )
-        .csv
-        .splitCsv ( header:true, sep:"\t" )
-        .map { get_samplesheet_paths(it) }
-        .set { reads }
+     .csv
+     .splitCsv ( header:true, sep:',' )
+     .map { create_ms_channel(it) }
+     .set { reads }
 
     emit:
     reads                                     // channel: [ val(meta), [ reads ] ]
@@ -21,18 +26,20 @@ workflow INPUT_CHECK {
 }
 
 // Function to get list of [ meta, filenames ]
-def get_samplesheet_paths(LinkedHashMap row) {
+def create_ms_channel(LinkedHashMap row) {
     def meta = [:]
     meta.id        = row.ID
     meta.sample    = row.Sample
     meta.condition = row.Condition
-    meta.ext       = row.FileExt
-    // add path(s) of the fastq file(s) to the meta map
-    def array = []
-    if (!file(row.Filename).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.Filename}"
+    meta.ext       = row.Extension
+
+    // add path(s) of the data file(s) to the meta map
+    def ms_meta = []
+
+    if (!file(row.ReplicateFileName).exists()) {
+        exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.ReplicateFileName}"
     } else {
-        array = [ meta, file(row.Filename) ]
+        ms_meta = [ meta, [ file(row.ReplicateFileName) ] ]
     }
-    return array
+    return ms_meta
 }

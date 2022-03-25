@@ -44,7 +44,7 @@ jobs:
 
       - name: Run pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results
 
   test_additional_params:
     name: Run pipeline with additional params
@@ -77,5 +77,5 @@ jobs:
 
       - name: Run pipeline with additional params
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --predict_RT
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --predict_RT --outdir ./results
 #
