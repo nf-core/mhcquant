@@ -78,4 +78,5 @@ jobs:
       - name: Run pipeline with additional params
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --predict_RT --outdir ./results
+
 #

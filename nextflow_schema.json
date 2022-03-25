@@ -142,15 +142,7 @@
                     "type": "string",
                     "default": "ALL",
                     "description": "Specify which fragmentation method was used in the MS acquisition",
-                    "enum": [
-                        "ALL",
-                        "CID",
-                        "ECD",
-                        "ETD",
-                        "PQD",
-                        "HCD",
-                        "IRMPD"
-                    ]
+                    "enum": ["ALL", "CID", "ECD", "ETD", "PQD", "HCD", "IRMPD"]
                 },
                 "enzyme": {
                     "type": "string",
@@ -223,11 +215,7 @@
                     "type": "string",
                     "default": "peptide_level_fdrs",
                     "description": "Specify the level at which the false discovery rate should be computed.",
-                    "enum": [
-                        "peptide_level_fdrs",
-                        "psm-level-fdrs",
-                        "protein_level_fdrs"
-                    ]
+                    "enum": ["peptide_level_fdrs", "psm-level-fdrs", "protein_level_fdrs"]
                 },
                 "fdr_threshold": {
                     "type": "number",
@@ -312,20 +300,13 @@
                 "variant_reference": {
                     "type": "string",
                     "description": "Specify genomic reference used for variant annotation",
-                    "enum": [
-                        "GRCH37",
-                        "GRCH38"
-                    ],
+                    "enum": ["GRCH37", "GRCH38"],
                     "default": "GRCH38"
                 },
                 "variant_annotation_style": {
                     "type": "string",
                     "description": "Specify style of tool used for variant annotation - currently supported",
-                    "enum": [
-                        "SNPEFF",
-                        "VEP",
-                        "ANNOVAR"
-                    ],
+                    "enum": ["SNPEFF", "VEP", "ANNOVAR"],
                     "default": "SNPEFF"
                 },
                 "variant_indel_filter": {

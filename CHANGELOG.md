@@ -34,9 +34,9 @@
 
 ### `Dependencies`
 
-| Dependency            | Old version | New version |
-| --------------------- | ----------- | ----------- |
-| `fred2`              | 2.0.6       | 2.0.7       |
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `fred2`    | 2.0.6       | 2.0.7       |
 
 ### `Deprecated`
 
