@@ -29,6 +29,7 @@
 - Adjustment of the README, including all contributors
 - Inclusion of the PSMs files (tsv format) per replicates in `results/PSMs`
 - Include check in WorkflowMhcquant, to determine if the allele and vcf sheet has been provided under specific circumstances
+- [[#188](https://github.com/nf-core/mhcquant/issues/188)] Added reference links to README
 
 ### `Fixed`
 
