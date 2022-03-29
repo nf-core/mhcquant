@@ -1,7 +1,7 @@
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     VALIDATE INPUTS
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
@@ -40,18 +40,18 @@ if (params.predict_class_1 || params.predict_class_2)  {
 }
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CREATE CHANNELS
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 //
@@ -62,10 +62,16 @@ include { OPENMS_THERMORAWFILEPARSER }                                      from
 include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
+
+include { OPENMS_FALSEDISCOVERYRATE }                                       from '../modules/local/openms_falsediscoveryrate'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }                from '../modules/local/openms_idfilter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_PSMS }                 from '../modules/local/openms_textexporter'
+
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_UNQUANTIFIED }         from '../modules/local/openms_textexporter'
 include { CUSTOM_DUMPSOFTWAREVERSIONS }                                     from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 include { MULTIQC }                                                         from '../modules/nf-core/modules/multiqc/main'
 
@@ -101,12 +107,10 @@ workflow MHCQUANT {
         meta, filename ->
             raw : meta.ext == 'raw'
                 return [ meta, filename ]
-            mzml :  meta.ext == 'mzml'
+            mzml : meta.ext == 'mzml'
                 return [ meta, filename ]
             other : true }
-        .set { ms_files }
-    // A warning message will be given when the format differs from the '.raw' or '.mzML' extention
-    ms_files.other.subscribe { row -> log.warn("Unknown format for entry " + row[3] + " in provided sample sheet, line will be ignored."); exit 1 }
+    .set { ms_files }
 
     // Input fasta file
     Channel.fromPath( params.fasta )
@@ -159,15 +163,34 @@ workflow MHCQUANT {
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
+    // Calculate fdr for id based alignment
+    OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out.idxml)
+    ch_versions = ch_versions.mix(OPENMS_FALSEDISCOVERYRATE.out.versions.first().ifEmpty(null))
+    // Filter fdr for id based alignment
+    OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
+        .flatMap { it -> [tuple(it[0], it[1], null)]})
+    ch_versions = ch_versions.mix(OPENMS_IDFILTER_FOR_ALIGNMENT.out.versions.first().ifEmpty(null))
+    // Write the content to a PSMs file
+    OPENMS_TEXTEXPORTER_PSMS(
+        OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
+        .flatMap {
+            meta, idxml ->
+                ident = idxml.baseName.split('_-_')[1]
+                [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], idxml]]
+        }
+    )
+
     //
     // SUBWORKFLOW: Pre-process step for the quantification of the data
     //
+
     if(!params.skip_quantification) {
         PRE_QUANTIFICATION(
+            OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
             OPENMS_PEPTIDEINDEXER.out.idxml,
-            ch_mzml_file,
-            ms_files.mzml,
-            OPENMS_THERMORAWFILEPARSER.out.mzml
+            ms_files.mzml
+                .mix(OPENMS_THERMORAWFILEPARSER.out.mzml)
+                .mix(ch_mzml_file)
         )
         ch_proceeding_idx = PRE_QUANTIFICATION.out.ch_proceeding_idx
         ch_versions = ch_versions.mix(PRE_QUANTIFICATION.out.versions.ifEmpty(null))
@@ -217,11 +240,13 @@ workflow MHCQUANT {
     //
     if ( !params.skip_quantification) {
         POST_QUANTIFICATION (
-            PRE_QUANTIFICATION.out.psms_outcome,
+            OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
             PRE_QUANTIFICATION.out.aligned_mzml,
             filter_q_value
             )
         ch_versions = ch_versions.mix(POST_QUANTIFICATION.out.versions.ifEmpty(null))
+    } else {
+        OPENMS_TEXTEXPORTER_UNQUANTIFIED (filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] })
     }
 
     //
@@ -295,9 +320,9 @@ workflow MHCQUANT {
 }
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     COMPLETION EMAIL AND SUMMARY
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 workflow.onComplete {
@@ -308,7 +333,7 @@ workflow.onComplete {
 }
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     THE END
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
