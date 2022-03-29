@@ -7,6 +7,9 @@
 - nf-core template update (version 2.3.2)
 - Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
 - Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
+- Removed the table of contents from usage.md
+- [#200](https://github.com/nf-core/mhcquant/pull/200) fixes some typos and stuff in the output documentation
+- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
 
 ### `Fixed`
 
@@ -31,7 +34,6 @@
 - Error that was raised in generate_proteins_from_vcf
 - Problems that were detected in predict_possible_class1_neoepitopes and predict_possible_class2_neoepitopes
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
-- [#200](https://github.com/nf-core/mhcquant/pull/200) fixes some typos and stuff in the output docu
 
 ### `Deprecated`
 
