@@ -10,6 +10,7 @@
 - Removed the table of contents from usage.md
 - [#200](https://github.com/nf-core/mhcquant/pull/200) fixes some typos and stuff in the output documentation
 - [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
+- [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
 
 ### `Fixed`
 
@@ -34,7 +35,6 @@
 - Error that was raised in generate_proteins_from_vcf
 - Problems that were detected in predict_possible_class1_neoepitopes and predict_possible_class2_neoepitopes
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
-- [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
 
 ### `Deprecated`
 
