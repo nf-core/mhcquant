@@ -1,6 +1,22 @@
 # nf-core/mhcquant: Changelog
 
-## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2021/01/14
+## v2.3.0 nfcore/mhcquant "White Gold Swallow" - 2022/mm/dependency
+
+### `Added`
+
+- nf-core template update (version 2.3.2)
+- Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
+- Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
+
+### `Fixed`
+
+- Typo in previous release date
+
+### `Dependencies`
+
+### `Deprecated`
+
+## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2022/01/14
 
 ### `Added`
 
@@ -18,9 +34,9 @@
 
 ### `Dependencies`
 
-| Dependency            | Old version | New version |
-| --------------------- | ----------- | ----------- |
-| `fred2`              | 2.0.6       | 2.0.7       |
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `fred2`    | 2.0.6       | 2.0.7       |
 
 ### `Deprecated`
 
