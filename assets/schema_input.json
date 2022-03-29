@@ -36,11 +36,6 @@
                 ]
             }
         },
-        "required": [
-            "ID",
-            "Sample",
-            "Condition",
-            "ReplicateFileName"
-        ]
+        "required": ["ID", "Sample", "Condition", "ReplicateFileName"]
     }
 }
