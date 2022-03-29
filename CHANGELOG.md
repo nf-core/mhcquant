@@ -10,6 +10,7 @@
 - Removed the table of contents from usage.md
 - [#200](https://github.com/nf-core/mhcquant/pull/200) fixes some typos and stuff in the output documentation
 - [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
+- [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
 
 ### `Fixed`
 
