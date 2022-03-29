@@ -31,7 +31,6 @@ The pipeline will auto-detect whether a sample is either a mzML or raw files usi
 
 A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
 
-
 ```tsv
 ID  Sample  Condition  ReplicateFileName
 1   WT  A  /path/to/MS/files/WT_A1.raw
