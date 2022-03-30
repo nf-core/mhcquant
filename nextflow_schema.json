@@ -62,8 +62,8 @@
                 },
                 "skip_decoy_generation": {
                     "type": "boolean",
-                    "description": "Add this parameter when you want to skip the generation of the decoy database, the consequence is that it prevents the generation of variants and FDR refinement",
-                    "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.\nOne should consider though that this option will then prevent appending variants to the database and if not using reversed decoys the subset refinement FDR option will not work."
+                    "description": "Set depending on whether own decoy database should be used",
+                    "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.\nOne should consider though that this option will then prevent to append variants to the database and if not using reversed decoys the subset refinement FDR option will not work."
                 }
             }
         },
@@ -76,7 +76,7 @@
                 "pick_ms_levels": {
                     "type": "integer",
                     "default": 2,
-                    "description": "Specify the MS levels for which the peak picking is applied (unless you use `--run_centroidisation`)."
+                    "description": "If one ms level in the raw ms data is not centroided, specify the level here. (eg. 2)"
                 },
                 "run_centroidisation": {
                     "type": "boolean",
@@ -93,29 +93,29 @@
                 "peptide_min_length": {
                     "type": "integer",
                     "default": 8,
-                    "description": "Specify the minimum length of peptides to be considered after processing"
+                    "description": "Specify the minimum length of peptides considered after processing"
                 },
                 "peptide_max_length": {
                     "type": "integer",
                     "default": 12,
-                    "description": "Specify the maximum length of peptides to be considered after processing"
+                    "description": "Specify the maximum length of peptides considered after processing"
                 },
                 "fragment_mass_tolerance": {
                     "type": "number",
                     "default": 0.02,
-                    "description": "Specify the fragment mass tolerance to be used for the comet database search.",
+                    "description": "Specify the fragment mass tolerance used for the comet database search.",
                     "help_text": "For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)"
                 },
                 "precursor_mass_tolerance": {
                     "type": "integer",
                     "default": 5,
-                    "description": "Specify the precursor mass tolerance to be used for the comet database search.",
+                    "description": "Specify the precursor mass tolerance used for the comet database search.",
                     "help_text": " For High-Resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)"
                 },
                 "fragment_bin_offset": {
                     "type": "integer",
                     "default": 0,
-                    "description": "Specify the fragment bin offset to be used for the comet database search.",
+                    "description": "Specify the fragment bin offset used for the comet database search.",
                     "help_text": "For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)"
                 },
                 "number_mods": {
@@ -159,13 +159,13 @@
                 "fixed_mods": {
                     "type": "string",
                     "description": "Specify which fixed modifications should be applied to the database search",
-                    "help_text": "e.g. 'Carbamidomethyl (C)' (see OpenMS modifications; for a list of options, see parameter description on https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html)"
+                    "help_text": "e.g. 'Carbamidomethyl (C)' (see OpenMS modifications)"
                 },
                 "variable_mods": {
                     "type": "string",
                     "default": "Oxidation (M)",
                     "description": "Specify which variable modifications should be applied to the database search",
-                    "help_text": "e.g. 'Oxidation (M)' (see OpenMS modifications; for a list of options, see parameter description on https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html)"
+                    "help_text": "e.g. 'Oxidation (M)' (see OpenMS modifications)"
                 },
                 "use_x_ions": {
                     "type": "boolean",
@@ -189,7 +189,7 @@
                 },
                 "remove_precursor_peak": {
                     "type": "boolean",
-                    "description": "Include if you want to remove all peaks around precursor m/z",
+                    "description": "Include precursor ions into the peptide spectrum matching",
                     "default": false
                 },
                 "spectrum_batch_size": {
@@ -311,17 +311,17 @@
                 },
                 "variant_indel_filter": {
                     "type": "boolean",
-                    "description": "Set this option to not consider insertions and deletions for variant translation",
+                    "description": "Specify whether insertions and deletions should not be considered for variant translation",
                     "default": false
                 },
                 "variant_frameshift_filter": {
                     "type": "boolean",
-                    "description": "Set this option to not consider frameshifts for variant translation",
+                    "description": "Specify whether frameshifts should not be considered for variant translation",
                     "default": false
                 },
                 "variant_snp_filter": {
                     "type": "boolean",
-                    "description": "Set this option to not consider snps for variant translation"
+                    "description": "Specify whether snps should not be considered for variant translation"
                 }
             }
         },
