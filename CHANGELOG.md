@@ -9,6 +9,7 @@
 - Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
 - Removed the table of contents from usage.md
 - [#200](https://github.com/nf-core/mhcquant/pull/200) fixes some typos and stuff in the output documentation
+- [#195](https://github.com/nf-core/mhcquant/issues/195) Updated parameter documentation
 - [#192](https://github.com/nf-core/mhcquant/issues/192) Fixed samplesheet format in usage.md
 - [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
 - [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
