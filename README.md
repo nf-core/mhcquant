@@ -55,12 +55,12 @@ On release, automated continuous integration tests run the pipeline on a full-si
 4. Start running your own analysis!
 
    ```bash
-   nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
-                                 --input 'samples.tsv'
-                                 --fasta 'SWISSPROT_2020.fasta'
-                                 --allele_sheet 'alleles.tsv'
-                                 --predict_class_1
-                                 --refine_fdr_on_predicted_subset
+   nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute> \
+                                 --input 'samples.tsv' \
+                                 --fasta 'SWISSPROT_2020.fasta' \
+                                 --allele_sheet 'alleles.tsv' \
+                                 --predict_class_1 \
+                                 --refine_fdr_on_predicted_subset \
                                  --outdir ./results
    ```
 
@@ -72,7 +72,19 @@ The nf-core/mhcquant pipeline comes with documentation about the pipeline [usage
 
 nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann) from the [Kohlbacher Lab](https://kohlbacherlab.org/). The pipeline was re-written in Nextflow DSL2 and is primarily maintained by [Marissa Dubbelaar](https://github.com/marissaDubbelaar) from [Clinical Collaboration Unit Translational Immunology](https://www.medizin.uni-tuebingen.de/en-de/das-klinikum/einrichtungen/kliniken/medizinische-klinik/kke-translationale-immunologie) and [Quantitative Biology Center](https://uni-tuebingen.de/forschung/forschungsinfrastruktur/zentrum-fuer-quantitative-biologie-qbic/) in Tübingen.
 
-Helpful contributors: - [Lukas Heumos](https://github.com/Zethson) - [Alexander Peltzer](https://github.com/apeltzer) - [Maxime Garcia](https://github.com/maxulysse) - [Gisela Gabernet](https://github.com/ggabernet) - [Leon Kuchenbecker](https://github.com/lkuchenb) - [Phil Ewels](https://github.com/ewels) - [Christian Fufezan](https://github.com/fu) - [Sven Fillinger](https://github.com/sven1103) - [Kevin Menden](https://github.com/KevinMenden)
+Helpful contributors:
+
+- [Lukas Heumos](https://github.com/Zethson)
+- [Alexander Peltzer](https://github.com/apeltzer)
+- [Maxime Garcia](https://github.com/maxulysse)
+- [Gisela Gabernet](https://github.com/ggabernet)
+- [Susanne Jodoin](https://github.com/SusiJo)
+- [Oskar Wacker](https://github.com/WackerO)
+- [Leon Kuchenbecker](https://github.com/lkuchenb)
+- [Phil Ewels](https://github.com/ewels)
+- [Christian Fufezan](https://github.com/fu)
+- [Sven Fillinger](https://github.com/sven1103)
+- [Kevin Menden](https://github.com/KevinMenden)
 
 ## Contributions and Support
 
@@ -104,26 +116,26 @@ In addition, references of tools and data used in this pipeline are as follows:
 
 > **Fred2 Immunoinformatics Toolbox**
 >
-> Schubert B. et al, _Bioinformatics_ 2016 Jul 1;32(13):2044-6. doi: 10.1093/bioinformatics/btw113. Epub 2016 Feb 26
+> Schubert B. et al, _Bioinformatics_ 2016 Jul 1;32(13):2044-6. doi: [10.1093/bioinformatics/btw113](https://academic.oup.com/bioinformatics/article/32/13/2044/1743767) Epub 2016 Feb 26
 >
 > **Comet Search Engine**
 >
-> Eng J.K. et al, _J Am Soc Mass Spectrom._ 2015 Nov;26(11):1865-74. doi: 10.1007/s13361-015-1179-x. Epub 2015 Jun 27.
+> Eng J.K. et al, _J Am Soc Mass Spectrom._ 2015 Nov;26(11):1865-74. doi: [10.1007/s13361-015-1179-x](https://pubs.acs.org/doi/10.1007/s13361-015-1179-x) Epub 2015 Jun 27.
 >
 > **Percolator**
 >
-> Käll L. et al, _Nat Methods_ 2007 Nov;4(11):923-5. doi: 10.1038/nmeth1113. Epub 2007 Oct 21.
+> Käll L. et al, _Nat Methods_ 2007 Nov;4(11):923-5. doi: [10.1038/nmeth1113](https://www.nature.com/articles/nmeth1113) Epub 2007 Oct 21.
 >
 > **Identification based RT Alignment**
 >
-> Weisser H. et al, _J Proteome Res._ 2013 Apr 5;12(4):1628-44. doi: 10.1021/pr300992u. Epub 2013 Feb 22.
+> Weisser H. et al, _J Proteome Res._ 2013 Apr 5;12(4):1628-44. doi: [10.1021/pr300992u](https://pubs.acs.org/doi/10.1021/pr300992u) Epub 2013 Feb 22.
 >
 > **Targeted peptide quantification**
 >
-> Weisser H. et al, _J Proteome Res._ 2017 Aug 4;16(8):2964-2974. doi: 10.1021/acs.jproteome.7b00248. Epub 2017 Jul 19.
+> Weisser H. et al, _J Proteome Res._ 2017 Aug 4;16(8):2964-2974. doi: [10.1021/acs.jproteome.7b00248](https://pubs.acs.org/doi/10.1021/acs.jproteome.7b00248) Epub 2017 Jul 19.
 >
 > **MHC affinity prediction**
 >
-> O'Donnell T.J., _Cell Syst._ 2018 Jul 25;7(1):129-132.e4. doi: 10.1016/j.cels.2018.05.014. Epub 2018 Jun 27.
+> O'Donnell T.J., _Cell Syst._ 2018 Jul 25;7(1):129-132.e4. doi: [10.1016/j.cels.2018.05.014](https://www.sciencedirect.com/science/article/pii/S2405471218302321) Epub 2018 Jun 27.
 >
-> Shao X.M., _Cancer Immunol Res._ 2020 Mar;8(3):396-408. doi: 10.1158/2326-6066.CIR-19-0464. Epub 2019 Dec 23.
+> Shao X.M., _Cancer Immunol Res._ 2020 Mar;8(3):396-408. doi: [10.1158/2326-6066.CIR-19-0464](https://aacrjournals.org/cancerimmunolres/article/8/3/396/469597/High-Throughput-Prediction-of-MHC-Class-I-and-II) Epub 2019 Dec 23.
