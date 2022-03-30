@@ -55,12 +55,12 @@ On release, automated continuous integration tests run the pipeline on a full-si
 4. Start running your own analysis!
 
    ```bash
-   nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
-                                 --input 'samples.tsv'
-                                 --fasta 'SWISSPROT_2020.fasta'
-                                 --allele_sheet 'alleles.tsv'
-                                 --predict_class_1
-                                 --refine_fdr_on_predicted_subset
+   nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute> \
+                                 --input 'samples.tsv' \
+                                 --fasta 'SWISSPROT_2020.fasta' \
+                                 --allele_sheet 'alleles.tsv' \
+                                 --predict_class_1 \
+                                 --refine_fdr_on_predicted_subset \
                                  --outdir ./results
    ```
 
