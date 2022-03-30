@@ -17,7 +17,7 @@ You will need to create a samplesheet with information about the samples you wou
 The `sample` identifiers have to be the same when you have multiple runs. The `Condition` identifiers can be used to further distinguish the sample groups.
 Below is an example for the same sample sequenced across 3 lanes:
 
-```console
+```tsv
 ID  Sample  Condition   ReplicateFileName
 1   WT  A   /path/to/MS/files/WT_A1.raw
 2   WT  A   /path/to/MS/files/WT_A2.raw
@@ -31,7 +31,7 @@ The pipeline will auto-detect whether a sample is either a mzML or raw files usi
 
 A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
 
-```console
+```tsv
 ID  Sample  Condition   ReplicateFileName
 1   WT  A   /path/to/MS/files/WT_A1.raw
 2   WT  A   /path/to/MS/files/WT_A2.raw
