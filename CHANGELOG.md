@@ -1,6 +1,30 @@
 # nf-core/mhcquant: Changelog
 
-## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2021/01/14
+## v2.3.0dev nfcore/mhcquant "White Gold Swallow" - 2022/mm/day
+
+### `Added`
+
+- nf-core template update (version 2.3.2)
+- Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
+- Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
+- Removed the table of contents from usage.md
+- [#200](https://github.com/nf-core/mhcquant/pull/200) fixes some typos and stuff in the output documentation
+- [#192](https://github.com/nf-core/mhcquant/issues/192) Fixed samplesheet format in usage.md
+- [#195](https://github.com/nf-core/mhcquant/issues/195) Updated parameter documentation
+- [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
+- [#188](https://github.com/nf-core/mhcquant/issues/188) Added reference links to README
+
+### `Fixed`
+
+- Typo in previous release date
+
+### `Dependencies`
+
+### `Deprecated`
+
+- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
+
+## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2022/01/14
 
 ### `Added`
 
@@ -8,7 +32,6 @@
 - Adjustment of the README, including all contributors
 - Inclusion of the PSMs files (tsv format) per replicates in `results/PSMs`
 - Include check in WorkflowMhcquant, to determine if the allele and vcf sheet has been provided under specific circumstances
-- [#195](https://github.com/nf-core/mhcquant/issues/195)] Updated parameter documentation
 
 ### `Fixed`
 
@@ -17,11 +40,15 @@
 - Problems that were detected in predict_possible_class1_neoepitopes and predict_possible_class2_neoepitopes
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
 
+### `Deprecated`
+
+- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
+
 ### `Dependencies`
 
-| Dependency            | Old version | New version |
-| --------------------- | ----------- | ----------- |
-| `fred2`              | 2.0.6       | 2.0.7       |
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `fred2`    | 2.0.6       | 2.0.7       |
 
 ### `Deprecated`
 
