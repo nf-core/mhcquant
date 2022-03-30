@@ -11,8 +11,8 @@
 - [#200](https://github.com/nf-core/mhcquant/pull/200) fixes some typos and stuff in the output documentation
 - [#195](https://github.com/nf-core/mhcquant/issues/195) Updated parameter documentation
 - [#192](https://github.com/nf-core/mhcquant/issues/192) Fixed samplesheet format in usage.md
-- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
 - [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
+- [#188](https://github.com/nf-core/mhcquant/issues/188) Added reference links to README
 
 ### `Fixed`
 
@@ -22,6 +22,8 @@
 
 ### `Deprecated`
 
+- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
+
 ## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2022/01/14
 
 ### `Added`
@@ -30,7 +32,6 @@
 - Adjustment of the README, including all contributors
 - Inclusion of the PSMs files (tsv format) per replicates in `results/PSMs`
 - Include check in WorkflowMhcquant, to determine if the allele and vcf sheet has been provided under specific circumstances
-- [[#188](https://github.com/nf-core/mhcquant/issues/188)] Added reference links to README
 
 ### `Fixed`
 
@@ -40,8 +41,6 @@
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
 
 ### `Deprecated`
-
-- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
 
 ### `Dependencies`
 
