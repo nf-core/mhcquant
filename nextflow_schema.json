@@ -190,7 +190,7 @@
                 },
                 "remove_precursor_peak": {
                     "type": "boolean",
-                    "description": "Include if you want to remove all peaks around precursor m/z"
+                    "description": "Include if you want to remove all peaks around precursor m/z",
                     "default": false
                 },
                 "spectrum_batch_size": {
