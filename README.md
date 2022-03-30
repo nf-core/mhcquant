@@ -72,7 +72,7 @@ The nf-core/mhcquant pipeline comes with documentation about the pipeline [usage
 
 nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann) from the [Kohlbacher Lab](https://kohlbacherlab.org/). The pipeline was re-written in Nextflow DSL2 and is primarily maintained by [Marissa Dubbelaar](https://github.com/marissaDubbelaar) from [Clinical Collaboration Unit Translational Immunology](https://www.medizin.uni-tuebingen.de/en-de/das-klinikum/einrichtungen/kliniken/medizinische-klinik/kke-translationale-immunologie) and [Quantitative Biology Center](https://uni-tuebingen.de/forschung/forschungsinfrastruktur/zentrum-fuer-quantitative-biologie-qbic/) in Tübingen.
 
-Helpful contributors: 
+Helpful contributors:
 
 - [Lukas Heumos](https://github.com/Zethson)
 - [Alexander Peltzer](https://github.com/apeltzer)
