@@ -133,7 +133,7 @@ peptide sequence   geneID
 
 </details>
 
-This CSV fils contains all theoretically possible neoepitope sequences from the variants that were specified in the vcf
+This CSV file contains all theoretically possible neoepitope sequences from the variants that were specified in the vcf
 The format is shown below
 
 ```bash
