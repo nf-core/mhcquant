@@ -108,7 +108,7 @@ Additional functionality contained by the pipeline currently includes:
 
 ## Documentation
 
-The nf-core/mhcquant pipeline comes with documentation about the pipeline [usage](https://nf-co.re/mhcquant/usage), [parameters](https://nf-co.re/mhcquant/parameters) and [output](https://nf-co.re/mhcquant/output
+The nf-core/mhcquant pipeline comes with documentation about the pipeline [usage](https://nf-co.re/mhcquant/usage), [parameters](https://nf-co.re/mhcquant/parameters) and [output](https://nf-co.re/mhcquant/output).
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
