@@ -30,7 +30,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
 
 1. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
-![overview](assets/MHCquant_scheme.png)
+![overview](assets/mhcquant_web.png)
 (This chart was created with the help of [Lucidchart](https://www.lucidchart.com))
 
 ## Quick Start
