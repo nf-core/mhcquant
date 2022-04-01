@@ -65,6 +65,16 @@ On release, automated continuous integration tests run the pipeline on a full-si
 
 By default the pipeline currently performs the following
 
+- Identification of peptides in the MS/MS spectra using comet (`CometAdapter`)
+- Refreshes the protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
+- Estimates the false discovery rate on peptide and protein level (`FalseDiscoveryRate`)
+- Filters peptide/protein identification results on ID based alignment (`IDFilter`)
+- Converts XML format to text files (`TextExporter`)
+- Merges several idXML files into one idXML file (`IDMerger`)
+- Extract PSM features for Percolator (`PSMFeatureExtractor`)
+- Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
+- Filters peptide/protein identification result (`IDFilter`)
+
 ### Additional Steps
 
 Additional functionality contained by the pipeline currently includes:
@@ -72,27 +82,27 @@ Additional functionality contained by the pipeline currently includes:
 #### Input
 
 - Inclusion of proteins in the reference database (`mhcnuggets`, `mhcflurry`, `fred2`)
-- Creation of a decoy database (`DecoyDatabase`)
+- Create a decoy peptide database from standard FASTA databases (`DecoyDatabase`)
 - Conversion of raw to mzML files (`ThermoRawFileParser`)
 - Executing the peak picking with high_res algorithm (`PeakPickerHiRes`)
 
 #### Prequantification
 
-- Compute alignment retention transformations (`MapAlignerIdentification`)
-- Align the different retention files of the replicates (`MapRTTransformer`)
+- Corrects retention time distortions between maps, using information from peptides identified in different maps (`MapAlignerIdentification`)
+- Applies retention time transformations to maps (`MapRTTransformer`)
 
 #### Refine FDR
 
-- Export filtered mzML content as results (`MzTabExporter`)
+- This application converts several OpenMS XML formats to mzTab. (`MzTabExporter`)
 - Predict psm results using mhcflurry to shrink search space (`mhcflurry`)
-- Run Percolator (`PercolatorAdapter`)
+- Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
 
 #### Post-quantification
 
-- Quantify identifications using targeted feature extraction (`FeatureFinderIdentification`)
-- Link extracted features (`FeatureLinkerUnlabeledKD`)
-- Resolve conflicting ids matching to the same feature (`IDConflictResolver`)
-- Writes the content to generate PSMs files (`TextExporter`)
+- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
+- Group corresponding features across labelfree experiments (`FeatureLinkerUnlabeledKD`)
+- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
+- Converts XML format to text files (`TextExporter`)
 
 #### Prediction of HLA class 1 peptides
 
@@ -103,7 +113,7 @@ Additional functionality contained by the pipeline currently includes:
 
 #### Prediction retention time
 
-- Train Retention Times Predictor (`RTModel`)
+- Used to train a model for peptide retention time prediction or peptide separation prediction (`RTModel`)
 - Retention Times Predictor Found Peptides and neoepitopes (`RTPredict`)
 
 ## Documentation
