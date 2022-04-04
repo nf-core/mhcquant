@@ -4,12 +4,11 @@
 
 ### `Added`
 
-- nf-core template update (version 2.3.2)
+- [#206](https://github.com/nf-core/mhcquant/issues/206) Updated the workflow picture
+- nf-core template update (version 2.3.2) (included pull [#208](https://github.com/nf-core/mhcquant/pull/208))
 - Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
 - Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
-- Removed the table of contents from usage.md
-- [#200](https://github.com/nf-core/mhcquant/pull/200) fixes some typos and stuff in the output documentation
-- [#192](https://github.com/nf-core/mhcquant/issues/192) Fixed samplesheet format in usage.md
+- Included `pipeline summary` and increment the `documentation` paragraph
 - [#195](https://github.com/nf-core/mhcquant/issues/195) Updated parameter documentation
 - [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
 - [#188](https://github.com/nf-core/mhcquant/issues/188) Added reference links to README
@@ -17,6 +16,9 @@
 ### `Fixed`
 
 - Typo in previous release date
+- [#199](https://github.com/nf-core/mhcquant/issues/199) Fixes some typos and stuff in the output documentation
+- [#192](https://github.com/nf-core/mhcquant/issues/192) Fixed samplesheet format in usage.md
+- [#184](https://github.com/nf-core/mhcquant/issues/184) Fix parsing for VEP annotated VCF files
 
 ### `Dependencies`
 
@@ -39,10 +41,6 @@
 - Error that was raised in generate_proteins_from_vcf
 - Problems that were detected in predict_possible_class1_neoepitopes and predict_possible_class2_neoepitopes
 - Error that occurred in mhcnuggets_predictneoepitopesclass2 (faulty container set up)
-
-### `Deprecated`
-
-- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
 
 ### `Dependencies`
 
@@ -95,6 +93,8 @@ DSL1 to DSL2 conversion
     - Template update to nf-core tools version 2.1
 
 ### `Fixed`
+
+- Clarified conda usage and added an installation tutorial for Singularity since the one on Syllabs' website uses an outdate version of GO Compiler
 
 ### `Dependencies`
 
