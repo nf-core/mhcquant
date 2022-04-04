@@ -9,16 +9,11 @@ workflow INPUT_CHECK {
     samplesheet // file: /path/to/samplesheet.csv
 
     main:
-    //SAMPLESHEET_CHECK ( samplesheet )
-    //    .csv
-    //    .splitCsv ( header:true, sep:"," )
-    //    .map { get_samplesheet_paths(it) }
-    //    .set { reads }
     SAMPLESHEET_CHECK ( samplesheet )
-     .csv
-     .splitCsv ( header:true, sep:',' )
-     .map { create_ms_channel(it) }
-     .set { reads }
+        .csv
+        .splitCsv ( header:true, sep:',' )
+        .map { create_ms_channel(it) }
+        .set { reads }
 
     emit:
     reads                                     // channel: [ val(meta), [ reads ] ]

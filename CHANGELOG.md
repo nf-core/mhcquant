@@ -1,11 +1,11 @@
 # nf-core/mhcquant: Changelog
 
-## v2.3.0 nfcore/mhcquant "White Gold Swallow" - 2022/mm/day
+## v2.3.0dev nfcore/mhcquant "White Gold Swallow" - 2022/mm/day
 
 ### `Added`
 
 - [#206](https://github.com/nf-core/mhcquant/issues/206) Updated the workflow picture
-- nf-core template update (version 2.3.2)
+- nf-core template update (version 2.3.2) (included pull [#208](https://github.com/nf-core/mhcquant/pull/208))
 - Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
 - Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
 - Included `pipeline summary` and increment the `documentation` paragraph
@@ -93,6 +93,8 @@ DSL1 to DSL2 conversion
     - Template update to nf-core tools version 2.1
 
 ### `Fixed`
+
+- Clarified conda usage and added an installation tutorial for Singularity since the one on Syllabs' website uses an outdate version of GO Compiler
 
 ### `Dependencies`
 
