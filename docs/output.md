@@ -9,8 +9,11 @@ The directories listed below will be created in the results directory after the 
 ## General
 
 <<<<<<< HEAD
+
 ### Quantification
+
 =======
+
 ## Pipeline overview
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
@@ -20,18 +23,19 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
 ### FastQC
->>>>>>> upstream/TEMPLATE
+
+> > > > > > > upstream/TEMPLATE
 
 <details markdown="1">
 <summary>Output files</summary>
 
 <<<<<<< HEAD
-- `*.tsv` : If `--skip_quantification` is not specified.
-=======
+
+- # `*.tsv` : If `--skip_quantification` is not specified.
 - `fastqc/`
   - `*_fastqc.html`: FastQC report containing quality metrics.
   - `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
->>>>>>> upstream/TEMPLATE
+    > > > > > > > upstream/TEMPLATE
 
 </details>
 
