@@ -1,4 +1,5 @@
-files_exist:
-  - .github/markdownlint.yml
-  - bin/markdown_to_html.py
-actions_awsfulltest: False
+repository_type: pipeline
+
+lint:
+  files_exist:
+    - conf/igenomes.config

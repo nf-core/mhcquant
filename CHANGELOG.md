@@ -1,6 +1,36 @@
 # nf-core/mhcquant: Changelog
 
-## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2021/01/14
+## v2.3.0 nfcore/mhcquant "White Gold Swallow" - 2022/04/05
+
+### `Added`
+
+- [#206](https://github.com/nf-core/mhcquant/issues/206) Updated the workflow picture
+- Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
+- Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
+- Included `pipeline summary` and increment the `documentation` paragraph
+- [#195](https://github.com/nf-core/mhcquant/issues/195) Updated parameter documentation
+- [#189](https://github.com/nf-core/mhcquant/issues/189) Added backslashes in Quick Start in README
+- [#188](https://github.com/nf-core/mhcquant/issues/188) Added reference links to README
+
+### `Fixed`
+
+- Typo in previous release date
+- [#208](https://github.com/nf-core/mhcquant/pull/208) - nf-core template update (version 2.3.2)
+- [#199](https://github.com/nf-core/mhcquant/issues/199) Fixes some typos and stuff in the output documentation
+- [#192](https://github.com/nf-core/mhcquant/issues/192) Fixed samplesheet format in usage.md
+- [#184](https://github.com/nf-core/mhcquant/issues/184) Fix parsing for VEP annotated VCF files
+
+### `Dependencies`
+
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `MultiQC`  | 1.11        | 1.12        |
+
+### `Deprecated`
+
+- [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
+
+## v2.2.0 nfcore/mhcquant "Silver Titanium Ostrich" - 2022/01/14
 
 ### `Added`
 
@@ -18,9 +48,9 @@
 
 ### `Dependencies`
 
-| Dependency            | Old version | New version |
-| --------------------- | ----------- | ----------- |
-| `fred2`              | 2.0.6       | 2.0.7       |
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `fred2`    | 2.0.6       | 2.0.7       |
 
 ### `Deprecated`
 
