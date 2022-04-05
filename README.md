@@ -1,4 +1,4 @@
-# ![nf-core/mhcquant](docs/images/nf-core-mhcquant_logo_light.png#gh-light-mode-only) ![nf-core/mhcquant](docs/images/nf-core-mhcquant_logo_dark.png#gh-dark-mode-only)
+# ![nf-core/mhcquant](docs/images/nf-core/mhcquant_logo_light.png#gh-light-mode-only) ![nf-core/mhcquant](docs/images/nf-core/mhcquant_logo_dark.png#gh-dark-mode-only)
 
 [![GitHub Actions CI Status](https://github.com/nf-core/mhcquant/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/mhcquant/actions?query=workflow%3A%22nf-core+CI%22)
 [![GitHub Actions Linting Status](https://github.com/nf-core/mhcquant/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/mhcquant/actions?query=workflow%3A%22nf-core+linting%22)
@@ -26,12 +26,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/mhcquant/results).
 
-## Pipeline summary
-
-1. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
-
-![overview](assets/MHCquant_scheme.png)
-(This chart was created with the help of [Lucidchart](https://www.lucidchart.com))
+![overview](assets/mhcquant_web.png)
 
 ## Quick Start
 
@@ -42,7 +37,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
    ```console
-   nextflow run nf-core/mhcquant -profile test,YOURPROFILE
+   nextflow run nf-core/mhcquant -profile test,YOURPROFILE --outdir <OUTDIR>
    ```
 
    Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`YOURPROFILE` in the example command above). You can chain multiple config profiles in a comma-separated string.
@@ -64,9 +59,74 @@ On release, automated continuous integration tests run the pipeline on a full-si
                                  --outdir ./results
    ```
 
+## Pipeline summary
+
+### Default Steps
+
+By default the pipeline currently performs the following
+
+- Identification of peptides in the MS/MS spectra using comet (`CometAdapter`)
+- Refreshes the protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
+- Estimates the false discovery rate on peptide and protein level (`FalseDiscoveryRate`)
+- Filters peptide/protein identification results on ID based alignment (`IDFilter`)
+- Converts XML format to text files (`TextExporter`)
+- Merges several idXML files into one idXML file (`IDMerger`)
+- Extract PSM features for Percolator (`PSMFeatureExtractor`)
+- Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
+- Filters peptide/protein identification result (`IDFilter`)
+
+### Additional Steps
+
+Additional functionality contained by the pipeline currently includes:
+
+#### Input
+
+- Inclusion of proteins in the reference database (`mhcnuggets`, `mhcflurry`, `fred2`)
+- Create a decoy peptide database from standard FASTA databases (`DecoyDatabase`)
+- Conversion of raw to mzML files (`ThermoRawFileParser`)
+- Executing the peak picking with high_res algorithm (`PeakPickerHiRes`)
+
+#### Prequantification
+
+- Corrects retention time distortions between maps, using information from peptides identified in different maps (`MapAlignerIdentification`)
+- Applies retention time transformations to maps (`MapRTTransformer`)
+
+#### Refine FDR
+
+- This application converts several OpenMS XML formats to mzTab. (`MzTabExporter`)
+- Predict psm results using mhcflurry to shrink search space (`mhcflurry`)
+- Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
+
+#### Post-quantification
+
+- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
+- Group corresponding features across labelfree experiments (`FeatureLinkerUnlabeledKD`)
+- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
+- Converts XML format to text files (`TextExporter`)
+
+#### Prediction of HLA class 1 peptides
+
+- Predict peptides (`mhcnuggets`, `mhcflurry`, `fred2`)
+- Predict possible neoepitopes - when an vcf files is provided (`mhcnuggets`, `mhcflurry`, `fred2`)
+- Predict neoepitopes based on the peptide hits (`mhcnuggets`, `mhcflurry`, `fred2`)
+- Resolve found neoepitopes (`mhcnuggets`, `mhcflurry`, `fred2`)
+
+#### Prediction retention time
+
+- Used to train a model for peptide retention time prediction or peptide separation prediction (`RTModel`)
+- Retention Times Predictor Found Peptides and neoepitopes (`RTPredict`)
+
 ## Documentation
 
 The nf-core/mhcquant pipeline comes with documentation about the pipeline [usage](https://nf-co.re/mhcquant/usage), [parameters](https://nf-co.re/mhcquant/parameters) and [output](https://nf-co.re/mhcquant/output).
+
+1. [Nextflow installation](https://nf-co.re/usage/installation)
+2. Pipeline configuration
+   - [Pipeline installation](https://nf-co.re/usage/local_installation)
+   - [Adding your own system config](https://nf-co.re/usage/adding_own_config)
+3. [Running the pipeline](https://nf-co.re/mhcquant/docs/usage.md)
+   - This includes tutorials, FAQs, and troubleshooting instructions
+4. [Output and how to interpret the results](https://nf-co.re/mhcquant/docs/output.md)
 
 ## Credits
 
