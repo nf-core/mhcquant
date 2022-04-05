@@ -5,7 +5,6 @@
 ### `Added`
 
 - [#206](https://github.com/nf-core/mhcquant/issues/206) Updated the workflow picture
-- nf-core template update (version 2.3.2)
 - Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
 - Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
 - Included `pipeline summary` and increment the `documentation` paragraph
@@ -16,11 +15,16 @@
 ### `Fixed`
 
 - Typo in previous release date
+- [#208](https://github.com/nf-core/mhcquant/pull/208) - nf-core template update (version 2.3.2)
 - [#199](https://github.com/nf-core/mhcquant/issues/199) Fixes some typos and stuff in the output documentation
 - [#192](https://github.com/nf-core/mhcquant/issues/192) Fixed samplesheet format in usage.md
 - [#184](https://github.com/nf-core/mhcquant/issues/184) Fix parsing for VEP annotated VCF files
 
 ### `Dependencies`
+
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `MultiQC`  | 1.11        | 1.12        |
 
 ### `Deprecated`
 
