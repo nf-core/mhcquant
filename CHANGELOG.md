@@ -5,7 +5,7 @@
 ### `Added`
 
 - [#206](https://github.com/nf-core/mhcquant/issues/206) Updated the workflow picture
-- nf-core template update (version 2.3.2) (included pull [#208](https://github.com/nf-core/mhcquant/pull/208))
+- nf-core template update (version 2.3.2) - including PR [#208](https://github.com/nf-core/mhcquant/pull/208)
 - Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
 - Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
 - Included `pipeline summary` and increment the `documentation` paragraph
