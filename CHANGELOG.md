@@ -22,6 +22,10 @@
 
 ### `Dependencies`
 
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `MultiQC`  | 1.11        | 1.12        |
+
 ### `Deprecated`
 
 - [#191](https://github.com/nf-core/mhcquant/issues/191) Removed the table of contents from usage.md
