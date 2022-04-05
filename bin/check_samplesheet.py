@@ -5,10 +5,6 @@
 """Provide a command line tool to validate and transform tabular samplesheets."""
 
 import os.path
-#import sys
-#import errno
-#import argparse
-
 import argparse
 import csv
 import logging
