@@ -5,7 +5,6 @@
 ### `Added`
 
 - [#206](https://github.com/nf-core/mhcquant/issues/206) Updated the workflow picture
-- nf-core template update (version 2.3.2) - including PR [#208](https://github.com/nf-core/mhcquant/pull/208)
 - Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
 - Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
 - Included `pipeline summary` and increment the `documentation` paragraph
@@ -16,6 +15,7 @@
 ### `Fixed`
 
 - Typo in previous release date
+- [#208](https://github.com/nf-core/mhcquant/pull/208) - nf-core template update (version 2.3.2)
 - [#199](https://github.com/nf-core/mhcquant/issues/199) Fixes some typos and stuff in the output documentation
 - [#192](https://github.com/nf-core/mhcquant/issues/192) Fixed samplesheet format in usage.md
 - [#184](https://github.com/nf-core/mhcquant/issues/184) Fix parsing for VEP annotated VCF files
@@ -93,8 +93,6 @@ DSL1 to DSL2 conversion
     - Template update to nf-core tools version 2.1
 
 ### `Fixed`
-
-- Clarified conda usage and added an installation tutorial for Singularity since the one on Syllabs' website uses an outdate version of GO Compiler
 
 ### `Dependencies`
 

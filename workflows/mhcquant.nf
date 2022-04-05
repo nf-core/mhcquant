@@ -179,7 +179,6 @@ workflow MHCQUANT {
                 [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], idxml]]
         }
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
     // SUBWORKFLOW: Pre-process step for the quantification of the data
