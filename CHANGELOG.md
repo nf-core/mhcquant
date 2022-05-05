@@ -1,5 +1,19 @@
 # nf-core/mhcquant: Changelog
 
+## v2.3.1 nfcore/mhcquant "White Gold Swallow" - 2022/MM/DD
+
+### `Added`
+
+Icons to the different parameters in the `nextflow_schema.json`
+
+### `Fixed`
+
+Resolved the problem that there was no output from `OPENMS_MZTABEXPORTER_QUANT`
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.3.0 nfcore/mhcquant "White Gold Swallow" - 2022/04/05
 
 ### `Added`

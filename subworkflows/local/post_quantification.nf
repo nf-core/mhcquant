@@ -6,7 +6,7 @@ include { OPENMS_FEATUREFINDERIDENTIFICATION }                              from
 include { OPENMS_FEATURELINKERUNLABELEDKD }                                 from '../../modules/local/openms_featurelinkerunlabeledkd'
 include { OPENMS_IDCONFLICTRESOLVER }                                       from '../../modules/local/openms_idconflictresolver'
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_QUANTIFIED }           from '../../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER }                                            from '../../modules/local/openms_mztabexporter'
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_QUANT }            from '../../modules/local/openms_mztabexporter'
 
 workflow POST_QUANTIFICATION {
     take:
@@ -42,10 +42,10 @@ workflow POST_QUANTIFICATION {
         OPENMS_TEXTEXPORTER_QUANTIFIED(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
         ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER_QUANTIFIED.out.versions.first().ifEmpty(null))
         // Export all information as mzTab
-        OPENMS_MZTABEXPORTER(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
-        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.first().ifEmpty(null))
+        OPENMS_MZTABEXPORTER_QUANT(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
+        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER_QUANT.out.versions.first().ifEmpty(null))
     emit:
         // Define the information that is returned by this workflow
         versions = ch_versions
-        mztab = OPENMS_MZTABEXPORTER.out.mztab
+        mztab = OPENMS_MZTABEXPORTER_QUANT.out.mztab
 }
