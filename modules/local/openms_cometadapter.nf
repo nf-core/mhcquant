@@ -17,8 +17,6 @@ process OPENMS_COMETADAPTER {
     script:
         def prefix           = task.ext.prefix ?: "${mzml.baseName}"
         def args             = task.ext.args  ?: ''
-
-        def mods             = params.fixed_mods != " " ? "-fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")}" : ""
         def xions            = params.use_x_ions ? "-use_X_ions true" : ""
         def zions            = params.use_z_ions ? "-use_Z_ions true" : ""
         def aions            = params.use_a_ions ? "-use_A_ions true" : ""
@@ -32,7 +30,6 @@ process OPENMS_COMETADAPTER {
             -database $fasta \\
             -threads $task.cpus \\
             $args \\
-            $mods \\
             $xions \\
             $zions \\
             $aions \\

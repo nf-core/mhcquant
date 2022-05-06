@@ -8,7 +8,7 @@
 
 ### `Fixed`
 
-Resolved the problem that there was no output from `OPENMS_MZTABEXPORTER_QUANT`
+[#211](https://github.com/nf-core/mhcquant/issues/211) Resolved the problem that there was no output from `OPENMS_MZTABEXPORTER_QUANT`
 
 ### `Dependencies`
 
