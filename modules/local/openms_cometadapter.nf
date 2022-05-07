@@ -32,7 +32,6 @@ process OPENMS_COMETADAPTER {
             -database $fasta \\
             -threads $task.cpus \\
             $args \\
-            $mods \\
             $xions \\
             $zions \\
             $aions \\
