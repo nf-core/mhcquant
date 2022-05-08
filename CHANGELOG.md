@@ -9,7 +9,7 @@
 ### `Fixed`
 
 - [#211](https://github.com/nf-core/mhcquant/issues/211) Resolved the problem that there was no output from `OPENMS_MZTABEXPORTER_QUANT`
-- [#212](https://github.com/nf-core/mhcquant/issues/212) - Altered the CometAdapter functionalities for resolve the issue with the `fixed_modifications`
+- [#212](https://github.com/nf-core/mhcquant/issues/212) - Altered the CometAdapter functionalities for resolve the issue with the `fixed_mods`
 
 ### `Dependencies`
 
