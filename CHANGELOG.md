@@ -1,5 +1,20 @@
 # nf-core/mhcquant: Changelog
 
+## v2.3.1 nfcore/mhcquant "White Gold Swallow" - 2022/05/10
+
+### `Added`
+
+- [#210](https://github.com/nf-core/mhcquant/pull/210) - Icons to the different parameters in the `nextflow_schema.json`
+
+### `Fixed`
+
+- [#211](https://github.com/nf-core/mhcquant/issues/211) Resolved the problem that there was no output from `OPENMS_MZTABEXPORTER_QUANT`
+- [#212](https://github.com/nf-core/mhcquant/issues/212) - Altered the CometAdapter functionalities for resolve the issue with the `fixed_mods`
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.3.0 nfcore/mhcquant "White Gold Swallow" - 2022/04/05
 
 ### `Added`
