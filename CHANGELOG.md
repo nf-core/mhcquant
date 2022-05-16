@@ -1,6 +1,5 @@
 # nf-core/mhcquant: Changelog
 
-
 ## v2.3.2 - 2022/MM/DD
 
 ### `Added`
