@@ -1,5 +1,18 @@
 # nf-core/mhcquant: Changelog
 
+
+## v2.3.2 - 2022/MM/DD
+
+### `Added`
+
+### `Fixed`
+
+- [#219](https://github.com/nf-core/mhcquant/pull/219) - Template update for nf-core/tools v2.4
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.3.1 nfcore/mhcquant "White Gold Swallow" - 2022/05/10
 
 ### `Added`
