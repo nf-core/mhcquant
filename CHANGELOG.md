@@ -4,6 +4,8 @@
 
 ### `Added`
 
+- uasge opdate - added the option to provide a csv file
+
 ### `Fixed`
 
 - Clarification of the input file
