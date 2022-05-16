@@ -147,10 +147,9 @@ def sniff_format(handle):
     if not sniffer.has_header(peek):
         logger.critical(f"The given sample sheet does not appear to contain a header.")
         sys.exit(1)
-    dialect = sniffer.sniff(peek)
+    dialect = sniffer.sniff(peek, delimiters=",\t")
     handle.seek(0)
     return dialect
-
 
 def check_samplesheet(file_in, file_out):
     """
