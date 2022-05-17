@@ -103,6 +103,7 @@ class RowChecker:
 
     def _validate_ms_format(self, filename):
         """Assert that a given filename has one of the expected MS extensions."""
+
         assert any(filename.endswith(extension) for extension in self.VALID_FORMATS), (
             f"The file has an unrecognized extension: {filename}\n"
             f"It should be one of: {', '.join(self.VALID_FORMATS)}"
@@ -127,6 +128,16 @@ class RowChecker:
                     row[self._sample_col] = f"{sample}"
 
 
+def read_head(handle, num_lines=10):
+    """Read the specified number of lines from the current position in the file."""
+    lines = []
+    for idx, line in enumerate(handle):
+        if idx == num_lines:
+            break
+        lines.append(line)
+    return "".join(lines)
+
+
 def sniff_format(handle):
     """
     Detect the tabular format.
@@ -142,13 +153,13 @@ def sniff_format(handle):
         https://docs.python.org/3/glossary.html#term-text-file
 
     """
-    peek = handle.read(2048)
+    peek = read_head(handle)
+    handle.seek(0)
     sniffer = csv.Sniffer()
     if not sniffer.has_header(peek):
         logger.critical(f"The given sample sheet does not appear to contain a header.")
         sys.exit(1)
     dialect = sniffer.sniff(peek)
-    handle.seek(0)
     return dialect
 
 
