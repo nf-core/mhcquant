@@ -39,7 +39,7 @@ ID,Sample,Condition,ReplicateFileName
 
 The pipeline will auto-detect whether a sample is either a mzML or raw files using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 4 columns to match those defined in the table below.
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. 
+A final samplesheet file consisting of both single- and paired-end data may look something like the one below.
 
 ```tsv
 ID  Sample  Condition ReplicateFileName
