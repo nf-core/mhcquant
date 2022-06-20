@@ -11,7 +11,7 @@ workflow INPUT_CHECK {
     main:
     SAMPLESHEET_CHECK ( samplesheet )
         .csv
-        .splitCsv ( header:true, sep:',' )
+        .splitCsv ( header:true, sep:'\t' )
         .map { create_ms_channel(it) }
         .set { reads }
 
@@ -23,18 +23,19 @@ workflow INPUT_CHECK {
 // Function to get list of [ meta, filenames ]
 def create_ms_channel(LinkedHashMap row) {
     def meta = [:]
+
     meta.id        = row.ID
     meta.sample    = row.Sample
     meta.condition = row.Condition
-    meta.ext       = row.Extension
+    meta.ext       = row.FileExt
 
     // add path(s) of the data file(s) to the meta map
     def ms_meta = []
 
-    if (!file(row.ReplicateFileName).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.ReplicateFileName}"
+    if (!file(row.Filename).exists()) {
+        exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.Filename}"
     } else {
-        ms_meta = [ meta, [ file(row.ReplicateFileName) ] ]
+        ms_meta = [ meta, [ file(row.Filename) ] ]
     }
     return ms_meta
 }
