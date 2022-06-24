@@ -8,30 +8,30 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowMhcquant.initialise(params, log)
 
-// Input/outpout options
+// Input/output options
 if (params.input)   { sample_sheet = file(params.input) }
 if (params.fasta)   { params.fasta = params.fasta }
-if (params.outdir)  { params.outdir  = './results' }
+//if (params.outdir)  { params.outdir  = './results' }
 
 // MHC affinity prediction
-if (params.predict_class_1 || params.predict_class_2)  {
-    Channel.from( file(params.allele_sheet, checkIfExists: true) )
-        .splitCsv( header: true, sep:'\t' )
+if (params.predict_class_1 || params.predict_class_2) {
+    Channel.from(file(params.allele_sheet, checkIfExists: true))
+        .splitCsv(header: true, sep:'\t')
         .multiMap { col ->
-        classI: ["${col.Sample}", "${col.HLA_Alleles_Class_1}"]
-        classII: ["${col.Sample}", "${col.HLA_Alleles_Class_2}"] }
+            classI: ["${col.Sample}", "${col.HLA_Alleles_Class_1}"]
+            classII: ["${col.Sample}", "${col.HLA_Alleles_Class_2}"] }
         .set { ch_alleles_from_sheet }
 
         // Allele class 1
-        if( params.predict_class_1){
+        if (params.predict_class_1) {
             ch_alleles_from_sheet.classI
                 .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
-                .flatMap {it -> [tuple(it[0].toString(), it[1])] }
+                .flatMap { it -> [tuple(it[0].toString(), it[1])] }
                 .set { peptides_class_1_alleles }
         }
 
         // Allele class 2
-        if( params.predict_class_2){
+        if (params.predict_class_2) {
             ch_alleles_from_sheet.classII
                 .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
                 .flatMap { it -> [tuple(it[0].toString(), it[1])] }
@@ -98,19 +98,19 @@ workflow MHCQUANT {
     // SUBWORKFLOW: Check the input file
     //
     INPUT_CHECK( params.input )
-    .reads
-    .set { ch_samples_from_sheet }
+        .reads
+        .set { ch_samples_from_sheet }
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     ch_samples_from_sheet
-    .branch {
-        meta, filename ->
-            raw : meta.ext == 'raw'
-                return [ meta, filename ]
-            mzml : meta.ext == 'mzml'
-                return [ meta, filename ]
-            other : true }
-    .set { ms_files }
+        .branch {
+            meta, filename ->
+                raw : meta.ext == 'raw'
+                    return [ meta, filename ]
+                mzml : meta.ext == 'mzml'
+                    return [ meta, filename ]
+                other : true }
+        .set { ms_files }
 
     // Input fasta file
     Channel.fromPath( params.fasta )
@@ -122,9 +122,9 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Include protein information
     //
-    if ( params.include_proteins_from_vcf ) {
+    if (params.include_proteins_from_vcf) {
         // Include the proteins from the vcf file to the fasta file
-        INCLUDE_PROTEINS( input_fasta )
+        INCLUDE_PROTEINS(input_fasta)
         ch_versions = ch_versions.mix(INCLUDE_PROTEINS.out.versions.ifEmpty(null))
         ch_fasta_file = INCLUDE_PROTEINS.out.ch_fasta_file
         ch_vcf_from_sheet = INCLUDE_PROTEINS.out.ch_vcf_from_sheet
@@ -156,8 +156,8 @@ workflow MHCQUANT {
     // Run comet database search
     OPENMS_COMETADAPTER(
         OPENMS_THERMORAWFILEPARSER.out.mzml
-                .mix(ch_mzml_file)
-                .join(ch_decoy_db, remainder:true))
+            .mix(ch_mzml_file)
+            .join(ch_decoy_db, remainder:true))
     ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
@@ -168,10 +168,10 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(OPENMS_FALSEDISCOVERYRATE.out.versions.first().ifEmpty(null))
     // Filter fdr for id based alignment
     OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
-        .flatMap { it -> [tuple(it[0], it[1], null)]})
+                                    .flatMap { it -> [tuple(it[0], it[1], null)]})
     ch_versions = ch_versions.mix(OPENMS_IDFILTER_FOR_ALIGNMENT.out.versions.first().ifEmpty(null))
     // Write the content to a PSMs file
-    OPENMS_TEXTEXPORTER_PSMS(
+    OPENMS_TEXTEXPORTER_PSMS (
         OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
         .flatMap {
             meta, idxml ->
@@ -184,7 +184,7 @@ workflow MHCQUANT {
     // SUBWORKFLOW: Pre-process step for the quantification of the data
     //
 
-    if(!params.skip_quantification) {
+    if (!params.skip_quantification) {
         PRE_QUANTIFICATION(
             OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
             OPENMS_PEPTIDEINDEXER.out.idxml,
@@ -215,7 +215,8 @@ workflow MHCQUANT {
     ch_percolator_adapter_outcome = OPENMS_PERCOLATORADAPTER.out.idxml
     // Filter by percolator q-value
     OPENMS_IDFILTER_Q_VALUE(ch_percolator_adapter_outcome.flatMap { it -> [tuple(it[0], it[1], null)]})
-    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
+    ch_versions = ch_versions
+                    .mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
 
     //
     // SUBWORKFLOW: Refine the FDR values on the predicted subset
@@ -232,21 +233,21 @@ workflow MHCQUANT {
         filter_q_value = REFINE_FDR.out.filter_refined_q_value.flatMap { it -> [ tuple(it[0].sample, it[0], it[1]) ] }
     } else {
         // Make sure that the columns that consists of the ID's, sample names and the idXML file names are returned
-        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml.map{ it -> [it[0].sample, it[0], it[1]] }
+        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml.map { it -> [it[0].sample, it[0], it[1]] }
     }
 
     //
     // SUBWORKFLOW: Perform the post quantification step
     //
-    if ( !params.skip_quantification) {
+    if ( !params.skip_quantification ) {
         POST_QUANTIFICATION (
             OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
             PRE_QUANTIFICATION.out.aligned_mzml,
             filter_q_value
             )
-        ch_versions = ch_versions.mix(POST_QUANTIFICATION.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix( POST_QUANTIFICATION.out.versions.ifEmpty(null) )
     } else {
-        OPENMS_TEXTEXPORTER_UNQUANTIFIED (filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] })
+        OPENMS_TEXTEXPORTER_UNQUANTIFIED( filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] } )
     }
 
     //
@@ -258,7 +259,7 @@ workflow MHCQUANT {
             peptides_class_1_alleles,
             ch_vcf_from_sheet
         )
-        ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix( PREDICT_CLASS1.out.versions.ifEmpty(null) )
         ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
     } else {
         ch_predicted_possible_neoepitopes = Channel.empty()
@@ -273,7 +274,7 @@ workflow MHCQUANT {
             peptides_class_2_alleles,
             ch_vcf_from_sheet
         )
-        ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix( PREDICT_CLASS2.out.versions.ifEmpty(null) )
         ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
     } else {
         ch_predicted_possible_neoepitopes_II = Channel.empty()
@@ -303,15 +304,16 @@ workflow MHCQUANT {
     if (!params.skip_multiqc) {
         workflow_summary    = WorkflowMhcquant.paramsSummaryMultiqc(workflow, summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)
-
         ch_multiqc_files = Channel.empty()
-        ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-        ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+                                    .mix(Channel.from(ch_multiqc_config),
+                                        ch_multiqc_custom_config.collect().ifEmpty([]),
+                                        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+                                        CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
 
+        // Give two channels
         MULTIQC (
-            ch_multiqc_files.collect()
+            ch_multiqc_files.collect(),
+            [[],[]]
         )
 
         multiqc_report = MULTIQC.out.report.toList()

@@ -4,13 +4,13 @@
 
 ### `Added`
 
-- uasge opdate - added the option to provide a csv file
-
 ### `Fixed`
 
-- Clarification of the input file
+- Resolved issues with SAMPLESHEET_CHEC"
 
 ### `Dependencies`
+
+- Updated the multiQC module
 
 ### `Deprecated`
 
