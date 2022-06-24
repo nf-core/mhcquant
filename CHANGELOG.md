@@ -1,6 +1,20 @@
 # nf-core/mhcquant: Changelog
 
-## v2.3.1 nfcore/mhcquant "White Gold Swallow" - 2022/MM/DD
+## v2.3.2 nfcore/mhcquant "White Gold Swallow" - 2022/mm/dd
+
+### `Added`
+
+### `Fixed`
+
+- Resolved issues with SAMPLESHEET_CHEC"
+
+### `Dependencies`
+
+- Updated the multiQC module
+
+### `Deprecated`
+
+## v2.3.1 nfcore/mhcquant "White Gold Swallow" - 2022/05/10
 
 ### `Added`
 
