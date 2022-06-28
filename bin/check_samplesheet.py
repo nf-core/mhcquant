@@ -53,7 +53,6 @@ def check_samplesheet(file_in, file_out):
         MIN_COLS = 4
         HEADER = ["ID", "Sample", "Condition", "ReplicateFileName"]
         header = [x.strip('"') for x in fin.readline().strip().split("\t")]
-        print(header)
         if header[: len(HEADER)] != HEADER:
             print("ERROR: Please check samplesheet header -> {} != {}".format("\t".join(header), "\t".join(HEADER)))
             sys.exit(1)

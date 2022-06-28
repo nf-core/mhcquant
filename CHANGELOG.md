@@ -6,7 +6,7 @@
 
 ### `Fixed`
 
-- Resolved issues with SAMPLESHEET_CHEC"
+- Resolved issues with SAMPLESHEET_CHECK"
 
 ### `Dependencies`
 
