@@ -145,19 +145,20 @@ workflow MHCQUANT {
     // Raw file conversion
     OPENMS_THERMORAWFILEPARSER(ms_files.raw)
     ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.ifEmpty(null))
+    // Define the ch_ms_files channels to combine the mzml files
+    ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml)
+
     if ( params.run_centroidisation ) {
         // Optional: Run Peak Picking as Preprocessing
-        OPENMS_PEAKPICKERHIRES(ms_files.mzml)
+        OPENMS_PEAKPICKERHIRES(ch_ms_files)
         ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.ifEmpty(null))
         ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
     } else {
-        ch_mzml_file = ms_files.mzml
+        ch_mzml_file = ch_ms_files
     }
     // Run comet database search
     OPENMS_COMETADAPTER(
-        OPENMS_THERMORAWFILEPARSER.out.mzml
-            .mix(ch_mzml_file)
-            .join(ch_decoy_db, remainder:true))
+            ch_mzml_file.join(ch_decoy_db, remainder:true))
     ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
