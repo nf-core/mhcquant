@@ -7,6 +7,7 @@
 ### `Fixed`
 
 - Resolved issues with SAMPLESHEET_CHECK"
+- Fix for the `peakpickerhires`, raw files could not be used anymore
 
 ### `Dependencies`
 
