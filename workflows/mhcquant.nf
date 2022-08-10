@@ -189,7 +189,7 @@ workflow MHCQUANT {
         PRE_QUANTIFICATION(
             OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
             OPENMS_PEPTIDEINDEXER.out.idxml,
-            ms_files.mzml
+            ms_files.mzml // TODO: what is the concequence if the ms_files.mzml is removed from the mix?
                 .mix(OPENMS_THERMORAWFILEPARSER.out.mzml)
                 .mix(ch_mzml_file)
         )
