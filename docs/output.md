@@ -80,7 +80,6 @@ PEPTIDE contains information about peptide hits that were identified and corresp
     - `*pred_filtered.idXML` : Contains filtered PSMs prediction results by shrinked search space (outcome mhcflurry).
     - `{ID}_-_{filename}_filtered` : An outcome file of `OPENMS_IDFILTER_REFINED`
 
-
 </details>
 
 This folder contains the intermediate results from various steps of the MHCquant pipeline (e.g. (un)filtered PSMs, aligned mzMLs, features)

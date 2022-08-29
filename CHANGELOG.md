@@ -23,11 +23,11 @@
 
 - Updated the multiQC module
 
-| Dependency | Old version | New version |
-| ---------- | ----------- | ----------- |
-| `MultiQC`  | 1.11        | 1.12        |
-| `OpenMS`   | 2.6         | 2.8         |
-| `OpenMS thirdparty`   | 2.6         | 2.8      |
+| Dependency          | Old version | New version |
+| ------------------- | ----------- | ----------- |
+| `MultiQC`           | 1.11        | 1.12        |
+| `OpenMS`            | 2.6         | 2.8         |
+| `OpenMS thirdparty` | 2.6         | 2.8         |
 
 ### `Deprecated`
 
