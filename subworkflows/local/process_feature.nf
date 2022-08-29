@@ -6,9 +6,9 @@ include { OPENMS_FEATUREFINDERIDENTIFICATION }                              from
 include { OPENMS_FEATURELINKERUNLABELEDKD }                                 from '../../modules/local/openms_featurelinkerunlabeledkd'
 include { OPENMS_IDCONFLICTRESOLVER }                                       from '../../modules/local/openms_idconflictresolver'
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_QUANTIFIED }           from '../../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_QUANT }            from '../../modules/local/openms_mztabexporter'
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_QUANT }              from '../../modules/local/openms_mztabexporter'
 
-workflow POST_QUANTIFICATION {
+workflow PROCESS_FEATURE {
     take:
         psms_outcome
         aligned_mzml
@@ -47,5 +47,5 @@ workflow POST_QUANTIFICATION {
     emit:
         // Define the information that is returned by this workflow
         versions = ch_versions
-        mztab = OPENMS_MZTABEXPORTER_QUANT.out.mztab
+        //mztab = OPENMS_MZTABEXPORTER_QUANT.out.mztab
 }

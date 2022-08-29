@@ -2,22 +2,32 @@
  * Perform the quantification of the samples when the parameter --skip_quantification is not provided
  */
 
+include { OPENMS_FALSEDISCOVERYRATE }                                       from '../../modules/local/openms_falsediscoveryrate'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }                from '../../modules/local/openms_idfilter'
 include { OPENMS_MAPALIGNERIDENTIFICATION }                                 from '../../modules/local/openms_mapaligneridentification'
 include {
     OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERMZML
     OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERIDXML }               from '../../modules/local/openms_maprttransformer'
 
 
-workflow PRE_QUANTIFICATION {
+workflow MAP_ALIGNMENT {
     take:
-        aligned_hits
+        // aligned_hits
         indexed_hits
         mzml_files
 
     main:
         ch_versions = Channel.empty()
+        // Calculate fdr for id based alignment
+        OPENMS_FALSEDISCOVERYRATE(indexed_hits)
+        ch_versions = ch_versions.mix(OPENMS_FALSEDISCOVERYRATE.out.versions.first().ifEmpty(null))
+        // Filter fdr for id based alignment
+        OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
+                                        .flatMap { it -> [tuple(it[0], it[1], null)]})
+        ch_versions = ch_versions.mix(OPENMS_IDFILTER_FOR_ALIGNMENT.out.versions.first().ifEmpty(null))
+
         // Group samples together if they are replicates
-        ch_grouped_fdr_filtered = aligned_hits
+        ch_grouped_fdr_filtered = OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
             .map {
                 meta, raw ->
                     [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
@@ -65,5 +75,6 @@ workflow PRE_QUANTIFICATION {
         // Define the information that is returned by this workflow
         versions = ch_versions
         ch_proceeding_idx
+        aligned_idfilter = OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
         aligned_mzml = OPENMS_MAPRTTRANSFORMERMZML.out.aligned
 }

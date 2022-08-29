@@ -87,7 +87,7 @@ Additional functionality contained by the pipeline currently includes:
 - Conversion of raw to mzML files (`ThermoRawFileParser`)
 - Executing the peak picking with high_res algorithm (`PeakPickerHiRes`)
 
-#### Prequantification
+#### Map alignment
 
 - Corrects retention time distortions between maps, using information from peptides identified in different maps (`MapAlignerIdentification`)
 - Applies retention time transformations to maps (`MapRTTransformer`)
@@ -98,7 +98,7 @@ Additional functionality contained by the pipeline currently includes:
 - Predict psm results using mhcflurry to shrink search space (`mhcflurry`)
 - Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
 
-#### Post-quantification
+#### Process features
 
 - Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
 - Group corresponding features across labelfree experiments (`FeatureLinkerUnlabeledKD`)

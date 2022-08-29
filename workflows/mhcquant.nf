@@ -11,7 +11,6 @@ WorkflowMhcquant.initialise(params, log)
 // Input/output options
 if (params.input)   { sample_sheet = file(params.input) }
 if (params.fasta)   { params.fasta = params.fasta }
-//if (params.outdir)  { params.outdir  = './results' }
 
 // MHC affinity prediction
 if (params.predict_class_1 || params.predict_class_2) {
@@ -63,14 +62,14 @@ include { OPENMS_PEAKPICKERHIRES }                                          from
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
 
-include { OPENMS_FALSEDISCOVERYRATE }                                       from '../modules/local/openms_falsediscoveryrate'
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }                from '../modules/local/openms_idfilter'
-include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_PSMS }                 from '../modules/local/openms_textexporter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_COMET }                from '../modules/local/openms_textexporter'
 
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
+
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_FDR }                  from '../modules/local/openms_textexporter'
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_UNQUANTIFIED }         from '../modules/local/openms_textexporter'
 include { CUSTOM_DUMPSOFTWAREVERSIONS }                                     from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 include { MULTIQC }                                                         from '../modules/nf-core/modules/multiqc/main'
@@ -80,9 +79,9 @@ include { MULTIQC }                                                         from
 //
 include { INPUT_CHECK }                                                     from '../subworkflows/local/input_check'
 include { INCLUDE_PROTEINS }                                                from '../subworkflows/local/include_proteins'
-include { PRE_QUANTIFICATION }                                              from '../subworkflows/local/pre_quantification'
+include { MAP_ALIGNMENT }                                                   from '../subworkflows/local/map_alignment'
 include { REFINE_FDR }                                                      from '../subworkflows/local/refine_fdr'
-include { POST_QUANTIFICATION }                                             from '../subworkflows/local/post_quantification'
+include { PROCESS_FEATURE }                                                 from '../subworkflows/local/process_feature.nf'
 include { PREDICT_CLASS1 }                                                  from '../subworkflows/local/predict_class1'
 include { PREDICT_CLASS2 }                                                  from '../subworkflows/local/predict_class2'
 include { PREDICT_RT }                                                      from '../subworkflows/local/predict_rt'
@@ -159,42 +158,23 @@ workflow MHCQUANT {
     // Run comet database search
     OPENMS_COMETADAPTER(
             ch_mzml_file.join(ch_decoy_db, remainder:true))
+    // Write this information to an tsv file
+    OPENMS_TEXTEXPORTER_COMET(OPENMS_COMETADAPTER.out.idxml)
     ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
-    // Calculate fdr for id based alignment
-    OPENMS_FALSEDISCOVERYRATE(OPENMS_PEPTIDEINDEXER.out.idxml)
-    ch_versions = ch_versions.mix(OPENMS_FALSEDISCOVERYRATE.out.versions.first().ifEmpty(null))
-    // Filter fdr for id based alignment
-    OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
-                                    .flatMap { it -> [tuple(it[0], it[1], null)]})
-    ch_versions = ch_versions.mix(OPENMS_IDFILTER_FOR_ALIGNMENT.out.versions.first().ifEmpty(null))
-    // Write the content to a PSMs file
-    OPENMS_TEXTEXPORTER_PSMS (
-        OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
-        .flatMap {
-            meta, idxml ->
-                ident = idxml.baseName.split('_-_')[1]
-                [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], idxml]]
-        }
-    )
-
     //
     // SUBWORKFLOW: Pre-process step for the quantification of the data
     //
-
     if (!params.skip_quantification) {
-        PRE_QUANTIFICATION(
-            OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
+        MAP_ALIGNMENT(
             OPENMS_PEPTIDEINDEXER.out.idxml,
-            ms_files.mzml // TODO: what is the concequence if the ms_files.mzml is removed from the mix?
-                .mix(OPENMS_THERMORAWFILEPARSER.out.mzml)
-                .mix(ch_mzml_file)
+            ch_mzml_file
         )
-        ch_proceeding_idx = PRE_QUANTIFICATION.out.ch_proceeding_idx
-        ch_versions = ch_versions.mix(PRE_QUANTIFICATION.out.versions.ifEmpty(null))
+        ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
+        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
     } else {
         ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
             .map {
@@ -213,11 +193,18 @@ workflow MHCQUANT {
     // Run Percolator
     OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
     ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
-    ch_percolator_adapter_outcome = OPENMS_PERCOLATORADAPTER.out.idxml
     // Filter by percolator q-value
-    OPENMS_IDFILTER_Q_VALUE(ch_percolator_adapter_outcome.flatMap { it -> [tuple(it[0], it[1], null)]})
-    ch_versions = ch_versions
-                    .mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
+    OPENMS_IDFILTER_Q_VALUE(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)] })
+    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
+    // Prepare for check if file is empty
+    OPENMS_TEXTEXPORTER_FDR(OPENMS_IDFILTER_Q_VALUE.out.idxml)
+    // Return an error message when there is only a header present in the document
+    OPENMS_TEXTEXPORTER_FDR.out.tsv.map { 
+        meta, tsv -> if (tsv.size() < 130) {
+            log.error "It seems that there were no significant hits found for one or more samples.\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample."
+            exit(0)
+        } 
+    }
 
     //
     // SUBWORKFLOW: Refine the FDR values on the predicted subset
@@ -238,15 +225,16 @@ workflow MHCQUANT {
     }
 
     //
-    // SUBWORKFLOW: Perform the post quantification step
+    // SUBWORKFLOW: Perform the step to process the feature and obtain the belonging information
     //
+
     if ( !params.skip_quantification ) {
-        POST_QUANTIFICATION (
-            OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml,
-            PRE_QUANTIFICATION.out.aligned_mzml,
+        PROCESS_FEATURE (
+            MAP_ALIGNMENT.out.aligned_idfilter,
+            MAP_ALIGNMENT.out.aligned_mzml,
             filter_q_value
             )
-        ch_versions = ch_versions.mix( POST_QUANTIFICATION.out.versions.ifEmpty(null) )
+          ch_versions = ch_versions.mix( PROCESS_FEATURE.out.versions.ifEmpty(null) )
     } else {
         OPENMS_TEXTEXPORTER_UNQUANTIFIED( filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] } )
     }
@@ -254,9 +242,9 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
     //
-    if ( params.predict_class_1  & !params.skip_quantification ) {
+    if ( params.predict_class_1 & !params.skip_quantification ) {
         PREDICT_CLASS1 (
-            POST_QUANTIFICATION.out.mztab,
+            PROCESS_FEATURE.out.mztab,
             peptides_class_1_alleles,
             ch_vcf_from_sheet
         )
@@ -271,7 +259,7 @@ workflow MHCQUANT {
     //
     if ( params.predict_class_2 & !params.skip_quantification ) {
         PREDICT_CLASS2 (
-            POST_QUANTIFICATION.out.mztab,
+            PROCESS_FEATURE.out.mztab,
             peptides_class_2_alleles,
             ch_vcf_from_sheet
         )
