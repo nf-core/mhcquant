@@ -47,5 +47,5 @@ workflow PROCESS_FEATURE {
     emit:
         // Define the information that is returned by this workflow
         versions = ch_versions
-        //mztab = OPENMS_MZTABEXPORTER_QUANT.out.mztab
+        mztab = OPENMS_MZTABEXPORTER_QUANT.out.mztab
 }

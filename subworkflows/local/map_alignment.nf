@@ -12,7 +12,6 @@ include {
 
 workflow MAP_ALIGNMENT {
     take:
-        // aligned_hits
         indexed_hits
         mzml_files
 
