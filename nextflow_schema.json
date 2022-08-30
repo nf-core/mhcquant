@@ -86,7 +86,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-border-center-v",
                     "default": false,
-                    "description": "Choose whether the specified ms_level in pick_ms_levels is centroided or not."
+                    "description": "Include the flag when the specified ms level is not centroided (default=false). "
                 }
             }
         },
