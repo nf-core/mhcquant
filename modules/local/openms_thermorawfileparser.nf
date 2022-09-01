@@ -17,6 +17,7 @@ process OPENMS_THERMORAWFILEPARSER {
     script:
         def prefix           = task.ext.prefix ?: "${rawfile.baseName}"
 
+        // The ThermoRawFileParser expects a input file which is transcribed to an indexed mzML (defined by '-f 2')
         """
         ThermoRawFileParser.sh \\
             -i $rawfile \\

@@ -6,9 +6,9 @@ include { OPENMS_FEATUREFINDERIDENTIFICATION }                              from
 include { OPENMS_FEATURELINKERUNLABELEDKD }                                 from '../../modules/local/openms_featurelinkerunlabeledkd'
 include { OPENMS_IDCONFLICTRESOLVER }                                       from '../../modules/local/openms_idconflictresolver'
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_QUANTIFIED }           from '../../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_QUANT }            from '../../modules/local/openms_mztabexporter'
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_QUANT }              from '../../modules/local/openms_mztabexporter'
 
-workflow POST_QUANTIFICATION {
+workflow PROCESS_FEATURE {
     take:
         psms_outcome
         aligned_mzml
