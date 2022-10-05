@@ -11,7 +11,7 @@ workflow INPUT_CHECK {
     main:
     SAMPLESHEET_CHECK ( samplesheet )
         .csv
-        .splitCsv ( header:true, sep:',' )
+        .splitCsv ( header:true, sep:'\t' )
         .map { create_ms_channel(it) }
         .set { reads }
 

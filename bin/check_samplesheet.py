@@ -191,7 +191,7 @@ def check_samplesheet(file_in, file_out):
     header.insert(4, "Extension")
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_out.open(mode="w", newline="") as out_handle:
-        writer = csv.DictWriter(out_handle, header, delimiter=",")
+        writer = csv.DictWriter(out_handle, header, delimiter="\t")
         writer.writeheader()
         for row in checker.modified:
             row["Extension"] = os.path.splitext(row["ReplicateFileName"])[1][1:].lower()
