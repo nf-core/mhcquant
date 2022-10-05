@@ -14,6 +14,9 @@ process OPENMS_PEPTIDEINDEXER {
         tuple val(meta), path("*.idXML"), emit: idxml
         path "versions.yml"             , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.prefix ?: "${idxml.baseName}_-_idx"
 

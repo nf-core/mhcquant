@@ -14,6 +14,9 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         tuple val(meta), path("*.featureXML"), emit: featurexml
         path "versions.yml"                  , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.id}"
         def arguments        = params.quantification_fdr ? "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}" : "-id $id_quant"

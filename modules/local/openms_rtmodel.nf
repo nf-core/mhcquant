@@ -14,6 +14,9 @@ process OPENMS_RTMODEL {
         tuple val(meta), path("*_rt_training.txt"), path("*.paramXML"), path("*_trainset.txt"), emit: complete
         path "versions.yml"                                                                   , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.prefix ?: "${meta.sample}"
 

@@ -14,6 +14,9 @@ process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
         tuple val(meta), path("*.csv"), emit: csv
         path "versions.yml"           , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.suffix ?: "${meta.id}_predicted_peptides_class_1"
 
