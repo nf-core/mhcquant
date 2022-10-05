@@ -12,6 +12,7 @@ from pathlib import Path
 
 logger = logging.getLogger()
 
+
 class RowChecker:
     """
     Define a service that can validate and transform each given row.
@@ -28,24 +29,19 @@ class RowChecker:
     )
 
     def __init__(
-        self,
-        id_col="ID",
-        sample_col="Sample",
-        condition_col="Condition",
-        filename_col="ReplicateFileName",
-        **kwargs
+        self, id_col="ID", sample_col="Sample", condition_col="Condition", filename_col="ReplicateFileName", **kwargs
     ):
         """
         Initialize the row checker with the expected column names.
         Args:
-            id_col (int) : An integer that acts as a unique identifier for the 
+            id_col (int) : An integer that acts as a unique identifier for the
                 unique samples.
             sample_col (str): The name of the column that contains the sample name
                 (default "sample").
             condition_col (str): This column consists of additional information about
-                the sample, could be anything from a "wildtype/disease" description 
+                the sample, could be anything from a "wildtype/disease" description
                 to a particular treatment (default "").
-            filename_col (str): The name of the column that contains the path to the 
+            filename_col (str): The name of the column that contains the path to the
                 raw or mzMl files ).
         """
         super().__init__(**kwargs)
@@ -113,6 +109,7 @@ class RowChecker:
                 seen[sample] += 1
                 if counts[sample] > 1:
                     row[self._sample_col] = f"{sample}"
+
 
 def read_head(handle, num_lines=10):
     """Read the specified number of lines from the current position in the file."""
@@ -200,6 +197,7 @@ def check_samplesheet(file_in, file_out):
             row["Extension"] = os.path.splitext(row["ReplicateFileName"])[1][1:].lower()
             writer.writerow(row)
 
+
 def parse_args(argv=None):
     """Define and immediately parse command line arguments."""
     parser = argparse.ArgumentParser(
@@ -237,6 +235,7 @@ def main(argv=None):
         sys.exit(2)
     args.file_out.parent.mkdir(parents=True, exist_ok=True)
     check_samplesheet(args.file_in, args.file_out)
+
 
 if __name__ == "__main__":
     sys.exit(main())

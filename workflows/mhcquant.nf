@@ -313,6 +313,9 @@ workflow MHCQUANT {
     // MODULE: MultiQC
     //
     if (!params.skip_multiqc) {
+        workflow_summary = WorkflowMhcquant.paramsSummaryMultiqc(workflow, summary_params)
+        ch_workflow_summary = Channel.value(workflow_summary)
+        
         methods_description    = WorkflowMhcquant.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
         ch_methods_description = Channel.value(methods_description)
 

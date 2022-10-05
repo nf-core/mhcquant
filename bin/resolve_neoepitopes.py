@@ -30,7 +30,7 @@ from collections import defaultdict
 
 # logging setup
 console = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 console.setFormatter(formatter)
 LOG = logging.getLogger("Resolve Neoepitopes")
 LOG.addHandler(console)
@@ -50,10 +50,10 @@ def parse_mztab(identified_peptides_file):
     seq_geneIDs = defaultdict(str)
     for line in mztab_read:
         if line.startswith("PEP"):
-            content = line.split('\t')
+            content = line.split("\t")
             seq = content[1]
             geneID = content[2]
-            if not 'U' in seq and not 'X' in seq and not 'Z' in seq and not 'J' in seq and not 'B' in seq:
+            if not "U" in seq and not "X" in seq and not "Z" in seq and not "J" in seq and not "B" in seq:
                 seq_geneIDs[seq] = geneID
 
     return seq_geneIDs
@@ -71,14 +71,14 @@ def parse_vcf_neoepitopes(neoepitope_file, alleles):
     if not alleles:
         neoepitopes = []
         with open(neoepitope_file) as tsvfile:
-            reader = csv.DictReader(tsvfile, dialect='excel-tab')
+            reader = csv.DictReader(tsvfile, dialect="excel-tab")
             for row in reader:
-                neoepitopes.append(row['Sequence'])
+                neoepitopes.append(row["Sequence"])
 
         return neoepitopes
 
     with open(neoepitope_file) as tsvfile:
-        reader = csv.DictReader(tsvfile, dialect='excel-tab')
+        reader = csv.DictReader(tsvfile, dialect="excel-tab")
         reader, reader_iter_cp = tee(reader)
 
         # determine whether any alleles were used for the vcf_neoepitope_predictor script
@@ -88,8 +88,11 @@ def parse_vcf_neoepitopes(neoepitope_file, alleles):
             try:
                 content[allele]
             except KeyError:
-                LOG.warning("Allele " + str(allele)
-                            + " was specified, but not found in the possible neoepitopes predicted from the vcf file.")
+                LOG.warning(
+                    "Allele "
+                    + str(allele)
+                    + " was specified, but not found in the possible neoepitopes predicted from the vcf file."
+                )
                 alleles.remove(allele)
 
         # allele with highest affinity score wins
@@ -113,16 +116,16 @@ def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
     :param file_format: json or csv or raw
     """
     # if only list (no bindings)
-    if file_format == 'pep':
-        with open(filepath + "." + file_format, 'w') as f:
-            f.write('Peptide sequence' + '\t' + 'geneID')
-            f.write('\n'.join(str(seq) + '\t' + str(geneID) for seq, geneID in found_neoepitopes.items()))
+    if file_format == "pep":
+        with open(filepath + "." + file_format, "w") as f:
+            f.write("Peptide sequence" + "\t" + "geneID")
+            f.write("\n".join(str(seq) + "\t" + str(geneID) for seq, geneID in found_neoepitopes.items()))
     elif file_format == "json":
-        json.dump(found_neoepitopes, open(filepath + '.' + file_format, 'w'))
+        json.dump(found_neoepitopes, open(filepath + "." + file_format, "w"))
     elif file_format == "csv":
-        with open(filepath + '.' + file_format, 'w') as csv_file:
+        with open(filepath + "." + file_format, "w") as csv_file:
             writer = csv.writer(csv_file)
-            header = ['Peptide sequence', 'geneID']
+            header = ["Peptide sequence", "geneID"]
             writer.writerow(header)
             for seq, geneID in found_neoepitopes.items():
                 writer.writerow([seq, geneID])
@@ -135,33 +138,17 @@ def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
 
 
 def main():
-    model = argparse.ArgumentParser(description='Neoepitope resolvement from mztab and possible vcf determined neoepitopes.')
-
-    model.add_argument(
-        '-n', '--neoepitopes',
-        type=str,
-        help='All possible predicted neoepitopes'
+    model = argparse.ArgumentParser(
+        description="Neoepitope resolvement from mztab and possible vcf determined neoepitopes."
     )
 
-    model.add_argument(
-        '-m', '--mztab',
-        type=str,
-        help='Path to mztab file'
-    )
+    model.add_argument("-n", "--neoepitopes", type=str, help="All possible predicted neoepitopes")
 
-    model.add_argument(
-        '-f', '--file_format',
-        type=str,
-        default="csv",
-        help='File format for output file'
-    )
+    model.add_argument("-m", "--mztab", type=str, help="Path to mztab file")
 
-    model.add_argument(
-        '-o', '--output',
-        type=str,
-        required=True,
-        help='Output file path'
-    )
+    model.add_argument("-f", "--file_format", type=str, default="csv", help="File format for output file")
+
+    model.add_argument("-o", "--output", type=str, required=True, help="Output file path")
 
     args = model.parse_args()
 
