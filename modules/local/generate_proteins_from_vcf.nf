@@ -12,7 +12,10 @@ process GENERATE_PROTEINS_FROM_VCF {
 
     output:
         tuple val(meta), path("*.fasta"), emit: vcf_fasta
-        path "versions.yml"           , emit: versions
+        path "versions.yml"             , emit: versions
+
+    when:
+        task.ext.when == null || task.ext.when
 
     script:
         def prefix           = task.ext.prefix ?: "${fasta.baseName}_added_vcf"

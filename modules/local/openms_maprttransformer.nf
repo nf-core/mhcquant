@@ -14,6 +14,9 @@ process OPENMS_MAPRTTRANSFORMER {
         tuple val(meta), path("*_aligned.*"), emit: aligned
         path "versions.yml"                 , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.prefix ?: "${meta.id}_aligned"
         def fileExt          = alignment_file.collect { it.name.tokenize("\\.")[1] }.join(' ')

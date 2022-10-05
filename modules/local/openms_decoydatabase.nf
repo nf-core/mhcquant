@@ -14,6 +14,9 @@ process OPENMS_DECOYDATABASE {
         tuple val(meta), path("*.fasta"), emit: decoy
         path "versions.yml"             , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.prefix ?: "${fasta.baseName}_decoy"
 

@@ -14,6 +14,9 @@ process MHCNUGGETS_NEOEPITOPESCLASS2POST {
         tuple val(meta), path("*.csv"), emit: csv
         path "versions.yml"           , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
 
         """

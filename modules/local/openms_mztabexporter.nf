@@ -14,6 +14,9 @@ process OPENMS_MZTABEXPORTER {
         tuple val(meta), path("*.mzTab"), emit: mztab
         path "versions.yml"             , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.condition}"
         def args             = task.ext.args  ?: ''

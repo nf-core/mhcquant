@@ -27,15 +27,15 @@ def create_ms_channel(LinkedHashMap row) {
     meta.id        = row.ID
     meta.sample    = row.Sample
     meta.condition = row.Condition
-    meta.ext       = row.FileExt
+    meta.ext       = row.Extension
 
     // add path(s) of the data file(s) to the meta map
     def ms_meta = []
 
-    if (!file(row.Filename).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.Filename}"
+    if (!file(row.ReplicateFileName).exists()) {
+        exit 1, "ERROR: Please check input samplesheet -> MS file does not exist!\n${row.ReplicateFileName}"
     } else {
-        ms_meta = [ meta, [ file(row.Filename) ] ]
+        ms_meta = [ meta, [ file(row.ReplicateFileName) ] ]
     }
     return ms_meta
 }

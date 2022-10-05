@@ -14,6 +14,9 @@ process OPENMS_IDFILTER {
         tuple val(meta), path("*.idXML"), emit: idxml
         path "versions.yml"             , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def whitelist        = "$peptide_filter"
         def prefix           = task.ext.prefix ?: "${meta.id}_-_${idxml.baseName}_filtered"
