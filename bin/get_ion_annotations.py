@@ -4,10 +4,9 @@ __author__ = 'Jonas Scheid'
 from typing import Tuple
 from pyopenms import *
 import pandas as pd
-import re
 import numpy as np
 import argparse
-import logging
+
 
 def parse_arguments() -> Tuple[argparse.ArgumentParser,argparse.Namespace]:
     """
@@ -85,9 +84,10 @@ def generate_theoretical_spectrum(peptide: PeptideIdentification, args: argparse
     return theo_spectrum
 
 
+
 def flatten(ls: list) -> list:
     """
-    Purpose: Flatten list of lists into a flat lat
+    Purpose: Flatten list of lists into a list
     Output: List
     """
     return [item for sublist in ls for item in sublist]
@@ -99,29 +99,39 @@ def __main__():
     peptide_ids = []
     # Each peptide ID should only contain one hit in the FDR_filtered idXML
     IdXMLFile().load(args.filtered_idXML, protein_ids, peptide_ids)
+    # Get the list of mzML files that have been merged together by IDmerger previously
+    filenames = [filename.decode("utf-8") for filename in protein_ids[0].getMetaValue("spectra_data")]
     # Define empty lists that collect all the necessary information, which is comprised in DataFrames
     ions = []
     spectra_mz = []
     spectra_intensities = []
     spectra_peptides = []
+    spectra_nativeIDs = []
+    spectra_filename = []
     is_matching_ion = []
-    for i, file in enumerate(args.input):
+    # Define spectrum alignment class and set parameters for later use
+    spa = SpectrumAlignment()
+    # Specify parameters for the alignment. Pyopenms offers two parameters here
+    p = spa.getParameters()
+    # Since we look at the MS2 Spectrum we align Da tolerance
+    p.setValue("tolerance", float(args.fragment_mass_tolerance))
+    p.setValue("is_relative_tolerance", "false")  # false == Da, true == ppm
+    spa.setParameters(p)
+
+    for file in args.input:
         # Load the mzML files into the pyopenms structure
         exp = MSExperiment()
         MzMLFile().load(file, exp)
-        # Create map containing the spectrum nativeID and the respective scan number
-        # TODO: Explore how to access index of spectrum via pyopenms -> DOC is not sufficient to get the necessary information
-        native_id_index_map = {spectrum.getNativeID(): index for index, spectrum in enumerate(exp.getSpectra())}
-        """native_id_index_map = {spectrum.getNativeID(): int(re.search('scan=(.+)', spectrum.getNativeID()).group(1)) - 1
-                               for spectrum in exp.getSpectra()}"""
+        # Create lookup object for easy spectrum reference.
+        spectrum_lookup = SpectrumLookup()
+        spectrum_lookup.readSpectra(exp, 'scan=(?<SCAN>\\d+)')
         # Iterate over the FDR filtered peptideIDs
         for peptide_id in peptide_ids:
-            # Access raw spectrum via the spectrum index
-            if peptide_id.getMetaValue("spectrum_reference") not in native_id_index_map.keys():
+            # Check if the PeptideHit originates from the current mzML file
+            if file.split('/')[-1] != filenames[peptide_id.getMetaValue("id_merge_index")]:
                 continue
-            spectrum = exp.getSpectrum(native_id_index_map[peptide_id.getMetaValue("spectrum_reference")])
-            logging.warn(spectrum.getNativeID())
-            logging.warn(peptide_id.getMetaValue("spectrum_reference"))
+            # Access raw spectrum via the spectrum native ID
+            spectrum = exp.getSpectrum(spectrum_lookup.findByNativeID(peptide_id.getMetaValue("spectrum_reference")))
             # Save mz and intensities of all peaks to comprise them later in a DataFrame
             spectrum_mz, spectrum_intensities = spectrum.get_peaks()
             spectra_mz.append(spectrum_mz)
@@ -129,40 +139,34 @@ def __main__():
             sequence = peptide_id.getHits()[0].getSequence()
             spectra_peptides.append(np.repeat(sequence, len(spectrum_mz)))
             is_matching_ion_peptide = np.repeat(False, len(spectrum_mz))
-            # Distinguish scans of replicates by checking if the RT of the peptide matches the RT of the spectrum
-            # TODO: Come-up with a better solution to distinguish the true scan of the filtered peptide (not via RT)
-            if peptide_id.getRT() == round(spectrum.getRT(), 1):
-                theo_spectrum = generate_theoretical_spectrum(peptide_id, args)
-                alignment = []
-                spa = SpectrumAlignment()
-                # Specify parameters for the alignment. Pyopenms offers two parameters here
-                p = spa.getParameters()
-                # Since we look at the MS2 Spectrum we align Da tolerance
-                p.setValue("tolerance", int(args.fragment_mass_tolerance))
-                p.setValue("is_relative_tolerance", "false")  # false == Da, true == ppm
-                spa.setParameters(p)
-                # Align both spectra
-                spa.getSpectrumAlignment(alignment, theo_spectrum, spectrum)
-                # Obtain ion annotations from theoretical spectrum if there are at least two matching ions
-                if len(alignment) > 1:
-                    for theo_idx, obs_idx in alignment:
-                        ion_name = theo_spectrum.getStringDataArrays()[0][theo_idx].decode()
-                        ion_charge = theo_spectrum.getIntegerDataArrays()[0][theo_idx]
-                        obs_mz = spectrum[obs_idx].getMZ()
-                        obs_int = spectrum[obs_idx].getIntensity()
-                        ions.append([sequence, ion_name, ion_charge, theo_spectrum[theo_idx].getMZ(), obs_mz, obs_int])
-
-                        is_matching_ion_peptide[obs_idx] = True
+            spectra_nativeIDs.append(np.repeat(peptide_id.getMetaValue("spectrum_reference"), len(spectrum_mz)))
+            # Generate theoretical spectrum of peptide hit
+            theo_spectrum = generate_theoretical_spectrum(peptide_id, args)
+            # Align both spectra
+            alignment = []
+            spa.getSpectrumAlignment(alignment, theo_spectrum, spectrum)
+            # Obtain ion annotations from theoretical spectrum if there are at least two matching ions
+            if len(alignment) > 1:
+                for theo_idx, obs_idx in alignment:
+                    ion_name = theo_spectrum.getStringDataArrays()[0][theo_idx].decode()
+                    ion_charge = theo_spectrum.getIntegerDataArrays()[0][theo_idx]
+                    obs_mz = spectrum[obs_idx].getMZ()
+                    obs_int = spectrum[obs_idx].getIntensity()
+                    ions.append([sequence, ion_name, ion_charge, theo_spectrum[theo_idx].getMZ(), obs_mz, obs_int])
+                    is_matching_ion_peptide[obs_idx] = True
 
             is_matching_ion.append(is_matching_ion_peptide)
+
+        spectra_filename.append(np.repeat(file, len(flatten(spectra_mz)) - len(flatten(spectra_filename))))
 
     # Save information of matching ions
     matching_ions = pd.DataFrame.from_records(ions, columns=['Peptide', 'Ion_name', 'Ion_charge', 'Theoretical_mass',
                                                              'Experimental_mass', 'Intensity'])
     # Save information of all peaks (including non-matching peaks)
     all_peaks_df = pd.DataFrame([flatten(spectra_peptides), flatten(spectra_mz), flatten(spectra_intensities),
-                                 flatten(is_matching_ion)],
-                                index=['Peptide', 'Experimental_mass', 'Intensity', 'Is_matching_ion']).transpose()
+                                 flatten(is_matching_ion), flatten(spectra_nativeIDs), flatten(spectra_filename)],
+                                index=['Peptide', 'Experimental_mass', 'Intensity', 'Is_matching_ion',
+                                       'nativeID', 'filename']).transpose()
     all_peaks_df.index.name = 'Ion_ID'
     # Numpy magically converts booleans to floats of 1.0 and 0.0, revert that
     all_peaks_df['Is_matching_ion'] = all_peaks_df['Is_matching_ion'].astype(bool)
