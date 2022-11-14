@@ -34,7 +34,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 | --------------------- | ----------- | ----------- |
 | `MultiQC`             | 1.11        | 1.12        |
 | `OpenMS`              | 2.6         | 2.8         |
-| `pyOpenMS`            |      -      | 2.8         |
+| `pyOpenMS`            | -           | 2.8         |
 | `OpenMS thirdparty`   | 2.6         | 2.8         |
 | `thermorawfileparser` | 1.3.4       | 1.4.0       |
 
