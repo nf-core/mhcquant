@@ -82,7 +82,8 @@ def parse_arguments() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser.add_argument(
         "-rpp",
         "--remove_precursor_peak",
-        action="store_true",
+        type=bool,
+        default=False,
         help="Do not consider precursor masses in the theoretical spectrum generation",
     )
 

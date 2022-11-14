@@ -15,27 +15,23 @@ process PYOPENMS_ION_ANNOTATOR {
         path "versions.yml"             , emit: versions
 
     script:
-        def prefix           = sample
-        def precursor_charge = params.prec_charge
-        def remove_precursor = params.remove_precursor_peak ? "-remove_precursor_peak" : ""
-        def frag_mass_tol    = params.fragment_mass_tolerance
+        def prefix           = task.ext.prefix ?: "${mzml.baseName}"
+        def args             = task.ext.args  ?: ''
+
         def xions            = params.use_x_ions ? "-use_x_ions" : ""
         def zions            = params.use_z_ions ? "-use_z_ions" : ""
         def aions            = params.use_a_ions ? "-use_a_ions" : ""
         def cions            = params.use_c_ions ? "-use_c_ions" : ""
 
         """
-        echo $mzml
         get_ion_annotations.py --input $mzml \\
             -idxml $fdr_filtered_idxml \\
             --prefix $sample \\
-            --precursor_charge $precursor_charge \\
-            --fragment_mass_tolerance $frag_mass_tol \\
-            $remove_precursor \\
+            $args \\
             $xions \\
             $zions \\
             $aions \\
-            $cions \\
+            $cions
 
 
         cat <<-END_VERSIONS > versions.yml

@@ -302,13 +302,13 @@ workflow MHCQUANT {
             ch_predicted_possible_neoepitopes_II
         )
     }
-    // TODO: INSERT ION ANNOTATOR HERE
+
+    // Annotate spectra with ion fragmentation information
     ch_filtered_idxml = OPENMS_IDFILTER_Q_VALUE.out.idxml.map { meta, idxml -> [meta.id, idxml] }
     ch_raw_spectra_and_filtered_peptides = ch_mzml_file.map {
                                                 meta, mzml -> [meta.sample + '_' + meta.condition, mzml[0]] }
                                             .groupTuple()
                                             .join(ch_filtered_idxml)
-    ch_raw_spectra_and_filtered_peptides.view()
 
     PYOPENMS_ION_ANNOTATOR( ch_raw_spectra_and_filtered_peptides )
 
