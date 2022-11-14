@@ -14,6 +14,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 - `OPENMS_FALSEDISCOVERYRATE` and `OPENMS_IDFILTER_FOR_ALIGNMENT` are now included in the first quantification step
 - Altered the outcome content with the inclusion of the different folder structure
 - Updated the mhcquant_web.png in the `assets` folder
+- [#229](https://github.com/nf-core/mhcquant/pull/229) Add ion annotation feature requested in [#220](https://github.com/nf-core/mhcquant/issues/220)
 
 ### `Fixed`
 
@@ -33,6 +34,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 | --------------------- | ----------- | ----------- |
 | `MultiQC`             | 1.11        | 1.12        |
 | `OpenMS`              | 2.6         | 2.8         |
+| `pyOpenMS`            |      -      | 2.8         |
 | `OpenMS thirdparty`   | 2.6         | 2.8         |
 | `thermorawfileparser` | 1.3.4       | 1.4.0       |
 

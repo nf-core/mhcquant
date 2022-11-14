@@ -70,7 +70,7 @@ include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
-include { PYOPENMS_ION_ANNOTATOR }                                          from '../modules/local/pyopenms_ion_annotator'
+include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
 
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_FDR }                  from '../modules/local/openms_textexporter'
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_UNQUANTIFIED }         from '../modules/local/openms_textexporter'
@@ -310,7 +310,7 @@ workflow MHCQUANT {
                                             .groupTuple()
                                             .join(ch_filtered_idxml)
 
-    PYOPENMS_ION_ANNOTATOR( ch_raw_spectra_and_filtered_peptides )
+    PYOPENMS_IONANNOTATOR( ch_raw_spectra_and_filtered_peptides )
 
     //
     // MODULE: Pipeline reporting
