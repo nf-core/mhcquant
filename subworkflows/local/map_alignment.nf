@@ -16,6 +16,8 @@ workflow MAP_ALIGNMENT {
         mzml_files
 
     main:
+
+        mzml_files.toList().size().view()
         ch_versions = Channel.empty()
         // Calculate fdr for id based alignment
         OPENMS_FALSEDISCOVERYRATE(indexed_hits)
@@ -39,10 +41,6 @@ workflow MAP_ALIGNMENT {
 
         // TODO: somehow, there are files lost during the analyses
         // 605 -> 582 -> 590
-
-        mzml_files.view()
-
-
         mzml_files
         .join(
             OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
@@ -54,6 +52,8 @@ workflow MAP_ALIGNMENT {
                 }, by: [0] )
         .set { joined_trafos_mzmls }
 
+        joined_trafos_mzmls.toList().size().view()
+
         indexed_hits
         .join(
             OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
@@ -64,6 +64,8 @@ workflow MAP_ALIGNMENT {
                         [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
                 }, by: [0] )
         .set { joined_trafos_ids }
+
+        joined_trafos_ids.toList().size().view()
         // Align mzML files using trafoXMLs
         OPENMS_MAPRTTRANSFORMERMZML(joined_trafos_mzmls)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions.first().ifEmpty(null))
