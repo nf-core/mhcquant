@@ -163,27 +163,31 @@ workflow MHCQUANT {
         ch_decoy_db = ch_fasta_file
     }
 
+    ms_files.mzml.toList().size().view()
+
     // Raw file conversion
     OPENMS_THERMORAWFILEPARSER(ms_files.raw)
     ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.ifEmpty(null))
     // Define the ch_ms_files channels to combine the mzml files
-    ms_files.mzml.view()
     ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml)
 
-    ch_ms_files.view()
-//    if ( params.run_centroidisation ) {
-//        // Optional: Run Peak Picking as Preprocessing
-//        OPENMS_PEAKPICKERHIRES(ch_ms_files)
-//        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.ifEmpty(null))
-//        ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
-//    } else {
-//        ch_mzml_file = ch_ms_files
-//    }
+    ch_ms_files.toList().size().view()
+
+    if ( params.run_centroidisation ) {
+        // Optional: Run Peak Picking as Preprocessing
+        OPENMS_PEAKPICKERHIRES(ch_ms_files)
+        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.ifEmpty(null))
+        ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
+    } else {
+        ch_mzml_file = ch_ms_files
+    }
+
+    ch_mzml_file.toList().size().view()
+
+
 //    // Run comet database search
 //    OPENMS_COMETADAPTER(
 //            ch_mzml_file.join(ch_decoy_db, remainder:true))
-//
-//    ch_mzml_file.view()        
 //    // Write this information to an tsv file
 //    OPENMS_TEXTEXPORTER_COMET(OPENMS_COMETADAPTER.out.idxml)
 //    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
@@ -209,7 +213,7 @@ workflow MHCQUANT {
 //            }
 //            .groupTuple(by: [0])
 //    }
-
+//
 //    // Merge aligned idXMLfiles
 //    OPENMS_IDMERGER(ch_proceeding_idx)
 //    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
