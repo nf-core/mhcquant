@@ -180,31 +180,33 @@ workflow MHCQUANT {
     // Run comet database search
     OPENMS_COMETADAPTER(
             ch_mzml_file.join(ch_decoy_db, remainder:true))
-    // Write this information to an tsv file
-    OPENMS_TEXTEXPORTER_COMET(OPENMS_COMETADAPTER.out.idxml)
-    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
-    // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
-    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
-    //
-    // SUBWORKFLOW: Pre-process step for the quantification of the data
-    //
-    if (!params.skip_quantification) {
-        MAP_ALIGNMENT(
-            OPENMS_PEPTIDEINDEXER.out.idxml,
-            ch_mzml_file
-        )
-        ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
-        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
-    } else {
-        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
-            .map {
-                meta, raw ->
-                [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
-            }
-            .groupTuple(by: [0])
-    }
+    ch_mzml_file.view()        
+//    // Write this information to an tsv file
+//    OPENMS_TEXTEXPORTER_COMET(OPENMS_COMETADAPTER.out.idxml)
+//    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
+//    // Index decoy and target hits
+//    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
+//    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
+//
+//    //
+//    // SUBWORKFLOW: Pre-process step for the quantification of the data
+//    //
+//    if (!params.skip_quantification) {
+//        MAP_ALIGNMENT(
+//            OPENMS_PEPTIDEINDEXER.out.idxml,
+//            ch_mzml_file
+//        )
+//        ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
+//        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
+//    } else {
+//        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
+//            .map {
+//                meta, raw ->
+//                [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
+//            }
+//            .groupTuple(by: [0])
+//    }
 
 //    // Merge aligned idXMLfiles
 //    OPENMS_IDMERGER(ch_proceeding_idx)
