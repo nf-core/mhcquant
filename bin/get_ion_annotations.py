@@ -8,6 +8,7 @@ import numpy as np
 import argparse
 from pyopenms.Plotting import *
 
+
 def parse_arguments() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
     """
     Purpose: Parse command line arguments
@@ -91,9 +92,8 @@ def parse_arguments() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
 
     return parser, args
 
-def generate_theoretical_spectrum(
-    peptide: PeptideIdentification, args: argparse.Namespace
-) -> MSSpectrum:
+
+def generate_theoretical_spectrum(peptide: PeptideIdentification, args: argparse.Namespace) -> MSSpectrum:
     """
     Purpose: Generate theoretical spectrum based on PeptideIdentification
     Output: Theoretical spectrum of input peptide
@@ -102,9 +102,7 @@ def generate_theoretical_spectrum(
     min_charge = int(args.precursor_charge.split(":")[0])
     # If precursor charge ranges between 2:5, the fragment charges range from 1:4.
     # Get the precursor charge information from the idXML file
-    min_fragment_charge, max_fragment_charge = min_charge - 1, max(
-        peptide.getHits()[0].getCharge() - 1, 1
-    )
+    min_fragment_charge, max_fragment_charge = min_charge - 1, max(peptide.getHits()[0].getCharge() - 1, 1)
 
     # Define parameters for theoretical spectrum generation
     tsg = TheoreticalSpectrumGenerator()
@@ -134,12 +132,14 @@ def generate_theoretical_spectrum(
 
     return theo_spectrum
 
+
 def flatten(ls: list) -> list:
     """
     Purpose: Flatten list of lists into a list
     Output: List
     """
     return [item for sublist in ls for item in sublist]
+
 
 def __main__():
     parser, args = parse_arguments()
@@ -148,10 +148,7 @@ def __main__():
     # Each peptide ID should only contain one hit in the FDR_filtered idXML
     IdXMLFile().load(args.filtered_idXML, protein_ids, peptide_ids)
     # Get the list of mzML files that have been merged together by IDmerger previously
-    filenames = [
-        filename.decode("utf-8")
-        for filename in protein_ids[0].getMetaValue("spectra_data")
-    ]
+    filenames = [filename.decode("utf-8") for filename in protein_ids[0].getMetaValue("spectra_data")]
     # Define empty lists that collect all the necessary information, which is comprised in DataFrames
     ions = []
     spectra_mz = []
@@ -179,17 +176,10 @@ def __main__():
         # Iterate over the FDR filtered peptideIDs
         for peptide_id in peptide_ids:
             # Check if the PeptideHit originates from the current mzML file
-            if (
-                file.split("/")[-1]
-                != filenames[peptide_id.getMetaValue("id_merge_index")]
-            ):
+            if file.split("/")[-1] != filenames[peptide_id.getMetaValue("id_merge_index")]:
                 continue
             # Access raw spectrum via the spectrum native ID
-            spectrum = exp.getSpectrum(
-                spectrum_lookup.findByNativeID(
-                    peptide_id.getMetaValue("spectrum_reference")
-                )
-            )
+            spectrum = exp.getSpectrum(spectrum_lookup.findByNativeID(peptide_id.getMetaValue("spectrum_reference")))
             # Save mz and intensities of all peaks to comprise them later in a DataFrame
             spectrum_mz, spectrum_intensities = spectrum.get_peaks()
             spectra_mz.append(spectrum_mz)
@@ -197,11 +187,7 @@ def __main__():
             sequence = peptide_id.getHits()[0].getSequence()
             spectra_peptides.append(np.repeat(sequence, len(spectrum_mz)))
             is_matching_ion_peptide = np.repeat(False, len(spectrum_mz))
-            spectra_nativeIDs.append(
-                np.repeat(
-                    peptide_id.getMetaValue("spectrum_reference"), len(spectrum_mz)
-                )
-            )
+            spectra_nativeIDs.append(np.repeat(peptide_id.getMetaValue("spectrum_reference"), len(spectrum_mz)))
             # Generate theoretical spectrum of peptide hit
             theo_spectrum = generate_theoretical_spectrum(peptide_id, args)
             # Align both spectra
@@ -228,9 +214,7 @@ def __main__():
 
             is_matching_ion.append(is_matching_ion_peptide)
 
-        spectra_filename.append(
-            np.repeat(file, len(flatten(spectra_mz)) - len(flatten(spectra_filename)))
-        )
+        spectra_filename.append(np.repeat(file, len(flatten(spectra_mz)) - len(flatten(spectra_filename))))
 
     # Save information of matching ions
     matching_ions = pd.DataFrame.from_records(
@@ -271,6 +255,7 @@ def __main__():
     # Write matching ions table
     matching_ions.to_csv(f"{args.prefix}_matching_ions.tsv", sep="\t", index=False)
     all_peaks_df.to_csv(f"{args.prefix}_all_peaks.tsv", sep="\t")
+
 
 if __name__ == "__main__":
     __main__()

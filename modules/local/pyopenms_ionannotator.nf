@@ -1,4 +1,4 @@
-process PYOPENMS_ION_ANNOTATOR {
+process PYOPENMS_IONANNOTATOR {
     tag "$sample"
     label 'process_high'
 
@@ -24,7 +24,8 @@ process PYOPENMS_ION_ANNOTATOR {
         def cions            = params.use_c_ions ? "-use_c_ions" : ""
 
         """
-        get_ion_annotations.py --input $mzml \\
+        get_ion_annotations.py \\
+            --input $mzml \\
             -idxml $fdr_filtered_idxml \\
             --prefix $sample \\
             $args \\
