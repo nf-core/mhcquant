@@ -40,8 +40,8 @@ workflow MAP_ALIGNMENT {
         // TODO: somehow, there are files lost during the analyses
         // 605 -> 582 -> 590
 
-        println mzml_files.size()
-        
+        mzml_files.view()
+
 
         mzml_files
         .join(
