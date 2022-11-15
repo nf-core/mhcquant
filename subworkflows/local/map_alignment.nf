@@ -38,9 +38,10 @@ workflow MAP_ALIGNMENT {
         // Intermediate step to join RT transformation files with mzml and idxml channels
 
         // TODO: somehow, there are files lost during the analyses
-        // 605 -> 582
+        // 605 -> 582 -> 590
 
         println mzml_files.size()
+        
 
         mzml_files
         .join(
