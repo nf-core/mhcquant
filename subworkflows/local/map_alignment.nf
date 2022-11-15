@@ -36,6 +36,12 @@ workflow MAP_ALIGNMENT {
         OPENMS_MAPALIGNERIDENTIFICATION(ch_grouped_fdr_filtered)
         ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions.first().ifEmpty(null))
         // Intermediate step to join RT transformation files with mzml and idxml channels
+
+        // TODO: somehow, there are files lost during the analyses
+        // 605 -> 582
+
+        println mzml_files.size()
+
         mzml_files
         .join(
             OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
