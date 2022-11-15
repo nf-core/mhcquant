@@ -167,8 +167,8 @@ workflow MHCQUANT {
     OPENMS_THERMORAWFILEPARSER(ms_files.raw)
     ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.ifEmpty(null))
     // Define the ch_ms_files channels to combine the mzml files
-//    ms_files.mzml.view()
-//    ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml)
+    ms_files.mzml.view()
+    ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml)
 //
 //    if ( params.run_centroidisation ) {
 //        // Optional: Run Peak Picking as Preprocessing
