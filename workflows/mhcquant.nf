@@ -169,7 +169,8 @@ workflow MHCQUANT {
     // Define the ch_ms_files channels to combine the mzml files
     ms_files.mzml.view()
     ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml)
-//
+
+    ch_ms_files.view()
 //    if ( params.run_centroidisation ) {
 //        // Optional: Run Peak Picking as Preprocessing
 //        OPENMS_PEAKPICKERHIRES(ch_ms_files)
