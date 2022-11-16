@@ -16,8 +16,6 @@ workflow MAP_ALIGNMENT {
         mzml_files
 
     main:
-
-        mzml_files.toList().size().view()
         ch_versions = Channel.empty()
         // Calculate fdr for id based alignment
         OPENMS_FALSEDISCOVERYRATE(indexed_hits)
@@ -38,38 +36,24 @@ workflow MAP_ALIGNMENT {
         OPENMS_MAPALIGNERIDENTIFICATION(ch_grouped_fdr_filtered)
         ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions.first().ifEmpty(null))
         // Intermediate step to join RT transformation files with mzml and idxml channels
+        joined_trafos = OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
+            .transpose()
+            .flatMap {
+                meta, trafoxml ->
+                    ident = trafoxml.baseName.split('_-_')[0]
+                    [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
+            }
 
-        // TODO: somehow, there are files lost during the analyses
-        // 605 -> 582 -> 590
+        joined_trafos.toList().size().view()
+        //joined_trafos.view()
 
-        OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-        .transpose()
-        .flatMap {
-            meta, trafoxml ->
-                ident = trafoxml.baseName.split('_-_')[0]
-                [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-        }.toList().size().view()
-
-       // OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-       // .transpose()
-       // .flatMap {
-       //     meta, trafoxml ->
-       //         ident = trafoxml.baseName.split('_-_')[0]
-       //         [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-       // }.view()
-
-        mzml_files
-        .join(
-            OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-                .transpose()
-                .flatMap {
-                    meta, trafoxml ->
-                        ident = trafoxml.baseName.split('_-_')[0]
-                        [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-                })
-        .set { joined_trafos_mzmls }
+        joined_trafos_mzmls = mzml_files.join(joined_trafos)
 
         joined_trafos_mzmls.toList().size().view()
+        joined_trafos_mzmls.view()      
+
+//
+//        joined_trafos_mzmls.toList().size().view()
 //
 //        indexed_hits
 //        .join(
