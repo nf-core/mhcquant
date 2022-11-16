@@ -178,6 +178,7 @@ workflow MHCQUANT {
     } else {
         ch_mzml_file = ch_ms_files
     }
+
     // Run comet database search
     OPENMS_COMETADAPTER(
             ch_mzml_file.join(ch_decoy_db, remainder:true))
