@@ -191,21 +191,21 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Pre-process step for the quantification of the data
     //
-    if (!params.skip_quantification) {
+//    if (!params.skip_quantification) {
         MAP_ALIGNMENT(
             OPENMS_PEPTIDEINDEXER.out.idxml,
             ch_mzml_file
         )
-        ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
-        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
-    } else {
-        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
-            .map {
-                meta, raw ->
-                [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
-            }
-            .groupTuple(by: [0])
-    }
+//        ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
+//        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
+//    } else {
+//        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
+//            .map {
+//                meta, raw ->
+//                [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
+//            }
+//            .groupTuple(by: [0])
+//    }
 
 //    // Merge aligned idXMLfiles
 //    OPENMS_IDMERGER(ch_proceeding_idx)
