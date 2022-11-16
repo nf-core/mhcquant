@@ -44,27 +44,10 @@ workflow MAP_ALIGNMENT {
                     [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
             }
 
-        joined_trafos.toList().size().view()
-        //joined_trafos.view()
-
         joined_trafos_mzmls = mzml_files.join(joined_trafos)
-
+        joined_trafos_ids = indexed_hits.join(joined_trafos)
         joined_trafos_mzmls.toList().size().view()
-        joined_trafos_mzmls.view()      
-
-//
-//        joined_trafos_mzmls.toList().size().view()
-//
-//        indexed_hits
-//        .join(
-//            OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-//                .transpose()
-//                .flatMap {
-//                    meta, trafoxml ->
-//                        ident = trafoxml.baseName.split('_-_')[0]
-//                        [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-//                })
-//        .set { joined_trafos_ids }
+        joined_trafos_ids.toList().size().view()
 //
 //        // Align mzML files using trafoXMLs
 //        OPENMS_MAPRTTRANSFORMERMZML(joined_trafos_mzmls)
