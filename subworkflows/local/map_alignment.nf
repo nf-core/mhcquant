@@ -59,9 +59,11 @@ workflow MAP_ALIGNMENT {
         }.view()
 
         mzml_files
+        .toSortedList()
         .join(
             OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
                 .transpose()
+                .toSortedList()
                 .flatMap {
                     meta, trafoxml ->
                         ident = trafoxml.baseName.split('_-_')[0]
