@@ -43,7 +43,6 @@ workflow MAP_ALIGNMENT {
                     ident = trafoxml.baseName.split('_-_')[0]
                     [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
             }
-
         // Intermediate step to join RT transformation files with mzml channels
         joined_trafos_mzmls = mzml_files.join(joined_trafos)
         // Intermediate step to join RT transformation files with idxml channels
