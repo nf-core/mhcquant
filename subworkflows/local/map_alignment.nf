@@ -48,9 +48,6 @@ workflow MAP_ALIGNMENT {
         joined_trafos_mzmls = mzml_files.join(joined_trafos)
         // Intermediate step to join RT transformation files with idxml channels
         joined_trafos_ids = indexed_hits.join(joined_trafos)
-        joined_trafos_mzmls.toList().size().view()
-        joined_trafos_ids.toList().size().view()
-
         // Align mzML files using trafoXMLs
         OPENMS_MAPRTTRANSFORMERMZML(joined_trafos_mzmls)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions.first().ifEmpty(null))
