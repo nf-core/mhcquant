@@ -71,7 +71,7 @@ workflow MAP_ALIGNMENT {
                     meta, trafoxml ->
                         ident = trafoxml.baseName.split('_-_')[0]
                         [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-                }, by: [0] )
+                })
         .set { joined_trafos_ids }
 
         // Align mzML files using trafoXMLs
