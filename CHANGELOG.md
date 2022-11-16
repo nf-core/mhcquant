@@ -1,6 +1,11 @@
 # nf-core/mhcquant: Changelog
 
-## v2.3.2 nfcore/mhcquant "White Gold Swallow" - 2022/mm/dd
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## v2.3.2dev - [date]
+
+Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re/) template.
 
 ### `Added`
 
@@ -18,16 +23,19 @@
 - `POST_QUANTIFICATION` is renamed to `PROCESS_FEATURE` since the feature identification and processing is done here
 - Outcome of `OPENMS_FEATUREFINDERIDENTIFICATION` got lost during one of the previous updates, this is reintroduced
 - `OPENMS_TEXTEXPORTER_UNQUANTIFIED` and `OPENMS_TEXTEXPORTER_QUANTIFIED` return only significant hits again
+- [#226](https://github.com/nf-core/mhcquant/pull/226) - nf-core template update (version 2.6)
+- [#230](https://github.com/nf-core/mhcquant/issues/230) - Issue with `OPENMS_MZTABEXPORTER_QUANT`
 
 ### `Dependencies`
 
 - Updated the multiQC module
 
-| Dependency          | Old version | New version |
-| ------------------- | ----------- | ----------- |
-| `MultiQC`           | 1.11        | 1.12        |
-| `OpenMS`            | 2.6         | 2.8         |
-| `OpenMS thirdparty` | 2.6         | 2.8         |
+| Dependency            | Old version | New version |
+| --------------------- | ----------- | ----------- |
+| `MultiQC`             | 1.11        | 1.12        |
+| `OpenMS`              | 2.6.0       | 2.8.0       |
+| `OpenMS thirdparty`   | 2.6.0       | 2.8.0       |
+| `thermorawfileparser` | 1.3.4       | 1.4.0       |
 
 ### `Deprecated`
 

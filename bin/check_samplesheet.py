@@ -1,133 +1,240 @@
 #!/usr/bin/env python
 
+"""Provide a command line tool to validate and transform tabular samplesheets."""
+
 import os
-import sys
-import errno
 import argparse
+import csv
+import logging
+import sys
+from collections import Counter
+from pathlib import Path
 
-def parse_args(args=None):
-    Description = "Reformat nf-core/mhcquant samplesheet file and check its contents."
-    Epilog = "Example usage: python check_samplesheet.py <FILE_IN> <FILE_OUT>"
+logger = logging.getLogger()
 
-    parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
-    parser.add_argument("FILE_IN", help="Input samplesheet file.")
-    parser.add_argument("FILE_OUT", help="Output file.")
-    return parser.parse_args(args)
 
-def make_dir(path):
-    if len(path) > 0:
-        try:
-            os.makedirs(path)
-        except OSError as exception:
-            if exception.errno != errno.EEXIST:
-                raise exception
+class RowChecker:
+    """
+    Define a service that can validate and transform each given row.
 
-def print_error(error, context="Line", context_str=""):
-    error_str = "ERROR: Please check samplesheet -> {}".format(error)
-    if context != "" and context_str != "":
-        error_str = "ERROR: Please check samplesheet -> {}\n{}: '{}'".format(
-            error, context.strip(), context_str.strip()
+    Attributes:
+        modified (list): A list of dicts, where each dict corresponds to a previously
+            validated and transformed row. The order of rows is maintained.
+
+    """
+
+    VALID_FORMATS = (
+        ".raw",
+        ".mzML",
+    )
+
+    def __init__(
+        self, id_col="ID", sample_col="Sample", condition_col="Condition", filename_col="ReplicateFileName", **kwargs
+    ):
+        """
+        Initialize the row checker with the expected column names.
+        Args:
+            id_col (int) : An integer that acts as a unique identifier for the
+                unique samples.
+            sample_col (str): The name of the column that contains the sample name
+                (default "sample").
+            condition_col (str): This column consists of additional information about
+                the sample, could be anything from a "wildtype/disease" description
+                to a particular treatment (default "").
+            filename_col (str): The name of the column that contains the path to the
+                raw or mzMl files ).
+        """
+        super().__init__(**kwargs)
+        self._id_col = id_col
+        self._sample_col = sample_col
+        self._condition_col = condition_col
+        self._filename_col = filename_col
+        self._seen = set()
+        self.modified = []
+
+    def validate_and_transform(self, row):
+        """
+        Perform all validations on the given row and insert the read pairing status.
+        Args:
+            row (dict): A mapping from column headers (keys) to elements of that row
+                (values).
+        """
+        self._validate_id(row)
+        self._validate_sample(row)
+        self._validate_condition(row)
+        self._validate_filename(row)
+        self._seen.add((row[self._sample_col], row[self._filename_col]))
+        self.modified.append(row)
+
+    def _validate_id(self, row):
+        """Assert that the sample name exists and convert spaces to underscores."""
+        assert row[self._id_col].isdigit(), "Make sure that the sample ID is an numeric value"
+
+    def _validate_sample(self, row):
+        """Assert that the sample name exists and convert spaces to underscores."""
+        assert len(row[self._sample_col]) > 0, "Sample input is required."
+        # Sanitize samples slightly.
+        row[self._sample_col] = row[self._sample_col].replace(" ", "_")
+
+    def _validate_condition(self, row):
+        """Assert that the condition is provided and convert spaces to underscores."""
+        assert len(row[self._condition_col]) > 0, "Sample input is required."
+        # Sanitize samples slightly.
+        row[self._condition_col] = row[self._condition_col].replace(" ", "_")
+
+    def _validate_filename(self, row):
+        """Assert that the data entry has the right format if it exists."""
+        if len(row[self._filename_col]) > 0:
+            self._validate_ms_format(row[self._filename_col])
+
+    def _validate_ms_format(self, filename):
+        """Assert that a given filename has one of the expected MS extensions."""
+        assert any(filename.endswith(extension) for extension in self.VALID_FORMATS), (
+            f"The file has an unrecognized extension: {filename}\n"
+            f"It should be one of: {', '.join(self.VALID_FORMATS)}"
         )
-    print(error_str)
-    sys.exit(1)
+
+    def validate_unique_samples(self):
+        """
+        Assert that the combination of sample name and filename is unique.
+        In addition to the validation, also rename the sample if more than one sample
+        file combination exists.
+        """
+        assert len(self._seen) == len(self.modified), "The pair of sample name and file must be unique."
+        if len({pair[0] for pair in self._seen}) < len(self._seen):
+            counts = Counter(pair[0] for pair in self._seen)
+            seen = Counter()
+            for row in self.modified:
+                sample = row[self._sample_col]
+                seen[sample] += 1
+                if counts[sample] > 1:
+                    row[self._sample_col] = f"{sample}"
+
+
+def read_head(handle, num_lines=10):
+    """Read the specified number of lines from the current position in the file."""
+    lines = []
+    for idx, line in enumerate(handle):
+        if idx == num_lines:
+            break
+        lines.append(line)
+    return "".join(lines)
+
+
+def sniff_format(handle):
+    """
+    Detect the tabular format.
+
+    Args:
+        handle (text file): A handle to a `text file`_ object. The read position is
+        expected to be at the beginning (index 0).
+
+    Returns:
+        csv.Dialect: The detected tabular format.
+
+    .. _text file:
+        https://docs.python.org/3/glossary.html#term-text-file
+
+    """
+    peek = read_head(handle)
+    handle.seek(0)
+    sniffer = csv.Sniffer()
+    if not sniffer.has_header(peek):
+        logger.critical("The given sample sheet does not appear to contain a header.")
+        sys.exit(1)
+    dialect = sniffer.sniff(peek)
+    return dialect
+
 
 def check_samplesheet(file_in, file_out):
+
     """
-    This function checks that the samplesheet follows the following structure:
-
-    ID  Sample  Condition   ReplicateFileName
-    1   WT  A   WT_A.raw
-    2   WT  B   WT_B.raw
-    3   KO  A   KO_A.raw
-    4   KO  B   KO_B.raw
+    Check that the tabular samplesheet has the structure expected by nf-core pipelines.
+    Validate the general shape of the table, expected columns, and each row. Also add
+    an additional column which records whether one or two FASTQ reads were found.
+    Args:
+        file_in (pathlib.Path): The given tabular samplesheet. The format can be either
+            CSV, TSV, or any other format automatically recognized by ``csv.Sniffer``.
+        file_out (pathlib.Path): Where the validated and transformed samplesheet should
+            be created; always in CSV format.
+    Example:
+        This function checks that the samplesheet follows the following structure,
+        see also the `viral recon samplesheet`_::
+            ID  Sample  Condition   ReplicateFileName
+            1   WT  A   WT_A.raw
+            2   WT  B   WT_B.raw
+            3   KO  A   KO_A.raw
+            4   KO  B   KO_B.raw
+    .. _viral recon samplesheet:
+        https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
     """
+    required_columns = {"ID", "Sample", "Condition", "ReplicateFileName"}
 
-    sample_run_dict = {}
-    with open(file_in, "r") as fin:
-
-        ## Check header
-        MIN_COLS = 4
-        HEADER = ["ID", "Sample", "Condition", "ReplicateFileName"]
-        header = [x.strip('"') for x in fin.readline().strip().split("\t")]
-        if header[: len(HEADER)] != HEADER:
-            print("ERROR: Please check samplesheet header -> {} != {}".format("\t".join(header), "\t".join(HEADER)))
+    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
+    with file_in.open(newline="") as in_handle:
+        reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
+        # Validate the existence of the expected header columns.
+        if not required_columns.issubset(reader.fieldnames):
+            req_cols = ", ".join(required_columns)
+            logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
             sys.exit(1)
+        # Validate each row.
+        checker = RowChecker()
+        for i, row in enumerate(reader):
+            try:
+                checker.validate_and_transform(row)
+            except AssertionError as error:
+                logger.critical(f"{str(error)} On line {i + 2}.")
+                sys.exit(1)
+        checker.validate_unique_samples()
+    header = list(reader.fieldnames)
+    header.insert(4, "Extension")
+    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
+    with file_out.open(mode="w", newline="") as out_handle:
+        writer = csv.DictWriter(out_handle, header, delimiter="\t")
+        writer.writeheader()
+        for row in checker.modified:
+            row["Extension"] = os.path.splitext(row["ReplicateFileName"])[1][1:].lower()
+            writer.writerow(row)
 
-        ## Check sample entries
-        for line in fin:
-            lspl = [x.strip().strip('"') for x in line.strip().split("\t")]
-            ## Check valid number of columns per row
-            if len(lspl) < len(HEADER):
-                print_error(
-                    "Invalid number of columns (minimum = {})!".format(len(HEADER)),
-                    "Line",
-                    line,
-                )
-            num_cols = len([x for x in lspl if x])
-            if num_cols < MIN_COLS:
-                print_error(
-                    "Invalid number of populated columns (minimum = {})!".format(MIN_COLS),
-                    "Line",
-                    line,
-                )
 
-            ## Check sample name entries
-            ident, sample, condition, filename = lspl[: len(HEADER)]
-            # sample, condition, filename = lspl[1: len(HEADER)]
+def parse_args(argv=None):
+    """Define and immediately parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Validate and transform a tabular samplesheet.",
+        epilog="Example: python check_samplesheet.py samplesheet.csv samplesheet.valid.csv",
+    )
+    parser.add_argument(
+        "file_in",
+        metavar="FILE_IN",
+        type=Path,
+        help="Tabular input samplesheet in CSV or TSV format.",
+    )
+    parser.add_argument(
+        "file_out",
+        metavar="FILE_OUT",
+        type=Path,
+        help="Transformed output samplesheet in CSV format.",
+    )
+    parser.add_argument(
+        "-l",
+        "--log-level",
+        help="The desired log level (default WARNING).",
+        choices=("CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"),
+        default="WARNING",
+    )
+    return parser.parse_args(argv)
 
-            ## Check replicate entry is integer
-            if not ident.isdigit():
-                ident = int(ident)
 
-            # identifier = sample + "_" + condition + "_" + ident
-            identifier = ident
-
-            for strCon in [sample, condition]:
-                if strCon:
-                    if strCon.find(" ") != -1:
-                        print_error("Group entry contains spaces!", "Line", line)
-                else:
-                    print_error("Group entry has not been specified!", "Line", line)
-
-            ## Check MS file extension
-            if filename:
-                if filename.find(" ") != -1:
-                    print_error("FastQ file contains spaces!", "Line", line)
-
-                if not filename.endswith(".raw") and not filename.endswith(".mzML"):
-                    print_error(
-                        "FastQ file does not have extension '.raw' or '.mzML'!",
-                        "Line",
-                        line,
-                    )
-                elif filename.endswith(".raw"):
-                    sample_info = [sample, condition, filename, "raw"]
-                elif filename.lower().endswith(".mzml"):
-                    sample_info = [sample, condition, filename, "mzml"]
-
-                ## Create sample mapping dictionary = {sample: [[ single_end, fastq_1, fastq_2, strandedness ]]}
-                if sample not in sample_run_dict:
-                    sample_run_dict[identifier] = [sample_info]
-                else:
-                    if sample_info in sample_run_dict[identifier]:
-                        print_error("Samplesheet contains duplicate rows!", "Line", line)
-                    else:
-                        sample_run_dict[identifier].append(sample_info)
-
-    ## Write validated samplesheet with appropriate columns
-    if len(sample_run_dict) > 0:
-        out_dir = os.path.dirname(file_out)
-        make_dir(out_dir)
-        with open(file_out, "w") as fout:
-            fout.write("\t".join(["ID", "Sample", "Condition", "Filename", "FileExt"]) + "\n")
-
-            for sample in sorted(sample_run_dict.keys()):
-                for idx, val in enumerate(sample_run_dict[sample]):
-                    fout.write("\t".join([sample] + val) + "\n")
-
-def main(args=None):
-    args = parse_args(args)
-    check_samplesheet(args.FILE_IN, args.FILE_OUT)
+def main(argv=None):
+    """Coordinate argument parsing and program execution."""
+    args = parse_args(argv)
+    logging.basicConfig(level=args.log_level, format="[%(levelname)s] %(message)s")
+    if not args.file_in.is_file():
+        logger.error(f"The given input file {args.file_in} was not found!")
+        sys.exit(2)
+    args.file_out.parent.mkdir(parents=True, exist_ok=True)
+    check_samplesheet(args.file_in, args.file_out)
 
 
 if __name__ == "__main__":

@@ -14,6 +14,9 @@ process RESOLVE_FOUND_NEOEPITOPES {
         tuple val(meta), path("*.csv"), emit: csv
         path "versions.yml"           , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.prefix ?: "${meta}_found_neoepitopes"
 

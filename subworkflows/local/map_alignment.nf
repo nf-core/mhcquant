@@ -35,28 +35,18 @@ workflow MAP_ALIGNMENT {
         // Compute alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION(ch_grouped_fdr_filtered)
         ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions.first().ifEmpty(null))
-        // Intermediate step to join RT transformation files with mzml and idxml channels
-        mzml_files
-        .join(
-            OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-                .transpose()
-                .flatMap {
-                    meta, trafoxml ->
-                        ident = trafoxml.baseName.split('_-_')[0]
-                        [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-                }, by: [0] )
-        .set { joined_trafos_mzmls }
-
-        indexed_hits
-        .join(
-            OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-                .transpose()
-                .flatMap {
-                    meta, trafoxml ->
-                        ident = trafoxml.baseName.split('_-_')[0]
-                        [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-                }, by: [0] )
-        .set { joined_trafos_ids }
+        // Obtain the unique files that were present for the combined data
+        joined_trafos = OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
+            .transpose()
+            .flatMap {
+                meta, trafoxml ->
+                    ident = trafoxml.baseName.split('_-_')[0]
+                    [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
+            }
+        // Intermediate step to join RT transformation files with mzml channels
+        joined_trafos_mzmls = mzml_files.join(joined_trafos)
+        // Intermediate step to join RT transformation files with idxml channels
+        joined_trafos_ids = indexed_hits.join(joined_trafos)
         // Align mzML files using trafoXMLs
         OPENMS_MAPRTTRANSFORMERMZML(joined_trafos_mzmls)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions.first().ifEmpty(null))
