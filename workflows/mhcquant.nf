@@ -70,6 +70,7 @@ include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
+include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
 
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_FDR }                  from '../modules/local/openms_textexporter'
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_UNQUANTIFIED }         from '../modules/local/openms_textexporter'
@@ -222,11 +223,11 @@ workflow MHCQUANT {
     // Prepare for check if file is empty
     OPENMS_TEXTEXPORTER_FDR(OPENMS_IDFILTER_Q_VALUE.out.idxml)
     // Return an error message when there is only a header present in the document
-    OPENMS_TEXTEXPORTER_FDR.out.tsv.map { 
+    OPENMS_TEXTEXPORTER_FDR.out.tsv.map {
         meta, tsv -> if (tsv.size() < 130) {
             log.error "It seems that there were no significant hits found for one or more samples.\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample."
             exit(0)
-        } 
+        }
     }
 
     //
@@ -303,6 +304,15 @@ workflow MHCQUANT {
         )
     }
 
+    // Annotate spectra with ion fragmentation information
+    ch_filtered_idxml = OPENMS_IDFILTER_Q_VALUE.out.idxml.map { meta, idxml -> [meta.id, idxml] }
+    ch_raw_spectra_and_filtered_peptides = ch_mzml_file.map {
+                                                meta, mzml -> [meta.sample + '_' + meta.condition, mzml[0]] }
+                                            .groupTuple()
+                                            .join(ch_filtered_idxml)
+
+    PYOPENMS_IONANNOTATOR( ch_raw_spectra_and_filtered_peptides )
+
     //
     // MODULE: Pipeline reporting
     //
@@ -316,7 +326,7 @@ workflow MHCQUANT {
     if (!params.skip_multiqc) {
         workflow_summary = WorkflowMhcquant.paramsSummaryMultiqc(workflow, summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)
-        
+
         methods_description    = WorkflowMhcquant.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
         ch_methods_description = Channel.value(methods_description)
 
@@ -334,6 +344,7 @@ workflow MHCQUANT {
         multiqc_report = MULTIQC.out.report.toList()
         ch_versions    = ch_versions.mix(MULTIQC.out.versions)
     }
+
 }
 
 /*

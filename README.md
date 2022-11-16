@@ -99,6 +99,7 @@ Additional functionality contained by the pipeline currently includes:
 - Group corresponding features across labelfree experiments (`FeatureLinkerUnlabeledKD`)
 - Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
 - Converts XML format to text files (`TextExporter`)
+- Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
 
 #### Prediction of HLA class 1 peptides
 
@@ -141,6 +142,7 @@ Helpful contributors:
 - [Christian Fufezan](https://github.com/fu)
 - [Sven Fillinger](https://github.com/sven1103)
 - [Kevin Menden](https://github.com/KevinMenden)
+- [Jonas Scheid](https://github.com/jonasscheid)
 
 ## Contributions and Support
 
