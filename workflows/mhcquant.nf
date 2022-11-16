@@ -191,149 +191,149 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Pre-process step for the quantification of the data
     //
-//    if (!params.skip_quantification) {
+    if (!params.skip_quantification) {
         MAP_ALIGNMENT(
             OPENMS_PEPTIDEINDEXER.out.idxml,
             ch_mzml_file
         )
-//        ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
-//        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
-//    } else {
-//        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
-//            .map {
-//                meta, raw ->
-//                [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
-//            }
-//            .groupTuple(by: [0])
-//    }
+        ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
+        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
+    } else {
+        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
+            .map {
+                meta, raw ->
+                [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
+            }
+            .groupTuple(by: [0])
+    }
 
-//    // Merge aligned idXMLfiles
-//    OPENMS_IDMERGER(ch_proceeding_idx)
-//    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
-//    // Extract PSM features for Percolator
-//    OPENMS_PSMFEATUREEXTRACTOR(OPENMS_IDMERGER.out.idxml)
-//    ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
-//    // Run Percolator
-//    OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-//    ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
-//    // Filter by percolator q-value
-//    OPENMS_IDFILTER_Q_VALUE(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)] })
-//    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
-//    // Prepare for check if file is empty
-//    OPENMS_TEXTEXPORTER_FDR(OPENMS_IDFILTER_Q_VALUE.out.idxml)
-//    // Return an error message when there is only a header present in the document
-//    OPENMS_TEXTEXPORTER_FDR.out.tsv.map { 
-//        meta, tsv -> if (tsv.size() < 130) {
-//            log.error "It seems that there were no significant hits found for one or more samples.\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample."
-//            exit(0)
-//        } 
-//    }
-//
-//    //
-//    // SUBWORKFLOW: Refine the FDR values on the predicted subset
-//    //
-//    if ( params.refine_fdr_on_predicted_subset && params.predict_class_1 ) {
-//        // Run the following subworkflow
-//        REFINE_FDR (
-//            OPENMS_IDFILTER_Q_VALUE.out.idxml,
-//            OPENMS_PSMFEATUREEXTRACTOR.out.idxml,
-//            peptides_class_1_alleles
-//        )
-//        ch_versions = ch_versions.mix(REFINE_FDR.out.versions.ifEmpty(null))
-//        // Define the outcome of the paramer to a fixed variable
-//        filter_q_value = REFINE_FDR.out.filter_refined_q_value.flatMap { it -> [ tuple(it[0].sample, it[0], it[1]) ] }
-//    } else {
-//        // Make sure that the columns that consists of the ID's, sample names and the idXML file names are returned
-//        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml.map { it -> [it[0].sample, it[0], it[1]] }
-//    }
-//
-//    //
-//    // SUBWORKFLOW: Perform the step to process the feature and obtain the belonging information
-//    //
-//
-//    if ( !params.skip_quantification ) {
-//        PROCESS_FEATURE (
-//            MAP_ALIGNMENT.out.aligned_idfilter,
-//            MAP_ALIGNMENT.out.aligned_mzml,
-//            filter_q_value
-//            )
-//          ch_versions = ch_versions.mix( PROCESS_FEATURE.out.versions.ifEmpty(null) )
-//    } else {
-//        OPENMS_TEXTEXPORTER_UNQUANTIFIED( filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] } )
-//    }
-//
-//    //
-//    // SUBWORKFLOW: Predict class I (neoepitopes)
-//    //
-//    if ( params.predict_class_1 & !params.skip_quantification ) {
-//        PREDICT_CLASS1 (
-//            PROCESS_FEATURE.out.mztab,
-//            peptides_class_1_alleles,
-//            ch_vcf_from_sheet
-//        )
-//        ch_versions = ch_versions.mix( PREDICT_CLASS1.out.versions.ifEmpty(null) )
-//        ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
-//    } else {
-//        ch_predicted_possible_neoepitopes = Channel.empty()
-//    }
-//
-//    //
-//    // SUBWORKFLOW: Predict class II (neoepitopes)
-//    //
-//    if ( params.predict_class_2 & !params.skip_quantification ) {
-//        PREDICT_CLASS2 (
-//            PROCESS_FEATURE.out.mztab,
-//            peptides_class_2_alleles,
-//            ch_vcf_from_sheet
-//        )
-//        ch_versions = ch_versions.mix( PREDICT_CLASS2.out.versions.ifEmpty(null) )
-//        ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
-//    } else {
-//        ch_predicted_possible_neoepitopes_II = Channel.empty()
-//    }
-//
-//    //
-//    // SUBWORKFLOW: Predict retention time
-//    //
-//    if ( params.predict_RT ) {
-//        PREDICT_RT (
-//            filter_q_value.map{ it -> [it[1], it[2]] },
-//            ch_predicted_possible_neoepitopes,
-//            ch_predicted_possible_neoepitopes_II
-//        )
-//    }
-//
-//    //
-//    // MODULE: Pipeline reporting
-//    //
-//    CUSTOM_DUMPSOFTWAREVERSIONS (
-//        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-//    )
-//
-//    //
-//    // MODULE: MultiQC
-//    //
-//    if (!params.skip_multiqc) {
-//        workflow_summary = WorkflowMhcquant.paramsSummaryMultiqc(workflow, summary_params)
-//        ch_workflow_summary = Channel.value(workflow_summary)
-//        
-//        methods_description    = WorkflowMhcquant.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-//        ch_methods_description = Channel.value(methods_description)
-//
-//        ch_multiqc_files = Channel.empty()
-//        ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-//        ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-//        ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-//
-//        MULTIQC (
-//            ch_multiqc_files.collect(),
-//            ch_multiqc_config.collect().ifEmpty([]),
-//            ch_multiqc_custom_config.collect().ifEmpty([]),
-//            ch_multiqc_logo.collect().ifEmpty([])
-//        )
-//        multiqc_report = MULTIQC.out.report.toList()
-//        ch_versions    = ch_versions.mix(MULTIQC.out.versions)
-//    }
+    // Merge aligned idXMLfiles
+    OPENMS_IDMERGER(ch_proceeding_idx)
+    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
+    // Extract PSM features for Percolator
+    OPENMS_PSMFEATUREEXTRACTOR(OPENMS_IDMERGER.out.idxml)
+    ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
+    // Run Percolator
+    OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
+    ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
+    // Filter by percolator q-value
+    OPENMS_IDFILTER_Q_VALUE(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)] })
+    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
+    // Prepare for check if file is empty
+    OPENMS_TEXTEXPORTER_FDR(OPENMS_IDFILTER_Q_VALUE.out.idxml)
+    // Return an error message when there is only a header present in the document
+    OPENMS_TEXTEXPORTER_FDR.out.tsv.map { 
+        meta, tsv -> if (tsv.size() < 130) {
+            log.error "It seems that there were no significant hits found for one or more samples.\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample."
+            exit(0)
+        } 
+    }
+
+    //
+    // SUBWORKFLOW: Refine the FDR values on the predicted subset
+    //
+    if ( params.refine_fdr_on_predicted_subset && params.predict_class_1 ) {
+        // Run the following subworkflow
+        REFINE_FDR (
+            OPENMS_IDFILTER_Q_VALUE.out.idxml,
+            OPENMS_PSMFEATUREEXTRACTOR.out.idxml,
+            peptides_class_1_alleles
+        )
+        ch_versions = ch_versions.mix(REFINE_FDR.out.versions.ifEmpty(null))
+        // Define the outcome of the paramer to a fixed variable
+        filter_q_value = REFINE_FDR.out.filter_refined_q_value.flatMap { it -> [ tuple(it[0].sample, it[0], it[1]) ] }
+    } else {
+        // Make sure that the columns that consists of the ID's, sample names and the idXML file names are returned
+        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml.map { it -> [it[0].sample, it[0], it[1]] }
+    }
+
+    //
+    // SUBWORKFLOW: Perform the step to process the feature and obtain the belonging information
+    //
+
+    if ( !params.skip_quantification ) {
+        PROCESS_FEATURE (
+            MAP_ALIGNMENT.out.aligned_idfilter,
+            MAP_ALIGNMENT.out.aligned_mzml,
+            filter_q_value
+            )
+          ch_versions = ch_versions.mix( PROCESS_FEATURE.out.versions.ifEmpty(null) )
+    } else {
+        OPENMS_TEXTEXPORTER_UNQUANTIFIED( filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] } )
+    }
+
+    //
+    // SUBWORKFLOW: Predict class I (neoepitopes)
+    //
+    if ( params.predict_class_1 & !params.skip_quantification ) {
+        PREDICT_CLASS1 (
+            PROCESS_FEATURE.out.mztab,
+            peptides_class_1_alleles,
+            ch_vcf_from_sheet
+        )
+        ch_versions = ch_versions.mix( PREDICT_CLASS1.out.versions.ifEmpty(null) )
+        ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
+    } else {
+        ch_predicted_possible_neoepitopes = Channel.empty()
+    }
+
+    //
+    // SUBWORKFLOW: Predict class II (neoepitopes)
+    //
+    if ( params.predict_class_2 & !params.skip_quantification ) {
+        PREDICT_CLASS2 (
+            PROCESS_FEATURE.out.mztab,
+            peptides_class_2_alleles,
+            ch_vcf_from_sheet
+        )
+        ch_versions = ch_versions.mix( PREDICT_CLASS2.out.versions.ifEmpty(null) )
+        ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
+    } else {
+        ch_predicted_possible_neoepitopes_II = Channel.empty()
+    }
+
+    //
+    // SUBWORKFLOW: Predict retention time
+    //
+    if ( params.predict_RT ) {
+        PREDICT_RT (
+            filter_q_value.map{ it -> [it[1], it[2]] },
+            ch_predicted_possible_neoepitopes,
+            ch_predicted_possible_neoepitopes_II
+        )
+    }
+
+    //
+    // MODULE: Pipeline reporting
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
+    //
+    // MODULE: MultiQC
+    //
+    if (!params.skip_multiqc) {
+        workflow_summary = WorkflowMhcquant.paramsSummaryMultiqc(workflow, summary_params)
+        ch_workflow_summary = Channel.value(workflow_summary)
+        
+        methods_description    = WorkflowMhcquant.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
+        ch_methods_description = Channel.value(methods_description)
+
+        ch_multiqc_files = Channel.empty()
+        ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
+        ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+
+        MULTIQC (
+            ch_multiqc_files.collect(),
+            ch_multiqc_config.collect().ifEmpty([]),
+            ch_multiqc_custom_config.collect().ifEmpty([]),
+            ch_multiqc_logo.collect().ifEmpty([])
+        )
+        multiqc_report = MULTIQC.out.report.toList()
+        ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    }
 }
 
 /*
