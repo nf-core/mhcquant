@@ -24,6 +24,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 - Outcome of `OPENMS_FEATUREFINDERIDENTIFICATION` got lost during one of the previous updates, this is reintroduced
 - `OPENMS_TEXTEXPORTER_UNQUANTIFIED` and `OPENMS_TEXTEXPORTER_QUANTIFIED` return only significant hits again
 - [#226](https://github.com/nf-core/mhcquant/pull/226) - nf-core template update (version 2.6)
+- [#230](https://github.com/nf-core/mhcquant/issues/230) - Issue with `OPENMS_MZTABEXPORTER_QUANT`
 
 ### `Dependencies`
 
@@ -32,7 +33,8 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 | Dependency            | Old version | New version |
 | --------------------- | ----------- | ----------- |
 | `MultiQC`             | 1.11        | 1.12        |
-| `OpenMS thirdparty`   | 2.6         | 2.8         |
+| `OpenMS`              | 2.6.0       | 2.8.0       |
+| `OpenMS thirdparty`   | 2.6.0       | 2.8.0       |
 | `thermorawfileparser` | 1.3.4       | 1.4.0       |
 
 ### `Deprecated`
