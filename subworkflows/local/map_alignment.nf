@@ -50,25 +50,23 @@ workflow MAP_ALIGNMENT {
                 [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
         }.toList().size().view()
 
-        OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-        .transpose()
-        .flatMap {
-            meta, trafoxml ->
-                ident = trafoxml.baseName.split('_-_')[0]
-                [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-        }.view()
+       // OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
+       // .transpose()
+       // .flatMap {
+       //     meta, trafoxml ->
+       //         ident = trafoxml.baseName.split('_-_')[0]
+       //         [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
+       // }.view()
 
         mzml_files
-        .toSortedList()
         .join(
             OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
                 .transpose()
-                .toSortedList()
                 .flatMap {
                     meta, trafoxml ->
                         ident = trafoxml.baseName.split('_-_')[0]
                         [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-                }, by: [0] )
+                })
         .set { joined_trafos_mzmls }
 
         joined_trafos_mzmls.toList().size().view()
