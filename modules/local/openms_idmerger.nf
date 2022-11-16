@@ -24,7 +24,7 @@ process OPENMS_IDMERGER {
         IDMerger -in $aligned \\
             -out ${prefix}.idXML \\
             -threads $task.cpus \\
-            -annotate_file_origin \\
+            -annotate_file_origin true\\
             -merge_proteins_add_PSMs
 
         cat <<-END_VERSIONS > versions.yml
