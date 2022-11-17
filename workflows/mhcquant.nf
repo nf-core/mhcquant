@@ -168,9 +168,7 @@ workflow MHCQUANT {
     OPENMS_THERMORAWFILEPARSER(ms_files.raw)
     ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.ifEmpty(null))
     // Define the ch_ms_files channels to combine the mzml files
-    ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml)
-
-    ch_ms_files.view()
+    ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
 
     if (params.run_centroidisation) {
         // Optional: Run Peak Picking as Preprocessing
@@ -310,16 +308,12 @@ workflow MHCQUANT {
         // Alter the annotation of the filtered q value
         ch_filtered_idxml = filter_q_value.map { ident, meta, idxml -> [meta.id, idxml] }
         // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_ms_files.view()
-        //ch_raw_spectra_data = ch_mzml_file.flatMap {
-        //        meta, mzml -> [meta.sample + '_' + meta.condition, mzml] }
-        //    .view()
-        //    .groupTuple()
-        //    .join(ch_filtered_idxml)
-        //ch_raw_spectra_data.view()
-        //// Annotate spectra with ion fragmentation information
-        //PYOPENMS_IONANNOTATOR(ch_raw_spectra_data)
-        //ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions.ifEmpty(null))
+        ch_raw_spectra_data = ch_mzml_file.map {meta, mzml -> [meta.sample + '_' + meta.condition, mzml] }
+            .groupTuple()
+            .join(ch_filtered_idxml)
+        // Annotate spectra with ion fragmentation information
+        PYOPENMS_IONANNOTATOR(ch_raw_spectra_data)
+        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions.ifEmpty(null))
     }
 
     //

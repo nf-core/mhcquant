@@ -11,7 +11,7 @@ process OPENMS_THERMORAWFILEPARSER {
         tuple val(meta), path(rawfile)
 
     output:
-        tuple val(meta), [path("*.mzML")], emit: mzml
+        tuple val(meta), path("*.mzML"), emit: mzml
         path "versions.yml"            , emit: versions
 
     when:
