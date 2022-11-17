@@ -28,6 +28,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 - [#226](https://github.com/nf-core/mhcquant/pull/226) - nf-core template update (version 2.6)
 - [#230](https://github.com/nf-core/mhcquant/issues/230) - Issue with `OPENMS_MZTABEXPORTER_QUANT`
 - [#236](https://github.com/nf-core/mhcquant/issues/236) - Resolved issue with `PYOPENMS_IONANNOTATOR`
+- Fix for an inconsistend mzml channel issue
 
 ### `Dependencies`
 
