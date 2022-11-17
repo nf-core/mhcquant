@@ -231,6 +231,12 @@
                     "pattern": "^\\S+\\.tsv$",
                     "description": "Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.",
                     "help_text": "| Sample      | VCF_FileName           |\n| -------------| :---------------------:|\n| MM15_Melanom | data/MM15_variants.vcf |\n| MM17_Melanom | data/MM17_variants.vcf |"
+                },
+                "annotate_ions": {
+                    "type": "boolean",
+                    "default": "true",
+                    "fa_icon": "fas fa-tags",
+                    "description": "Set this option to create documents that are created with to perform the ion annotation"
                 }
             }
         },
