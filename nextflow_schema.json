@@ -389,6 +389,20 @@
                 }
             }
         },
+        "ion_annotation": {
+            "title": "Ion annotation",
+            "type": "object",
+            "fa_icon": "fas fa-pen-to-square",
+            "description": "",
+            "default": "true",
+            "properties": {
+                "annotate_ions": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-tags",
+                    "description": "Set this option to create documents that are created with to perform the ion annotation"
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",

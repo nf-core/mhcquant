@@ -45,8 +45,8 @@ if (params.predict_class_1 || params.predict_class_2) {
 */
 
 ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
+ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
 ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
@@ -119,7 +119,7 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Check the input file
     //
-    INPUT_CHECK( params.input )
+    INPUT_CHECK(params.input)
         .reads
         .set { ch_samples_from_sheet }
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
@@ -135,8 +135,8 @@ workflow MHCQUANT {
         .set { ms_files }
 
     // Input fasta file
-    Channel.fromPath( params.fasta )
-        .combine( ch_samples_from_sheet )
+    Channel.fromPath(params.fasta)
+        .combine(ch_samples_from_sheet)
         .flatMap{ it -> [tuple(it[1],it[0])] }
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .set { input_fasta }
@@ -170,7 +170,7 @@ workflow MHCQUANT {
     // Define the ch_ms_files channels to combine the mzml files
     ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml)
 
-    if ( params.run_centroidisation ) {
+    if (params.run_centroidisation) {
         // Optional: Run Peak Picking as Preprocessing
         OPENMS_PEAKPICKERHIRES(ch_ms_files)
         ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.ifEmpty(null))
@@ -233,7 +233,7 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Refine the FDR values on the predicted subset
     //
-    if ( params.refine_fdr_on_predicted_subset && params.predict_class_1 ) {
+    if (params.refine_fdr_on_predicted_subset && params.predict_class_1) {
         // Run the following subworkflow
         REFINE_FDR (
             OPENMS_IDFILTER_Q_VALUE.out.idxml,
@@ -252,27 +252,27 @@ workflow MHCQUANT {
     // SUBWORKFLOW: Perform the step to process the feature and obtain the belonging information
     //
 
-    if ( !params.skip_quantification ) {
+    if (!params.skip_quantification) {
         PROCESS_FEATURE (
             MAP_ALIGNMENT.out.aligned_idfilter,
             MAP_ALIGNMENT.out.aligned_mzml,
             filter_q_value
-            )
-          ch_versions = ch_versions.mix( PROCESS_FEATURE.out.versions.ifEmpty(null) )
+        )
+          ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions.ifEmpty(null))
     } else {
-        OPENMS_TEXTEXPORTER_UNQUANTIFIED( filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] } )
+        OPENMS_TEXTEXPORTER_UNQUANTIFIED(filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] })
     }
 
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
     //
-    if ( params.predict_class_1 & !params.skip_quantification ) {
+    if (params.predict_class_1 & !params.skip_quantification) {
         PREDICT_CLASS1 (
             PROCESS_FEATURE.out.mztab,
             peptides_class_1_alleles,
             ch_vcf_from_sheet
-        )
-        ch_versions = ch_versions.mix( PREDICT_CLASS1.out.versions.ifEmpty(null) )
+       )
+        ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.ifEmpty(null))
         ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
     } else {
         ch_predicted_possible_neoepitopes = Channel.empty()
@@ -281,13 +281,13 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Predict class II (neoepitopes)
     //
-    if ( params.predict_class_2 & !params.skip_quantification ) {
+    if (params.predict_class_2 & !params.skip_quantification) {
         PREDICT_CLASS2 (
             PROCESS_FEATURE.out.mztab,
             peptides_class_2_alleles,
             ch_vcf_from_sheet
         )
-        ch_versions = ch_versions.mix( PREDICT_CLASS2.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.ifEmpty(null))
         ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
     } else {
         ch_predicted_possible_neoepitopes_II = Channel.empty()
@@ -296,7 +296,7 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Predict retention time
     //
-    if ( params.predict_RT ) {
+    if (params.predict_RT) {
         PREDICT_RT (
             filter_q_value.map{ it -> [it[1], it[2]] },
             ch_predicted_possible_neoepitopes,
@@ -304,17 +304,18 @@ workflow MHCQUANT {
         )
     }
 
-    // Annotate spectra with ion fragmentation information
-    ch_filtered_idxml = filter_q_value.map { meta, idxml -> [meta.id, idxml] }
-
-    ch_raw_spectra_data = ch_mzml_file.map {
-            meta, mzml -> [meta.sample + '_' + meta.condition, mzml] }
-        .groupTuple()
-        .join(ch_filtered_idxml)
-
-    // TODO: comments
-    PYOPENMS_IONANNOTATOR( ch_raw_spectra_data )
-    ch_versions = ch_versions.mix( PYOPENMS_IONANNOTATOR.out.versions.ifEmpty(null) )
+    if (params.annotate_ions) {
+        // Alter the annotation of the filtered q value
+        ch_filtered_idxml = filter_q_value.map { ident, meta, idxml -> [meta.id, idxml] }
+        // Join the ch_filtered_idxml and the ch_mzml_file
+        ch_raw_spectra_data = ch_mzml_file.map {
+                meta, mzml -> [meta.sample + '_' + meta.condition, mzml[0]] }
+            .groupTuple()
+            .join(ch_filtered_idxml)
+        // Annotate spectra with ion fragmentation information
+        PYOPENMS_IONANNOTATOR(ch_raw_spectra_data)
+        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions.ifEmpty(null))
+    }
 
     //
     // MODULE: Pipeline reporting

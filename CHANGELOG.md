@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.3.2dev - [date]
+## v2.4.0dev nfcore/mhcquant "Maroon Gold Boxer" - [date]
 
 Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re/) template.
 
@@ -15,6 +15,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 - Altered the outcome content with the inclusion of the different folder structure
 - Updated the mhcquant_web.png in the `assets` folder
 - [#229](https://github.com/nf-core/mhcquant/pull/229) Add ion annotation feature requested in [#220](https://github.com/nf-core/mhcquant/issues/220)
+- [#235](https://github.com/nf-core/mhcquant/issues/235) Add the `annotate_ions` parameter to enable/disable the ion annotation feature (default is true)
 
 ### `Fixed`
 
@@ -26,6 +27,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 - `OPENMS_TEXTEXPORTER_UNQUANTIFIED` and `OPENMS_TEXTEXPORTER_QUANTIFIED` return only significant hits again
 - [#226](https://github.com/nf-core/mhcquant/pull/226) - nf-core template update (version 2.6)
 - [#230](https://github.com/nf-core/mhcquant/issues/230) - Issue with `OPENMS_MZTABEXPORTER_QUANT`
+- [#236](https://github.com/nf-core/mhcquant/issues/236) - Resolved issue with `PYOPENMS_IONANNOTATOR`
 
 ### `Dependencies`
 
