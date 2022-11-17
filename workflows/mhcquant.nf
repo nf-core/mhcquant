@@ -308,7 +308,7 @@ workflow MHCQUANT {
     ch_filtered_idxml = OPENMS_IDFILTER_Q_VALUE.out.idxml.map { meta, idxml -> [meta.id, idxml] }
 
     ch_raw_spectra_and_filtered_peptides = ch_mzml_file.map {
-                                                meta, mzml -> [meta.sample + '_' + meta.condition, mzm] }
+                                                meta, mzml -> [meta.sample + '_' + meta.condition, mzml] }
                                             .groupTuple()
                                             .join(ch_filtered_idxml)
 
