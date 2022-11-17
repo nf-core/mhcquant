@@ -306,11 +306,17 @@ workflow MHCQUANT {
 
     // Annotate spectra with ion fragmentation information
     ch_filtered_idxml = OPENMS_IDFILTER_Q_VALUE.out.idxml.map { meta, idxml -> [meta.id, idxml] }
+
+    ch_mzml_file.map {
+    meta, mzml -> [meta.sample + '_' + meta.condition, mzml[0]] }
+    .groupTuple().view()
+
     ch_raw_spectra_and_filtered_peptides = ch_mzml_file.map {
                                                 meta, mzml -> [meta.sample + '_' + meta.condition, mzml[0]] }
                                             .groupTuple()
                                             .join(ch_filtered_idxml)
 
+    // TODO: comments
     PYOPENMS_IONANNOTATOR( ch_raw_spectra_and_filtered_peptides )
 
     //
