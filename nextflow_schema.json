@@ -236,7 +236,7 @@
                     "type": "boolean",
                     "default": "true",
                     "fa_icon": "fas fa-tags",
-                    "description": "Set this option to create documents that are created with to perform the ion annotation"
+                    "description": "Set this option to create documents that are created to perform the ion annotation"
                 }
             }
         },
