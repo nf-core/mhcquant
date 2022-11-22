@@ -60,6 +60,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { OPENMS_DECOYDATABASE }                                            from '../modules/local/openms_decoydatabase'
 include { OPENMS_THERMORAWFILEPARSER }                                      from '../modules/local/openms_thermorawfileparser'
+include { PWIZ_BRUKERRAWFILEPARSER }                                        from '../modules/local/pwiz_brukerrawfileparser'
 include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
@@ -131,6 +132,8 @@ workflow MHCQUANT {
                     return [ meta, filename ]
                 mzml : meta.ext == 'mzml'
                     return [ meta, filename ]
+                d : meta.ext == 'd'
+                    return [ meta, filename ]
                 other : true }
         .set { ms_files }
 
@@ -164,11 +167,14 @@ workflow MHCQUANT {
         ch_decoy_db = ch_fasta_file
     }
 
-    // Raw file conversion
+    // Thermofisher raw file conversion
     OPENMS_THERMORAWFILEPARSER(ms_files.raw)
     ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.ifEmpty(null))
     // Define the ch_ms_files channels to combine the mzml files
     ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
+
+    // Bruker raw file conversion
+    PWIZ_BRUKERRAWFILEPARSER(ms_files.d)
 
     if (params.run_centroidisation) {
         // Optional: Run Peak Picking as Preprocessing
