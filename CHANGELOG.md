@@ -15,7 +15,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 - Altered the outcome content with the inclusion of the different folder structure
 - Updated the mhcquant_web.png in the `assets` folder
 - [#229](https://github.com/nf-core/mhcquant/pull/229) Add ion annotation feature requested in [#220](https://github.com/nf-core/mhcquant/issues/220)
-- [#235](https://github.com/nf-core/mhcquant/issues/235) Add the `annotate_ions` parameter to enable/disable the ion annotation feature (default is true)
+- [#235](https://github.com/nf-core/mhcquant/issues/235) Add the `annotate_ions` parameter to enable/disable the ion annotation feature (default is false)
 
 ### `Fixed`
 
