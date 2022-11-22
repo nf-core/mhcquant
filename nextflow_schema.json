@@ -234,7 +234,7 @@
                 },
                 "annotate_ions": {
                     "type": "boolean",
-                    "default": "true",
+                    "default": "false",
                     "fa_icon": "fas fa-tags",
                     "description": "Set this option to create documents that are created to perform the ion annotation"
                 }
