@@ -29,6 +29,7 @@ Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re
 - [#230](https://github.com/nf-core/mhcquant/issues/230) - Issue with `OPENMS_MZTABEXPORTER_QUANT`
 - [#236](https://github.com/nf-core/mhcquant/issues/236) - Resolved issue with `PYOPENMS_IONANNOTATOR`
 - Fix for an inconsistent mzml channel issue
+- [#241](https://github.com/nf-core/mhcquant/issues/241) - Fix of the HLA allele annotation in the help of the `allele_sheet` parameter
 
 ### `Dependencies`
 
