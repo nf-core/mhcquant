@@ -1,0 +1,33 @@
+id: "nf-core-mhcquant-methods-description"
+description: "Suggested text and references to use when describing pipeline usage within the methods section of a publication."
+section_name: "nf-core/mhcquant Methods Description"
+section_href: "https://github.com/nf-core/mhcquant"
+plot_type: "html"
+## TODO nf-core: Update the HTML below to your prefered methods description, e.g. add publication citation for this pipeline
+## You inject any metadata in the Nextflow '${workflow}' object
+data: |
+  <h4>Methods</h4>
+  <p>Data was processed using nf-core/mhcquant v${workflow.manifest.version} ${doi_text} of the nf-core collection of workflows (<a href="https://doi.org/10.1038/s41587-020-0439-x">Ewels <em>et al.</em>, 2020</a>).</p>
+  <p>The pipeline was executed with Nextflow v${workflow.nextflow.version} (<a href="https://doi.org/10.1038/nbt.3820">Di Tommaso <em>et al.</em>, 2017</a>) with the following command:</p>
+  <pre><code>${workflow.commandLine}</code></pre>
+  <h4>References</h4>
+  <ul>
+    <li>Di Tommaso, P., Chatzou, M., Floden, E. W., Barja, P. P., Palumbo, E., & Notredame, C. (2017). Nextflow enables reproducible computational workflows. Nature Biotechnology, 35(4), 316-319. <a href="https://doi.org/10.1038/nbt.3820">https://doi.org/10.1038/nbt.3820</a></li>
+    <li>Ewels, P. A., Peltzer, A., Fillinger, S., Patel, H., Alneberg, J., Wilm, A., Garcia, M. U., Di Tommaso, P., & Nahnsen, S. (2020). The nf-core framework for community-curated bioinformatics pipelines. Nature Biotechnology, 38(3), 276-278. <a href="https://doi.org/10.1038/s41587-020-0439-x">https://doi.org/10.1038/s41587-020-0439-x</a></li>
+    <li>Bichmann, L., Nelde, N., Ghosh, M., Heumos, L., Mohr, C., Peltzer, A., Kuchenbecker L., Sachsenberg, T., Walz, J.S., Stevanović, S., & Kohlbacher, O. (2019). MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics. Journal of Proteome Research, 18 (11), 3876-3884. <a href="https://doi.org/10.1021/acs.jproteome.9b00313">https://doi.org/10.1021/acs.jproteome.9b00313</a></li>
+    <li>O'Donnell, T.J., Rubinsteyn, A., Bonsack, M., Riemer, A.B., Laserson, U., & Hammerbacher, J. (2018). MHCflurry: Open-Source Class I MHC Binding Affinity Prediction. Cell Systems, 7(1), 129-132.e4. <a href="https://doi.org/10.1016/j.cels.2018.05.014">https://doi.org/10.1016/j.cels.2018.05.014</a></li>    
+    <li>Shao, X.M., Bhattacharya, R., Huang, J., Sivakumar, A., Tokheim, C., Zheng, L., Hirsch, D., Kaminow, B., Omdahl, A., Bonsack, M., Riemer, A.B., Velculescu, V.E., Anagnostou, V., Pagel, K.A., & Karchin, R. (2018). High-Throughput Prediction of MHC Class I and II Neoantigens with MHCnuggets. Cancer Immunology Research, 8(3), 396-408. <a href="https://doi.org/10.1158/2326-6066.CIR-19-0464">https://doi.org/10.1158/2326-6066.CIR-19-0464</a></li>
+    <li>Weisser, H., & Choudharay, J.S. (2017). Targeted Feature Detection for Data-Dependent Shotgun Proteomics. Journal of Proteome Research, 16(8), 2964-2974. <a href="https://doi.org/10.1021/acs.jproteome.7b00248">https://doi.org/10.1021/acs.jproteome.7b00248</a></li>    
+    <li>Schubert, B., Walzer, M., Brachvogel, H-P., Szolek, A., Mohr, C., & Kohlbacher, O. (2016). FRED 2: an immunoinformatics framework for Python. Bioinformatics, 32(13), 2044-6. <a href="https://doi.org/10.1093/bioinformatics/btw113">https://doi.org/10.1093/bioinformatics/btw113</a></li>
+    <li>Eng, J.K., Hoopmann, M.R., Jahan, T.A., Egertson, J.D., Noble, W.S., & MacCoss, M.J. (2015). A Deeper Look into Comet—Implementation and Features. Journal of the American Society for Mass Spectrometry, 26(11), 1865-74. <a href="https://doi.org/10.1007/s13361-015-1179-x">https://doi.org/10.1007/s13361-015-1179-x</a></li>
+    <li>Weisser, H., Nahnsen, S., Grossmann, J., Nilse, L., Quandt, A., Brauer, H., Sturm, M., Kenar, E., Kohlbacher, O., Aebersold, R., & Malmström, L. (2013). An Automated Pipeline for High-Throughput Label-Free Quantitative Proteomics. Journal of Proteome Research, 12(4), 1628-44. <a href="https://doi.org/10.1021/pr300992u">https://doi.org/10.1021/pr300992u</a></li>
+    <li>Käll, L., Canterbury, J.D., Weston, J., Stafford Noble, W., & MacCoss, M.J. (2007). Semi-supervised learning for peptide identification from shotgun proteomics datasets. Nature Methods, 4(11), 923-5. <a href="https://doi.org/10.1038/nmeth1113">https://doi.org/10.1038/nmeth1113</a></li>
+  </ul>
+  <div class="alert alert-info">
+    <h5>Notes:</h5>
+    <ul>
+      ${nodoi_text}
+      <li>The command above does not include parameters contained in any configs or profiles that may have been used. Ensure the config file is also uploaded with your publication!</li>
+      <li>You should also cite all software used within this run. Check the "Software Versions" of this report to get version information.</li>
+    </ul>
+  </div>

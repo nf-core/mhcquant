@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-# This script is based on the example at: https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
-
 """Provide a command line tool to validate and transform tabular samplesheets."""
 
-import os.path
+import os
 import argparse
 import csv
 import logging
@@ -31,46 +29,35 @@ class RowChecker:
     )
 
     def __init__(
-        self,
-        id_col="ID",
-        sample_col="Sample",
-        condition_col="Condition",
-        filename_col="ReplicateFileName",
-        ext_col="Extension",
-        **kwargs,
+        self, id_col="ID", sample_col="Sample", condition_col="Condition", filename_col="ReplicateFileName", **kwargs
     ):
         """
         Initialize the row checker with the expected column names.
-
         Args:
-            id_col (int) : An integer that acts as a unique identifier for the 
+            id_col (int) : An integer that acts as a unique identifier for the
                 unique samples.
             sample_col (str): The name of the column that contains the sample name
                 (default "sample").
             condition_col (str): This column consists of additional information about
-                the sample, could be anything from a "wildtype/disease" description 
+                the sample, could be anything from a "wildtype/disease" description
                 to a particular treatment (default "").
-            filename_col (str): The name of the column that contains the path to the 
+            filename_col (str): The name of the column that contains the path to the
                 raw or mzMl files ).
-
         """
         super().__init__(**kwargs)
         self._id_col = id_col
         self._sample_col = sample_col
         self._condition_col = condition_col
         self._filename_col = filename_col
-        self._ext_col = ext_col
         self._seen = set()
         self.modified = []
 
     def validate_and_transform(self, row):
         """
         Perform all validations on the given row and insert the read pairing status.
-
         Args:
             row (dict): A mapping from column headers (keys) to elements of that row
                 (values).
-
         """
         self._validate_id(row)
         self._validate_sample(row)
@@ -99,7 +86,6 @@ class RowChecker:
         """Assert that the data entry has the right format if it exists."""
         if len(row[self._filename_col]) > 0:
             self._validate_ms_format(row[self._filename_col])
-            row[self._ext_col] = os.path.splitext(row[self._filename_col])[1][1:].lower()
 
     def _validate_ms_format(self, filename):
         """Assert that a given filename has one of the expected MS extensions."""
@@ -111,10 +97,8 @@ class RowChecker:
     def validate_unique_samples(self):
         """
         Assert that the combination of sample name and filename is unique.
-
         In addition to the validation, also rename the sample if more than one sample
         file combination exists.
-
         """
         assert len(self._seen) == len(self.modified), "The pair of sample name and file must be unique."
         if len({pair[0] for pair in self._seen}) < len(self._seen):
@@ -125,6 +109,16 @@ class RowChecker:
                 seen[sample] += 1
                 if counts[sample] > 1:
                     row[self._sample_col] = f"{sample}"
+
+
+def read_head(handle, num_lines=10):
+    """Read the specified number of lines from the current position in the file."""
+    lines = []
+    for idx, line in enumerate(handle):
+        if idx == num_lines:
+            break
+        lines.append(line)
+    return "".join(lines)
 
 
 def sniff_format(handle):
@@ -142,50 +136,47 @@ def sniff_format(handle):
         https://docs.python.org/3/glossary.html#term-text-file
 
     """
-    peek = handle.read(2048)
+    peek = read_head(handle)
+    handle.seek(0)
     sniffer = csv.Sniffer()
     if not sniffer.has_header(peek):
-        logger.critical(f"The given sample sheet does not appear to contain a header.")
+        logger.critical("The given sample sheet does not appear to contain a header.")
         sys.exit(1)
     dialect = sniffer.sniff(peek)
-    handle.seek(0)
     return dialect
 
 
 def check_samplesheet(file_in, file_out):
+
     """
     Check that the tabular samplesheet has the structure expected by nf-core pipelines.
-
     Validate the general shape of the table, expected columns, and each row. Also add
     an additional column which records whether one or two FASTQ reads were found.
-
     Args:
         file_in (pathlib.Path): The given tabular samplesheet. The format can be either
             CSV, TSV, or any other format automatically recognized by ``csv.Sniffer``.
         file_out (pathlib.Path): Where the validated and transformed samplesheet should
             be created; always in CSV format.
-
     Example:
         This function checks that the samplesheet follows the following structure,
         see also the `viral recon samplesheet`_::
-
             ID  Sample  Condition   ReplicateFileName
             1   WT  A   WT_A.raw
             2   WT  B   WT_B.raw
             3   KO  A   KO_A.raw
             4   KO  B   KO_B.raw
-
     .. _viral recon samplesheet:
         https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
-
     """
     required_columns = {"ID", "Sample", "Condition", "ReplicateFileName"}
+
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
         # Validate the existence of the expected header columns.
         if not required_columns.issubset(reader.fieldnames):
-            logger.critical(f"The sample sheet **must** contain the column headers: {', '.join(required_columns)}.")
+            req_cols = ", ".join(required_columns)
+            logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
             sys.exit(1)
         # Validate each row.
         checker = RowChecker()
@@ -200,16 +191,18 @@ def check_samplesheet(file_in, file_out):
     header.insert(4, "Extension")
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_out.open(mode="w", newline="") as out_handle:
-        writer = csv.DictWriter(out_handle, header, delimiter=",")
+        writer = csv.DictWriter(out_handle, header, delimiter="\t")
         writer.writeheader()
         for row in checker.modified:
+            row["Extension"] = os.path.splitext(row["ReplicateFileName"])[1][1:].lower()
             writer.writerow(row)
+
 
 def parse_args(argv=None):
     """Define and immediately parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Validate and transform a tabular samplesheet.",
-        epilog="Example: python check_samplesheet.py samplesheet.tsv samplesheet.valid.tsv",
+        epilog="Example: python check_samplesheet.py samplesheet.csv samplesheet.valid.csv",
     )
     parser.add_argument(
         "file_in",
@@ -242,6 +235,7 @@ def main(argv=None):
         sys.exit(2)
     args.file_out.parent.mkdir(parents=True, exist_ok=True)
     check_samplesheet(args.file_in, args.file_out)
+
 
 if __name__ == "__main__":
     sys.exit(main())

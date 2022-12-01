@@ -14,6 +14,9 @@ process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
         tuple val(meta), path("*.csv"), emit: csv
         path "versions.yml"           , emit: versions
 
+    when:
+        task.ext.when == null || task.ext.when
+
     script:
         def prefix           = task.ext.suffix ?: "${neoepitopes}_${meta}_predicted_neoepitopes_class_1"
 

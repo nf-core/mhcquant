@@ -1,5 +1,52 @@
 # nf-core/mhcquant: Changelog
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## v2.4.0 nfcore/mhcquant "Maroon Gold Boxer" - 2022/12/02
+
+Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re/) template.
+
+### `Added`
+
+- Additional output from `CometAdapter` (generated with the parameter `--pin_out`)
+- Folder structure within the `intermediate_results` folder to retrace the outcome files easier
+- `OPENMS_FALSEDISCOVERYRATE` and `OPENMS_IDFILTER_FOR_ALIGNMENT` are now included in the first quantification step
+- Altered the outcome content with the inclusion of the different folder structure
+- Updated the mhcquant_web.png in the `assets` folder
+- [#229](https://github.com/nf-core/mhcquant/pull/229) Add ion annotation feature requested in [#220](https://github.com/nf-core/mhcquant/issues/220)
+- [#235](https://github.com/nf-core/mhcquant/issues/235) Add the `annotate_ions` parameter to enable/disable the ion annotation feature (default is false)
+
+### `Fixed`
+
+- Resolved issues with `SAMPLESHEET_CHECK`
+- Fix for the `peakpickerhires`, mzml files generated from input raw files are now seen as input for this step as well
+- `PRE_QUANTIFICATION` is renamed to `MAP_ALIGNMENT` to indicate that the alignment (and the complementing processes) of the different maps happens here
+- `POST_QUANTIFICATION` is renamed to `PROCESS_FEATURE` since the feature identification and processing is done here
+- Outcome of `OPENMS_FEATUREFINDERIDENTIFICATION` got lost during one of the previous updates, this is reintroduced
+- `OPENMS_TEXTEXPORTER_UNQUANTIFIED` and `OPENMS_TEXTEXPORTER_QUANTIFIED` return only significant hits again
+- [#226](https://github.com/nf-core/mhcquant/pull/226) - nf-core template update (version 2.6)
+- [#230](https://github.com/nf-core/mhcquant/issues/230) - Issue with `OPENMS_MZTABEXPORTER_QUANT`
+- [#236](https://github.com/nf-core/mhcquant/issues/236) - Resolved issue with `PYOPENMS_IONANNOTATOR`
+- Fix for an inconsistent mzml channel issue
+- [#241](https://github.com/nf-core/mhcquant/issues/241) - Fix of the HLA allele annotation in the help of the `allele_sheet` parameter
+
+### `Dependencies`
+
+- Updated the multiQC module
+
+| Dependency            | Old version | New version |
+| --------------------- | ----------- | ----------- |
+| `MultiQC`             | 1.11        | 1.12        |
+| `OpenMS`              | 2.6.0       | 2.8.0       |
+| `OpenMS thirdparty`   | 2.6.0       | 2.8.0       |
+| `pyOpenMS`            | -           | 2.8         |
+| `thermorawfileparser` | 1.3.4       | 1.4.0       |
+
+### `Deprecated`
+
+- `OPENMS_TEXTEXPORTER_PSMS` was removed due to the outcome of the comet adapter step
+
 ## v2.3.1 nfcore/mhcquant "White Gold Swallow" - 2022/05/10
 
 ### `Added`
@@ -20,7 +67,7 @@
 ### `Added`
 
 - [#206](https://github.com/nf-core/mhcquant/issues/206) Updated the workflow picture
-- Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_PSMS`
+- Adjustments of the `PRE_QUANTIFICATION` subworkflow: `OPENMS_FALSEDISCOVERYRATE`, `OPENMS_IDFILTER_FOR_ALIGNMENT`, and `OPENMS_TEXTEXPORTER_SINGLE`
 - Included `OPENMS_TEXTEXPORTER_UNQUANTIFIED`to write a combined FDR filtered output file for unquantified data
 - Included `pipeline summary` and increment the `documentation` paragraph
 - [#195](https://github.com/nf-core/mhcquant/issues/195) Updated parameter documentation

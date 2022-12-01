@@ -11,7 +11,7 @@ workflow INPUT_CHECK {
     main:
     SAMPLESHEET_CHECK ( samplesheet )
         .csv
-        .splitCsv ( header:true, sep:',' )
+        .splitCsv ( header:true, sep:'\t' )
         .map { create_ms_channel(it) }
         .set { reads }
 
@@ -23,6 +23,7 @@ workflow INPUT_CHECK {
 // Function to get list of [ meta, filenames ]
 def create_ms_channel(LinkedHashMap row) {
     def meta = [:]
+
     meta.id        = row.ID
     meta.sample    = row.Sample
     meta.condition = row.Condition

@@ -2,17 +2,21 @@ process OPENMS_COMETADAPTER {
     tag "$meta.id"
     label 'process_high'
 
-    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.6.0" : null)
+    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.8.0" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms-thirdparty:2.6.0--0' :
-        'quay.io/biocontainers/openms-thirdparty:2.6.0--0' }"
+        'https://depot.galaxyproject.org/singularity/openms-thirdparty:2.8.0--h9ee0642_2' :
+        'quay.io/biocontainers/openms-thirdparty:2.8.0--h9ee0642_2' }"
 
     input:
         tuple val(meta), path(mzml), path(fasta)
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
+        tuple val(meta), path("*.tsv")  , emit: tsv
         path "versions.yml"             , emit: versions
+
+    when:
+        task.ext.when == null || task.ext.when
 
     script:
         def prefix           = task.ext.prefix ?: "${mzml.baseName}"
@@ -31,6 +35,7 @@ process OPENMS_COMETADAPTER {
             -out ${prefix}.idXML \\
             -database $fasta \\
             -threads $task.cpus \\
+            -pin_out ${prefix}.tsv \\
             $args \\
             $mods \\
             $xions \\

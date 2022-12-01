@@ -2,10 +2,10 @@ process OPENMS_RTMODEL {
     tag "$meta.id"
     label 'process_medium'
 
-    conda (params.enable_conda ? "bioconda::openms=2.6.0" : null)
+    conda (params.enable_conda ? "bioconda::openms=2.8.0" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:2.6.0--h4afb90d_0' :
-        'quay.io/biocontainers/openms:2.6.0--h4afb90d_0' }"
+        'https://depot.galaxyproject.org/singularity/openms:2.8.0--h7ca0330_2' :
+        'quay.io/biocontainers/openms:2.8.0--h7ca0330_2' }"
 
     input:
         tuple val(meta), path(rt_training)
@@ -13,6 +13,9 @@ process OPENMS_RTMODEL {
     output:
         tuple val(meta), path("*_rt_training.txt"), path("*.paramXML"), path("*_trainset.txt"), emit: complete
         path "versions.yml"                                                                   , emit: versions
+
+    when:
+        task.ext.when == null || task.ext.when
 
     script:
         def prefix           = task.ext.prefix ?: "${meta.sample}"

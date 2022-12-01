@@ -26,7 +26,7 @@ from Bio import SeqUtils
 from datetime import datetime
 from string import Template
 
-__author__ = 'mohr, walzer'
+__author__ = "mohr, walzer"
 VERSION = "1.1"
 
 ID_SYSTEM_USED = EIdentifierTypes.ENSEMBL
@@ -87,18 +87,18 @@ def get_fred2_annotation(vt, p, r, alt):
         return p, r, alt
     elif vt == VariationType.DEL or vt == VariationType.FSDEL:
         # more than one observed ?
-        if alt != '-':
-            alternative = '-'
-            reference = r[len(alt):]
+        if alt != "-":
+            alternative = "-"
+            reference = r[len(alt) :]
             position = p + len(alt)
         else:
             return p, r, alt
     elif vt == VariationType.INS or vt == VariationType.FSINS:
-        if r != '-':
+        if r != "-":
             position = p
-            reference = '-'
-            if alt != '-':
-                alt_new = alt[len(r):]
+            reference = "-"
+            if alt != "-":
+                alt_new = alt[len(r) :]
                 alternative = alt_new
             else:
                 alternative = str(alt)
@@ -106,7 +106,6 @@ def get_fred2_annotation(vt, p, r, alt):
             return p, r, alt
 
     return position, reference, alternative
-
 
 
 def read_vcf(filename, pass_only=True):
@@ -119,7 +118,7 @@ def read_vcf(filename, pass_only=True):
     global ID_SYSTEM_USED
 
     vl = list()
-    with open(filename, 'rb') as tsvfile:
+    with open(filename, "rb") as tsvfile:
         vcf_reader = vcf.Reader(tsvfile)
         vl = [r for r in vcf_reader]
 
@@ -129,7 +128,7 @@ def read_vcf(filename, pass_only=True):
     genotye_dict = {"het": False, "hom": True, "ref": True}
 
     for num, record in enumerate(vl):
-        c = record.CHROM.strip('chr')
+        c = record.CHROM.strip("chr")
         p = record.POS - 1
         variation_dbid = record.ID
         r = str(record.REF)
@@ -156,14 +155,14 @@ def read_vcf(filename, pass_only=True):
                     vt = VariationType.FSDEL
                 else:
                     vt = VariationType.FSINS
-        gene = ''
+        gene = ""
 
         for alt in v_list:
             isHomozygous = False
-            if 'HOM' in record.INFO:
-                isHomozygous = record.INFO['HOM'] == 1
-            elif 'SGT' in record.INFO:
-                zygosity = record.INFO['SGT'].split("->")[1]
+            if "HOM" in record.INFO:
+                isHomozygous = record.INFO["HOM"] == 1
+            elif "SGT" in record.INFO:
+                zygosity = record.INFO["SGT"].split("->")[1]
                 if zygosity in genotye_dict:
                     isHomozygous = genotye_dict[zygosity]
                 else:
@@ -173,42 +172,59 @@ def read_vcf(filename, pass_only=True):
                         isHomozygous = False
             else:
                 for sample in record.samples:
-                    if 'GT' in sample.data:
-                        isHomozygous = sample.data['GT'] == '1/1'
+                    if "GT" in sample.data:
+                        isHomozygous = sample.data["GT"] == "1/1"
 
-            if record.INFO['ANN']:
+            if record.INFO["ANN"]:
                 isSynonymous = False
                 coding = dict()
                 types = []
-                for annraw in record.INFO['ANN']:  # for each ANN only add a new coding! see GSvar
-                    annots = annraw.split('|')
-                    obs, a_mut_type, impact, a_gene, a_gene_id, feature_type, transcript_id, exon, tot_exon, trans_coding, prot_coding, cdna, cds, aa, distance, warnings = annots
+                for annraw in record.INFO["ANN"]:  # for each ANN only add a new coding! see GSvar
+                    annots = annraw.split("|")
+                    (
+                        obs,
+                        a_mut_type,
+                        impact,
+                        a_gene,
+                        a_gene_id,
+                        feature_type,
+                        transcript_id,
+                        exon,
+                        tot_exon,
+                        trans_coding,
+                        prot_coding,
+                        cdna,
+                        cds,
+                        aa,
+                        distance,
+                        warnings,
+                    ) = annots
                     types.append(a_mut_type)
 
                     tpos = 0
                     ppos = 0
-                    positions = ''
+                    positions = ""
 
                     # get cds/protein positions and convert mutation syntax to FRED2 format
-                    if trans_coding != '':
-                        positions = re.findall(r'\d+', trans_coding)
+                    if trans_coding != "":
+                        positions = re.findall(r"\d+", trans_coding)
                         ppos = int(positions[0]) - 1
 
-                    if prot_coding != '':
-                        positions = re.findall(r'\d+', prot_coding)
+                    if prot_coding != "":
+                        positions = re.findall(r"\d+", prot_coding)
                         tpos = int(positions[0]) - 1
 
-                    isSynonymous = (a_mut_type == "synonymous_variant")
+                    isSynonymous = a_mut_type == "synonymous_variant"
 
                     gene = a_gene_id
                     # there are no isoforms in biomart
                     transcript_id = transcript_id.split(".")[0]
 
-                    if 'NM' in transcript_id:
+                    if "NM" in transcript_id:
                         ID_SYSTEM_USED = EIdentifierTypes.REFSEQ
 
-                    #take online coding variants into account, FRED2 cannot deal with stopgain variants right now
-                    if not prot_coding or 'stop_gained' in a_mut_type:
+                    # take online coding variants into account, FRED2 cannot deal with stopgain variants right now
+                    if not prot_coding or "stop_gained" in a_mut_type:
                         continue
 
                     coding[transcript_id] = MutationSyntax(transcript_id, ppos, tpos, trans_coding, prot_coding)
@@ -216,7 +232,9 @@ def read_vcf(filename, pass_only=True):
 
                 if coding:
                     pos, reference, alternative = get_fred2_annotation(vt, p, r, str(alt))
-                    var = Variant("line" + str(num), vt, c, pos, reference, alternative, coding, isHomozygous, isSynonymous)
+                    var = Variant(
+                        "line" + str(num), vt, c, pos, reference, alternative, coding, isHomozygous, isSynonymous
+                    )
                     var.gene = gene
                     var.log_metadata("vardbid", variation_dbid)
                     dict_vars[var] = var
@@ -239,5 +257,3 @@ def read_vcf(filename, pass_only=True):
                 dict_vars[v] = vs_new
 
     return dict_vars.values(), transcript_ids
-
-

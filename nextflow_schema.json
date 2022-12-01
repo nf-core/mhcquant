@@ -86,7 +86,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-border-center-v",
                     "default": false,
-                    "description": "Choose whether the specified ms_level in pick_ms_levels is centroided or not."
+                    "description": "Include the flag when the specified ms level is not centroided (default=false). "
                 }
             }
         },
@@ -231,6 +231,12 @@
                     "pattern": "^\\S+\\.tsv$",
                     "description": "Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.",
                     "help_text": "| Sample      | VCF_FileName           |\n| -------------| :---------------------:|\n| MM15_Melanom | data/MM15_variants.vcf |\n| MM17_Melanom | data/MM17_variants.vcf |"
+                },
+                "annotate_ions": {
+                    "type": "boolean",
+                    "default": "false",
+                    "fa_icon": "fas fa-tags",
+                    "description": "Set this option to create documents that are created to perform the ion annotation"
                 }
             }
         },
@@ -321,7 +327,7 @@
                     "fa_icon": "fas fa-file-code",
                     "pattern": "^\\S+\\.tsv$",
                     "description": "Specify a .tsv file containing the MHC alleles of your probes as well as their metadata such as SampleID.",
-                    "help_text": "| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |\n| -------------| :----------------------------------------------:| ------------------------------------------:|\n| MM15_Melanom | A* 03:01;A* 68:01;B* 27:05;B* 35:03;C* 02:02;C* 04:01 |HLA-DRB1* 01:01;HLA-DQB1* 03:19;HLA-DQA1* 05:01|\n| MM17_Melanom | A* 02:01;B* 07:01;B* 26:01;C* 11:01;C* 01:01         |HLA-DRB1* 01:02;HLA-DRB3* 02:02;HLA-DRB4* 01:03|\n"
+                    "help_text": "| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |\n| -------------| :----------------------------------------------:| ------------------------------------------:|\n| MM15_Melanom | `A*03:01;A*68:01;B*27:05;B*35:03;C*02:02;C*04:01` | `HLA-DRB1*01:01;HLA-DQB1*03:19;HLA-DQA1*05:01` |\n| MM17_Melanom | `A*02:01;B*07:01;B*26:01;C*11:01;C*01:01` | `HLA-DRB1*01:02;HLA-DRB3*02:02;HLA-DRB4*01:03` |\n"
                 },
                 "predict_class_1": {
                     "type": "boolean",
@@ -529,11 +535,29 @@
                     "fa_icon": "fas fa-palette",
                     "hidden": true
                 },
+                "hook_url": {
+                    "type": "string",
+                    "description": "Incoming hook URL for messaging service",
+                    "fa_icon": "fas fa-people-group",
+                    "help_text": "Incoming hook URL for messaging service. Currently, only MS Teams is supported.",
+                    "hidden": true
+                },
                 "multiqc_config": {
                     "type": "string",
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true
+                },
+                "multiqc_logo": {
+                    "type": "string",
+                    "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
+                    "fa_icon": "fas fa-image",
+                    "hidden": true
+                },
+                "multiqc_methods_description": {
+                    "type": "string",
+                    "description": "Custom MultiQC yaml file containing HTML including a methods description.",
+                    "fa_icon": "fas fa-cog"
                 },
                 "tracedir": {
                     "type": "string",
