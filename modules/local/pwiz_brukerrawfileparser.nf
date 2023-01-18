@@ -7,13 +7,10 @@ process PWIZ_BRUKERRAWFILEPARSER {
             { exit 1, "Converting bruker tdf file format to mzml is only supported using docker/singularity. Aborting." }
     }
 
-
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/thermorawfileparser:1.4.0--ha8f3691_0' :
-        'quay.io/biocontainers/thermorawfileparser:1.4.0--ha8f3691_0' }"
+    container "chambm/pwiz-skyline-i-agree-to-the-vendor-licenses"
 
     input:
-        tuple val(meta), path(rawfile)
+        tuple val(meta), path(tdf)
 
     output:
         tuple val(meta), path("*.mzML"), emit: mzml
@@ -23,18 +20,21 @@ process PWIZ_BRUKERRAWFILEPARSER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${rawfile.baseName}"
+        //def prefix           = task.ext.prefix ?: "${tdf.baseName}"
 
-        // The ThermoRawFileParser expects a input file which is transcribed to an indexed mzML (defined by '-f 2')
+
         """
-        ThermoRawFileParser.sh \\
-            -i $rawfile \\
-            -f 2 \\
-            -b ${prefix}.mzML
+        wine msconvert \\
+            $tdf \\
+            -o $PWD \\
+            --inten64 \\
+            --zlib \\
+            --combineIonMobilitySpectra \\
+            --filter "scanSumming precursorTol=0.05 scanTimeTol=5 ionMobilityTol=0.1"
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
-            thermorawfileparser: \$(ThermoRawFileParser.sh --version)
+            wine: \$(wine --version)
         END_VERSIONS
         """
 }

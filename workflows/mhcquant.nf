@@ -175,7 +175,10 @@ workflow MHCQUANT {
 
     // Bruker raw file conversion
     PWIZ_BRUKERRAWFILEPARSER(ms_files.d)
-
+    ch_versions = ch_versions.mix(PWIZ_BRUKERRAWFILEPARSER.out.versions.ifEmpty(null))
+    ch_ms_files = PWIZ_BRUKERRAWFILEPARSER.out.mzml
+    ch_ms_files.view()
+    """
     if (params.run_centroidisation) {
         // Optional: Run Peak Picking as Preprocessing
         OPENMS_PEAKPICKERHIRES(ch_ms_files)
@@ -353,7 +356,7 @@ workflow MHCQUANT {
         multiqc_report = MULTIQC.out.report.toList()
         ch_versions    = ch_versions.mix(MULTIQC.out.versions)
     }
-
+"""
 }
 
 /*
