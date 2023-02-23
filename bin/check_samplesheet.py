@@ -26,7 +26,7 @@ class RowChecker:
     VALID_FORMATS = (
         ".raw",
         ".mzML",
-        ".d"
+        ".d.tar.gz"
     )
 
     def __init__(
