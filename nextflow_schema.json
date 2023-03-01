@@ -222,7 +222,7 @@
                 "spectrum_batch_size": {
                     "type": "integer",
                     "fa_icon": "fas fa-wave-sine",
-                    "default": 500,
+                    "default": 0,
                     "description": "Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)"
                 },
                 "vcf_sheet": {

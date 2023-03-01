@@ -62,7 +62,7 @@ An [example samplesheet](../assets/samplesheet.tsv) has been provided with the p
 The typical command for running the pipeline is as follows:
 
 ```console
-nextflow run nf-core/mhcquant --input 'samples.tsv' --outdir <OUTDIR> --fasta 'SWISSPROT_2020.fasta' --allele_sheet 'alleles.tsv' --vcf_sheet 'variants.tsv' --include_proteins_from_vcf --predict_class_1 -profile docker
+nextflow run nf-core/mhcquant --input 'samples.tsv' --outdir <OUTDIR> --fasta 'SWISSPROT_2020.fasta' --allele_sheet 'alleles.tsv' --vcf_sheet 'variants.tsv' --include_proteins_from_vcf --predict_class_1 --spectrum_batch_size 500 -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
