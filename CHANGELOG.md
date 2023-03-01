@@ -3,6 +3,19 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.4.1 nfcore/mhcquant "Maroon Gold Boxer" (patch) - yyyy/mm/dd
+
+### `Added`
+
+### `Fixed`
+
+- Increased comet search, through altering the spectrum_batch_size from 500 to 0
+- [#249](https://github.com/nf-core/mhcquant/pull/249) - nf-core template update (version 2.7.2)
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.4.0 nfcore/mhcquant "Maroon Gold Boxer" - 2022/12/02
 
 Initial release of nf-core/mhcquant, created with the [nf-core](https://nf-co.re/) template.
