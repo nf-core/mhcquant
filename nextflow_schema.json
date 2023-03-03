@@ -237,6 +237,12 @@
                     "default": "false",
                     "fa_icon": "fas fa-tags",
                     "description": "Set this option to create documents that are created to perform the ion annotation"
+                },
+                "instrument": {
+                    "type": "string",
+                    "default": "high_res",
+                    "fa_icon": "fas fa-wrench",
+                    "description": "Comets theoretical_fragment_ions parameter: theoretical fragment ion peak representation, high-res: sum of intensities plus flanking bins, ion trap (low-res) ms/ms: sum of intensities of central M bin only"
                 }
             }
         },
