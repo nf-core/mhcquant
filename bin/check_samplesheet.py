@@ -147,6 +147,7 @@ def sniff_format(handle):
 
 
 def check_samplesheet(file_in, file_out):
+
     """
     Check that the tabular samplesheet has the structure expected by nf-core pipelines.
     Validate the general shape of the table, expected columns, and each row. Also add
