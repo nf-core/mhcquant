@@ -225,8 +225,7 @@ workflow MHCQUANT {
     // Return an error message when there is only a header present in the document
     OPENMS_TEXTEXPORTER_FDR.out.tsv.map {
         meta, tsv -> if (tsv.size() < 130) {
-            log.error "It seems that there were no significant hits found for one or more samples.\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample."
-            exit(0)
+            log.warn "It seems that there were no significant hits found for this sample: " + meta.sample + "\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample. "
         }
     }
 
