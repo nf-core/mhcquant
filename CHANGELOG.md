@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#249](https://github.com/nf-core/mhcquant/pull/249) - nf-core template update (version 2.7.2)
 - [#258](https://github.com/nf-core/mhcquant/pull/258) - Adjusted decoy strategy to reverse [#255](https://github.com/nf-core/mhcquant/issues/255) and made consistent fdr-level flags [#228](https://github.com/nf-core/mhcquant/issues/228)
 
-
 ### `Dependencies`
 
 ### `Deprecated`
