@@ -124,9 +124,9 @@
                     "help_text": " For High-Resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)"
                 },
                 "fragment_bin_offset": {
-                    "type": "integer",
+                    "type": "number",
                     "fa_icon": "fas fa-indent",
-                    "default": 0,
+                    "default": 0.0,
                     "description": "Specify the fragment bin offset to be used for the comet database search.",
                     "help_text": "For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)"
                 },
@@ -222,7 +222,7 @@
                 "spectrum_batch_size": {
                     "type": "integer",
                     "fa_icon": "fas fa-wave-sine",
-                    "default": 500,
+                    "default": 0,
                     "description": "Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)"
                 },
                 "vcf_sheet": {
@@ -237,6 +237,12 @@
                     "default": "false",
                     "fa_icon": "fas fa-tags",
                     "description": "Set this option to create documents that are created to perform the ion annotation"
+                },
+                "instrument": {
+                    "type": "string",
+                    "default": "high_res",
+                    "fa_icon": "fas fa-wrench",
+                    "description": "Comets theoretical_fragment_ions parameter: theoretical fragment ion peak representation, high-res: sum of intensities plus flanking bins, ion trap (low-res) ms/ms: sum of intensities of central M bin only"
                 }
             }
         },
@@ -252,7 +258,7 @@
                     "fa_icon": "fas fa-rectangle-code",
                     "default": "peptide_level_fdrs",
                     "description": "Specify the level at which the false discovery rate should be computed.",
-                    "enum": ["peptide_level_fdrs", "psm-level-fdrs", "protein_level_fdrs"]
+                    "enum": ["peptide_level_fdrs", "psm_level_fdrs", "protein_level_fdrs"]
                 },
                 "fdr_threshold": {
                     "type": "number",
@@ -498,6 +504,12 @@
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
                 },
+                "version": {
+                    "type": "boolean",
+                    "description": "Display version and exit.",
+                    "fa_icon": "fas fa-question-circle",
+                    "hidden": true
+                },
                 "publish_dir_mode": {
                     "type": "string",
                     "default": "copy",
@@ -539,7 +551,7 @@
                     "type": "string",
                     "description": "Incoming hook URL for messaging service",
                     "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, only MS Teams is supported.",
+                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
                 "multiqc_config": {
@@ -579,12 +591,6 @@
                     "description": "Show all params when using `--help`",
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
-                },
-                "enable_conda": {
-                    "type": "boolean",
-                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
-                    "hidden": true,
-                    "fa_icon": "fas fa-bacon"
                 }
             }
         }
