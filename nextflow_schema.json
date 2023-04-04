@@ -258,7 +258,7 @@
                     "fa_icon": "fas fa-rectangle-code",
                     "default": "peptide_level_fdrs",
                     "description": "Specify the level at which the false discovery rate should be computed.",
-                    "enum": ["peptide_level_fdrs", "psm-level-fdrs", "protein_level_fdrs"]
+                    "enum": ["peptide_level_fdrs", "psm_level_fdrs", "protein_level_fdrs"]
                 },
                 "fdr_threshold": {
                     "type": "number",

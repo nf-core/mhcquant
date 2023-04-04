@@ -3,14 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.4.1 nfcore/mhcquant "Maroon Gold Boxer" (patch) - yyyy/mm/dd
+## v2.4.1 nfcore/mhcquant "Maroon Gold Boxer" (patch) - 2023/04/04
 
 ### `Added`
+
+- Added low resolution settings (e.g. Iontrap) [#254](https://github.com/nf-core/mhcquant/pull/254)
 
 ### `Fixed`
 
 - Increased comet search, through altering the spectrum_batch_size from 500 to 0
 - [#249](https://github.com/nf-core/mhcquant/pull/249) - nf-core template update (version 2.7.2)
+- [#258](https://github.com/nf-core/mhcquant/pull/258) - Adjusted decoy strategy to reverse [#255](https://github.com/nf-core/mhcquant/issues/255) and made consistent fdr-level flags [#228](https://github.com/nf-core/mhcquant/issues/228)
+- [#845](https://github.com/nf-core/test-datasets/pull/845) - Adjusted nf-core test data set [#233](https://github.com/nf-core/mhcquant/issues/233)
 
 ### `Dependencies`
 
