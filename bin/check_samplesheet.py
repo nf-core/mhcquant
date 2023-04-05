@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Written by Marissa Dubbelaar and released under MIT license.
+
 """Provide a command line tool to validate and transform tabular samplesheets."""
 
 import os

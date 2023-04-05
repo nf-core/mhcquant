@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Lukas Heumos and released under MIT license.
+
 from mhcflurry import Class1AffinityPredictor
 import logging
 import sys

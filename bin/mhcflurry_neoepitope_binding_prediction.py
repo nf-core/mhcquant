@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Lukas Heumos and released under MIT license.
+
 import pandas as pd
 import numpy as np
 import logging

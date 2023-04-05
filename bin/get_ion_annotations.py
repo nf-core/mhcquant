@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-__author__ = "Jonas Scheid"
+
+# Written by Jonas Scheid and released under MIT license.
 
 from typing import Tuple
 from pyopenms import *
