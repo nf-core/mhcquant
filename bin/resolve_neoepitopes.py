@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Written by Leon Bichmann and released under MIT license.
+# Written by Lukas Heumos and released under MIT license.
 
 """
 Commandline tool for extracting unique neoepitopes from mztab files and the
