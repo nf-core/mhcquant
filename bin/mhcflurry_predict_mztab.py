@@ -2,7 +2,6 @@
 
 # Written by Leon Bichmann and released under MIT license.
 
-
 import argparse
 import logging
 import pandas as pd
