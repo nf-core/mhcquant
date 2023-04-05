@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Leon Bichmann and released under MIT license.
+
 from mhcnuggets.src.predict import predict
 import argparse
 import logging

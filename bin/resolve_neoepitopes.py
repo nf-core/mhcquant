@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Leon Bichmann and released under MIT license.
+
 """
 Commandline tool for extracting unique neoepitopes from mztab files and the
 and the FRED2 vcf_neoepitope_predictor.py script.

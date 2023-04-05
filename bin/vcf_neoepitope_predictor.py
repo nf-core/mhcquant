@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Leon Bichmann and released under MIT license.
+
 """
 Commandline tool for (neo)epitope prediction
 usage: neoepitopeprediction.py [-h]
