@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Written by Lukas Heumos and released under MIT license.
+
 import argparse
 import logging
 import sys

@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+# Written by Christopher Mohr / Mathias Walzer and released under MIT license.
+
 import os
 import sys
 import logging

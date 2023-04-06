@@ -24,7 +24,8 @@ process OPENMS_DECOYDATABASE {
         DecoyDatabase -in $fasta \\
             -out ${prefix}.fasta \\
             -decoy_string DECOY_ \\
-            -decoy_string_position prefix
+            -decoy_string_position prefix \\
+            -enzyme 'no cleavage'
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

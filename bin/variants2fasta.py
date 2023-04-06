@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Leon Bichmann and released under MIT license.
+
 import time
 import sys
 import argparse
@@ -72,7 +75,6 @@ def read_variant_effect_predictor(file, gene_filter=None):
 
     with open(file, "r") as f:
         for i, l in enumerate(f):
-
             # skip comments
             if l.startswith("#") or l.strip() == "":
                 continue
@@ -143,7 +145,6 @@ def read_variant_effect_predictor(file, gene_filter=None):
 
 
 def main():
-
     model = argparse.ArgumentParser(description="Neoepitope protein fasta generation from variant vcf")
 
     model.add_argument("-v", "--vcf", type=str, default=None, help="Path to the vcf input file")

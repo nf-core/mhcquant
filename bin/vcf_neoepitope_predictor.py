@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Written by Leon Bichmann and released under MIT license.
+
 """
 Commandline tool for (neo)epitope prediction
 usage: neoepitopeprediction.py [-h]
@@ -124,7 +127,6 @@ def read_variant_effect_predictor(file, gene_filter=None):
 
     with open(file, "r") as f:
         for i, l in enumerate(f):
-
             # skip comments
             if l.startswith("#") or l.strip() == "":
                 continue

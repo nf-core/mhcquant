@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Written by Marissa Dubbelaar and released under MIT license.
+
 """Provide a command line tool to validate and transform tabular samplesheets."""
 
 import os
@@ -147,7 +149,6 @@ def sniff_format(handle):
 
 
 def check_samplesheet(file_in, file_out):
-
     """
     Check that the tabular samplesheet has the structure expected by nf-core pipelines.
     Validate the general shape of the table, expected columns, and each row. Also add
