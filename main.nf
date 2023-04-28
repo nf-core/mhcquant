@@ -4,7 +4,6 @@
     nf-core/mhcquant
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/mhcquant
-
     Website: https://nf-co.re/mhcquant
     Slack  : https://nfcore.slack.com/channels/mhcquant
 ----------------------------------------------------------------------------------------
