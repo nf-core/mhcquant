@@ -3,7 +3,9 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.4.1 nfcore/mhcquant "Maroon Gold Boxer" (patch) - 2023/04/04
+## v2.4.1dev - [date]
+
+## v2.4.1 nfcore/mhcquant "Young Shark" (patch) - 2023/04/04
 
 ### `Added`
 
