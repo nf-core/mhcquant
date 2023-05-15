@@ -59,6 +59,7 @@ nextflow run nf-core/mhcquant \
 ```
 
 <<<<<<< HEAD
+
 > **Warning:**
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
 > provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
@@ -67,16 +68,18 @@ nextflow run nf-core/mhcquant \
 For more details, please refer to the [usage documentation](https://nf-co.re/mhcquant/usage) and the [parameter documentation](https://nf-co.re/mhcquant/parameters).
 
 ## Pipeline output
+
 =======
-   ```bash
-   nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute> \
-                                 --input 'samples.tsv' \
-                                 --fasta 'SWISSPROT_2020.fasta' \
-                                 --allele_sheet 'alleles.tsv' \
-                                 --predict_class_1 \
-                                 --refine_fdr_on_predicted_subset \
-                                 --outdir ./results
-   ```
+
+```bash
+nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute> \
+                              --input 'samples.tsv' \
+                              --fasta 'SWISSPROT_2020.fasta' \
+                              --allele_sheet 'alleles.tsv' \
+                              --predict_class_1 \
+                              --refine_fdr_on_predicted_subset \
+                              --outdir ./results
+```
 
 ## Pipeline summary
 
@@ -137,7 +140,8 @@ Additional functionality contained by the pipeline currently includes:
 - Retention Times Predictor Found Peptides and neoepitopes (`RTPredict`)
 
 ## Documentation
->>>>>>> dev
+
+> > > > > > > dev
 
 To see the the results of a test run with a full size dataset refer to the [results](https://nf-co.re/mhcquant/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the
