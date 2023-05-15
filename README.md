@@ -58,8 +58,6 @@ nextflow run nf-core/mhcquant \
    --outdir <OUTDIR>
 ```
 
-<<<<<<< HEAD
-
 > **Warning:**
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
 > provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
@@ -75,9 +73,6 @@ For more details, please refer to the [usage documentation](https://nf-co.re/mhc
 nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute> \
                               --input 'samples.tsv' \
                               --fasta 'SWISSPROT_2020.fasta' \
-                              --allele_sheet 'alleles.tsv' \
-                              --predict_class_1 \
-                              --refine_fdr_on_predicted_subset \
                               --outdir ./results
 ```
 
@@ -157,7 +152,7 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann) from the [Kohlbacher Lab](https://kohlbacherlab.org/). The pipeline was re-written in Nextflow DSL2 and is primarily maintained by [Marissa Dubbelaar](https://github.com/marissaDubbelaar) from [Clinical Collaboration Unit Translational Immunology](https://www.medizin.uni-tuebingen.de/en-de/das-klinikum/einrichtungen/kliniken/medizinische-klinik/kke-translationale-immunologie) and [Quantitative Biology Center](https://uni-tuebingen.de/forschung/forschungsinfrastruktur/zentrum-fuer-quantitative-biologie-qbic/) in Tübingen.
+nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann) from the [Kohlbacher Lab](https://kohlbacherlab.org/). The pipeline was re-written in Nextflow DSL2 and is primarily maintained by [Marissa Dubbelaar](https://github.com/marissaDubbelaar) and [Jonas Scheid](https://github.com/jonasscheid) from [Peptide-based Immunotherapy](https://www.medizin.uni-tuebingen.de/en-de/peptid-basierte-immuntherapie) and [Quantitative Biology Center](https://uni-tuebingen.de/forschung/forschungsinfrastruktur/zentrum-fuer-quantitative-biologie-qbic/) in Tübingen.
 
 Helpful contributors:
 
@@ -172,7 +167,7 @@ Helpful contributors:
 - [Christian Fufezan](https://github.com/fu)
 - [Sven Fillinger](https://github.com/sven1103)
 - [Kevin Menden](https://github.com/KevinMenden)
-- [Jonas Scheid](https://github.com/jonasscheid)
+- [Steffen Lemke](https://github.com/steffenlem)
 
 ## Contributions and Support
 

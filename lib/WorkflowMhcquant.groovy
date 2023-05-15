@@ -154,7 +154,6 @@ class WorkflowMhcquant {
         def description_html = engine.createTemplate(methods_text).make(meta)
 
         return description_html
-<<<<<<< HEAD
     }
 
     //
@@ -169,7 +168,5 @@ class WorkflowMhcquant {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             Nextflow.error(error_string)
         }
-=======
->>>>>>> dev
     }
 }
