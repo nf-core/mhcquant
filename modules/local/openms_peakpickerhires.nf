@@ -4,8 +4,8 @@ process OPENMS_PEAKPICKERHIRES {
 
     conda (params.enable_conda ? "bioconda::openms=2.8.0" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:2.8.0--h7ca0330_2' :
-        'quay.io/biocontainers/openms:2.8.0--h7ca0330_2' }"
+        'https://depot.galaxyproject.org/singularity/openms:2.9.1--h135471a_1' :
+        'biocontainers/openms:2.9.1--h135471a_1' }"
 
     input:
         tuple val(meta), path(mzml)

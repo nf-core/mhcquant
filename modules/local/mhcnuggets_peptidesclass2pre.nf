@@ -5,7 +5,7 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
     conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0' :
-        'quay.io/biocontainers/mhcnuggets:2.3.2--py_0' }"
+        'biocontainers/mhcnuggets:2.3.2--py_0' }"
 
     input:
         tuple val(meta), path(mztab)

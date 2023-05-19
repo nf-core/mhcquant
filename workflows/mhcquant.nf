@@ -59,7 +59,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 // MODULE: Loaded from modules/local/
 //
 include { OPENMS_DECOYDATABASE }                                            from '../modules/local/openms_decoydatabase'
-include { OPENMS_THERMORAWFILEPARSER }                                      from '../modules/local/openms_thermorawfileparser'
+include { THERMORAWFILEPARSER }                                             from '../modules/local/thermorawfileparser'
 include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
@@ -165,10 +165,10 @@ workflow MHCQUANT {
     }
 
     // Raw file conversion
-    OPENMS_THERMORAWFILEPARSER(ms_files.raw)
-    ch_versions = ch_versions.mix(OPENMS_THERMORAWFILEPARSER.out.versions.ifEmpty(null))
+    THERMORAWFILEPARSER(ms_files.raw)
+    ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions.ifEmpty(null))
     // Define the ch_ms_files channels to combine the mzml files
-    ch_ms_files = OPENMS_THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
+    ch_ms_files = THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
 
     if (params.run_centroidisation) {
         // Optional: Run Peak Picking as Preprocessing
