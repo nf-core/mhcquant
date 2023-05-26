@@ -5,6 +5,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v2.4.1dev - [date]
 
+### `Added`
+
+### `Fixed`
+
+- [#266](https://github.com/nf-core/mhcquant/pull/266) New OpenMS version 2.9.1 fixes duplicated ID bug [#250](https://github.com/nf-core/mhcquant/issues/250)
+
+### `Dependencies`
+
+- [#266](https://github.com/nf-core/mhcquant/pull/266) Switched from OpenMS version 2.8.0 to newest version 2.9.1 [#265](https://github.com/nf-core/mhcquant/issues/265)
+- [#266](https://github.com/nf-core/mhcquant/pull/266) Bumped ThermoRawFileParser version from 1.4.0 to 1.4.2
+
+### `Deprecated`
+
 ## v2.4.1 nfcore/mhcquant "Young Shark" (patch) - 2023/04/04
 
 ### `Added`
