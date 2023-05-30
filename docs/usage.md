@@ -53,7 +53,7 @@ ID  Sample  Condition ReplicateFileName
 | `ID`                | An incrementing value which acts as a unique number for the given sample                                                                                             |
 | `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
 | `Condition`         | Additional information of the sample can be defined here.                                                                                                            |
-| `ReplicateFileName` | Full path to the MS outcome file. These files have the extentions ".raw", ".mzML" or ".d"                                                                             |
+| `ReplicateFileName` | Full path to the MS outcome file. These files have the extentions ".raw", ".mzML" or ".d"                                                                            |
 
 An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
 
