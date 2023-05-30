@@ -60,6 +60,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { OPENMS_DECOYDATABASE }                                            from '../modules/local/openms_decoydatabase'
 include { THERMORAWFILEPARSER }                                             from '../modules/local/thermorawfileparser'
+include { TDF2MZML }                                                        from '../modules/local/tdf2mzml'
 include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
@@ -131,6 +132,8 @@ workflow MHCQUANT {
                     return [ meta, filename ]
                 mzml : meta.ext == 'mzml'
                     return [ meta, filename ]
+                tdf : meta.ext == 'd'
+                    return [ meta, filename ]
                 other : true }
         .set { ms_files }
 
@@ -169,6 +172,11 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions.ifEmpty(null))
     // Define the ch_ms_files channels to combine the mzml files
     ch_ms_files = THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
+
+    // timsTOF data conversion
+    TDF2MZML(ms_files.tdf)
+    ch_ms_files = TDF2MZML.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
+    ch_versions = ch_versions.mix(TDF2MZML.out.versions.ifEmpty(null))   
 
     if (params.run_centroidisation) {
         // Optional: Run Peak Picking as Preprocessing
