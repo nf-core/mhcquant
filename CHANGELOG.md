@@ -3,9 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.4.1dev - [date]
+## v2.4.2dev - [date]
 
 ### `Added`
+
+- Support for brukers tdf format by adding tdf2mzml converter [#263](https://github.com/nf-core/mhcquant/issues/263)
 
 ### `Fixed`
 

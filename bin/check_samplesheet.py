@@ -25,10 +25,7 @@ class RowChecker:
 
     """
 
-    VALID_FORMATS = (
-        ".raw",
-        ".mzML",
-    )
+    VALID_FORMATS = (".raw", ".mzML", ".d")
 
     def __init__(
         self, id_col="ID", sample_col="Sample", condition_col="Condition", filename_col="ReplicateFileName", **kwargs
