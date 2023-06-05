@@ -170,13 +170,12 @@ workflow MHCQUANT {
     // Raw file conversion
     THERMORAWFILEPARSER(ms_files.raw)
     ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions.ifEmpty(null))
-    // Define the ch_ms_files channels to combine the mzml files
     ch_ms_files = THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
 
     // timsTOF data conversion
     TDF2MZML(ms_files.tdf)
-    ch_ms_files = TDF2MZML.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
     ch_versions = ch_versions.mix(TDF2MZML.out.versions.ifEmpty(null))   
+    ch_ms_files = TDF2MZML.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
 
     if (params.run_centroidisation) {
         // Optional: Run Peak Picking as Preprocessing
