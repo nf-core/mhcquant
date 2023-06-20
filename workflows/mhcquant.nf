@@ -64,6 +64,7 @@ include { TDF2MZML }                                                        from
 include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
+include { DEEPLC }                                                          from '../modules/local/deeplc'
 
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_COMET }                from '../modules/local/openms_textexporter'
 
@@ -214,7 +215,12 @@ workflow MHCQUANT {
             }
             .groupTuple(by: [0])
     }
-
+    // Run DeepLC if specified
+    if (params.use_deeplc){
+        DEEPLC(ch_proceeding_idx)
+        ch_versions = ch_versions.mix(DEEPLC.out.versions.ifEmpty(null))
+        ch_proceeding_idx = DEEPLC.out.idxml
+    }
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_proceeding_idx)
     ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
