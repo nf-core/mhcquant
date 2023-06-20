@@ -277,21 +277,21 @@ def add_rt_error(peptide_ids: list, prediction_dict: dict, add_abs_rt_error: boo
 @click.option('--add_log_rt_error', is_flag=True,
               help='add log RT prediction errors to idXML')
 @click.option('--debug', is_flag=True, help='Additionally write out calibration file and deeplc output')
-def main(idxml_input: str,
-         output_idxml: str,
+def main(input: str,
+         output: str,
          calibration_mode: str,
          calibration_bins: int,
          add_abs_rt_error: bool,
          add_sqr_rt_error: bool,
          add_log_rt_error: bool,
          debug: bool):
-    
+
     LOG.info("Parse idXML")
-    protein_ids, peptide_ids = parse_idxml(idxml_input)
+    protein_ids, peptide_ids = parse_idxml(input)
 
     if len(peptide_ids) <= calibration_bins:
         LOG.info("Number of peptide hits is smaller than calibration bins. Skipping deeplc prediction.")
-        IdXMLFile().store(output_idxml, protein_ids, peptide_ids)
+        IdXMLFile().store(output, protein_ids, peptide_ids)
         return 0
 
     LOG.info("Generate DeepLC input")
@@ -302,20 +302,20 @@ def main(idxml_input: str,
         LOG.info("Run DeepLC with RT bin calibration")
         calibration_df = generate_calibration_df_with_RT_bins(df_deeplc_input, calibration_bins)
         if debug:
-            calibration_df.to_csv(output_idxml + "_calibration.tsv", index=False, sep="\t")
+            calibration_df.to_csv(output + "_calibration.tsv", index=False, sep="\t")
         df_deeplc_output = run_deeplc(df_deeplc_input, calibration_df)
     elif calibration_mode == "idx_bin":
         LOG.info("Run DeepLC with index bin calibration")
         calibration_df = generate_calibration_df(df_deeplc_input, calibration_bins)
         if debug:
-            calibration_df.to_csv(output_idxml + "_calibration.tsv", index=False, sep="\t")
+            calibration_df.to_csv(output + "_calibration.tsv", index=False, sep="\t")
         df_deeplc_output = run_deeplc(df_deeplc_input, calibration_df)
     elif calibration_mode == "min_max":
         LOG.info("Run DeepLC with min/max calibration")
         df_deeplc_output = run_deeplc(df_deeplc_input)
-    
+
     if debug:
-        df_deeplc_output.to_csv(output_idxml + "_deeplc_output.tsv", index=False, sep="\t")
+        df_deeplc_output.to_csv(output + "_deeplc_output.tsv", index=False, sep="\t")
 
     # Create map containing the predicted retention time for each peptide sequence and modification
     sequence_to_prediction = {}
@@ -326,12 +326,12 @@ def main(idxml_input: str,
     peptide_ids_pred_RT = add_rt_error(peptide_ids, sequence_to_prediction, add_abs_rt_error, add_sqr_rt_error, add_log_rt_error)
 
     LOG.info("Write idXML")
-    IdXMLFile().store(output_idxml, protein_ids, peptide_ids_pred_RT)
+    IdXMLFile().store(output, protein_ids, peptide_ids_pred_RT)
 
     if debug:
-        df_deeplc_input.to_csv(output_idxml + "_deeplc_input.tsv", index=False, sep="\t")
+        df_deeplc_input.to_csv(output + "_deeplc_input.tsv", index=False, sep="\t")
         if calibration_mode == "rt_bin" or calibration_mode == "idx_bin":
-            calibration_df.to_csv(output_idxml + "_calibration.tsv", index=False, sep="\t")
+            calibration_df.to_csv(output + "_calibration.tsv", index=False, sep="\t")
 
     return 0
 
