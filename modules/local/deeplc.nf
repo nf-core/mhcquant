@@ -23,8 +23,8 @@ process DEEPLC {
 
     """
     deeplc_cli.py \\
-        --idxml_input $idxml_in \\
-        --output_idxml ${prefix}_deeplc.idXML \\
+        --iinput $idxml_in \\
+        --output ${prefix}_deeplc.idXML \\
         --calibration_mode ${params.deeplc_calibration_mode} \\
         --calibration_bins ${params.deeplc_calibration_bins} \\
         $add_abs_rt_error

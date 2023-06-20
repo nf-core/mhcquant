@@ -200,7 +200,7 @@ def run_deeplc(df: pd.DataFrame, calibration_df: pd.DataFrame = None) -> pd.Data
     return df
 
 
-def add_rt_error(peptide_ids: list, prediction_dict: dict, add_abs_error: bool=False, add_sqr_error: bool=False, add_log_error:bool=False) -> list:
+def add_rt_error(peptide_ids: list, prediction_dict: dict, add_abs_rt_error: bool=False, add_sqr_rt_error: bool=False, add_log_rt_error:bool=False) -> list:
     """
     Adds the error of the predicted retention time in comparison to the measured retention time to each peptide hit.
     Different error scores can be selected.
@@ -209,12 +209,12 @@ def add_rt_error(peptide_ids: list, prediction_dict: dict, add_abs_error: bool=F
     :type peptide_ids: list
     :param prediction_dict: dictionary containing the predicted retention time for each peptide sequence
     :type prediction_dict: dict
-    :param add_abs_error: add absolute RT prediction errors to idXML
-    :type add_abs_error: bool
-    :param add_sqr_error: add squared RT prediction errors to idXML
-    :type add_sqr_error: bool
-    :param add_log_error: add log RT prediction errors to idXML
-    :type add_log_error: bool
+    :param add_abs_rt_error: add absolute RT prediction errors to idXML
+    :type add_abs_rt_error: bool
+    :param add_sqr_rt_error: add squared RT prediction errors to idXML
+    :type add_sqr_rt_error: bool
+    :param add_log_rt_error: add log RT prediction errors to idXML
+    :type add_log_rt_error: bool
     :return: list of PeptideIdentification objects with added error scores
     :rtype: list
     """
@@ -242,17 +242,17 @@ def add_rt_error(peptide_ids: list, prediction_dict: dict, add_abs_error: bool=F
             predicted_rt = prediction_dict[(unmodified_sequence, modifications)]
 
             # calculate abs error
-            if add_abs_error:
+            if add_abs_rt_error:
                 abs_error = abs(measured_rt - predicted_rt)
                 hit.setMetaValue("deeplc_abs_error", abs_error)
 
             # calculate seq error
-            if add_sqr_error:
+            if add_sqr_rt_error:
                 sqr_error = abs(measured_rt - predicted_rt)**2
                 hit.setMetaValue("deeplc_sqr_error", sqr_error)
 
             # calcultae log error
-            if add_log_error:
+            if add_log_rt_error:
                 log_error = math.log(abs(measured_rt - predicted_rt))
                 hit.setMetaValue("deeplc_log_error", log_error)
 
@@ -263,27 +263,27 @@ def add_rt_error(peptide_ids: list, prediction_dict: dict, add_abs_error: bool=F
 
 
 @click.command()
-@click.option('-i', '--idxml_input', help='input path of idXML', required=True)
-@click.option('-o', '--output_idxml', help='output path of idXML',
+@click.option('-i', '--input', help='input path of idXML', required=True)
+@click.option('-o', '--output', help='output path of idXML',
               required=True)
-@click.option('--mode', type=click.Choice(['idx_bin', 'rt_bin', 'min_max']),
+@click.option('--calibration_mode', type=click.Choice(['idx_bin', 'rt_bin', 'min_max']),
               default='rt_bin', help='Calibration method')
 @click.option('--calibration_bins', type=int, default=20,
               help='number of bins for calibration')
-@click.option('--add_abs_error', is_flag=True,
+@click.option('--add_abs_rt_error', is_flag=True,
               help='add absolute RT prediction errors to idXML')
-@click.option('--add_sqr_error', is_flag=True,
+@click.option('--add_sqr_rt_error', is_flag=True,
               help='add squared RT prediction errors to idXML')
-@click.option('--add_log_error', is_flag=True,
+@click.option('--add_log_rt_error', is_flag=True,
               help='add log RT prediction errors to idXML')
 @click.option('--debug', is_flag=True, help='Additionally write out calibration file and deeplc output')
 def main(idxml_input: str,
          output_idxml: str,
-         mode: str,
+         calibration_mode: str,
          calibration_bins: int,
-         add_abs_error: bool,
-         add_sqr_error: bool,
-         add_log_error: bool,
+         add_abs_rt_error: bool,
+         add_sqr_rt_error: bool,
+         add_log_rt_error: bool,
          debug: bool):
     
     LOG.info("Parse idXML")
@@ -298,19 +298,19 @@ def main(idxml_input: str,
     df_deeplc_input = generate_deeplc_input(peptide_ids)
 
     # Run DeepLC
-    if mode == "rt_bin":
+    if calibration_mode == "rt_bin":
         LOG.info("Run DeepLC with RT bin calibration")
         calibration_df = generate_calibration_df_with_RT_bins(df_deeplc_input, calibration_bins)
         if debug:
             calibration_df.to_csv(output_idxml + "_calibration.tsv", index=False, sep="\t")
         df_deeplc_output = run_deeplc(df_deeplc_input, calibration_df)
-    elif mode == "idx_bin":
+    elif calibration_mode == "idx_bin":
         LOG.info("Run DeepLC with index bin calibration")
         calibration_df = generate_calibration_df(df_deeplc_input, calibration_bins)
         if debug:
             calibration_df.to_csv(output_idxml + "_calibration.tsv", index=False, sep="\t")
         df_deeplc_output = run_deeplc(df_deeplc_input, calibration_df)
-    elif mode == "min_max":
+    elif calibration_mode == "min_max":
         LOG.info("Run DeepLC with min/max calibration")
         df_deeplc_output = run_deeplc(df_deeplc_input)
     
@@ -323,14 +323,14 @@ def main(idxml_input: str,
         sequence_to_prediction[(seq, mods)] = pred_rt
 
     LOG.info("Add error to idXML")
-    peptide_ids_pred_RT = add_rt_error(peptide_ids, sequence_to_prediction, add_abs_error, add_sqr_error, add_log_error)
+    peptide_ids_pred_RT = add_rt_error(peptide_ids, sequence_to_prediction, add_abs_rt_error, add_sqr_rt_error, add_log_rt_error)
 
     LOG.info("Write idXML")
     IdXMLFile().store(output_idxml, protein_ids, peptide_ids_pred_RT)
 
     if debug:
         df_deeplc_input.to_csv(output_idxml + "_deeplc_input.tsv", index=False, sep="\t")
-        if mode == "rt_bin" or mode == "idx_bin":
+        if calibration_mode == "rt_bin" or calibration_mode == "idx_bin":
             calibration_df.to_csv(output_idxml + "_calibration.tsv", index=False, sep="\t")
 
     return 0
