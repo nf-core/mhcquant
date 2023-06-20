@@ -190,6 +190,14 @@ workflow MHCQUANT {
     // Run comet database search
     OPENMS_COMETADAPTER(
             ch_mzml_file.join(ch_decoy_db, remainder:true))
+
+    // Run DeepLC if specified
+    if (params.use_deeplc){
+        DEEPLC(ch_proceeding_idx)
+        ch_versions = ch_versions.mix(DEEPLC.out.versions.ifEmpty(null))
+        ch_proceeding_idx = DEEPLC.out.idxml
+    }
+    
     // Write this information to an tsv file
     OPENMS_TEXTEXPORTER_COMET(OPENMS_COMETADAPTER.out.idxml)
     ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
@@ -215,12 +223,7 @@ workflow MHCQUANT {
             }
             .groupTuple(by: [0])
     }
-    // Run DeepLC if specified
-    if (params.use_deeplc){
-        DEEPLC(ch_proceeding_idx)
-        ch_versions = ch_versions.mix(DEEPLC.out.versions.ifEmpty(null))
-        ch_proceeding_idx = DEEPLC.out.idxml
-    }
+
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_proceeding_idx)
     ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
