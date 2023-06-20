@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# Written by Jonas Scheid and Steffen Lemke
+
 import click
 import logging
 import math
