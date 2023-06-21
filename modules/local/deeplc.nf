@@ -27,8 +27,8 @@ process DEEPLC {
         --output ${prefix}_deeplc.idXML \\
         --calibration_mode ${params.deeplc_calibration_mode} \\
         --calibration_bins ${params.deeplc_calibration_bins} \\
-        $add_abs_rt_error
-        $add_sqr_rt_error
+        $add_abs_rt_error \\
+        $add_sqr_rt_error \\
         $add_log_rt_error
 
     cat <<-END_VERSIONS > versions.yml

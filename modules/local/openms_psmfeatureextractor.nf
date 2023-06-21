@@ -20,11 +20,25 @@ process OPENMS_PSMFEATUREEXTRACTOR {
     script:
         def prefix           = task.ext.prefix ?: "${merged.baseName}_psm"
         def args             = task.ext.args ?: ''
+        def extra_features = ""
+        if(params.use_deeplc){
+            def extra_features = "-extra"
+            if(params.add_abs_rt_error){
+                extra_features = "${extra_features} deeplc_abs_error"
+            }
+            if(params.add_log_rt_error){
+                extra_features = "${extra_features} deeplc_log_error"
+            }
+            if(params.add_sqr_rt_error || (!params.add_sqr_rt_error && !params.add_abs_rt_error && !params.add_log_rt_error)){
+                extra_features = "${extra_features} deeplc_sqr_error"
+            }
+        }
 
         """
         PSMFeatureExtractor -in $merged \\
             -out ${prefix}.idXML \\
             -threads $task.cpus \\
+            $extra_features \\
             $args
 
         cat <<-END_VERSIONS > versions.yml
