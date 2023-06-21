@@ -22,7 +22,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         def args             = task.ext.args ?: ''
         def extra_features = ""
         if(params.use_deeplc){
-            def extra_features = "-extra"
+            extra_features = "-extra"
             if(params.add_abs_rt_error){
                 extra_features = "${extra_features} deeplc_abs_error"
             }

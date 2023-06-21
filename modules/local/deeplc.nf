@@ -9,7 +9,7 @@ process DEEPLC {
         tuple val(meta), path(idxml_in)
 
     output:
-        path '*.idXML'     , emit: idxml
+        tuple val(meta), path('*.idXML'), emit: idxml
         path "versions.yml", emit: versions
 
     when:
