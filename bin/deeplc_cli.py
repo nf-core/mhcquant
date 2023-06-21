@@ -268,12 +268,12 @@ def add_rt_error(peptide_ids: list, prediction_dict: dict, add_abs_rt_error: boo
               required=True)
 @click.option('--calibration_mode', type=click.Choice(['idx_bin', 'rt_bin', 'min_max']),
               default='rt_bin', help='Calibration method')
-@click.option('--calibration_bins', type=int, default=20,
+@click.option('--calibration_bins', type=click.IntRange(min=2), default=20,
               help='number of bins for calibration')
 @click.option('--add_abs_rt_error', is_flag=True,
               help='add absolute RT prediction errors to idXML')
 @click.option('--add_sqr_rt_error', is_flag=True,
-              help='add squared RT prediction errors to idXML')
+              help='add squared RT prediction errors to idXML (default if nothing is selected)')
 @click.option('--add_log_rt_error', is_flag=True,
               help='add log RT prediction errors to idXML')
 @click.option('--debug', is_flag=True, help='Additionally write out calibration file and deeplc output')
@@ -285,6 +285,12 @@ def main(input: str,
          add_sqr_rt_error: bool,
          add_log_rt_error: bool,
          debug: bool):
+
+    # check if at least one error is selected, if not set squared error to true
+    num_true = sum([add_abs_rt_error, add_sqr_rt_error, add_log_rt_error])
+    if num_true == 0:
+        LOG.info("No error calculation was set, falling back to squared error")
+        add_sqr_rt_error = True
 
     LOG.info("Parse idXML")
     protein_ids, peptide_ids = parse_idxml(input)
