@@ -28,7 +28,12 @@ class RowChecker:
     VALID_FORMATS = (".raw", ".mzML", ".d")
 
     def __init__(
-        self, id_col="ID", sample_col="Sample", condition_col="Condition", filename_col="ReplicateFileName", **kwargs
+        self,
+        id_col="ID",
+        sample_col="Sample",
+        condition_col="Condition",
+        filename_col="ReplicateFileName",
+        **kwargs,
     ):
         """
         Initialize the row checker with the expected column names.
@@ -67,7 +72,9 @@ class RowChecker:
 
     def _validate_id(self, row):
         """Assert that the sample name exists and convert spaces to underscores."""
-        assert row[self._id_col].isdigit(), "Make sure that the sample ID is an numeric value"
+        assert row[
+            self._id_col
+        ].isdigit(), "Make sure that the sample ID is an numeric value"
 
     def _validate_sample(self, row):
         """Assert that the sample name exists and convert spaces to underscores."""
@@ -99,7 +106,9 @@ class RowChecker:
         In addition to the validation, also rename the sample if more than one sample
         file combination exists.
         """
-        assert len(self._seen) == len(self.modified), "The pair of sample name and file must be unique."
+        assert len(self._seen) == len(
+            self.modified
+        ), "The pair of sample name and file must be unique."
         if len({pair[0] for pair in self._seen}) < len(self._seen):
             counts = Counter(pair[0] for pair in self._seen)
             seen = Counter()
@@ -171,7 +180,9 @@ def check_samplesheet(file_in, file_out):
         # Validate the existence of the expected header columns.
         if not required_columns.issubset(reader.fieldnames):
             req_cols = ", ".join(required_columns)
-            logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
+            logger.critical(
+                f"The sample sheet **must** contain these column headers: {req_cols}."
+            )
             sys.exit(1)
         # Validate each row.
         checker = RowChecker()

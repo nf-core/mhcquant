@@ -38,7 +38,9 @@ if unsupported_alleles:
     for allele in unsupported_alleles:
         LOG.warning("Allele: " + allele + " is not supported by MHCFlurry!")
 if not alleles:
-    LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
+    LOG.warning(
+        "Submitted alleles are not supported or formatting of input.tsv is not correct!"
+    )
 
 
 # read identified peptides with q-value < threshold
@@ -52,12 +54,22 @@ seqs_new_smaller_qval = list(set(seqs))
 mztab = open(sys.argv[-2])
 mztab_read = mztab.readlines()
 mztab.close()
-seqs = [l.split()[1] for l in mztab_read if l.startswith("PSM") if l.split()[1] not in seqs_new_smaller_qval]
+seqs = [
+    l.split()[1]
+    for l in mztab_read
+    if l.startswith("PSM")
+    if l.split()[1] not in seqs_new_smaller_qval
+]
 seqs_new_greater_qval = list(set(seqs))
 seqs_new_greater_qval = [
     s
     for s in seqs_new_greater_qval
-    if 7 < len(s) < 13 and not "U" in s and not "X" in s and not "Z" in s and not "J" in s and not "B" in s
+    if 7 < len(s) < 13
+    and not "U" in s
+    and not "X" in s
+    and not "Z" in s
+    and not "J" in s
+    and not "B" in s
 ]
 
 # call mhcflurry
@@ -66,8 +78,12 @@ seqs_filtered = []
 for allele in alleles:
     print(allele)
     predictor = Class1AffinityPredictor.load()
-    df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_new_greater_qval)
-    seqs_filtered += df_pred[df_pred["prediction"] <= float(sys.argv[-5])]["peptide"].values.tolist()
+    df_pred = predictor.predict_to_dataframe(
+        allele=allele, peptides=seqs_new_greater_qval
+    )
+    seqs_filtered += df_pred[df_pred["prediction"] <= float(sys.argv[-5])][
+        "peptide"
+    ].values.tolist()
 
 # merge sequence lists and append decoys
 seqs_new_all = list(set(seqs_new_smaller_qval + seqs_filtered))
@@ -75,9 +91,13 @@ seqs_new_all = seqs_new_all + [s[::-1] for s in seqs_new_all]
 
 # write idXML for filtering
 op = open(sys.argv[-1], "w")
-op.write('<PeptideIdentification score_type="q-value" higher_score_better="false">' + "\n")
+op.write(
+    '<PeptideIdentification score_type="q-value" higher_score_better="false">' + "\n"
+)
 for pep in seqs_new_all:
-    op.write("\t\t\t" + '<PeptideHit sequence="' + pep + '" score="0" charge="0" >' + "\n")
+    op.write(
+        "\t\t\t" + '<PeptideHit sequence="' + pep + '" score="0" charge="0" >' + "\n"
+    )
     op.write("\t\t\t" + "</PeptideHit>" + "\n")
 op.write("</PeptideIdentification>" + "\n")
 op.close()

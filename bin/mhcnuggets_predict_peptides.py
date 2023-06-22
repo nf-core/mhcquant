@@ -156,7 +156,9 @@ def convert_alleles_mhcnuggets_format(alleles):
 
 def parse_alleles(allele_input):
     alleles = allele_input.split(";")
-    supp_alleles = convert_alleles_mhcnuggets_format(list(set(alleles).intersection(supported_alleles_class_2)))
+    supp_alleles = convert_alleles_mhcnuggets_format(
+        list(set(alleles).intersection(supported_alleles_class_2))
+    )
 
     return supp_alleles
 
@@ -176,7 +178,12 @@ def main():
         supp_alleles = parse_alleles(args.alleles)
 
         for allele in supp_alleles:
-            predict(class_="II", peptides_path=args.peptides, mhc=allele, output=allele + args.output)
+            predict(
+                class_="II",
+                peptides_path=args.peptides,
+                mhc=allele,
+                output=allele + args.output,
+            )
 
     else:
         op = open("predicted_neoepitopes_class_2", "w")

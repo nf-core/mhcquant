@@ -39,7 +39,9 @@ if unsupported_alleles:
     for allele in unsupported_alleles:
         LOG.warning("Allele: " + allele + " is not supported by MHCFlurry!")
 if not alleles:
-    LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
+    LOG.warning(
+        "Submitted alleles are not supported or formatting of input.tsv is not correct!"
+    )
 
 flatten = lambda l: [item for sublist in l for item in sublist]
 # read identified peptides
@@ -51,7 +53,9 @@ if len(seqs_to_geneID) > 0:
     # call mhcflurry
     for allele in alleles:
         predictor = Class1AffinityPredictor.load()
-        df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_to_geneID.keys())
+        df_pred = predictor.predict_to_dataframe(
+            allele=allele, peptides=seqs_to_geneID.keys()
+        )
         df_pred.insert(1, "geneID", pd.Series(np.array(seqs_to_geneID.values())))
         df_pred.to_csv(allele + "_" + sys.argv[-1])
 else:

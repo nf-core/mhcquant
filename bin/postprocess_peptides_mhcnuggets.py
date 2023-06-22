@@ -17,11 +17,17 @@ LOG.setLevel(logging.INFO)
 
 
 def main():
-    model = argparse.ArgumentParser(description="Postprocess Neoepitopes predicted by MHCNuggets")
+    model = argparse.ArgumentParser(
+        description="Postprocess Neoepitopes predicted by MHCNuggets"
+    )
 
-    model.add_argument("-i", "--input", type=str, nargs="*", help="predicted class 2 peptides")
+    model.add_argument(
+        "-i", "--input", type=str, nargs="*", help="predicted class 2 peptides"
+    )
 
-    model.add_argument("-p", "--peptides_seq_ID", type=str, help="peptides to seq_ID csv file")
+    model.add_argument(
+        "-p", "--peptides_seq_ID", type=str, help="peptides to seq_ID csv file"
+    )
 
     model.add_argument("-o", "--output", type=str, help="output file name")
 

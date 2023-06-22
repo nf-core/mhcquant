@@ -183,7 +183,9 @@ def read_vcf(filename, pass_only=True):
                 isSynonymous = False
                 coding = dict()
                 types = []
-                for annraw in record.INFO["ANN"]:  # for each ANN only add a new coding! see GSvar
+                for annraw in record.INFO[
+                    "ANN"
+                ]:  # for each ANN only add a new coding! see GSvar
                     annots = annraw.split("|")
                     (
                         obs,
@@ -231,13 +233,25 @@ def read_vcf(filename, pass_only=True):
                     if not prot_coding or "stop_gained" in a_mut_type:
                         continue
 
-                    coding[transcript_id] = MutationSyntax(transcript_id, ppos, tpos, trans_coding, prot_coding)
+                    coding[transcript_id] = MutationSyntax(
+                        transcript_id, ppos, tpos, trans_coding, prot_coding
+                    )
                     transcript_ids.append(transcript_id)
 
                 if coding:
-                    pos, reference, alternative = get_fred2_annotation(vt, p, r, str(alt))
+                    pos, reference, alternative = get_fred2_annotation(
+                        vt, p, r, str(alt)
+                    )
                     var = Variant(
-                        "line" + str(num), vt, c, pos, reference, alternative, coding, isHomozygous, isSynonymous
+                        "line" + str(num),
+                        vt,
+                        c,
+                        pos,
+                        reference,
+                        alternative,
+                        coding,
+                        isHomozygous,
+                        isSynonymous,
                     )
                     var.gene = gene
                     var.log_metadata("vardbid", variation_dbid)
@@ -254,7 +268,17 @@ def read_vcf(filename, pass_only=True):
     for tId, vs in transToVar.iteritems():
         if len(vs) > 10:
             for v in vs:
-                vs_new = Variant(v.id, v.type, v.chrom, v.genomePos, v.ref, v.obs, v.coding, True, v.isSynonymous)
+                vs_new = Variant(
+                    v.id,
+                    v.type,
+                    v.chrom,
+                    v.genomePos,
+                    v.ref,
+                    v.obs,
+                    v.coding,
+                    True,
+                    v.isSynonymous,
+                )
                 vs_new.gene = v.gene
                 for m in ["vardbid"]:
                     vs_new.log_metadata(m, v.get_metadata(m))
