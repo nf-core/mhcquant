@@ -131,9 +131,7 @@ def read_variant_effect_predictor(file, gene_filter=None):
             if l.startswith("#") or l.strip() == "":
                 continue
 
-            chrom, gene_pos, var_id, ref, alt, _, filter_flag, info = l.strip().split(
-                "\t"
-            )[:8]
+            chrom, gene_pos, var_id, ref, alt, _, filter_flag, info = l.strip().split("\t")[:8]
             coding = {}
             is_synonymous = False
 
@@ -160,18 +158,12 @@ def read_variant_effect_predictor(file, gene_filter=None):
                         aa_mutation,
                     ) = co.strip().split("|")[:16]
                 except ValueError:
-                    LOG.warning(
-                        "INFO field in different format in line: {}, skipping...".format(
-                            str(i)
-                        )
-                    )
+                    LOG.warning("INFO field in different format in line: {}, skipping...".format(str(i)))
                     continue
 
                 # pass every other feature type except Transcript (RegulatoryFeature, MotifFeature.)
                 # pass genes that are uninteresting for us
-                if transcript_type != "Transcript" or (
-                    gene not in gene_filter and gene_filter
-                ):
+                if transcript_type != "Transcript" or (gene not in gene_filter and gene_filter):
                     continue
 
                 # pass all intronic and other mutations that do not directly influence the protein sequence
@@ -189,9 +181,7 @@ def read_variant_effect_predictor(file, gene_filter=None):
                             geneID=gene,
                         )
                 # is variant synonymous?
-                is_synonymous = any(
-                    t == "synonymous_variant" for t in var_type.split("&")
-                )
+                is_synonymous = any(t == "synonymous_variant" for t in var_type.split("&"))
 
             if coding:
                 vars.append(
@@ -211,9 +201,7 @@ def read_variant_effect_predictor(file, gene_filter=None):
 
 
 def main():
-    model = argparse.ArgumentParser(
-        description="Neoepitope prediction for TargetInspector."
-    )
+    model = argparse.ArgumentParser(description="Neoepitope prediction for TargetInspector.")
 
     model.add_argument(
         "-m",
@@ -224,9 +212,7 @@ def main():
         help="The name of the prediction method",
     )
 
-    model.add_argument(
-        "-v", "--vcf", type=str, default=None, help="Path to the vcf input file"
-    )
+    model.add_argument("-v", "--vcf", type=str, default=None, help="Path to the vcf input file")
 
     model.add_argument(
         "-t",
@@ -284,21 +270,15 @@ def main():
         help="Filter insertions and deletions (including frameshifts)",
     )
 
-    model.add_argument(
-        "-fFS", "--filterFSINDEL", action="store_true", help="Filter frameshift INDELs"
-    )
+    model.add_argument("-fFS", "--filterFSINDEL", action="store_true", help="Filter frameshift INDELs")
 
     model.add_argument("-fSNP", "--filterSNP", action="store_true", help="Filter SNPs")
 
     model.add_argument("-etk", "--etk", action="store_true", help=argparse.SUPPRESS)
 
-    model.add_argument(
-        "-bind", "--predict_bindings", action="store_true", help="Predict bindings"
-    )
+    model.add_argument("-bind", "--predict_bindings", action="store_true", help="Predict bindings")
 
-    model.add_argument(
-        "-o", "--output", type=str, required=True, help="Path to the output file"
-    )
+    model.add_argument("-o", "--output", type=str, required=True, help="Path to the output file")
 
     args = model.parse_args()
 
@@ -306,9 +286,7 @@ def main():
     transcript_to_genes = {}
 
     if args.vcf is None and args.proteins is None:
-        sys.stderr.write(
-            "At least a vcf file or a protein id file has to be provided.\n"
-        )
+        sys.stderr.write("At least a vcf file or a protein id file has to be provided.\n")
         return -1
 
     # if vcf file is given: generate variants and filter them if HGNC IDs ar given
@@ -351,9 +329,7 @@ def main():
             )
 
         if not variants:
-            sys.stderr.write(
-                "No variants left after filtering. Please refine your filtering criteria.\n"
-            )
+            sys.stderr.write("No variants left after filtering. Please refine your filtering criteria.\n")
             return -1
 
         epitopes = []
@@ -362,9 +338,7 @@ def main():
         prots = [
             p
             for p in generate_proteins_from_transcripts(
-                generate_transcripts_from_variants(
-                    variants, martDB, EIdentifierTypes.ENSEMBL
-                )
+                generate_transcripts_from_variants(variants, martDB, EIdentifierTypes.ENSEMBL)
             )
         ]
         for peplen in range(minlength, maxlength + 1):
@@ -373,11 +347,7 @@ def main():
             peptides_var = [x for x in peptide_gen]
 
             # remove peptides which are not 'variant relevant'
-            peptides = [
-                x
-                for x in peptides_var
-                if any(x.get_variants_by_protein(y) for y in x.proteins.keys())
-            ]
+            peptides = [x for x in peptides_var if any(x.get_variants_by_protein(y) for y in x.proteins.keys())]
             epitopes.extend(peptides)
 
         for v in variants:
@@ -392,12 +362,8 @@ def main():
         proteins = []
         with open(args.proteins, "r") as f:
             for l in f:
-                ensembl_ids = martDB.get_ensembl_ids_from_id(
-                    l.strip(), type=EIdentifierTypes.HGNC
-                )[0]
-                protein_seq = martDB.get_product_sequence(
-                    ensembl_ids[EAdapterFields.PROTID]
-                )
+                ensembl_ids = martDB.get_ensembl_ids_from_id(l.strip(), type=EIdentifierTypes.HGNC)[0]
+                protein_seq = martDB.get_product_sequence(ensembl_ids[EAdapterFields.PROTID])
                 if protein_seq is not None:
                     transcript_to_genes[ensembl_ids[EAdapterFields.TRANSID]] = l.strip()
                     proteins.append(
@@ -416,30 +382,17 @@ def main():
 
     # predict bindings for all found neoepitopes
     if args.predict_bindings:
-        result = EpitopePredictorFactory(args.method).predict(
-            epitopes, alleles=alleles.split(";")
-        )
+        result = EpitopePredictorFactory(args.method).predict(epitopes, alleles=alleles.split(";"))
 
         with open(args.output, "w") as f:
             alleles = result.columns
             var_column = " Variants" if args.vcf is not None else ""
-            f.write(
-                "Sequence\tMethod\t"
-                + "\t".join(a.name for a in alleles)
-                + "\tAntigen ID\t"
-                + var_column
-                + "\n"
-            )
+            f.write("Sequence\tMethod\t" + "\t".join(a.name for a in alleles) + "\tAntigen ID\t" + var_column + "\n")
             for index, row in result.iterrows():
                 p = index[0]
                 method = index[1]
                 proteins = ",".join(
-                    set(
-                        [
-                            transcript_to_genes[prot.transcript_id.split(":FRED2")[0]]
-                            for prot in p.get_all_proteins()
-                        ]
-                    )
+                    set([transcript_to_genes[prot.transcript_id.split(":FRED2")[0]] for prot in p.get_all_proteins()])
                 )
                 vars_str = ""
 
@@ -448,9 +401,7 @@ def main():
                         set(
                             prot_id.split(":FRED2")[0]
                             + ":"
-                            + ",".join(
-                                repr(v) for v in set(p.get_variants_by_protein(prot_id))
-                            )
+                            + ",".join(repr(v) for v in set(p.get_variants_by_protein(prot_id)))
                             for prot_id in p.proteins.iterkeys()
                             if p.get_variants_by_protein(prot_id)
                         )
@@ -477,21 +428,12 @@ def main():
                     proteins = " ".join(
                         set(
                             [
-                                transcript_to_genes[
-                                    prot.transcript_id.split(":FRED2")[0]
-                                ]
+                                transcript_to_genes[prot.transcript_id.split(":FRED2")[0]]
                                 for prot in p.get_all_proteins()
                             ]
                         )
                     )
-                    g.write(
-                        str(p)
-                        + "\t"
-                        + "\t".join("%.3f" % row[a] for a in alleles)
-                        + "\t"
-                        + proteins
-                        + "\n"
-                    )
+                    g.write(str(p) + "\t" + "\t".join("%.3f" % row[a] for a in alleles) + "\t" + proteins + "\n")
     # don't predict bindings!
     # different output format!
     else:
@@ -502,12 +444,7 @@ def main():
             for epitope in epitopes:
                 p = epitope
                 proteins = ",".join(
-                    set(
-                        [
-                            transcript_to_genes[prot.transcript_id.split(":FRED2")[0]]
-                            for prot in p.get_all_proteins()
-                        ]
-                    )
+                    set([transcript_to_genes[prot.transcript_id.split(":FRED2")[0]] for prot in p.get_all_proteins()])
                 )
                 vars_str = ""
 
@@ -516,9 +453,7 @@ def main():
                         set(
                             prot_id.split(":FRED2")[0]
                             + ":"
-                            + ",".join(
-                                repr(v) for v in set(p.get_variants_by_protein(prot_id))
-                            )
+                            + ",".join(repr(v) for v in set(p.get_variants_by_protein(prot_id)))
                             for prot_id in p.proteins.iterkeys()
                             if p.get_variants_by_protein(prot_id)
                         )

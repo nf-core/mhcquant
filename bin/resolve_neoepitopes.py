@@ -56,13 +56,7 @@ def parse_mztab(identified_peptides_file):
             content = line.split("\t")
             seq = content[1]
             geneID = content[2]
-            if (
-                not "U" in seq
-                and not "X" in seq
-                and not "Z" in seq
-                and not "J" in seq
-                and not "B" in seq
-            ):
+            if not "U" in seq and not "X" in seq and not "Z" in seq and not "J" in seq and not "B" in seq:
                 seq_geneIDs[seq] = geneID
 
     return seq_geneIDs
@@ -128,12 +122,7 @@ def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
     if file_format == "pep":
         with open(filepath + "." + file_format, "w") as f:
             f.write("Peptide sequence" + "\t" + "geneID")
-            f.write(
-                "\n".join(
-                    str(seq) + "\t" + str(geneID)
-                    for seq, geneID in found_neoepitopes.items()
-                )
-            )
+            f.write("\n".join(str(seq) + "\t" + str(geneID) for seq, geneID in found_neoepitopes.items()))
     elif file_format == "json":
         json.dump(found_neoepitopes, open(filepath + "." + file_format, "w"))
     elif file_format == "csv":
@@ -148,9 +137,7 @@ def write_found_neoepitopes(filepath, found_neoepitopes, file_format="csv"):
         f.write(str(found_neoepitopes))
         f.close()
     else:
-        LOG.error(
-            "Could not write found neoepitopes. Please specify one of the file formats json, csv or raw."
-        )
+        LOG.error("Could not write found neoepitopes. Please specify one of the file formats json, csv or raw.")
 
 
 def main():
@@ -158,9 +145,7 @@ def main():
         description="Neoepitope resolvement from mztab and possible vcf determined neoepitopes."
     )
 
-    model.add_argument(
-        "-n", "--neoepitopes", type=str, help="All possible predicted neoepitopes"
-    )
+    model.add_argument("-n", "--neoepitopes", type=str, help="All possible predicted neoepitopes")
 
     model.add_argument("-m", "--mztab", type=str, help="Path to mztab file")
 
@@ -172,9 +157,7 @@ def main():
         help="File format for output file",
     )
 
-    model.add_argument(
-        "-o", "--output", type=str, required=True, help="Output file path"
-    )
+    model.add_argument("-o", "--output", type=str, required=True, help="Output file path")
 
     args = model.parse_args()
 
@@ -183,18 +166,9 @@ def main():
     identified_peptides_to_geneIDs = parse_mztab(args.mztab)
 
     # build the intersection of all found epitopes and possible neoepitopes
-    found_neoepitopes = list(
-        set(predicted_vcf_neoepitopes) & set(identified_peptides_to_geneIDs.keys())
-    )
-    LOG.info(
-        str(len(found_neoepitopes))
-        + ' Neoepitopes were found. Examine "found_neoepitopes.csv" for details.'
-    )
-    found_neoepitopes_to_geneIDs = {
-        k: v
-        for k, v in identified_peptides_to_geneIDs.items()
-        if k in found_neoepitopes
-    }
+    found_neoepitopes = list(set(predicted_vcf_neoepitopes) & set(identified_peptides_to_geneIDs.keys()))
+    LOG.info(str(len(found_neoepitopes)) + ' Neoepitopes were found. Examine "found_neoepitopes.csv" for details.')
+    found_neoepitopes_to_geneIDs = {k: v for k, v in identified_peptides_to_geneIDs.items() if k in found_neoepitopes}
 
     write_found_neoepitopes(args.output, found_neoepitopes_to_geneIDs, args.file_format)
 

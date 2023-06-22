@@ -12,9 +12,7 @@ from deeplc import DeepLC
 from pyopenms import IdXMLFile
 from sklearn.preprocessing import MinMaxScaler
 
-os.environ[
-    "TF_CPP_MIN_LOG_LEVEL"
-] = "3"  # Set TensorFlow logging level to suppress warnings
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Set TensorFlow logging level to suppress warnings
 tf.get_logger().setLevel(logging.ERROR)  # Filter out specific warnings
 
 # initate logger
@@ -66,9 +64,7 @@ def generate_deeplc_input(peptide_ids: list) -> pd.DataFrame:
             for pos in range(0, sequence.size()):
                 residue = sequence.getResidue(pos)
                 if residue.isModified():
-                    hit_mods.append(
-                        "|".join([str(pos + 1), residue.getModificationName()])
-                    )
+                    hit_mods.append("|".join([str(pos + 1), residue.getModificationName()]))
             if hit_mods == []:
                 modifications = ""
             else:
@@ -76,9 +72,7 @@ def generate_deeplc_input(peptide_ids: list) -> pd.DataFrame:
 
             data.append([unmodified_sequence, modifications, tr, x_corr, target_decoy])
 
-    df_deeplc_input = pd.DataFrame(
-        data, columns=["seq", "modifications", "tr", "x_corr", "target_decoy"]
-    )
+    df_deeplc_input = pd.DataFrame(data, columns=["seq", "modifications", "tr", "x_corr", "target_decoy"])
 
     return df_deeplc_input
 
@@ -131,9 +125,7 @@ def generate_calibration_df(df: pd.DataFrame, num_bins: int) -> pd.DataFrame:
     return calibration_df.copy()
 
 
-def generate_calibration_df_with_RT_bins(
-    df: pd.DataFrame, num_bins: int
-) -> pd.DataFrame:
+def generate_calibration_df_with_RT_bins(df: pd.DataFrame, num_bins: int) -> pd.DataFrame:
     """
     Generates a pandas DataFrame containing calibration peptides for DeepLC.
     The input DataFrame is sorted by measured retention time and sliced into bins of equal retention time.
@@ -247,9 +239,7 @@ def add_rt_error(
             for pos in range(0, sequence.size()):
                 residue = sequence.getResidue(pos)
                 if residue.isModified():
-                    hit_mods.append(
-                        "|".join([str(pos + 1), residue.getModificationName()])
-                    )
+                    hit_mods.append("|".join([str(pos + 1), residue.getModificationName()]))
             if hit_mods == []:
                 modifications = ""
             else:
@@ -303,9 +293,7 @@ def add_rt_error(
     is_flag=True,
     help="add squared RT prediction errors to idXML (default if nothing is selected)",
 )
-@click.option(
-    "--add_log_rt_error", is_flag=True, help="add log RT prediction errors to idXML"
-)
+@click.option("--add_log_rt_error", is_flag=True, help="add log RT prediction errors to idXML")
 @click.option(
     "--debug",
     is_flag=True,
@@ -331,9 +319,7 @@ def main(
     protein_ids, peptide_ids = parse_idxml(input)
 
     if len(peptide_ids) <= calibration_bins:
-        LOG.info(
-            "Number of peptide hits is smaller than calibration bins. Skipping deeplc prediction."
-        )
+        LOG.info("Number of peptide hits is smaller than calibration bins. Skipping deeplc prediction.")
         IdXMLFile().store(output, protein_ids, peptide_ids)
         return 0
 
@@ -343,9 +329,7 @@ def main(
     # Run DeepLC
     if calibration_mode == "rt_bin":
         LOG.info("Run DeepLC with RT bin calibration")
-        calibration_df = generate_calibration_df_with_RT_bins(
-            df_deeplc_input, calibration_bins
-        )
+        calibration_df = generate_calibration_df_with_RT_bins(df_deeplc_input, calibration_bins)
         if debug:
             calibration_df.to_csv(output + "_calibration.tsv", index=False, sep="\t")
         df_deeplc_output = run_deeplc(df_deeplc_input, calibration_df)

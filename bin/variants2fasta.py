@@ -79,9 +79,7 @@ def read_variant_effect_predictor(file, gene_filter=None):
             if l.startswith("#") or l.strip() == "":
                 continue
 
-            chrom, gene_pos, var_id, ref, alt, _, filter_flag, info = l.strip().split(
-                "\t"
-            )[:8]
+            chrom, gene_pos, var_id, ref, alt, _, filter_flag, info = l.strip().split("\t")[:8]
             coding = {}
             isSynonymous = False
 
@@ -109,9 +107,7 @@ def read_variant_effect_predictor(file, gene_filter=None):
 
                 # pass every other feature type except Transcript (RegulatoryFeature, MotifFeature.)
                 # pass genes that are uninterresting for us
-                if transcript_type != "Transcript" or (
-                    HGNC_ID not in gene_filter and gene_filter
-                ):
+                if transcript_type != "Transcript" or (HGNC_ID not in gene_filter and gene_filter):
                     continue
 
                 # pass all intronic and other mutations that do not directly influence the protein sequence
@@ -130,9 +126,7 @@ def read_variant_effect_predictor(file, gene_filter=None):
                         )
 
                 # is variant synonymous?
-                isSynonymous = any(
-                    t == "synonymous_variant" for t in var_type.split("&")
-                )
+                isSynonymous = any(t == "synonymous_variant" for t in var_type.split("&"))
             if coding:
                 vars.append(
                     Variant(
@@ -151,13 +145,9 @@ def read_variant_effect_predictor(file, gene_filter=None):
 
 
 def main():
-    model = argparse.ArgumentParser(
-        description="Neoepitope protein fasta generation from variant vcf"
-    )
+    model = argparse.ArgumentParser(description="Neoepitope protein fasta generation from variant vcf")
 
-    model.add_argument(
-        "-v", "--vcf", type=str, default=None, help="Path to the vcf input file"
-    )
+    model.add_argument("-v", "--vcf", type=str, default=None, help="Path to the vcf input file")
 
     model.add_argument(
         "-t",
@@ -168,9 +158,7 @@ def main():
         help="Type of annotation tool used (Variant Effect Predictor, ANNOVAR exonic gene annotation, SnpEff)",
     )
 
-    model.add_argument(
-        "-f", "--fasta_ref", type=str, default=None, help="Path to the fasta input file"
-    )
+    model.add_argument("-f", "--fasta_ref", type=str, default=None, help="Path to the fasta input file")
 
     model.add_argument(
         "-p",
@@ -195,24 +183,18 @@ def main():
         help="Filter insertions and deletions (including frameshifts)",
     )
 
-    model.add_argument(
-        "-fFS", "--filterFSINDEL", action="store_true", help="Filter frameshift INDELs"
-    )
+    model.add_argument("-fFS", "--filterFSINDEL", action="store_true", help="Filter frameshift INDELs")
 
     model.add_argument("-fSNP", "--filterSNP", action="store_true", help="Filter SNPs")
 
-    model.add_argument(
-        "-o", "--output", type=str, required=True, help="Path to the output file"
-    )
+    model.add_argument("-o", "--output", type=str, required=True, help="Path to the output file")
 
     args = model.parse_args()
 
     martDB = MartsAdapter(biomart=MARTDBURL[args.reference.upper()])
 
     if args.vcf is None:
-        sys.stderr.write(
-            "At least a vcf file or a protein id file has to be provided.\n"
-        )
+        sys.stderr.write("At least a vcf file or a protein id file has to be provided.\n")
         return -1
 
     # if vcf file is given: generate variants and filter them if HGNC IDs ar given
@@ -256,15 +238,11 @@ def main():
             )
 
         if not variants:
-            sys.stderr.write(
-                "No variants left after filtering. Please refine your filtering criteria.\n"
-            )
+            sys.stderr.write("No variants left after filtering. Please refine your filtering criteria.\n")
             return -1
 
         # generate transcripts
-        transcripts = generate_transcripts_from_variants(
-            variants, martDB, EIdentifierTypes.ENSEMBL
-        )
+        transcripts = generate_transcripts_from_variants(variants, martDB, EIdentifierTypes.ENSEMBL)
 
         # generate proteins
         proteins = generate_proteins_from_transcripts(transcripts)
@@ -288,9 +266,7 @@ def main():
             op.write(concat)
 
     else:
-        sys.stderr.write(
-            "At least a vcf file or a protein id file has to be provided.\n"
-        )
+        sys.stderr.write("At least a vcf file or a protein id file has to be provided.\n")
         return -1
 
     return 0

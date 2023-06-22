@@ -156,9 +156,7 @@ def convert_alleles_mhcnuggets_format(alleles):
 
 def parse_alleles(allele_input):
     alleles = allele_input.split(";")
-    supp_alleles = convert_alleles_mhcnuggets_format(
-        list(set(alleles).intersection(supported_alleles_class_2))
-    )
+    supp_alleles = convert_alleles_mhcnuggets_format(list(set(alleles).intersection(supported_alleles_class_2)))
 
     return supp_alleles
 

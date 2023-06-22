@@ -183,9 +183,7 @@ def read_vcf(filename, pass_only=True):
                 isSynonymous = False
                 coding = dict()
                 types = []
-                for annraw in record.INFO[
-                    "ANN"
-                ]:  # for each ANN only add a new coding! see GSvar
+                for annraw in record.INFO["ANN"]:  # for each ANN only add a new coding! see GSvar
                     annots = annraw.split("|")
                     (
                         obs,
@@ -233,15 +231,11 @@ def read_vcf(filename, pass_only=True):
                     if not prot_coding or "stop_gained" in a_mut_type:
                         continue
 
-                    coding[transcript_id] = MutationSyntax(
-                        transcript_id, ppos, tpos, trans_coding, prot_coding
-                    )
+                    coding[transcript_id] = MutationSyntax(transcript_id, ppos, tpos, trans_coding, prot_coding)
                     transcript_ids.append(transcript_id)
 
                 if coding:
-                    pos, reference, alternative = get_fred2_annotation(
-                        vt, p, r, str(alt)
-                    )
+                    pos, reference, alternative = get_fred2_annotation(vt, p, r, str(alt))
                     var = Variant(
                         "line" + str(num),
                         vt,

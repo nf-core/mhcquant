@@ -32,13 +32,7 @@ def parse_mztab(identified_peptides_file):
             content = line.split("\t")
             seq = content[1]
             geneID = content[2]
-            if (
-                not "U" in seq
-                and not "X" in seq
-                and not "Z" in seq
-                and not "J" in seq
-                and not "B" in seq
-            ):
+            if not "U" in seq and not "X" in seq and not "Z" in seq and not "J" in seq and not "B" in seq:
                 seq_geneIDs[seq] = geneID
 
     return seq_geneIDs

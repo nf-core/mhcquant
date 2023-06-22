@@ -17,13 +17,9 @@ LOG.setLevel(logging.INFO)
 
 
 def main():
-    model = argparse.ArgumentParser(
-        description="Postprocess Neoepitopes predicted by MHCNuggets"
-    )
+    model = argparse.ArgumentParser(description="Postprocess Neoepitopes predicted by MHCNuggets")
 
-    model.add_argument(
-        "-i", "--input", type=str, nargs="*", help="predicted class 2 neoepitopes"
-    )
+    model.add_argument("-i", "--input", type=str, nargs="*", help="predicted class 2 neoepitopes")
 
     model.add_argument("-n", "--neoepitopes", type=str, help="neoepitopes file")
 

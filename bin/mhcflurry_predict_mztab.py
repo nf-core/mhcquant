@@ -36,13 +36,7 @@ def parse_mztab(identified_peptides_file):
             content = line.split("\t")
             seq = content[1]
             geneID = content[2]
-            if (
-                not "U" in seq
-                and not "X" in seq
-                and not "Z" in seq
-                and not "J" in seq
-                and not "B" in seq
-            ):
+            if not "U" in seq and not "X" in seq and not "Z" in seq and not "J" in seq and not "B" in seq:
                 seq_geneIDs[seq] = geneID
 
     return seq_geneIDs
@@ -70,9 +64,7 @@ if unsupported_alleles:
     for allele in unsupported_alleles:
         LOG.warning("Allele: " + allele + " is not supported by MHCFlurry!")
 if not alleles:
-    LOG.warning(
-        "Submitted alleles are not supported or formatting of input.tsv is not correct!"
-    )
+    LOG.warning("Submitted alleles are not supported or formatting of input.tsv is not correct!")
 
 # read identified peptides
 seqs_to_geneID = parse_mztab(sys.argv[-2])
@@ -81,9 +73,7 @@ if len(seqs_to_geneID) > 0:
     # call mhcflurry
     for allele in alleles:
         predictor = Class1AffinityPredictor.load()
-        df_pred = predictor.predict_to_dataframe(
-            allele=allele, peptides=seqs_to_geneID.keys()
-        )
+        df_pred = predictor.predict_to_dataframe(allele=allele, peptides=seqs_to_geneID.keys())
         df_pred.insert(1, "geneID", pd.Series(np.array(seqs_to_geneID.values())))
         df_pred.to_csv(allele + "_" + sys.argv[-1])
 else:
