@@ -6,6 +6,7 @@ import logging
 import math
 import os
 import pandas as pd
+import numpy as np
 import sys
 import tensorflow as tf
 from deeplc import DeepLC
@@ -224,6 +225,12 @@ def add_rt_error(
     :return: list of PeptideIdentification objects with added error scores
     :rtype: list
     """
+    noncanonical_aa = ['B', 'J', 'O', 'U', 'X', 'Z']
+    peptide_hits_noncanonical_aa = {}
+    abs_rt_errors = []
+    sqr_rt_errors = []
+    log_rt_errors = []
+
     for peptide_id in peptide_ids:
         # Get measured Retention time
         measured_rt = peptide_id.getRT()
@@ -233,7 +240,10 @@ def add_rt_error(
         for hit in peptide_id.getHits():
             sequence = hit.getSequence()
             unmodified_sequence = sequence.toUnmodifiedString()
-
+            # Catch peptides with noncanonical amino acids and save spectrum reference and hit in dictionary
+            if any(aa in noncanonical_aa for aa in unmodified_sequence):
+                peptide_hits_noncanonical_aa[peptide_id.getMetaValue("spectrum_reference")] = hit
+                continue
             # Get modifications
             hit_mods = []
             for pos in range(0, sequence.size()):
@@ -251,19 +261,37 @@ def add_rt_error(
             if add_abs_rt_error:
                 abs_error = abs(measured_rt - predicted_rt)
                 hit.setMetaValue("deeplc_abs_error", abs_error)
+                abs_rt_errors.append(abs_error)
 
             # calculate seq error
             if add_sqr_rt_error:
                 sqr_error = abs(measured_rt - predicted_rt) ** 2
                 hit.setMetaValue("deeplc_sqr_error", sqr_error)
+                sqr_rt_errors.append(sqr_error)
 
             # calcultae log error
             if add_log_rt_error:
                 log_error = math.log(abs(measured_rt - predicted_rt))
                 hit.setMetaValue("deeplc_log_error", log_error)
+                log_rt_errors.append(log_error)
 
             new_hits.append(hit)
         peptide_id.setHits(new_hits)
+
+    # Add peptides with noncanonical amino acids to peptide_ids and return the median error
+    for scan_id in peptide_hits_noncanonical_aa.keys():
+        # get peptide id for scan id
+        peptide_id = [peptide_id for peptide_id in peptide_ids if peptide_id.getMetaValue("spectrum_reference") == scan_id][0]
+        hit = peptide_hits_noncanonical_aa[scan_id]
+        if add_abs_rt_error:
+            hit.setMetaValue("deeplc_abs_error", np.median(abs_rt_errors))
+        if add_sqr_rt_error:
+            hit.setMetaValue("deeplc_sqr_error", np.median(sqr_rt_errors))
+        if add_log_rt_error:
+            hit.setMetaValue("deeplc_log_error", np.median(log_rt_errors))
+        peptide_id.insertHit(hit)
+
+    peptide_ids = peptide_ids
 
     return peptide_ids
 
@@ -325,6 +353,11 @@ def main(
 
     LOG.info("Generate DeepLC input")
     df_deeplc_input = generate_deeplc_input(peptide_ids)
+    df_deeplc_input = df_deeplc_input[~df_deeplc_input['seq'].str.contains('B|J|O|U|X|Z')]
+
+    # Skip sequences with noncanonical amino acids, DeepLC cannot predict them
+    # Add them later with median error
+    df_deeplc_input = df_deeplc_input[~df_deeplc_input['seq'].str.contains('B|J|O|U|X|Z')]
 
     # Run DeepLC
     if calibration_mode == "rt_bin":
@@ -332,15 +365,21 @@ def main(
         calibration_df = generate_calibration_df_with_RT_bins(df_deeplc_input, calibration_bins)
         if debug:
             calibration_df.to_csv(output + "_calibration.tsv", index=False, sep="\t")
+            df_deeplc_input.to_csv(output + "_deeplc_input.tsv", index=False, sep="\t")
         df_deeplc_output = run_deeplc(df_deeplc_input, calibration_df)
+
     elif calibration_mode == "idx_bin":
         LOG.info("Run DeepLC with index bin calibration")
         calibration_df = generate_calibration_df(df_deeplc_input, calibration_bins)
         if debug:
             calibration_df.to_csv(output + "_calibration.tsv", index=False, sep="\t")
+            df_deeplc_input.to_csv(output + "_deeplc_input.tsv", index=False, sep="\t")
         df_deeplc_output = run_deeplc(df_deeplc_input, calibration_df)
+
     elif calibration_mode == "min_max":
         LOG.info("Run DeepLC with min/max calibration")
+        if debug:
+            df_deeplc_input.to_csv(output + "_deeplc_input.tsv", index=False, sep="\t")
         df_deeplc_output = run_deeplc(df_deeplc_input)
 
     if debug:
@@ -377,3 +416,4 @@ def main(
 
 if __name__ == "__main__":
     sys.exit(main())
+
