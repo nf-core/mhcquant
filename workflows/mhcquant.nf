@@ -136,7 +136,7 @@ workflow MHCQUANT {
                 tdf : meta.ext == 'd'
                     return [ meta, filename ]
                 other : true }
-        .set { ms_files }
+        .set { branched_ms_files }
 
     // Input fasta file
     Channel.fromPath(params.fasta)
@@ -168,15 +168,16 @@ workflow MHCQUANT {
         ch_decoy_db = ch_fasta_file
     }
 
+    ch_ms_files = (branched_ms_files.mzml)
     // Raw file conversion
-    THERMORAWFILEPARSER(ms_files.raw)
+    THERMORAWFILEPARSER(branched_ms_files.raw)
     ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions.ifEmpty(null))
-    ch_ms_files = THERMORAWFILEPARSER.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
+    ch_ms_files = ch_ms_files.mix(THERMORAWFILEPARSER.out.mzml)
 
     // timsTOF data conversion
-    TDF2MZML(ms_files.tdf)
-    ch_versions = ch_versions.mix(TDF2MZML.out.versions.ifEmpty(null))   
-    ch_ms_files = TDF2MZML.out.mzml.mix(ms_files.mzml.map{ it -> [it[0], it[1][0]] })
+    TDF2MZML(branched_ms_files.tdf)
+    ch_versions = ch_versions.mix(TDF2MZML.out.versions.ifEmpty(null))
+    ch_ms_files = ch_ms_files.mix(TDF2MZML.out.mzml)
 
     if (params.run_centroidisation) {
         // Optional: Run Peak Picking as Preprocessing
