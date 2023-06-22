@@ -195,16 +195,16 @@ workflow MHCQUANT {
     if (params.use_deeplc){
         DEEPLC(OPENMS_COMETADAPTER.out.idxml)
         ch_versions = ch_versions.mix(DEEPLC.out.versions.ifEmpty(null))
-        ch_proceeding_idx = DEEPLC.out.idxml
+        ch_comet_out_idxml = DEEPLC.out.idxml
     } else {
-        ch_proceeding_idx = OPENMS_COMETADAPTER.out.idxml
+        ch_comet_out_idxml = OPENMS_COMETADAPTER.out.idxml
     }
 
     // Write this information to an tsv file
-    OPENMS_TEXTEXPORTER_COMET(ch_proceeding_idx)
+    OPENMS_TEXTEXPORTER_COMET(ch_comet_out_idxml)
     ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
     // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(ch_proceeding_idx.join(ch_decoy_db))
+    OPENMS_PEPTIDEINDEXER(ch_comet_out_idxml.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
     //
