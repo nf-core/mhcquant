@@ -641,7 +641,7 @@
             "$ref": "#/definitions/mass_spectrometry_data_processing"
         },
         {
-            "$ref": "#/definitions/fdr_scoring"
+            "$ref": "#/definitions/rescoring"
         },
         {
             "$ref": "#/definitions/quantification_options"
