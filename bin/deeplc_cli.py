@@ -54,6 +54,7 @@ def generate_deeplc_input(peptide_ids: list) -> pd.DataFrame:
     data = []
     for peptide_id in peptide_ids:
         tr = peptide_id.getRT()
+        scan_id = peptide_id.getMetaValue("spectrum_reference")
         for hit in peptide_id.getHits():
             sequence = hit.getSequence()
             unmodified_sequence = sequence.toUnmodifiedString()
@@ -71,9 +72,11 @@ def generate_deeplc_input(peptide_ids: list) -> pd.DataFrame:
             else:
                 modifications = "|".join(hit_mods)
 
-            data.append([unmodified_sequence, modifications, tr, x_corr, target_decoy])
+            data.append([unmodified_sequence, modifications, tr, x_corr, target_decoy, str(sequence), scan_id])
 
-    df_deeplc_input = pd.DataFrame(data, columns=["seq", "modifications", "tr", "x_corr", "target_decoy"])
+    df_deeplc_input = pd.DataFrame(
+        data, columns=["seq", "modifications", "tr", "x_corr", "target_decoy", "seq_with_mods", "scan_id"]
+    )
 
     return df_deeplc_input
 
@@ -160,6 +163,10 @@ def generate_calibration_df_with_RT_bins(df: pd.DataFrame, num_bins: int) -> pd.
         # Get the subset of the dataframe for the current bin
         bin_df = sorted_df[(sorted_df["tr"] >= start_tr) & (sorted_df["tr"] < end_tr)]
 
+        # skip if bin is empty (no measurements in RT bin)
+        if len(bin_df) == 0:
+            continue
+
         # Find the row with the maximum x_corr value in the current bin
         max_row = bin_df.loc[bin_df["x_corr"].idxmax()]
 
@@ -225,7 +232,7 @@ def add_rt_error(
     :return: list of PeptideIdentification objects with added error scores
     :rtype: list
     """
-    noncanonical_aa = ['B', 'J', 'O', 'U', 'X', 'Z']
+    noncanonical_aa = ["B", "J", "O", "U", "X", "Z"]
     peptide_hits_noncanonical_aa = {}
     abs_rt_errors = []
     sqr_rt_errors = []
@@ -234,6 +241,7 @@ def add_rt_error(
     for peptide_id in peptide_ids:
         # Get measured Retention time
         measured_rt = peptide_id.getRT()
+        scan_id = peptide_id.getMetaValue("spectrum_reference")
 
         # Initilaize list for edited hits (with added features)
         new_hits = []
@@ -242,20 +250,10 @@ def add_rt_error(
             unmodified_sequence = sequence.toUnmodifiedString()
             # Catch peptides with noncanonical amino acids and save spectrum reference and hit in dictionary
             if any(aa in noncanonical_aa for aa in unmodified_sequence):
-                peptide_hits_noncanonical_aa[peptide_id.getMetaValue("spectrum_reference")] = hit
+                peptide_hits_noncanonical_aa[(peptide_id.getMetaValue("spectrum_reference"), sequence)] = hit
                 continue
-            # Get modifications
-            hit_mods = []
-            for pos in range(0, sequence.size()):
-                residue = sequence.getResidue(pos)
-                if residue.isModified():
-                    hit_mods.append("|".join([str(pos + 1), residue.getModificationName()]))
-            if hit_mods == []:
-                modifications = ""
-            else:
-                modifications = "|".join(hit_mods)
 
-            predicted_rt = prediction_dict[(unmodified_sequence, modifications)]
+            predicted_rt = prediction_dict[(str(sequence), scan_id)]
 
             # calculate abs error
             if add_abs_rt_error:
@@ -279,10 +277,15 @@ def add_rt_error(
         peptide_id.setHits(new_hits)
 
     # Add peptides with noncanonical amino acids to peptide_ids and return the median error
-    for scan_id in peptide_hits_noncanonical_aa.keys():
+    for scan_id, sequence in peptide_hits_noncanonical_aa.keys():
+        LOG.info(
+            f"Peptide {sequence} hit of spectrum {scan_id} contains noncanonical amino acids. Adding median error(s)"
+        )
         # get peptide id for scan id
-        peptide_id = [peptide_id for peptide_id in peptide_ids if peptide_id.getMetaValue("spectrum_reference") == scan_id][0]
-        hit = peptide_hits_noncanonical_aa[scan_id]
+        peptide_id = [
+            peptide_id for peptide_id in peptide_ids if peptide_id.getMetaValue("spectrum_reference") == scan_id
+        ][0]
+        hit = peptide_hits_noncanonical_aa[(scan_id, sequence)]
         if add_abs_rt_error:
             hit.setMetaValue("deeplc_abs_error", np.median(abs_rt_errors))
         if add_sqr_rt_error:
@@ -302,7 +305,7 @@ def add_rt_error(
 @click.option(
     "--calibration_mode",
     type=click.Choice(["idx_bin", "rt_bin", "min_max"]),
-    default="rt_bin",
+    default="idx_bin",
     help="Calibration method",
 )
 @click.option(
@@ -346,18 +349,15 @@ def main(
     LOG.info("Parse idXML")
     protein_ids, peptide_ids = parse_idxml(input)
 
-    if len(peptide_ids) <= calibration_bins:
-        LOG.info("Number of peptide hits is smaller than calibration bins. Skipping deeplc prediction.")
-        IdXMLFile().store(output, protein_ids, peptide_ids)
-        return 0
-
     LOG.info("Generate DeepLC input")
     df_deeplc_input = generate_deeplc_input(peptide_ids)
-    df_deeplc_input = df_deeplc_input[~df_deeplc_input['seq'].str.contains('B|J|O|U|X|Z')]
-
     # Skip sequences with noncanonical amino acids, DeepLC cannot predict them
     # Add them later with median error
-    df_deeplc_input = df_deeplc_input[~df_deeplc_input['seq'].str.contains('B|J|O|U|X|Z')]
+    df_deeplc_input = df_deeplc_input[~df_deeplc_input["seq"].str.contains("B|J|O|U|X|Z")]
+
+    if len(df_deeplc_input[df_deeplc_input["target_decoy"] != "decoy"]) <= calibration_bins:
+        LOG.info("Number of peptide hits is smaller than calibration bins. Falling back to min/max scaling")
+        calibration_mode = "min_max"
 
     # Run DeepLC
     if calibration_mode == "rt_bin":
@@ -387,12 +387,12 @@ def main(
 
     # Create map containing the predicted retention time for each peptide sequence and modification
     sequence_to_prediction = {}
-    for seq, mods, pred_rt in zip(
-        df_deeplc_output["seq"],
-        df_deeplc_output["modifications"],
+    for seq_mod, scan_id, pred_rt in zip(
+        df_deeplc_output["seq_with_mods"],
+        df_deeplc_output["scan_id"],
         df_deeplc_output["predicted_RT"],
     ):
-        sequence_to_prediction[(seq, mods)] = pred_rt
+        sequence_to_prediction[(seq_mod, scan_id)] = pred_rt
 
     LOG.info("Add error to idXML")
     peptide_ids_pred_RT = add_rt_error(
@@ -416,4 +416,3 @@ def main(
 
 if __name__ == "__main__":
     sys.exit(main())
-
