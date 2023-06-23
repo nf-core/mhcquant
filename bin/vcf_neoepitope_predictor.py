@@ -224,19 +224,35 @@ def main():
     )
 
     model.add_argument(
-        "-p", "--proteins", type=str, default=None, help="Path to the protein ID input file (in HGNC-ID)"
+        "-p",
+        "--proteins",
+        type=str,
+        default=None,
+        help="Path to the protein ID input file (in HGNC-ID)",
     )
 
     model.add_argument(
-        "-minl", "--peptide_min_length", type=int, default=8, help="Minimum peptide length for epitope prediction"
+        "-minl",
+        "--peptide_min_length",
+        type=int,
+        default=8,
+        help="Minimum peptide length for epitope prediction",
     )
 
     model.add_argument(
-        "-maxl", "--peptide_max_length", type=int, default=12, help="Maximum peptide length for epitope prediction"
+        "-maxl",
+        "--peptide_max_length",
+        type=int,
+        default=12,
+        help="Maximum peptide length for epitope prediction",
     )
 
     model.add_argument(
-        "-a", "--alleles", type=str, required=True, help="Path to the allele file (one per line in new nomenclature)"
+        "-a",
+        "--alleles",
+        type=str,
+        required=True,
+        help="Path to the allele file (one per line in new nomenclature)",
     )
 
     model.add_argument(
@@ -248,7 +264,10 @@ def main():
     )
 
     model.add_argument(
-        "-fINDEL", "--filterINDEL", action="store_true", help="Filter insertions and deletions (including frameshifts)"
+        "-fINDEL",
+        "--filterINDEL",
+        action="store_true",
+        help="Filter insertions and deletions (including frameshifts)",
     )
 
     model.add_argument("-fFS", "--filterFSINDEL", action="store_true", help="Filter frameshift INDELs")
@@ -294,12 +313,20 @@ def main():
         if args.filterINDEL:
             variants = filter(
                 lambda x: x.type
-                not in [VariationType.INS, VariationType.DEL, VariationType.FSDEL, VariationType.FSINS],
+                not in [
+                    VariationType.INS,
+                    VariationType.DEL,
+                    VariationType.FSDEL,
+                    VariationType.FSINS,
+                ],
                 variants,
             )
 
         if args.filterFSINDEL:
-            variants = filter(lambda x: x.type not in [VariationType.FSDEL, VariationType.FSINS], variants)
+            variants = filter(
+                lambda x: x.type not in [VariationType.FSDEL, VariationType.FSINS],
+                variants,
+            )
 
         if not variants:
             sys.stderr.write("No variants left after filtering. Please refine your filtering criteria.\n")
@@ -340,7 +367,11 @@ def main():
                 if protein_seq is not None:
                     transcript_to_genes[ensembl_ids[EAdapterFields.TRANSID]] = l.strip()
                     proteins.append(
-                        Protein(protein_seq, gene_id=l.strip(), transcript_id=ensembl_ids[EAdapterFields.TRANSID])
+                        Protein(
+                            protein_seq,
+                            gene_id=l.strip(),
+                            transcript_id=ensembl_ids[EAdapterFields.TRANSID],
+                        )
                     )
         epitopes = []
         for length in range(args.peptide_min_length, args.peptide_max_length):

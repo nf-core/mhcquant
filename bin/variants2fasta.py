@@ -161,7 +161,11 @@ def main():
     model.add_argument("-f", "--fasta_ref", type=str, default=None, help="Path to the fasta input file")
 
     model.add_argument(
-        "-p", "--proteins", type=str, default=None, help="Path to the protein ID input file (in HGNC-ID)"
+        "-p",
+        "--proteins",
+        type=str,
+        default=None,
+        help="Path to the protein ID input file (in HGNC-ID)",
     )
 
     model.add_argument(
@@ -173,7 +177,10 @@ def main():
     )
 
     model.add_argument(
-        "-fINDEL", "--filterINDEL", action="store_true", help="Filter insertions and deletions (including frameshifts)"
+        "-fINDEL",
+        "--filterINDEL",
+        action="store_true",
+        help="Filter insertions and deletions (including frameshifts)",
     )
 
     model.add_argument("-fFS", "--filterFSINDEL", action="store_true", help="Filter frameshift INDELs")
@@ -215,12 +222,20 @@ def main():
         if args.filterINDEL:
             variants = filter(
                 lambda x: x.type
-                not in [VariationType.INS, VariationType.DEL, VariationType.FSDEL, VariationType.FSINS],
+                not in [
+                    VariationType.INS,
+                    VariationType.DEL,
+                    VariationType.FSDEL,
+                    VariationType.FSINS,
+                ],
                 variants,
             )
 
         if args.filterFSINDEL:
-            variants = filter(lambda x: x.type not in [VariationType.FSDEL, VariationType.FSINS], variants)
+            variants = filter(
+                lambda x: x.type not in [VariationType.FSDEL, VariationType.FSINS],
+                variants,
+            )
 
         if not variants:
             sys.stderr.write("No variants left after filtering. Please refine your filtering criteria.\n")

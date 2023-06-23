@@ -246,8 +246,8 @@
                 }
             }
         },
-        "fdr_scoring": {
-            "title": "FDR Scoring",
+        "rescoring": {
+            "title": "Rescoring",
             "type": "object",
             "fa_icon": "fas fa-star-half-stroke",
             "description": "",
@@ -294,6 +294,38 @@
                     "type": "integer",
                     "fa_icon": "fas fa-train-track",
                     "description": "Maximum subset for percolator training iterations"
+                },
+                "use_deeplc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-microchip",
+                    "description": "Use DeepLC retention time features for Percolator rescoring",
+                    "help_text": "https://www.nature.com/articles/s41592-021-01301-5"
+                },
+                "deeplc_calibration_bins": {
+                    "type": "integer",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Number of bins (peptides) used for DeepLC calibration. For each bin the best hit is used."
+                },
+                "deeplc_calibration_mode": {
+                    "type": "string",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Specify the DeepLC calibration mode. rt_bin: bin peptides by RT, idx_bin: bin peptides by index, min_max: scale uncalibrated predictions to experimental RT range",
+                    "enum": ["rt_bin", "idx_bin", "min_max"]
+                },
+                "deeplc_add_abs_rt_error": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Add absolute RT error to of experimental and predicted RT to the feature set"
+                },
+                "deeplc_add_sqr_rt_error": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Add squared RT error to of experimental and predicted RT to the feature set"
+                },
+                "deeplc_add_log_rt_error": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Add log RT error to of experimental and predicted RT to the feature set"
                 }
             }
         },
@@ -609,7 +641,7 @@
             "$ref": "#/definitions/mass_spectrometry_data_processing"
         },
         {
-            "$ref": "#/definitions/fdr_scoring"
+            "$ref": "#/definitions/rescoring"
         },
         {
             "$ref": "#/definitions/quantification_options"

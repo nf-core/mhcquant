@@ -28,7 +28,12 @@ class RowChecker:
     VALID_FORMATS = (".raw", ".mzML", ".d")
 
     def __init__(
-        self, id_col="ID", sample_col="Sample", condition_col="Condition", filename_col="ReplicateFileName", **kwargs
+        self,
+        id_col="ID",
+        sample_col="Sample",
+        condition_col="Condition",
+        filename_col="ReplicateFileName",
+        **kwargs,
     ):
         """
         Initialize the row checker with the expected column names.

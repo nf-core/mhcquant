@@ -237,7 +237,15 @@ def read_vcf(filename, pass_only=True):
                 if coding:
                     pos, reference, alternative = get_fred2_annotation(vt, p, r, str(alt))
                     var = Variant(
-                        "line" + str(num), vt, c, pos, reference, alternative, coding, isHomozygous, isSynonymous
+                        "line" + str(num),
+                        vt,
+                        c,
+                        pos,
+                        reference,
+                        alternative,
+                        coding,
+                        isHomozygous,
+                        isSynonymous,
                     )
                     var.gene = gene
                     var.log_metadata("vardbid", variation_dbid)
@@ -254,7 +262,17 @@ def read_vcf(filename, pass_only=True):
     for tId, vs in transToVar.iteritems():
         if len(vs) > 10:
             for v in vs:
-                vs_new = Variant(v.id, v.type, v.chrom, v.genomePos, v.ref, v.obs, v.coding, True, v.isSynonymous)
+                vs_new = Variant(
+                    v.id,
+                    v.type,
+                    v.chrom,
+                    v.genomePos,
+                    v.ref,
+                    v.obs,
+                    v.coding,
+                    True,
+                    v.isSynonymous,
+                )
                 vs_new.gene = v.gene
                 for m in ["vardbid"]:
                     vs_new.log_metadata(m, v.get_metadata(m))
