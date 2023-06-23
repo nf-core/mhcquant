@@ -33,6 +33,9 @@ process OPENMS_PSMFEATUREEXTRACTOR {
                 extra_features = "${extra_features} deeplc_sqr_error"
             }
         }
+        if(params.use_ms2pip){
+            extra_features = "${extra_features} spectrum_correlation"
+        }
 
         """
         PSMFeatureExtractor -in $merged \\

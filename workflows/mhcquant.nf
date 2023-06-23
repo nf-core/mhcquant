@@ -65,6 +65,7 @@ include { OPENMS_PEAKPICKERHIRES }                                          from
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
 include { DEEPLC }                                                          from '../modules/local/deeplc'
+include { MS2PIP }                                                          from '../modules/local/ms2pip'
 
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_COMET }                from '../modules/local/openms_textexporter'
 
@@ -201,11 +202,20 @@ workflow MHCQUANT {
         ch_comet_out_idxml = OPENMS_COMETADAPTER.out.idxml
     }
 
+    // Run MS2PIP if specified
+    if (params.use_ms2pip){
+        MS2PIP(ch_comet_out_idxml.join(ch_mzml_file))
+        ch_versions = ch_versions.mix(MS2PIP.out.versions.ifEmpty(null))
+        ch_comet_out_idxml_proceeding = MS2PIP.out.idxml
+    } else {
+        ch_comet_out_idxml_proceeding = ch_comet_out_idxml
+    }
+
     // Write this information to an tsv file
-    OPENMS_TEXTEXPORTER_COMET(ch_comet_out_idxml)
+    OPENMS_TEXTEXPORTER_COMET(ch_comet_out_idxml_proceeding)
     ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
     // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(ch_comet_out_idxml.join(ch_decoy_db))
+    OPENMS_PEPTIDEINDEXER(ch_comet_out_idxml_proceeding.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
     //
