@@ -326,6 +326,17 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-train-track",
                     "description": "Add log RT error to of experimental and predicted RT to the feature set"
+                },
+                "use_ms2pip": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-microchip",
+                    "description": "Use MS2pip peak intensity prediction for Percolator rescoring",
+                    "help_text": "https://github.com/compomics/ms2pip"
+                },
+                "ms2pip_model_name": {
+                    "type": "string",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "MS2pip model name defined (https://github.com/compomics/ms2pip#specialized-prediction-models)"
                 }
             }
         },
