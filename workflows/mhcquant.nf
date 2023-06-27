@@ -62,6 +62,7 @@ include { OPENMS_DECOYDATABASE }                                            from
 include { THERMORAWFILEPARSER }                                             from '../modules/local/thermorawfileparser'
 include { TDF2MZML }                                                        from '../modules/local/tdf2mzml'
 include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
+include { OPENMS_FILEFILTER }                                               from '../modules/local/openms_filefilter'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
 include { DEEPLC }                                                          from '../modules/local/deeplc'
@@ -189,9 +190,14 @@ workflow MHCQUANT {
         ch_mzml_file = ch_ms_files
     }
 
+    // Clean up mzML files
+    OPENMS_FILEFILTER(ch_mzml_file)
+    ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions.ifEmpty(null))
+    ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
+
     // Run comet database search
     OPENMS_COMETADAPTER(
-            ch_mzml_file.join(ch_decoy_db, remainder:true))
+            ch_clean_mzml_file.join(ch_decoy_db, remainder:true))
 
     // Run DeepLC if specified
     if (params.use_deeplc){
@@ -204,7 +210,7 @@ workflow MHCQUANT {
 
     // Run MS2PIP if specified
     if (params.use_ms2pip){
-        MS2PIP(ch_comet_out_idxml.join(ch_mzml_file))
+        MS2PIP(ch_comet_out_idxml.join(ch_clean_mzml_file))
         ch_versions = ch_versions.mix(MS2PIP.out.versions.ifEmpty(null))
         ch_comet_out_idxml_proceeding = MS2PIP.out.idxml
     } else {
@@ -224,7 +230,7 @@ workflow MHCQUANT {
     if (!params.skip_quantification) {
         MAP_ALIGNMENT(
             OPENMS_PEPTIDEINDEXER.out.idxml,
-            ch_mzml_file
+            ch_clean_mzml_file
         )
         ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
         ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
@@ -336,7 +342,7 @@ workflow MHCQUANT {
         // Alter the annotation of the filtered q value
         ch_filtered_idxml = filter_q_value.map { ident, meta, idxml -> [meta.id, idxml] }
         // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_raw_spectra_data = ch_mzml_file.map {meta, mzml -> [meta.sample + '_' + meta.condition, mzml] }
+        ch_raw_spectra_data = ch_clean_mzml_file.map {meta, mzml -> [meta.sample + '_' + meta.condition, mzml] }
             .groupTuple()
             .join(ch_filtered_idxml)
         // Annotate spectra with ion fragmentation information
