@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for brukers tdf format by adding tdf2mzml converter [#263](https://github.com/nf-core/mhcquant/issues/263)
 - DeepLC retention time prediction
 - MS2PIP peak intensity prediction
+- Added OpenMS FileFilter to clean mzml after parsing to remove artifacts like empty spectra or precursors with charge 0
 
 ### `Fixed`
 
