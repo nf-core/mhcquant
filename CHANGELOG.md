@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DeepLC retention time prediction
 - MS2PIP peak intensity prediction
 - Added OpenMS FileFilter to clean mzml after parsing to remove artifacts like empty spectra or precursors with charge 0
+- Optimize ressource allocations
 
 ### `Fixed`
 
