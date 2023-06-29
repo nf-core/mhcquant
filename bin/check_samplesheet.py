@@ -25,7 +25,7 @@ class RowChecker:
 
     """
 
-    VALID_FORMATS = (".raw", ".mzML", ".d")
+    VALID_FORMATS = (".raw", ".mzml", ".d")
 
     def __init__(
         self,
@@ -93,7 +93,7 @@ class RowChecker:
 
     def _validate_ms_format(self, filename):
         """Assert that a given filename has one of the expected MS extensions."""
-        assert any(filename.endswith(extension) for extension in self.VALID_FORMATS), (
+        assert any(filename.lower().endswith(extension) for extension in self.VALID_FORMATS), (
             f"The file has an unrecognized extension: {filename}\n"
             f"It should be one of: {', '.join(self.VALID_FORMATS)}"
         )
