@@ -337,6 +337,11 @@
                     "type": "string",
                     "fa_icon": "fas fa-train-track",
                     "description": "MS2pip model name defined (https://github.com/compomics/ms2pip#specialized-prediction-models)"
+                },
+                "default_params_file_comet": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Default Comet params file. All parameters of this take precedence."
                 }
             }
         },
