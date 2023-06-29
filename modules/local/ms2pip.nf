@@ -1,6 +1,6 @@
 process MS2PIP {
     tag "$meta.id"
-    label 'process_medium'
+    label 'process_low'
 
     conda "bioconda::ms2pip=3.11.0 bioconda::pyopenms=2.9.1"
     container 'ghcr.io/jonasscheid/mhcquant:ms2pip'
@@ -28,7 +28,8 @@ process MS2PIP {
         --model_name ${params.ms2pip_model_name} \\
         --fragment_error $fragment_error \\
         --variable_mods '${params.variable_mods}' \\
-        --fixed_mods '${params.fixed_mods}'
+        --fixed_mods '${params.fixed_mods}' \\
+        --num_cpus ${task.cpus}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
