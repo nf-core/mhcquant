@@ -1,6 +1,6 @@
 process TDF2MZML {
     tag "$meta.id"
-    label 'process_single'
+    //label 'process_medium'
 
     container "docker.io/mfreitas/tdf2mzml"
 

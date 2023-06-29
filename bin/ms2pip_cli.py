@@ -184,6 +184,11 @@ def generate_params_config(
     help="List of fixed modifications",
 )
 @click.option("--add_pearson", is_flag=True, help="add pearson spectrum simliartity")
+@click.option(
+    "--num_cpus",
+    type=int,
+    help="number of cpus to use",
+)
 def main(
     input_idxml: str,
     input_mzml: str,
@@ -195,6 +200,7 @@ def main(
     variable_mods: str,
     fixed_mods: str,
     add_pearson: bool,
+    num_cpus: int,
 ):
     LOG.info("Parse idXML")
     protein_ids, peptide_ids = parse_idxml(input_idxml)
@@ -206,12 +212,7 @@ def main(
     scan_nr_seq_to_corr = {}
     for hit_idx in range(num_hits):  # number of hits to consider
         df_peprec, scan_nr_to_seq = peptide_ids_to_peprec_dataframe(peptide_ids, hit_idx)
-        ms2pip = MS2PIP(
-            pep_file=df_peprec,
-            spec_file=input_mzml,
-            params=params,
-            return_results=True,
-        )
+        ms2pip = MS2PIP(pep_file=df_peprec, spec_file=input_mzml, params=params, return_results=True, num_cpu=num_cpus)
         predictions = ms2pip.run()
         correlation_df = get_complete_spectrum_correlation(predictions, "pearson")
 
