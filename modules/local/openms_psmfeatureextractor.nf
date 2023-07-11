@@ -21,8 +21,10 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         def prefix           = task.ext.prefix ?: "${merged.baseName}_psm"
         def args             = task.ext.args ?: ''
         def extra_features = ""
-        if(params.use_deeplc){
+        if(params.use_deeplc || params.use_ms2pip){
             extra_features = "-extra"
+        }
+        if(params.use_deeplc){
             if(params.add_abs_rt_error){
                 extra_features = "${extra_features} deeplc_abs_error"
             }
