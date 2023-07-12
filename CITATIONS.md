@@ -10,6 +10,22 @@
 
 ## Pipeline tools
 
+- [FRED2](https://pubmed.ncbi.nlm.nih.gov/27153717/)
+
+  > Schubert B, WalzerM, Brachvogel HP, Szolek A, Mohr C, Kohlbacher O, FRED 2: an immunoinformatics framework for Python, Bioinformatics, Volume 32, Issue 13, 1 July 2016, Pages 2044–2046. doi: 10.109 bioinformatics/btw113. PubMed PMID: 27153717; PubMed Central PMCID; PMC4920123.
+
+- [MHCflurry](https://pubmed.ncbi.nlm.nih.gov/27153717/)
+
+  > O'Donnell TJ, Rubinsteyn A, Bonsack M, Riemer AB, Laserson U, Hammerbacher J. MHCflurry: Open-Source Class I MHC Binding Affinity Prediction. Cell Syst. 2018 Jul 25;7(1):129-132.e4. doi: 10.1016/j.cels.2018.05.014. Epub 2018 Jun 27. PMID: 29960884.
+
+- [MHCnugget](https://pubmed.ncbi.nlm.nih.gov/27153717/)
+
+  > Shao XM, Bhattacharya R, Huang J, Sivakumar IKA, Tokheim C, Zheng L, Hirsch D, Kaminow B, Omdahl A, Bonsack M, Riemer AB, Velculescu VE, Anagnostou V, Pagel KA, Karchin R. High-Throughput Prediction of MHC Class I and II Neoantigens with MHCnuggets. Cancer Immunol Res. 2020 Mar;8(3):396-408. doi: 10.1158/2326-6066.CIR-19-0464. Epub 2019 Dec 23. PMID: 31871119; PMCID: PMC7056596.
+
+- [OpenMS](https://pubmed.ncbi.nlm.nih.gov/27575624/)
+
+  > Röst H, Sachsenberg T, Aiche S, Bielow C, Weisser H, Aicheler F, Andreotti S, Ehrlich HC, Gutenbrunner P, Kenar E, Liang X, Nahnsen S, Nilse L, Pfeuffer J, Rosenberger G, Rurik M, Schmitt U, Veit J, Walze M, Wojnar D, Wolski WE, Schilling O, Choudhary JS, Malmström L, Aebersold R, Reinert K, Kohlbacher O. OpenMS: a flexible open-source software platform for mass spectrometry data analysis. Nat Methods 13 741–748 (2016). doi: 10.1038/nmeth.3959. PubMed PMID: 27575624
+
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
   > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]. Available online https://www.bioinformatics.babraham.ac.uk/projects/fastqc/.

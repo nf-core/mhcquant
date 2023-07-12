@@ -7,30 +7,39 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "ID": {
+                "type": "integer",
+                "errorMessage": "Provide an unique identifier for the replicate, must be a numeric value"
+            },
+            "Sample": {
                 "type": "string",
-                "pattern": "^\\S+$",
+                "pattern": "^\\S+-?",
                 "errorMessage": "Sample name must be provided and cannot contain spaces"
             },
-            "fastq_1": {
+            "Condition": {
                 "type": "string",
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+-?",
+                "errorMessage": "Sample condition must be provided and cannot contain spaces"
             },
-            "fastq_2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+            "ReplicateFileName": {
+                "type": "string",
+                "errorMessage": "MS file spaces and must have extension '.raw'|'.RAW', '.mzml'|'mzML', or '.d'",
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$"
+                        "pattern": "^(?i)\\S+-?\\.raw$"
                     },
                     {
                         "type": "string",
-                        "maxLength": 0
+                        "pattern": "^(?i)\\S+-?\\.mzML$"
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+-?\\.d$"
                     }
                 ]
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["ID", "Sample", "Condition", "ReplicateFileName"]
     }
 }
