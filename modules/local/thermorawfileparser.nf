@@ -2,7 +2,7 @@ process THERMORAWFILEPARSER {
     tag "$meta.id"
     label 'process_low'
 
-    conda (params.enable_conda ? "bioconda::thermorawfileparser=1.4.2" : null)
+    conda "bioconda::thermorawfileparser=1.4.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/thermorawfileparser:1.4.2--ha8f3691_0' :
         'biocontainers/thermorawfileparser:1.4.2--ha8f3691_0' }"
