@@ -23,15 +23,19 @@
             },
             "ReplicateFileName": {
                 "type": "string",
-                "errorMessage": "MS file spaces and must have extension '.raw' or '.mzml'",
+                "errorMessage": "MS file spaces and must have extension '.raw'|'.RAW', '.mzml'|'mzML', or '.d'",
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+-?\\.raw$"
+                        "pattern": "^(?i)\\S+-?\\.raw$"
                     },
                     {
                         "type": "string",
-                        "pattern": "^\\S+-?\\.mzml$"
+                        "pattern": "^(?i)\\S+-?\\.mzML$"
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+-?\\.d$"
                     }
                 ]
             }
