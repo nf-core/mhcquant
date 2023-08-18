@@ -25,13 +25,13 @@ process OPENMS_PSMFEATUREEXTRACTOR {
             extra_features = "-extra"
         }
         if(params.use_deeplc){
-            if(params.add_abs_rt_error){
+            if(params.deeplc_add_abs_rt_error){
                 extra_features = "${extra_features} deeplc_abs_error"
             }
-            if(params.add_log_rt_error){
+            if(params.deeplc_add_log_rt_error){
                 extra_features = "${extra_features} deeplc_log_error"
             }
-            if(params.add_sqr_rt_error || (!params.add_sqr_rt_error && !params.add_abs_rt_error && !params.add_log_rt_error)){
+            if(params.deeplc_add_sqr_rt_error || (!params.deeplc_add_sqr_rt_error && !params.deeplc_add_abs_rt_error && !params.deeplc_add_log_rt_error)){
                 extra_features = "${extra_features} deeplc_sqr_error"
             }
         }
