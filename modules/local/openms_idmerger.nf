@@ -1,5 +1,5 @@
 process OPENMS_IDMERGER {
-    tag "$meta.id"
+    tag "$merge_id.id"
     label 'process_single'
 
     conda "bioconda::openms=2.9.1"
@@ -8,20 +8,20 @@ process OPENMS_IDMERGER {
         'biocontainers/openms:2.9.1--h135471a_1' }"
 
     input:
-        tuple val(meta), path(aligned)
+        tuple val(merge_id), path(idxmls)
 
     output:
-        tuple val(meta), path("*.idXML"), emit: idxml
+        tuple val(merge_id), path("*.idXML"), emit: idxml
         path "versions.yml"             , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.condition}_all_ids_merged"
+        def prefix           = task.ext.prefix ?: "${merge_id.id}"
 
         """
-        IDMerger -in $aligned \\
+        IDMerger -in $idxmls \\
             -out ${prefix}.idXML \\
             -threads $task.cpus \\
             -annotate_file_origin true \\
