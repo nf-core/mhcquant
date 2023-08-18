@@ -41,7 +41,6 @@ workflow MAP_ALIGNMENT {
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERIDXML.out.versions.first().ifEmpty(null))
 
     emit:
-        // Define the information that is returned by this workflow
         versions = ch_versions
         aligned_idxml = OPENMS_MAPRTTRANSFORMERIDXML.out.aligned
         aligned_mzml = OPENMS_MAPRTTRANSFORMERMZML.out.aligned

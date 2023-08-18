@@ -79,6 +79,8 @@ include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_COMET }                from
 
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
+include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT }                        from '../modules/local/openms_idmerger'
+
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
 include { PYOPENMS_FDRFILTERRUNS }                                          from '../modules/local/pyopenms_fdrfilterruns'
@@ -292,12 +294,12 @@ workflow MHCQUANT {
     //
     if (!params.skip_quantification) {
         // Combine group-wise idXML files with percolator output
-        ch_runs_to_be_quantified = filter_q_value
+        ch_runs_to_be_aligned = filter_q_value
                 .cross(ch_proceeding_idx.transpose())
                 .map {pout, run -> [pout[0], run[1], run[2], pout[1]] } // -> [merge_id, meta, run_idxml, percolator_out]
 
         // Filter runs based on fdr filtered coprocessed percolator output
-        PYOPENMS_FDRFILTERRUNS ( ch_runs_to_be_quantified )
+        PYOPENMS_FDRFILTERRUNS ( ch_runs_to_be_aligned )
         ch_versions = ch_versions.mix(PYOPENMS_FDRFILTERRUNS.out.versions.ifEmpty(null))
 
         MAP_ALIGNMENT(
@@ -306,10 +308,22 @@ workflow MHCQUANT {
         )
         ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
 
+        // We need to merge groupwise the aligned idxml files together to use them as id_ext in featurefinder
+        OPENMS_IDMERGER_QUANT(MAP_ALIGNMENT.out.aligned_idxml
+                                    .map { meta, aligned_idxml ->
+                                        [[id:meta.sample + "_" + meta.condition], aligned_idxml] }
+                                    .groupTuple())
+
+        // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
+        OPENMS_IDMERGER_QUANT.out.idxml
+                .cross(MAP_ALIGNMENT.out.aligned_idxml.map { meta, idxml -> [[id:meta.sample + "_" + meta.condition], meta, idxml] })
+                .map { merged_idxmls, aligned_idxml -> [aligned_idxml[1], aligned_idxml[2], merged_idxmls[1]] }
+                .join(MAP_ALIGNMENT.out.aligned_mzml)
+                .map { it -> [it[0], it[3], it[1], it[2]] }
+                .set { ch_runs_to_be_quantified }
+
         PROCESS_FEATURE (
-            MAP_ALIGNMENT.out.aligned_idxml,
-            MAP_ALIGNMENT.out.aligned_mzml,
-            filter_q_value
+            ch_runs_to_be_quantified
         )
         ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions.ifEmpty(null))
 

@@ -8,7 +8,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         'biocontainers/openms:2.9.1--h135471a_1' }"
 
     input:
-    tuple val(meta), path(id_quant_int), path(mzml), path(id_quant)
+    tuple val(meta), path(mzml), path(id_int), path(id_ext)
 
     output:
         tuple val(meta), path("*.featureXML"), emit: featurexml
@@ -19,7 +19,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
     script:
         def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.id}"
-        def arguments        = params.quantification_fdr ? "-id $id_quant_int -id_ext $id_quant -svm:min_prob ${params.quantification_min_prob}" : "-id $id_quant"
+        def arguments        = params.quantification_fdr ? "-id $id_int -id_ext $id_ext -svm:min_prob ${params.quantification_min_prob}" : "-id $id_ext"
 
         """
         FeatureFinderIdentification -in $mzml \\

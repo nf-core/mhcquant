@@ -2,6 +2,7 @@
  * Perform the quantification of the samples when the parameter --skip_quantification is not provided
  */
 
+include { OPENMS_IDMERGER }                                                 from '../../modules/local/openms_idmerger'
 include { OPENMS_FEATUREFINDERIDENTIFICATION }                              from '../../modules/local/openms_featurefinderidentification'
 include { OPENMS_FEATURELINKERUNLABELEDKD }                                 from '../../modules/local/openms_featurelinkerunlabeledkd'
 include { OPENMS_IDCONFLICTRESOLVER }                                       from '../../modules/local/openms_idconflictresolver'
@@ -10,23 +11,13 @@ include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_QUANT }              from
 
 workflow PROCESS_FEATURE {
     take:
-        aligned_idxml
-        aligned_mzml
-        filter_q_value
+        ch_runs_to_be_quantified
 
     main:
         ch_versions = Channel.empty()
-        // Combining the necessary information into one channel
-        aligned_idxml.join( aligned_mzml ).view()
-        aligned_idxml
-            .join( aligned_mzml, by: [0] )
-            .map { it -> [it[0].sample, it[0], it[1], it[2]] }
-            .combine( filter_q_value , by: [0] )
-            .map { it -> [it[1], it[2], it[3], it[5]] }
-            .set{ joined_mzmls_ids_quant }
-        joined_mzmls_ids_quant.view()
+
         // Quantify identifications using targeted feature extraction
-        OPENMS_FEATUREFINDERIDENTIFICATION(joined_mzmls_ids_quant)
+        OPENMS_FEATUREFINDERIDENTIFICATION(ch_runs_to_be_quantified)
         ch_versions = ch_versions.mix(OPENMS_FEATUREFINDERIDENTIFICATION.out.versions.first().ifEmpty(null))
         // Link extracted features
         OPENMS_FEATURELINKERUNLABELEDKD(
