@@ -81,6 +81,7 @@ include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
+include { PYOPENMS_FDRFILTERRUNS }                                          from '../modules/local/pyopenms_fdrfilterruns'
 include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
 
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_FDR }                  from '../modules/local/openms_textexporter'
@@ -233,29 +234,23 @@ workflow MHCQUANT {
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(ch_comet_out_idxml_proceeding.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
-
-    //
-    // SUBWORKFLOW: Pre-process step for the quantification of the data
-    //
-    if (!params.skip_quantification) {
-        MAP_ALIGNMENT(
-            OPENMS_PEPTIDEINDEXER.out.idxml,
-            ch_clean_mzml_file
-        )
-        ch_proceeding_idx = MAP_ALIGNMENT.out.ch_proceeding_idx
-        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
-    } else {
-        ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
+    // Save indexed runs for later use to keep meta-run information
+    ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
             .map {
-                meta, raw ->
-                [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
+                meta, idxml ->
+                [[id:meta.sample + "_" + meta.condition], meta, idxml]
             }
-            .groupTuple(by: [0])
-    }
+            .groupTuple()
 
+    ch_runs_to_merge = ch_proceeding_idx
+            .map {
+                merge_id, meta, idxml ->
+                [merge_id, idxml]
+            }
     // Merge aligned idXMLfiles
-    OPENMS_IDMERGER(ch_proceeding_idx)
+    OPENMS_IDMERGER(ch_runs_to_merge)
     ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
+
     // Extract PSM features for Percolator
     OPENMS_PSMFEATUREEXTRACTOR(OPENMS_IDMERGER.out.idxml)
     ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
@@ -286,23 +281,38 @@ workflow MHCQUANT {
         )
         ch_versions = ch_versions.mix(REFINE_FDR.out.versions.ifEmpty(null))
         // Define the outcome of the paramer to a fixed variable
-        filter_q_value = REFINE_FDR.out.filter_refined_q_value.flatMap { it -> [ tuple(it[0].sample, it[0], it[1]) ] }
+        filter_q_value = REFINE_FDR.out.filter_refined_q_value
     } else {
         // Make sure that the columns that consists of the ID's, sample names and the idXML file names are returned
-        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml.map { it -> [it[0].sample, it[0], it[1]] }
+        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml
     }
 
     //
-    // SUBWORKFLOW: Perform the step to process the feature and obtain the belonging information
+    // SUBWORKFLOW: QUANT
     //
-
     if (!params.skip_quantification) {
+        // Combine group-wise idXML files with percolator output
+        ch_runs_to_be_quantified = filter_q_value
+                .cross(ch_proceeding_idx.transpose())
+                .map {pout, run -> [pout[0], run[1], run[2], pout[1]] } // -> [merge_id, meta, run_idxml, percolator_out]
+
+        // Filter runs based on fdr filtered coprocessed percolator output
+        PYOPENMS_FDRFILTERRUNS ( ch_runs_to_be_quantified )
+        ch_versions = ch_versions.mix(PYOPENMS_FDRFILTERRUNS.out.versions.ifEmpty(null))
+
+        MAP_ALIGNMENT(
+            PYOPENMS_FDRFILTERRUNS.out.fdr_filtered_runs,
+            ch_clean_mzml_file
+        )
+        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
+
         PROCESS_FEATURE (
-            MAP_ALIGNMENT.out.aligned_idfilter,
+            MAP_ALIGNMENT.out.aligned_idxml,
             MAP_ALIGNMENT.out.aligned_mzml,
             filter_q_value
         )
-          ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions.ifEmpty(null))
+
     } else {
         OPENMS_TEXTEXPORTER_UNQUANTIFIED(filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] })
     }
@@ -315,7 +325,7 @@ workflow MHCQUANT {
             PROCESS_FEATURE.out.mztab,
             peptides_class_1_alleles,
             ch_vcf_from_sheet
-       )
+        )
         ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.ifEmpty(null))
         ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
     } else {

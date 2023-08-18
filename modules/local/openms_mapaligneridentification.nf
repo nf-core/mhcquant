@@ -1,5 +1,5 @@
 process OPENMS_MAPALIGNERIDENTIFICATION {
-    tag "$meta.id"
+    tag "$merge_id.id"
     label 'process_single'
 
     conda "bioconda::openms=2.9.1"
@@ -8,7 +8,7 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         'biocontainers/openms:2.9.1--h135471a_1' }"
 
     input:
-        tuple val(meta), path(idxml)
+        tuple val(merge_id), val(meta), path(idxmls)
 
     output:
         tuple val(meta), path("*.trafoXML"), emit: trafoxml
@@ -18,11 +18,11 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         task.ext.when == null || task.ext.when
 
     script:
-        def out_names        = idxml.collect { it.baseName+'.trafoXML' }.join(' ')
+        def out_names        = idxmls.collect { it.baseName+'.trafoXML' }.join(' ')
         def args             = task.ext.args  ?: ''
 
         """
-        MapAlignerIdentification -in $idxml \\
+        MapAlignerIdentification -in $idxmls \\
             -trafo_out ${out_names} \\
             $args
 

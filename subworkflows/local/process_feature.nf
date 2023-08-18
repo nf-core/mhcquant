@@ -10,19 +10,21 @@ include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_QUANT }              from
 
 workflow PROCESS_FEATURE {
     take:
-        psms_outcome
+        aligned_idxml
         aligned_mzml
         filter_q_value
 
     main:
         ch_versions = Channel.empty()
         // Combining the necessary information into one channel
-        psms_outcome
+        aligned_idxml.join( aligned_mzml ).view()
+        aligned_idxml
             .join( aligned_mzml, by: [0] )
             .map { it -> [it[0].sample, it[0], it[1], it[2]] }
             .combine( filter_q_value , by: [0] )
             .map { it -> [it[1], it[2], it[3], it[5]] }
             .set{ joined_mzmls_ids_quant }
+        joined_mzmls_ids_quant.view()
         // Quantify identifications using targeted feature extraction
         OPENMS_FEATUREFINDERIDENTIFICATION(joined_mzmls_ids_quant)
         ch_versions = ch_versions.mix(OPENMS_FEATUREFINDERIDENTIFICATION.out.versions.first().ifEmpty(null))
