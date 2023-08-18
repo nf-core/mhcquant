@@ -18,7 +18,7 @@ process OPENMS_PEPTIDEINDEXER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${idxml.baseName}_-_idx"
+        def prefix           = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}_idx"
 
         """
         PeptideIndexer -in $idxml \\
