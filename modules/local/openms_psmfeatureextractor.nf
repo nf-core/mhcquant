@@ -18,7 +18,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${merged.baseName}_psm"
+        def prefix           = task.ext.prefix ?: "${meta.id}_features"
         def args             = task.ext.args ?: ''
         def extra_features = ""
         if(params.use_deeplc){

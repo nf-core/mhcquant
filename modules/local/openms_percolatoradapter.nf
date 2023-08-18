@@ -8,7 +8,7 @@ process OPENMS_PERCOLATORADAPTER {
         'biocontainers/openms-thirdparty:2.9.1--h9ee0642_1' }"
 
     input:
-        tuple val(meta), path(psm)
+        tuple val(meta), path(merged_with_features)
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
@@ -18,13 +18,13 @@ process OPENMS_PERCOLATORADAPTER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.id}"
+        def prefix           = task.ext.prefix ?: "${meta.id}_pout"
         def args             = task.ext.args  ?: ''
         def klammer          = (params.description_correct_features > 0 && params.klammer) ? "-klammer" : ""
 
         """
         OMP_NUM_THREADS=$task.cpus \\
-        PercolatorAdapter -in $psm \\
+        PercolatorAdapter -in $merged_with_features \\
             -out ${prefix}.idXML \\
             $klammer \\
             $args
