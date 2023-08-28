@@ -2,7 +2,7 @@ process MHCNUGGETS_NEOEPITOPESCLASS2POST {
     tag "$meta"
     label 'process_low'
 
-    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2" : null)
+    conda "bioconda::mhcnuggets=2.3.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0' :
         'biocontainers/mhcnuggets:2.3.2--py_0' }"

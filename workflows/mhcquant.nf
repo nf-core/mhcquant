@@ -1,11 +1,18 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
+    PRINT PARAMS SUMMARY
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
-// Validate input parameters
+include { paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-validation'
+
+def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
+def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
+def summary_params = paramsSummaryMap(workflow)
+
+// Print parameter summary log to screen
+log.info logo + paramsSummaryLog(workflow) + citation
+
 WorkflowMhcquant.initialise(params, log)
 
 // Input/output options
@@ -123,12 +130,15 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Check the input file
     //
-    INPUT_CHECK(params.input)
-        .reads
-        .set { ch_samples_from_sheet }
+    INPUT_CHECK (
+        file(params.input)
+    )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
+    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
+    // ! There is currently no tooling to help you write a sample sheet schema
 
-    ch_samples_from_sheet
+    INPUT_CHECK.out.ms_runs
         .branch {
             meta, filename ->
                 raw : meta.ext == 'raw'
@@ -142,7 +152,7 @@ workflow MHCQUANT {
 
     // Input fasta file
     Channel.fromPath(params.fasta)
-        .combine(ch_samples_from_sheet)
+        .combine(INPUT_CHECK.out.ms_runs)
         .flatMap{ it -> [tuple(it[1],it[0])] }
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .set { input_fasta }
@@ -364,8 +374,8 @@ workflow MHCQUANT {
         workflow_summary = WorkflowMhcquant.paramsSummaryMultiqc(workflow, summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)
 
-        methods_description    = WorkflowMhcquant.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-        ch_methods_description = Channel.value(methods_description)
+    methods_description    = WorkflowMhcquant.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
+    ch_methods_description = Channel.value(methods_description)
 
         ch_multiqc_files = Channel.empty()
         ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))

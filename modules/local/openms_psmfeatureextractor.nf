@@ -2,7 +2,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
     tag "$meta.id"
     label 'process_low'
 
-    conda (params.enable_conda ? "bioconda::openms=2.8.0" : null)
+    conda "bioconda::openms=2.9.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/openms:2.9.1--h135471a_1' :
         'biocontainers/openms:2.9.1--h135471a_1' }"
@@ -21,15 +21,17 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         def prefix           = task.ext.prefix ?: "${merged.baseName}_psm"
         def args             = task.ext.args ?: ''
         def extra_features = ""
-        if(params.use_deeplc){
+        if(params.use_deeplc || params.use_ms2pip){
             extra_features = "-extra"
-            if(params.add_abs_rt_error){
+        }
+        if(params.use_deeplc){
+            if(params.deeplc_add_abs_rt_error){
                 extra_features = "${extra_features} deeplc_abs_error"
             }
-            if(params.add_log_rt_error){
+            if(params.deeplc_add_log_rt_error){
                 extra_features = "${extra_features} deeplc_log_error"
             }
-            if(params.add_sqr_rt_error || (!params.add_sqr_rt_error && !params.add_abs_rt_error && !params.add_log_rt_error)){
+            if(params.deeplc_add_sqr_rt_error || (!params.deeplc_add_sqr_rt_error && !params.deeplc_add_abs_rt_error && !params.deeplc_add_log_rt_error)){
                 extra_features = "${extra_features} deeplc_sqr_error"
             }
         }
