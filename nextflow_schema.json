@@ -359,7 +359,7 @@
                     "description": "Skip quantification and only yield peptide identifications"
                 },
                 "quantification_fdr": {
-                    "type": "string",
+                    "type": "boolean",
                     "fa_icon": "fas fa-less-than",
                     "description": "Compute FDR for the targeted approach",
                     "help_text": "(Weisser H. and Choudhary J.S. J Proteome Res. 2017 Aug 4)"
