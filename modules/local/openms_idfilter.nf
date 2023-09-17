@@ -8,7 +8,7 @@ process OPENMS_IDFILTER {
         'biocontainers/openms:2.9.1--h135471a_1' }"
 
     input:
-        tuple val(meta), path(idxml), file(peptide_filter)
+        tuple val(meta), path(idxml), val(peptide_filter)
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
@@ -18,20 +18,18 @@ process OPENMS_IDFILTER {
         task.ext.when == null || task.ext.when
 
     script:
-        def whitelist        = "$peptide_filter"
-        def prefix           = task.ext.prefix ?: "${meta.id}_-_${idxml.baseName}_filtered"
+        def prefix           = task.ext.prefix ?: "${meta.id}_${idxml.baseName}_filtered"
         def args             = task.ext.args  ?: ''
 
-        if (whitelist == "input.2") {
-            whitelist = " "
+        if (peptide_filter != null) {
+            args += "-whitelist:peptides $peptide_filter"
         }
 
         """
         IDFilter -in $idxml \\
             -out ${prefix}.idXML \\
             -threads $task.cpus \\
-            $args \\
-            $whitelist
+            $args
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

@@ -367,6 +367,26 @@
                 "quantification_min_prob": {
                     "type": "number",
                     "description": "Specify a cut off probability value for quantification events as a filter"
+                },
+                "quantification_mz_window": {
+                    "type": "number",
+                    "description": "Specify a m/z window for matching between runs"
+                },
+                "quantification_rt_window": {
+                    "type": "number",
+                    "description": "Specify a rt window for matching between runs"
+                },
+                "quantification_mapping_tolerance": {
+                    "type": "number",
+                    "description": "Specify a rt mapping tolerance for mapping features between runs"
+                },
+                "quantification_peak_width": {
+                    "type": "number",
+                    "description": "Specify a peak width for feature extraction"
+                },
+                "quantification_min_peak_width": {
+                    "type": "number",
+                    "description": "Specify a minimum peak width for quantification"
                 }
             }
         },

@@ -80,14 +80,17 @@ include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_COMET }                from
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT }                        from '../modules/local/openms_idmerger'
+include { OPENMS_IDRIPPER }                                                 from '../modules/local/openms_idripper'
 
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
-include { PYOPENMS_FDRFILTERRUNS }                                          from '../modules/local/pyopenms_fdrfilterruns'
+include { PYOPENMS_IDFILTER }                                               from '../modules/local/pyopenms_idfilter'
 include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
 
-include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_FDR }                  from '../modules/local/openms_textexporter'
-include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_UNQUANTIFIED }         from '../modules/local/openms_textexporter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_ID }                  from '../modules/local/openms_textexporter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_QUANTIFIED }          from '../modules/local/openms_textexporter'
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_ID }                from '../modules/local/openms_mztabexporter'
+
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -236,13 +239,18 @@ workflow MHCQUANT {
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(ch_comet_out_idxml_proceeding.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
-    // Save indexed runs for later use to keep meta-run information
+    // Save indexed runs for later use to keep meta-run information. Sort based on file id
     ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
-            .map {
-                meta, idxml ->
-                [[id:meta.sample + "_" + meta.condition], meta, idxml]
+            .map { meta, idxml ->
+                [[id:meta.sample + "_" + meta.condition], meta, [id:meta.id, file:idxml]]
             }
             .groupTuple()
+            .map {
+                merge_id, meta, idxml ->
+                // Create a custom comparator to sort based on id
+                def comparator = { a, b -> a.id <=> b.id }
+                [merge_id, meta.sort(comparator), idxml.sort(comparator).file]
+            }
 
     ch_runs_to_merge = ch_proceeding_idx
             .map {
@@ -262,14 +270,6 @@ workflow MHCQUANT {
     // Filter by percolator q-value
     OPENMS_IDFILTER_Q_VALUE(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)] })
     ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
-    // Prepare for check if file is empty
-    OPENMS_TEXTEXPORTER_FDR(OPENMS_IDFILTER_Q_VALUE.out.idxml)
-    // Return an error message when there is only a header present in the document
-    OPENMS_TEXTEXPORTER_FDR.out.tsv.map {
-        meta, tsv -> if (tsv.size() < 130) {
-            log.warn "It seems that there were no significant hits found for this sample: " + meta.sample + "\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample. "
-        }
-    }
 
     //
     // SUBWORKFLOW: Refine the FDR values on the predicted subset
@@ -293,17 +293,32 @@ workflow MHCQUANT {
     // SUBWORKFLOW: QUANT
     //
     if (!params.skip_quantification) {
-        // Combine group-wise idXML files with percolator output
-        ch_runs_to_be_aligned = filter_q_value
-                .cross(ch_proceeding_idx.transpose())
-                .map {pout, run -> [pout[0], run[1], run[2], pout[1]] } // -> [merge_id, meta, run_idxml, percolator_out]
+        // Rip post-percolator idXML files
+        OPENMS_IDRIPPER( OPENMS_PERCOLATORADAPTER.out.idxml ).ripped
+                .join(filter_q_value)
+                .join(ch_proceeding_idx)
+                // [merge_id, [idxml_run1, idxml_run2, ...], pout_filtered, meta, [pre_perc_run1_idxml, pre_perc_run2_idxml, ...]]
+                .map {merge_id, ripped, fdrfiltered, meta, indexed -> [meta, ripped, fdrfiltered] }
+                .transpose()
+                // [meta_run1, idxml_run1, pout_filtered] [meta_run2, idxml_run2, pout_filtered] ...
+                .set { ch_runs_to_be_filtered }
 
-        // Filter runs based on fdr filtered coprocessed percolator output
-        PYOPENMS_FDRFILTERRUNS ( ch_runs_to_be_aligned )
-        ch_versions = ch_versions.mix(PYOPENMS_FDRFILTERRUNS.out.versions.ifEmpty(null))
+        // Filter runs based on fdr filtered coprocessed percolator output.
+        // NOTE: This is an alternative filtering method that will be replaced by IDFilter with new release of OpenMS
+        PYOPENMS_IDFILTER( ch_runs_to_be_filtered ).filtered
+                .map { meta, idxml ->
+                        [[id:meta.sample + "_" + meta.condition], meta, [id:meta.id, file:idxml]]
+                    }
+                .groupTuple()
+                .map { merge_id, meta, idxml ->
+                    // Create a custom comparator to sort based on id
+                    def comparator = { a, b -> a.id <=> b.id }
+                    [merge_id, meta.sort(comparator), idxml.sort(comparator).file]
+                    }
+                .set { ch_runs_to_be_aligned }
 
         MAP_ALIGNMENT(
-            PYOPENMS_FDRFILTERRUNS.out.fdr_filtered_runs,
+            ch_runs_to_be_aligned,
             ch_clean_mzml_file
         )
         ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
@@ -315,11 +330,19 @@ workflow MHCQUANT {
                                     .groupTuple())
 
         // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
-        OPENMS_IDMERGER_QUANT.out.idxml
-                .cross(MAP_ALIGNMENT.out.aligned_idxml.map { meta, idxml -> [[id:meta.sample + "_" + meta.condition], meta, idxml] })
-                .map { merged_idxmls, aligned_idxml -> [aligned_idxml[1], aligned_idxml[2], merged_idxmls[1]] }
-                .join(MAP_ALIGNMENT.out.aligned_mzml)
-                .map { it -> [it[0], it[3], it[1], it[2]] }
+        MAP_ALIGNMENT.out.aligned_mzml
+                .join(MAP_ALIGNMENT.out.aligned_idxml)
+                .map {meta, mzml, idxml ->
+                    [[id:meta.sample + "_" + meta.condition], meta, [id:meta.id, file:mzml], [id:meta.id, file:idxml]] }
+                .groupTuple()
+                .map { merge_id, meta, mzml, idxml ->
+                    // Create a custom comparator to sort based on id
+                    def comparator = { a, b -> a.id <=> b.id }
+                    [merge_id, meta.sort(comparator), mzml.sort(comparator).file, idxml.sort(comparator).file]}
+                .join(OPENMS_IDMERGER_QUANT.out.idxml)
+                .map { merge_id, meta, mzml, idxml, merged_idxml ->
+                    [meta, mzml, idxml, merged_idxml] }
+                .transpose()
                 .set { ch_runs_to_be_quantified }
 
         PROCESS_FEATURE (
@@ -328,7 +351,15 @@ workflow MHCQUANT {
         ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions.ifEmpty(null))
 
     } else {
-        OPENMS_TEXTEXPORTER_UNQUANTIFIED(filter_q_value.flatMap { ident, meta, idxml -> [[meta, idxml]] })
+        // Prepare for check if file is empty
+        OPENMS_TEXTEXPORTER_ID(OPENMS_IDFILTER_Q_VALUE.out.idxml)
+        // Return an error message when there is only a header present in the document
+        OPENMS_TEXTEXPORTER_ID.out.tsv.map {
+            meta, tsv -> if (tsv.size() < 130) {
+            log.warn "It seems that there were no significant hits found for this sample: " + meta.sample + "\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample. "
+            }
+        }
+        OPENMS_MZTABEXPORTER_ID(filter_q_value)
     }
 
     //

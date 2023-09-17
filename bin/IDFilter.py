@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Written by Jonas Scheid
+# Written by Jonas Scheid under the MIT license
 
 from pyopenms import *
 import pandas as pd
@@ -13,9 +13,9 @@ def parse_args() -> argparse.Namespace:
     :return: parsed arguments
     :rtype: argparse.Namespace
     """
-    parser = argparse.ArgumentParser(description="Filter runs by hits in FDR-filtered Percolator output.")
+    parser = argparse.ArgumentParser(description="Filter idXML by a given whitelist of peptides.")
     parser.add_argument("--input", required=True, type=str, help="Input idXML file.")
-    parser.add_argument("--pout", required=True, type=str, help="Percolator output file containing fdr filtered hits merged from all replicates.")
+    parser.add_argument("--whitelist", required=True, type=str, help="IdXML file, which peptide IDs are used as whitelist filter.")
     parser.add_argument("--output", required=True, type=str, help="Filtered idXML file.")
 
     return parser.parse_args()
@@ -52,7 +52,7 @@ def filter_run(protein_ids, peptide_ids, whitelist) -> tuple[list, list]:
     ids_to_keep = [peptide_id for peptide_id in peptide_ids for hit in peptide_id.getHits() if hit.getSequence().toString() in whitelist]
     filter.keepPeptidesWithMatchingSequences(peptide_ids, ids_to_keep, ignore_mods=False)
     # We only want to have unique peptide sequences
-    filter.keepBestPerPeptide(peptide_ids, ignore_mods=False, ignore_charges=True, nr_best_spectrum=1)
+    filter.keepBestPerPeptide(peptide_ids, ignore_mods=False, ignore_charges=False, nr_best_spectrum=1)
     filter.removeEmptyIdentifications(peptide_ids)
     # We only want to have protein accessions that are referenced by the fdr-filtered peptide hits
     filter.removeUnreferencedProteins(protein_ids, peptide_ids)
@@ -63,20 +63,19 @@ def filter_run(protein_ids, peptide_ids, whitelist) -> tuple[list, list]:
 def main():
     args = parse_args()
 
-    # Read filtered percolator output
-    pout_protein_ids, pout_peptide_ids = parse_idxml(args.pout)
-
     # Read idXML files of runs
-    run_protein_ids, run_peptide_ids = parse_idxml(args.input)
+    protein_ids, peptide_ids = parse_idxml(args.input)
 
+    # Read file containing peptides to keep
+    whitelist_protein_ids, whitelist_peptide_ids = parse_idxml(args.whitelist)
     # Get string representation of peptide sequences in fdr_filtered_peptides
-    pout_peptides = [hit.getSequence().toString() for id in pout_peptide_ids for hit in id.getHits()]
+    whitelist_peptides = [hit.getSequence().toString() for id in whitelist_peptide_ids for hit in id.getHits()]
 
     # Filter runs for peptides only in the fdr_filtered_peptides list
-    run_protein_id_filtered, run_peptide_ids_filtered = filter_run(run_protein_ids, run_peptide_ids, pout_peptides)
+    protein_id_filtered, peptide_ids_filtered = filter_run(protein_ids, peptide_ids, whitelist_peptides)
 
     # Write filtered run to idXML file
-    IdXMLFile().store(args.output, run_protein_id_filtered, run_peptide_ids_filtered)
+    IdXMLFile().store(args.output, protein_id_filtered, peptide_ids_filtered)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-process OPENMS_MZTABEXPORTER {
-    tag "$meta.id"
+process OPENMS_IDRIPPER {
+    tag "$merge_id.id"
     label 'process_single'
 
     conda "bioconda::openms=2.9.1"
@@ -8,22 +8,21 @@ process OPENMS_MZTABEXPORTER {
         'biocontainers/openms:2.9.1--h135471a_1' }"
 
     input:
-        tuple val(meta), path(in_file)
+        tuple val(merge_id), path(merged_idxml)
 
     output:
-        tuple val(meta), path("*.mzTab"), emit: mztab
+        tuple val(merge_id), path("*.idXML"), emit: ripped
         path "versions.yml"             , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.condition}"
         def args             = task.ext.args  ?: ''
 
         """
-        MzTabExporter -in $in_file \\
-            -out ${prefix}.mzTab \\
+        IDRipper -in $merged_idxml \\
+            -out . \\
             -threads $task.cpus \\
             $args
 

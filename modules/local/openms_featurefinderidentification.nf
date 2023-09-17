@@ -11,7 +11,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
     tuple val(meta), path(mzml), path(id_int), path(id_ext)
 
     output:
-        tuple val(meta), path("*.featureXML"), emit: featurexml
+        tuple val(meta), path("*_out.featureXML"), emit: featurexml
         path "versions.yml"                  , emit: versions
 
     when:
@@ -19,13 +19,16 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
     script:
         def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.id}"
-        def arguments        = params.quantification_fdr ? "-id $id_int -id_ext $id_ext -svm:min_prob ${params.quantification_min_prob}" : "-id $id_ext"
+        def args             = task.ext.args  ?: ''
+        def quant_fdr        = params.quantification_fdr ? "-id $id_int -id_ext $id_ext -svm:min_prob ${params.quantification_min_prob}" : "-id $id_ext"
+        args = args + " $quant_fdr"
 
         """
         FeatureFinderIdentification -in $mzml \\
-            -out ${prefix}.featureXML \\
+            -out ${prefix}_out.featureXML \\
             -threads $task.cpus \\
-            ${arguments}
+            -candidates_out ${prefix}_candidates.featureXML \\
+            $args
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
