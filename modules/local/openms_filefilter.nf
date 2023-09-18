@@ -4,8 +4,8 @@ process OPENMS_FILEFILTER {
 
     conda "bioconda::openms=2.9.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:2.9.1--h135471a_1' :
-        'biocontainers/openms:2.9.1--h135471a_1' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.0.0--h8964181_1' :
+        'biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
         tuple val(meta), path(mzml)
