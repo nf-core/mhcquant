@@ -171,17 +171,6 @@ The prediction outputs are comma-separated table (CSV) for each allele, listing 
 peptide   allele   prediction   prediction_low   prediction_high   prediction_percentile
 ```
 
-## Retention time prediction
-
-<details markdown="1">
-<summary>Output files</summary>
-
-- `RT_prediction`
-  - `*id_RTpredicted.csv`: If `--predict_RT` is specified, the retention time found peptides are provided
-  - `*txt_RTpredicted.csv`: If `--predict_RT` is specified, the retention time predicted neoepitopes are provided
-
-</details>
-
 ### MultiQC
 
 <details markdown="1">
