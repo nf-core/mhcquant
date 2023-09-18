@@ -3,7 +3,9 @@ process DEEPLC {
     label 'process_medium'
 
     conda "bioconda::deeplc=2.2.0 bioconda::pyopenms=2.9.1"
-    container 'ghcr.io/jonasscheid/mhcquant:deeplc'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-beb85d5ee68ba9251d26079ca28797d51ea3c49a:857e5e7908422b6ea5016a3c313f67087fbe2f8b-0' :
+        'biocontainers/mulled-v2-beb85d5ee68ba9251d26079ca28797d51ea3c49a:857e5e7908422b6ea5016a3c313f67087fbe2f8b-0' }"
 
     input:
         tuple val(meta), path(idxml_in)
