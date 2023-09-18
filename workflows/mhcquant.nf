@@ -124,7 +124,6 @@ include { REFINE_FDR }                                                      from
 include { PROCESS_FEATURE }                                                 from '../subworkflows/local/process_feature.nf'
 include { PREDICT_CLASS1 }                                                  from '../subworkflows/local/predict_class1'
 include { PREDICT_CLASS2 }                                                  from '../subworkflows/local/predict_class2'
-include { PREDICT_RT }                                                      from '../subworkflows/local/predict_rt'
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
@@ -390,17 +389,6 @@ workflow MHCQUANT {
         ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
     } else {
         ch_predicted_possible_neoepitopes_II = Channel.empty()
-    }
-
-    //
-    // SUBWORKFLOW: Predict retention time
-    //
-    if (params.predict_RT) {
-        PREDICT_RT (
-            filter_q_value.map{ it -> [it[1], it[2]] },
-            ch_predicted_possible_neoepitopes,
-            ch_predicted_possible_neoepitopes_II
-        )
     }
 
     if (params.annotate_ions) {

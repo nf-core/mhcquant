@@ -456,20 +456,6 @@
                 }
             }
         },
-        "rt_prediction": {
-            "title": "RT Prediction",
-            "type": "object",
-            "fa_icon": "fas fa-timeline",
-            "description": "",
-            "default": "",
-            "properties": {
-                "predict_RT": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-wrench",
-                    "description": "Set this option to predict retention times of all identified peptides and possible neoepitopes based on high scoring ids"
-                }
-            }
-        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -703,9 +689,6 @@
         },
         {
             "$ref": "#/definitions/variant_options"
-        },
-        {
-            "$ref": "#/definitions/rt_prediction"
         },
         {
             "$ref": "#/definitions/institutional_config_options"
