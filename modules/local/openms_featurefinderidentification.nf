@@ -11,7 +11,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
     tuple val(meta), path(mzml), path(id_int), path(id_ext)
 
     output:
-        tuple val(meta), path("*_out.featureXML"), emit: featurexml
+        tuple val(meta), path("*.featureXML"), emit: featurexml
         path "versions.yml"                  , emit: versions
 
     when:
@@ -25,9 +25,8 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
         """
         FeatureFinderIdentification -in $mzml \\
-            -out ${prefix}_out.featureXML \\
+            -out ${prefix}.featureXML \\
             -threads $task.cpus \\
-            -candidates_out ${prefix}_candidates.featureXML \\
             $args
 
         cat <<-END_VERSIONS > versions.yml
