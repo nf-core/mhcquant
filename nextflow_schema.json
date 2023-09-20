@@ -244,6 +244,17 @@
                     "default": "high_res",
                     "fa_icon": "fas fa-wrench",
                     "description": "Comets theoretical_fragment_ions parameter: theoretical fragment ion peak representation, high-res: sum of intensities plus flanking bins, ion trap (low-res) ms/ms: sum of intensities of central M bin only"
+                },
+                "default_params_file_comet": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Default Comet params file. All parameters of this take precedence."
+                }
+                ,
+                "filter_mzml": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Clean up mzml files and remove artificial charge 0 peptides."
                 }
             }
         },
@@ -338,11 +349,6 @@
                     "type": "string",
                     "fa_icon": "fas fa-train-track",
                     "description": "MS2pip model name defined (https://github.com/compomics/ms2pip#specialized-prediction-models)"
-                },
-                "default_params_file_comet": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-code",
-                    "description": "Default Comet params file. All parameters of this take precedence."
                 }
             }
         },
