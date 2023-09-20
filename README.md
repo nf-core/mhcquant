@@ -82,15 +82,32 @@ nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/c
 
 By default the pipeline currently performs the following
 
-- Identification of peptides in the MS/MS spectra using comet (`CometAdapter`)
+#### Identification
+- Identification of peptides in the MS/MS spectra using Comet (`CometAdapter`)
 - Refreshes the protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
-- Estimates the false discovery rate on peptide and protein level (`FalseDiscoveryRate`)
 - Filters peptide/protein identification results on ID based alignment (`IDFilter`)
-- Converts XML format to text files (`TextExporter`)
-- Merges several idXML files into one idXML file (`IDMerger`)
-- Extract PSM features for Percolator (`PSMFeatureExtractor`)
+- Merges idXML files of a sample-condition group into one idXML file (`IDMerger`)
+- Defines extra features for Percolator (`PSMFeatureExtractor`)
 - Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
-- Filters peptide/protein identification result (`IDFilter`)
+- Filters peptide/protein identification result based on Percolator q-value (`IDFilter`)
+- Splits merged idXML file into their respective runs again (`IDRipper`)
+- Uses Comet XCorr instead of percolator q-value as primary score for downstream purposess (`IDScoreSwitcher`)
+- Keeps peptides observed after FDR filtering in each run and selects the best peptide per run (`Pyopenms_IDFilter`)
+
+#### Map alignment
+
+- Corrects retention time distortions between runs, using information from peptides identified in different runs (`MapAlignerIdentification`)
+- Applies retention time transformations to runs (`MapRTTransformer`)
+
+#### Process features
+
+- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
+- Group corresponding features across labelfree experiments (`FeatureLinkerUnlabeledKD`)
+- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
+
+#### Output
+- Converts XML format to text files (`TextExporter`)
+- Converts XML format to mzTab files (`MzTabExporter`)
 
 ### Additional Steps
 
@@ -101,12 +118,12 @@ Additional functionality contained by the pipeline currently includes:
 - Inclusion of proteins in the reference database (`mhcnuggets`, `mhcflurry`, `fred2`)
 - Create a decoy peptide database from standard FASTA databases (`DecoyDatabase`)
 - Conversion of raw to mzML files (`ThermoRawFileParser`)
+- Conversion of tdf (`.d`) to mzML files (`tdf2mzml`)
 - Executing the peak picking with high_res algorithm (`PeakPickerHiRes`)
 
-#### Map alignment
-
-- Corrects retention time distortions between maps, using information from peptides identified in different maps (`MapAlignerIdentification`)
-- Applies retention time transformations to maps (`MapRTTransformer`)
+#### Additional features for rescoring
+- Retention time prediction (`DeepLC`)
+- Peak intensity prediction (`MS2PIP`)
 
 #### Refine FDR
 
@@ -114,13 +131,6 @@ Additional functionality contained by the pipeline currently includes:
 - Predict psm results using mhcflurry to shrink search space (`mhcflurry`)
 - Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
 
-#### Process features
-
-- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
-- Group corresponding features across labelfree experiments (`FeatureLinkerUnlabeledKD`)
-- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
-- Converts XML format to text files (`TextExporter`)
-- Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
 
 #### Prediction of HLA class 1 peptides
 
@@ -129,10 +139,8 @@ Additional functionality contained by the pipeline currently includes:
 - Predict neoepitopes based on the peptide hits (`mhcnuggets`, `mhcflurry`, `fred2`)
 - Resolve found neoepitopes (`mhcnuggets`, `mhcflurry`, `fred2`)
 
-#### Prediction retention time
-
-- Used to train a model for peptide retention time prediction or peptide separation prediction (`RTModel`)
-- Retention Times Predictor Found Peptides and neoepitopes (`RTPredict`)
+#### Output
+- Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
 
 ## Documentation
 
