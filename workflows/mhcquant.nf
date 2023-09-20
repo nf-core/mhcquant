@@ -81,6 +81,7 @@ include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT }                        from '../modules/local/openms_idmerger'
 include { OPENMS_IDRIPPER }                                                 from '../modules/local/openms_idripper'
+include { OPENMS_IDSCORESWITCHER }                                          from '../modules/local/openms_idscoreswitcher'
 
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
@@ -88,7 +89,6 @@ include { PYOPENMS_IDFILTER }                                               from
 include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
 
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_ID }                  from '../modules/local/openms_textexporter'
-include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_QUANTIFIED }          from '../modules/local/openms_textexporter'
 include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_ID }                from '../modules/local/openms_mztabexporter'
 
 
@@ -205,10 +205,15 @@ workflow MHCQUANT {
         ch_mzml_file = ch_ms_files
     }
 
-    // Clean up mzML files
-    OPENMS_FILEFILTER(ch_mzml_file)
-    ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions.ifEmpty(null))
-    ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
+    // Optionally clean up mzML files
+    if (params.filter_mzml){
+        OPENMS_FILEFILTER(ch_mzml_file)
+        ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions.ifEmpty(null))
+        ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
+    } else {
+        ch_clean_mzml_file = ch_mzml_file
+    }
+
 
     // Run comet database search
     OPENMS_COMETADAPTER(
@@ -300,8 +305,16 @@ workflow MHCQUANT {
                 .map {merge_id, ripped, fdrfiltered, meta, indexed -> [meta, ripped, fdrfiltered] }
                 .transpose()
                 // [meta_run1, idxml_run1, pout_filtered] [meta_run2, idxml_run2, pout_filtered] ...
-                .set { ch_runs_to_be_filtered }
+                .set { ch_ripped_pout }
+        ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions.ifEmpty(null))
 
+        // Switch to xcorr for filtering since q-values are set to 1 with peptide-level-fdr
+        if (params.fdr_level == 'peptide_level_fdrs'){
+            ch_runs_to_be_filtered = OPENMS_IDSCORESWITCHER( ch_ripped_pout ).switched_idxml
+            ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions.ifEmpty(null))
+        } else {
+            ch_runs_to_be_filtered = ch_ripped_pout
+        }
         // Filter runs based on fdr filtered coprocessed percolator output.
         // NOTE: This is an alternative filtering method that will be replaced by IDFilter with new release of OpenMS
         PYOPENMS_IDFILTER( ch_runs_to_be_filtered ).filtered
@@ -315,6 +328,7 @@ workflow MHCQUANT {
                     [merge_id, meta.sort(comparator), idxml.sort(comparator).file]
                     }
                 .set { ch_runs_to_be_aligned }
+        ch_versions = ch_versions.mix(PYOPENMS_IDFILTER.out.versions.ifEmpty(null))
 
         MAP_ALIGNMENT(
             ch_runs_to_be_aligned,
@@ -327,6 +341,7 @@ workflow MHCQUANT {
                                     .map { meta, aligned_idxml ->
                                         [[id:meta.sample + "_" + meta.condition], aligned_idxml] }
                                     .groupTuple())
+        ch_versions = ch_versions.mix(OPENMS_IDMERGER_QUANT.out.versions.ifEmpty(null))
 
         // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
         MAP_ALIGNMENT.out.aligned_mzml
@@ -352,6 +367,7 @@ workflow MHCQUANT {
     } else {
         // Prepare for check if file is empty
         OPENMS_TEXTEXPORTER_ID(OPENMS_IDFILTER_Q_VALUE.out.idxml)
+        ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER_ID.out.versions.ifEmpty(null))
         // Return an error message when there is only a header present in the document
         OPENMS_TEXTEXPORTER_ID.out.tsv.map {
             meta, tsv -> if (tsv.size() < 130) {
@@ -359,6 +375,7 @@ workflow MHCQUANT {
             }
         }
         OPENMS_MZTABEXPORTER_ID(filter_q_value)
+        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER_ID.out.versions.ifEmpty(null))
     }
 
     //
