@@ -2,7 +2,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::openms=2.9.1"
+    conda "bioconda::openms=3.0.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/openms:3.0.0--h8964181_1' :
         'biocontainers/openms:3.0.0--h8964181_1' }"
