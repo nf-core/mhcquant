@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#266](https://github.com/nf-core/mhcquant/pull/266) Bumped ThermoRawFileParser version from 1.4.0 to 1.4.2
 
 ### `Deprecated`
-
+- OpenMS RT prediction
 ## v2.4.1 nfcore/mhcquant "Young Shark" (patch) - 2023/04/04
 
 ### `Added`
