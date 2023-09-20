@@ -226,7 +226,7 @@ In addition, references of tools and data used in this pipeline are as follows:
 >
 > **MS2 Peak intensity prediction**
 >
-> Gabriels R. et al, _Nucleic Acids Research_ 2019 Jul;47(W1):W295-9. doi: [10.1038/s41592-021-01301-5](https://academic.oup.com/nar/article/47/W1/W295/5480903)
+> Gabriels R. et al, _Nucleic Acids Research_ 2019 Jul;47(W1):W295-9. doi: [10.1093/nar/gkz299](https://academic.oup.com/nar/article/47/W1/W295/5480903)
 >
 > **Identification based RT Alignment**
 >
