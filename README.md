@@ -220,6 +220,14 @@ In addition, references of tools and data used in this pipeline are as follows:
 >
 > Käll L. et al, _Nat Methods_ 2007 Nov;4(11):923-5. doi: [10.1038/nmeth1113](https://www.nature.com/articles/nmeth1113). Epub 2007 Oct 21.
 >
+> **Retention time prediction**
+>
+> Bouwmeester R. et al, _Nature Methods_ 2021 Oct;18(11):1363-1369. doi: [10.1038/s41592-021-01301-5](https://www.nature.com/articles/s41592-021-01301-5)
+>
+> **MS2 Peak intensity prediction**
+>
+> Gabriels R. et al, _Nucleic Acids Research_ 2019 Jul;47(W1):W295-9. doi: [10.1038/s41592-021-01301-5](https://academic.oup.com/nar/article/47/W1/W295/5480903)
+>
 > **Identification based RT Alignment**
 >
 > Weisser H. et al, _J Proteome Res._ 2013 Apr 5;12(4):1628-44. doi: [10.1021/pr300992u](https://pubs.acs.org/doi/10.1021/pr300992u). Epub 2013 Feb 22.
