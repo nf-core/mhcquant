@@ -36,7 +36,7 @@ process OPENMS_COMETADAPTER {
             -out ${prefix}.idXML \\
             -database $fasta \\
             -threads $task.cpus \\
-            -pin_out ${prefix}.tsv \\
+            -pin_out ${prefix}_pin.tsv \\
             $params_file \\
             $args \\
             $mods \\

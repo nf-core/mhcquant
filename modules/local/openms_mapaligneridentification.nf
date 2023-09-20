@@ -24,7 +24,6 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         """
         MapAlignerIdentification -in $idxmls \\
             -trafo_out ${out_names} \\
-            -debug 1000 \\
             $args
 
         cat <<-END_VERSIONS > versions.yml
