@@ -83,6 +83,7 @@ nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/c
 By default the pipeline currently performs the following
 
 #### Identification
+
 - Identification of peptides in the MS/MS spectra using Comet (`CometAdapter`)
 - Refreshes the protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
 - Filters peptide/protein identification results on ID based alignment (`IDFilter`)
@@ -106,6 +107,7 @@ By default the pipeline currently performs the following
 - Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
 
 #### Output
+
 - Converts XML format to text files (`TextExporter`)
 - Converts XML format to mzTab files (`MzTabExporter`)
 
@@ -122,6 +124,7 @@ Additional functionality contained by the pipeline currently includes:
 - Executing the peak picking with high_res algorithm (`PeakPickerHiRes`)
 
 #### Additional features for rescoring
+
 - Retention time prediction (`DeepLC`)
 - Peak intensity prediction (`MS2PIP`)
 
@@ -131,7 +134,6 @@ Additional functionality contained by the pipeline currently includes:
 - Predict psm results using mhcflurry to shrink search space (`mhcflurry`)
 - Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
 
-
 #### Prediction of HLA class 1 peptides
 
 - Predict peptides (`mhcnuggets`, `mhcflurry`, `fred2`)
@@ -140,6 +142,7 @@ Additional functionality contained by the pipeline currently includes:
 - Resolve found neoepitopes (`mhcnuggets`, `mhcflurry`, `fred2`)
 
 #### Output
+
 - Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
 
 ## Documentation

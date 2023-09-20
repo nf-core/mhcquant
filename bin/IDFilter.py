@@ -6,6 +6,7 @@ import pandas as pd
 import os
 import argparse
 
+
 def parse_args() -> argparse.Namespace:
     """
     Parse command line arguments.
@@ -15,7 +16,9 @@ def parse_args() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(description="Filter idXML by a given whitelist of peptides.")
     parser.add_argument("--input", required=True, type=str, help="Input idXML file.")
-    parser.add_argument("--whitelist", required=True, type=str, help="IdXML file, which peptide IDs are used as whitelist filter.")
+    parser.add_argument(
+        "--whitelist", required=True, type=str, help="IdXML file, which peptide IDs are used as whitelist filter."
+    )
     parser.add_argument("--output", required=True, type=str, help="Filtered idXML file.")
 
     return parser.parse_args()
@@ -49,7 +52,12 @@ def filter_run(protein_ids, peptide_ids, whitelist) -> tuple[list, list]:
     :type whitelist: list
     """
     filter = IDFilter()
-    ids_to_keep = [peptide_id for peptide_id in peptide_ids for hit in peptide_id.getHits() if hit.getSequence().toString() in whitelist]
+    ids_to_keep = [
+        peptide_id
+        for peptide_id in peptide_ids
+        for hit in peptide_id.getHits()
+        if hit.getSequence().toString() in whitelist
+    ]
     filter.keepPeptidesWithMatchingSequences(peptide_ids, ids_to_keep, ignore_mods=False)
     # We only want to have unique peptide sequences
     filter.keepBestPerPeptide(peptide_ids, ignore_mods=False, ignore_charges=False, nr_best_spectrum=1)

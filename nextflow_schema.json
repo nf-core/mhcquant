@@ -249,10 +249,9 @@
                     "type": "string",
                     "fa_icon": "fas fa-file-code",
                     "description": "Default Comet params file. All parameters of this take precedence."
-                }
-                ,
+                },
                 "filter_mzml": {
-                    "type": "string",
+                    "type": "boolean",
                     "fa_icon": "fas fa-file-code",
                     "description": "Clean up mzml files and remove artificial charge 0 peptides."
                 }
