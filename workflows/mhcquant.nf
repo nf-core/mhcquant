@@ -88,8 +88,8 @@ include { OPENMS_PERCOLATORADAPTER }                                        from
 include { PYOPENMS_IDFILTER }                                               from '../modules/local/pyopenms_idfilter'
 include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
 
-include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_ID }                  from '../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_ID }                from '../modules/local/openms_mztabexporter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_ID }                   from '../modules/local/openms_textexporter'
+include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_ID }                 from '../modules/local/openms_mztabexporter'
 
 
 //
@@ -237,9 +237,6 @@ workflow MHCQUANT {
         ch_comet_out_idxml_proceeding = ch_comet_out_idxml
     }
 
-    // Write this information to an tsv file
-    OPENMS_TEXTEXPORTER_COMET(ch_comet_out_idxml_proceeding)
-    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions.ifEmpty(null))
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(ch_comet_out_idxml_proceeding.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
@@ -366,7 +363,7 @@ workflow MHCQUANT {
 
     } else {
         // Prepare for check if file is empty
-        OPENMS_TEXTEXPORTER_ID(OPENMS_IDFILTER_Q_VALUE.out.idxml)
+        OPENMS_TEXTEXPORTER_ID(filter_q_value)
         ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER_ID.out.versions.ifEmpty(null))
         // Return an error message when there is only a header present in the document
         OPENMS_TEXTEXPORTER_ID.out.tsv.map {
@@ -409,14 +406,13 @@ workflow MHCQUANT {
     }
 
     if (params.annotate_ions) {
-        // Alter the annotation of the filtered q value
-        ch_filtered_idxml = filter_q_value.map { ident, meta, idxml -> [meta.id, idxml] }
         // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_raw_spectra_data = ch_clean_mzml_file.map {meta, mzml -> [meta.sample + '_' + meta.condition, mzml] }
+        ch_clean_mzml_file.map {meta, mzml -> [[id:meta.sample + '_' + meta.condition], mzml] }
             .groupTuple()
-            .join(ch_filtered_idxml)
+            .join(filter_q_value)
+            .set{ ch_ion_annotator_input }
         // Annotate spectra with ion fragmentation information
-        PYOPENMS_IONANNOTATOR(ch_raw_spectra_data)
+        PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
         ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions.ifEmpty(null))
     }
 

@@ -8,7 +8,7 @@ process OPENMS_TEXTEXPORTER {
         'quay.io/biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
-        tuple val(meta), path(consensus_resolved)
+        tuple val(meta), path(file)
 
     output:
         tuple val(meta), path("*.tsv"), emit: tsv
@@ -22,7 +22,7 @@ process OPENMS_TEXTEXPORTER {
         def args             = task.ext.args  ?: ''
 
         """
-        TextExporter -in $consensus_resolved \\
+        TextExporter -in $file \\
             -out ${prefix}.tsv \\
             -threads $task.cpus \\
             -id:add_hit_metavalues 0 \\

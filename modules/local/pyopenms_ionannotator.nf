@@ -1,5 +1,5 @@
 process PYOPENMS_IONANNOTATOR {
-    tag "$sample"
+    tag "$meta.id"
     label 'process_high'
 
     conda "bioconda::pyopenms=2.8.0"
@@ -8,17 +8,17 @@ process PYOPENMS_IONANNOTATOR {
         'biocontainers/pyopenms:2.8.0--py310h3dc0cdb_1' }"
 
     input:
-        tuple val(sample), path(mzml), path(fdr_filtered_idxml)
+        tuple val(meta), path(mzml), path(fdr_filtered_idxml)
 
     output:
-        tuple val(sample), path("*.tsv"), path("*.tsv"), emit: tsv
+        tuple val(meta), path("*.tsv")  , emit: tsv
         path "versions.yml"             , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${mzml.baseName}"
+        def prefix           = task.ext.prefix ?: "${meta.id}"
         def args             = task.ext.args  ?: ''
 
         def xions            = params.use_x_ions ? "-use_x_ions" : ""
@@ -30,7 +30,7 @@ process PYOPENMS_IONANNOTATOR {
         get_ion_annotations.py \\
             --input $mzml \\
             -idxml $fdr_filtered_idxml \\
-            --prefix $sample \\
+            --prefix $meta.id \\
             $args \\
             $xions \\
             $zions \\

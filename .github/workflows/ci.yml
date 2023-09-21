@@ -60,4 +60,4 @@ jobs:
 
       - name: Run pipeline with additional params
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --spectrum_batch_size 2000 --use_deeplc --use_ms2pip --annotate_ions --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --spectrum_batch_size 2000 --use_deeplc --use_ms2pip --ms2pip_model_name 'CID' --annotate_ions --outdir ./results
