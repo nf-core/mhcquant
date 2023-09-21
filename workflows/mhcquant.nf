@@ -185,7 +185,7 @@ workflow MHCQUANT {
         ch_decoy_db = ch_fasta_file
     }
 
-    ch_ms_files = (branched_ms_files.mzml)
+    ch_ms_files = branched_ms_files.mzml.map{ meta, mzml -> [meta, mzml[0]]}
     // Raw file conversion
     THERMORAWFILEPARSER(branched_ms_files.raw)
     ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions.ifEmpty(null))
