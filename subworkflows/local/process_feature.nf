@@ -32,13 +32,13 @@ workflow PROCESS_FEATURE {
         OPENMS_IDCONFLICTRESOLVER(OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml)
         ch_versions = ch_versions.mix(OPENMS_IDCONFLICTRESOLVER.out.versions.first().ifEmpty(null))
         // Export all information as text to csv
-        OPENMS_TEXTEXPORTER_QUANT(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
-        ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER_QUANT.out.versions.first().ifEmpty(null))
-        // Export all information as mzTab
-        OPENMS_MZTABEXPORTER_QUANT(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
-        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER_QUANT.out.versions.first().ifEmpty(null))
+        //OPENMS_TEXTEXPORTER_QUANT(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
+        //ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER_QUANT.out.versions.first().ifEmpty(null))
+        //// Export all information as mzTab
+        //OPENMS_MZTABEXPORTER_QUANT(OPENMS_IDCONFLICTRESOLVER.out.consensusxml)
+        //ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER_QUANT.out.versions.first().ifEmpty(null))
     emit:
         // Define the information that is returned by this workflow
         versions = ch_versions
-        mztab = OPENMS_MZTABEXPORTER_QUANT.out.mztab
+        consensusxml = OPENMS_IDCONFLICTRESOLVER.out.consensusxml
 }

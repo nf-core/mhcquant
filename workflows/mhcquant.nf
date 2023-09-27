@@ -75,8 +75,6 @@ include { OPENMS_PEPTIDEINDEXER }                                           from
 include { DEEPLC }                                                          from '../modules/local/deeplc'
 include { MS2PIP }                                                          from '../modules/local/ms2pip'
 
-include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_COMET }                from '../modules/local/openms_textexporter'
-
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT }                        from '../modules/local/openms_idmerger'
@@ -88,8 +86,8 @@ include { OPENMS_PERCOLATORADAPTER }                                        from
 include { PYOPENMS_IDFILTER }                                               from '../modules/local/pyopenms_idfilter'
 include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
 
-include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_ID }                   from '../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTER_ID }                 from '../modules/local/openms_mztabexporter'
+include { OPENMS_TEXTEXPORTER }                                             from '../modules/local/openms_textexporter'
+include { OPENMS_MZTABEXPORTER }                                            from '../modules/local/openms_mztabexporter'
 
 
 //
@@ -360,27 +358,27 @@ workflow MHCQUANT {
             ch_runs_to_be_quantified
         )
         ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions.ifEmpty(null))
-
+        ch_output = PROCESS_FEATURE.out.consensusxml
     } else {
-        // Prepare for check if file is empty
-        OPENMS_TEXTEXPORTER_ID(filter_q_value)
-        ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER_ID.out.versions.ifEmpty(null))
-        // Return an error message when there is only a header present in the document
-        OPENMS_TEXTEXPORTER_ID.out.tsv.map {
-            meta, tsv -> if (tsv.size() < 130) {
-            log.warn "It seems that there were no significant hits found for this sample: " + meta.sample + "\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample. "
-            }
-        }
-        OPENMS_MZTABEXPORTER_ID(filter_q_value)
-        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER_ID.out.versions.ifEmpty(null))
+        ch_output = filter_q_value
     }
-
+    // Prepare for check if file is empty
+    OPENMS_TEXTEXPORTER(ch_output)
+    ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions.ifEmpty(null))
+    // Return an error message when there is only a header present in the document
+    OPENMS_TEXTEXPORTER.out.tsv.map {
+        meta, tsv -> if (tsv.size() < 130) {
+        log.warn "It seems that there were no significant hits found for this sample: " + meta.sample + "\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample. "
+        }
+    }
+    OPENMS_MZTABEXPORTER(ch_output)
+    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.ifEmpty(null))
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
     //
     if (params.predict_class_1 & !params.skip_quantification) {
         PREDICT_CLASS1 (
-            PROCESS_FEATURE.out.mztab,
+            OPENMS_MZTABEXPORTER.out.mztab,
             peptides_class_1_alleles,
             ch_vcf_from_sheet
         )
@@ -395,7 +393,7 @@ workflow MHCQUANT {
     //
     if (params.predict_class_2 & !params.skip_quantification) {
         PREDICT_CLASS2 (
-            PROCESS_FEATURE.out.mztab,
+            OPENMS_MZTABEXPORTER.out.mztab,
             peptides_class_2_alleles,
             ch_vcf_from_sheet
         )
