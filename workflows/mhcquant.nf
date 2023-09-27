@@ -183,6 +183,7 @@ workflow MHCQUANT {
         ch_decoy_db = ch_fasta_file
     }
 
+    // If mzml files are specified, they are encapsulated in a list [meta, [mzml]]. We need to extract the path for grouping later
     ch_ms_files = branched_ms_files.mzml.map{ meta, mzml -> [meta, mzml[0]]}
     // Raw file conversion
     THERMORAWFILEPARSER(branched_ms_files.raw)
