@@ -213,10 +213,8 @@ workflow MHCQUANT {
         ch_clean_mzml_file = ch_mzml_file
     }
 
-
     // Run comet database search
-    OPENMS_COMETADAPTER(
-            ch_clean_mzml_file.join(ch_decoy_db, remainder:true))
+    OPENMS_COMETADAPTER(ch_clean_mzml_file.join(ch_decoy_db, remainder:true))
 
     // Run DeepLC if specified
     if (params.use_deeplc){
