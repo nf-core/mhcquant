@@ -1,5 +1,5 @@
 process OPENMS_MAPALIGNERIDENTIFICATION {
-    tag "$merge_id.id"
+    tag "$meta.id"
     label 'process_single'
 
     conda "bioconda::openms=3.0.0"
@@ -8,7 +8,7 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         'biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
-        tuple val(merge_id), val(meta), path(idxmls)
+        tuple val(meta), path(idxmls)
 
     output:
         tuple val(meta), path("*.trafoXML"), emit: trafoxml

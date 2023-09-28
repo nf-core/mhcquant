@@ -18,7 +18,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.id}"
+        def prefix           = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}"
         def args             = task.ext.args  ?: ''
         def quant_fdr        = params.quantification_fdr ? "-id $id_int -id_ext $id_ext -svm:min_prob ${params.quantification_min_prob}" : "-id $id_ext"
         args = args + " $quant_fdr"

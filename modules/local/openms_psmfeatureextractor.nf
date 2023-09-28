@@ -8,7 +8,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         'biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
-        tuple val(meta), path(merged)
+        tuple val(meta), path(idxml)
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
@@ -18,7 +18,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${merged.baseName}_psm"
+        def prefix           = task.ext.prefix ?: "${meta.id}_psm"
         def args             = task.ext.args ?: ''
         def extra_features = ""
         if(params.use_deeplc || params.use_ms2pip){
@@ -40,7 +40,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         }
 
         """
-        PSMFeatureExtractor -in $merged \\
+        PSMFeatureExtractor -in $idxml \\
             -out ${prefix}.idXML \\
             -threads $task.cpus \\
             $extra_features \\

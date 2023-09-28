@@ -1,5 +1,5 @@
 process OPENMS_IDRIPPER {
-    tag "$merge_id.id"
+    tag "${meta.id}"
     label 'process_single'
 
     conda "bioconda::openms=3.0.0"
@@ -8,10 +8,10 @@ process OPENMS_IDRIPPER {
         'biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
-        tuple val(merge_id), path(merged_idxml)
+        tuple val(meta), path(merged_idxml)
 
     output:
-        tuple val(merge_id), path("*.idXML"), emit: ripped
+        tuple val(meta), path("*.idXML"), emit: ripped
         path "versions.yml"             , emit: versions
 
     when:

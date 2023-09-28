@@ -18,7 +18,7 @@ process OPENMS_MZTABEXPORTER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.condition}"
+        def prefix           = task.ext.prefix ?: "${meta.id}"
         def args             = task.ext.args  ?: ''
 
         """

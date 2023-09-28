@@ -1,5 +1,5 @@
 process MHCNUGGETS_NEOEPITOPESCLASS2POST {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_low'
 
     conda "bioconda::mhcnuggets=2.3.2"

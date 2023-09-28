@@ -18,7 +18,7 @@ process OPENMS_IDFILTER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.id}_${idxml.baseName}_filtered"
+        def prefix           = task.ext.prefix ?: "${meta.id}_filtered"
         def args             = task.ext.args  ?: ''
 
         if (peptide_filter != null) {

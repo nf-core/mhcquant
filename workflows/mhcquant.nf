@@ -115,6 +115,8 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 
 // Info required for completion email and summary
 def multiqc_report = []
+// Sort closure for merging and splitting files
+def sortById = { a, b -> a.id <=> b.id }
 
 include { INCLUDE_PROTEINS }                                                from '../subworkflows/local/include_proteins'
 include { MAP_ALIGNMENT }                                                   from '../subworkflows/local/map_alignment'
@@ -145,18 +147,18 @@ workflow MHCQUANT {
         .branch {
             meta, filename ->
                 raw : meta.ext == 'raw'
-                    return [ meta, filename ]
+                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
                 mzml : meta.ext == 'mzml'
-                    return [ meta, filename ]
+                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
                 tdf : meta.ext == 'd'
-                    return [ meta, filename ]
+                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
                 other : true }
         .set { branched_ms_files }
 
     // Input fasta file
     Channel.fromPath(params.fasta)
         .combine(INPUT_CHECK.out.ms_runs)
-        .flatMap{ it -> [tuple(it[1],it[0])] }
+        .map{ fasta, meta, ms_file -> [meta.subMap('id', 'sample', 'condition'), fasta] }
         .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
         .set { input_fasta }
 
@@ -195,8 +197,8 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(TDF2MZML.out.versions.ifEmpty(null))
     ch_ms_files = ch_ms_files.mix(TDF2MZML.out.mzml)
 
+    // Optional: Run Peak Picking as Preprocessing
     if (params.run_centroidisation) {
-        // Optional: Run Peak Picking as Preprocessing
         OPENMS_PEAKPICKERHIRES(ch_ms_files)
         ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.ifEmpty(null))
         ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
@@ -237,24 +239,18 @@ workflow MHCQUANT {
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(ch_comet_out_idxml_proceeding.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
-    // Save indexed runs for later use to keep meta-run information. Sort based on file id
-    ch_proceeding_idx = OPENMS_PEPTIDEINDEXER.out.idxml
-            .map { meta, idxml ->
-                [[id:meta.sample + "_" + meta.condition], meta, [id:meta.id, file:idxml]]
-            }
-            .groupTuple()
-            .map {
-                merge_id, meta, idxml ->
-                // Create a custom comparator to sort based on id
-                def comparator = { a, b -> a.id <=> b.id }
-                [merge_id, meta.sort(comparator), idxml.sort(comparator).file]
-            }
 
-    ch_runs_to_merge = ch_proceeding_idx
-            .map {
-                merge_id, meta, idxml ->
-                [merge_id, idxml]
-            }
+    // Save indexed runs for later use to keep meta-run information. Sort based on file id
+    OPENMS_PEPTIDEINDEXER.out.idxml
+            .map { meta, idxml -> [[id: meta.sample + '_' + meta.condition], meta] }
+            .groupTuple( sort: sortById )
+            .set { merge_meta_map }
+
+    OPENMS_PEPTIDEINDEXER.out.idxml
+            .map { meta, idxml -> [[id: meta.sample + '_' + meta.condition], idxml] }
+            .groupTuple()
+            .set { ch_runs_to_merge }
+
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_runs_to_merge)
     ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
@@ -262,9 +258,11 @@ workflow MHCQUANT {
     // Extract PSM features for Percolator
     OPENMS_PSMFEATUREEXTRACTOR(OPENMS_IDMERGER.out.idxml)
     ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
+
     // Run Percolator
     OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
     ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
+
     // Filter by percolator q-value
     OPENMS_IDFILTER_Q_VALUE(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)] })
     ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
@@ -291,14 +289,12 @@ workflow MHCQUANT {
     // SUBWORKFLOW: QUANT
     //
     if (!params.skip_quantification) {
-        // Rip post-percolator idXML files
+        // Rip post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1, pout_filtered] [meta_run2, idxml_run2, pout_filtered] ...
         OPENMS_IDRIPPER( OPENMS_PERCOLATORADAPTER.out.idxml ).ripped
+                .join(merge_meta_map)
                 .join(filter_q_value)
-                .join(ch_proceeding_idx)
-                // [merge_id, [idxml_run1, idxml_run2, ...], pout_filtered, meta, [pre_perc_run1_idxml, pre_perc_run2_idxml, ...]]
-                .map {merge_id, ripped, fdrfiltered, meta, indexed -> [meta, ripped, fdrfiltered] }
+                .map {group_meta, ripped, meta, fdrfiltered -> [meta, ripped, fdrfiltered] }
                 .transpose()
-                // [meta_run1, idxml_run1, pout_filtered] [meta_run2, idxml_run2, pout_filtered] ...
                 .set { ch_ripped_pout }
         ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions.ifEmpty(null))
 
@@ -309,47 +305,37 @@ workflow MHCQUANT {
         } else {
             ch_runs_to_be_filtered = ch_ripped_pout
         }
+
         // Filter runs based on fdr filtered coprocessed percolator output.
         // NOTE: This is an alternative filtering method that will be replaced by IDFilter with new release of OpenMS
         PYOPENMS_IDFILTER( ch_runs_to_be_filtered ).filtered
-                .map { meta, idxml ->
-                        [[id:meta.sample + "_" + meta.condition], meta, [id:meta.id, file:idxml]]
-                    }
-                .groupTuple()
-                .map { merge_id, meta, idxml ->
-                    // Create a custom comparator to sort based on id
-                    def comparator = { a, b -> a.id <=> b.id }
-                    [merge_id, meta.sort(comparator), idxml.sort(comparator).file]
-                    }
+                .map { meta, idxml -> [[id:meta.sample + '_' + meta.condition], [id:meta.id, file:idxml]] }
+                .groupTuple(sort: sortById)
+                .map { meta, idxml -> [meta, idxml.file] }
                 .set { ch_runs_to_be_aligned }
         ch_versions = ch_versions.mix(PYOPENMS_IDFILTER.out.versions.ifEmpty(null))
 
         MAP_ALIGNMENT(
             ch_runs_to_be_aligned,
-            ch_clean_mzml_file
+            ch_clean_mzml_file,
+            merge_meta_map
         )
         ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
 
         // We need to merge groupwise the aligned idxml files together to use them as id_ext in featurefinder
         OPENMS_IDMERGER_QUANT(MAP_ALIGNMENT.out.aligned_idxml
-                                    .map { meta, aligned_idxml ->
-                                        [[id:meta.sample + "_" + meta.condition], aligned_idxml] }
+                                    .map { meta, aligned_idxml -> [[id: meta.sample + '_' + meta.condition], aligned_idxml] }
                                     .groupTuple())
         ch_versions = ch_versions.mix(OPENMS_IDMERGER_QUANT.out.versions.ifEmpty(null))
 
         // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
         MAP_ALIGNMENT.out.aligned_mzml
                 .join(MAP_ALIGNMENT.out.aligned_idxml)
-                .map {meta, mzml, idxml ->
-                    [[id:meta.sample + "_" + meta.condition], meta, [id:meta.id, file:mzml], [id:meta.id, file:idxml]] }
-                .groupTuple()
-                .map { merge_id, meta, mzml, idxml ->
-                    // Create a custom comparator to sort based on id
-                    def comparator = { a, b -> a.id <=> b.id }
-                    [merge_id, meta.sort(comparator), mzml.sort(comparator).file, idxml.sort(comparator).file]}
+                .map {meta, mzml, idxml -> [[id: meta.sample + '_' + meta.condition], meta, [id:meta.id, file:mzml], [id:meta.id, file:idxml]] }
+                .groupTuple(sort: sortById)
+                .map { group_meta, meta, mzml, idxml -> [group_meta, meta, mzml.file, idxml.file]}
                 .join(OPENMS_IDMERGER_QUANT.out.idxml)
-                .map { merge_id, meta, mzml, idxml, merged_idxml ->
-                    [meta, mzml, idxml, merged_idxml] }
+                .map { group_meta, meta, mzml, idxml, merged_idxml -> [meta, mzml, idxml, merged_idxml] }
                 .transpose()
                 .set { ch_runs_to_be_quantified }
 
@@ -361,6 +347,7 @@ workflow MHCQUANT {
     } else {
         ch_output = filter_q_value
     }
+
     // Prepare for check if file is empty
     OPENMS_TEXTEXPORTER(ch_output)
     ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions.ifEmpty(null))
@@ -370,8 +357,10 @@ workflow MHCQUANT {
         log.warn "It seems that there were no significant hits found for this sample: " + meta.sample + "\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample. "
         }
     }
+
     OPENMS_MZTABEXPORTER(ch_output)
     ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.ifEmpty(null))
+
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
     //
@@ -404,10 +393,11 @@ workflow MHCQUANT {
 
     if (params.annotate_ions) {
         // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_clean_mzml_file.map {meta, mzml -> [[id:meta.sample + '_' + meta.condition], mzml] }
+        ch_clean_mzml_file.map {meta, mzml -> [[id: meta.sample + '_' + meta.condition], mzml] }
             .groupTuple()
             .join(filter_q_value)
             .set{ ch_ion_annotator_input }
+
         // Annotate spectra with ion fragmentation information
         PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
         ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions.ifEmpty(null))

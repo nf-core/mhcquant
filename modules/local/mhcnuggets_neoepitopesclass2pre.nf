@@ -1,5 +1,5 @@
 process MHCNUGGETS_NEOEPITOPESCLASS2PRE {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_low'
 
     conda "bioconda::mhcnuggets=2.3.2"
@@ -18,7 +18,7 @@ process MHCNUGGETS_NEOEPITOPESCLASS2PRE {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta}_mhcnuggets_preprocessed"
+        def prefix           = task.ext.prefix ?: "${meta.id}_mhcnuggets_preprocessed"
 
         """
         preprocess_neoepitopes_mhcnuggets.py \\

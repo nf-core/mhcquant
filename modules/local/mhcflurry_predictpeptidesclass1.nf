@@ -1,5 +1,5 @@
 process MHCFLURRY_PREDICTPEPTIDESCLASS1 {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_low'
 
     conda "bioconda::fred2=2.0.7 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2"
