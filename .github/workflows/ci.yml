@@ -39,25 +39,41 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker --spectrum_batch_size 5000 --outdir ./results
 
-  test_additional_params:
+  profiles:
     name: Run pipeline with additional params
     # Only run on push if this is the nf-core dev branch (merged PRs)
     if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/mhcquant') }}"
     runs-on: ubuntu-latest
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
     strategy:
       matrix:
-        NXF_VER:
-          - "23.04.0"
-          - "latest-everything"
+        include:
+          - NXF_VER:
+              - "23.04.0"
+              - "latest-everything"
+        tests:
+          [
+            "test_deeplc",
+            "test_ms2pip",
+            "test_quant",
+            "test_ionannotator",
+            "test_full"
+          ]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v1
-        with:
+        env:
           version: "${{ matrix.NXF_VER }}"
 
-      - name: Run pipeline with additional params
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --spectrum_batch_size 2000 --use_deeplc --use_ms2pip --ms2pip_model_name 'CID' --annotate_ions --outdir ./results
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+
+      - name: Run pipeline with profile ${{ matrix.tests }}
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --outdir ./results
