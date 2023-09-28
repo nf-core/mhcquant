@@ -53,27 +53,16 @@ jobs:
           - NXF_VER:
               - "23.04.0"
               - "latest-everything"
-        tests:
-          [
-            "test_deeplc",
-            "test_ms2pip",
-            "test_quant",
-            "test_ionannotator",
-            "test_full"
-          ]
+        tests: ["test_deeplc", "test_ms2pip", "test_quant", "test_ionannotator", "test_full"]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v1
-        env:
-          version: "${{ matrix.NXF_VER }}"
 
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-
+        with:
+          version: ${{ matrix.NXF_VER }}
       - name: Run pipeline with profile ${{ matrix.tests }}
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --outdir ./results
