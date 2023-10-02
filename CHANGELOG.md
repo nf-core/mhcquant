@@ -14,8 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made file extension check case insensitive
 - Added option to provide a default comet parameters file
 - Optimize resource allocations
-- Template update 2.9. [#274](https://github.com/nf-core/mhcquant/pull/274)
+- Template update 2.9 [#274](https://github.com/nf-core/mhcquant/pull/274)
 - Improved quantification such that merged FDR-filtered runs can be quantified properly
+- Template update 2.10 [#282](https://github.com/nf-core/mhcquant/pull/282)
 
 ### `Fixed`
 
