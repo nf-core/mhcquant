@@ -7,7 +7,6 @@ from pyopenms import *
 import pandas as pd
 import numpy as np
 import argparse
-from pyopenms.Plotting import *
 
 
 def parse_arguments() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
