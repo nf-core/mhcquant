@@ -1,5 +1,5 @@
 /*
- * Perform the quantification of the samples when the parameter --skip_quantification is not provided
+ * Align retention times of runs to be able to quantify them.
  */
 include { OPENMS_MAPALIGNERIDENTIFICATION }                                 from '../../modules/local/openms_mapaligneridentification'
 include {

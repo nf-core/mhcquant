@@ -1,5 +1,5 @@
 /*
- * Perform the quantification of the samples when the parameter --skip_quantification is not provided
+ * Perform the quantification by extracting the feature intensities and group runs corresponding to the same sample and condition.
  */
 
 include { OPENMS_IDMERGER }                                                 from '../../modules/local/openms_idmerger'
