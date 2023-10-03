@@ -70,4 +70,4 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Run pipeline with profile ${{ matrix.tests }}
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --max_memory '6.GB' --max_cpus 2 --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --max_memory '6.GB' --max_cpus 2 --spectrum_batch_size 2000 --outdir ./results
