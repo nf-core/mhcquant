@@ -1,4 +1,4 @@
-process OPENMS_FALSEDISCOVERYRATE  {
+process OPENMS_IDSCORESWITCHER {
     tag "$meta.id"
     label 'process_single'
 
@@ -8,23 +8,27 @@ process OPENMS_FALSEDISCOVERYRATE  {
         'biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
-        tuple val(meta), path(idxml)
+        tuple val(meta), path(idxml), path(whitelist)
 
     output:
-        tuple val(meta), path("*.idXML"), emit: idxml
+        tuple val(meta), path("*.idXML"), path(whitelist), emit: switched_idxml
         path "versions.yml"             , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${idxml.baseName}_fdr"
+        def prefix           = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}_switched"
+        def args             = task.ext.args  ?: ''
 
         """
-        FalseDiscoveryRate -in $idxml \\
-            -protein 'false' \\
-            -out ${prefix}.idXML \\
-            -threads $task.cpus
+        IDScoreSwitcher -in $idxml \\
+            -out  ${prefix}.idXML \\
+            -threads $task.cpus \\
+            -new_score 'COMET:xcorr' \\
+            -new_score_orientation 'higher_better' \\
+            -old_score 'q-value' \\
+            $args
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

@@ -3,29 +3,33 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.4.2dev - [date]
+## v2.5.0 - nfcore/mhcquant "Angry Bird" - 2023/10/04
 
 ### `Added`
 
 - Support for brukers tdf format by adding tdf2mzml converter [#263](https://github.com/nf-core/mhcquant/issues/263)
 - DeepLC retention time prediction
 - MS2PIP peak intensity prediction
-- Added OpenMS FileFilter to clean mzml after parsing to remove artifacts like empty spectra or precursors with charge 0
+- Added OpenMS FileFilter to clean mzml after parsing to remove artifacts like empty spectra or precursors with charge 0 (optional)
 - Made file extension check case insensitive
 - Added option to provide a default comet parameters file
 - Optimize resource allocations
-- Template update 2.9. [#274](https://github.com/nf-core/mhcquant/pull/274)
+- Template update 2.9 [#274](https://github.com/nf-core/mhcquant/pull/274)
+- Improved quantification such that merged FDR-filtered runs can be quantified properly
+- Template update 2.10 [#282](https://github.com/nf-core/mhcquant/pull/282)
 
 ### `Fixed`
 
-- [#266](https://github.com/nf-core/mhcquant/pull/266) New OpenMS version 2.9.1 fixes duplicated ID bug [#250](https://github.com/nf-core/mhcquant/issues/250)
+- [#266](https://github.com/nf-core/mhcquant/pull/266) New OpenMS version 3.0.0 fixes duplicated ID bug [#250](https://github.com/nf-core/mhcquant/issues/250)
 
 ### `Dependencies`
 
-- [#266](https://github.com/nf-core/mhcquant/pull/266) Switched from OpenMS version 2.8.0 to newest version 2.9.1 [#265](https://github.com/nf-core/mhcquant/issues/265)
+- [#266](https://github.com/nf-core/mhcquant/pull/266) Switched from OpenMS version 2.8.0 to newest version 3.0.0 [#265](https://github.com/nf-core/mhcquant/issues/265)
 - [#266](https://github.com/nf-core/mhcquant/pull/266) Bumped ThermoRawFileParser version from 1.4.0 to 1.4.2
 
 ### `Deprecated`
+
+- OpenMS RT prediction
 
 ## v2.4.1 nfcore/mhcquant "Young Shark" (patch) - 2023/04/04
 

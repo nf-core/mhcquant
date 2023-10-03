@@ -1,5 +1,5 @@
 process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_low'
 
     conda "bioconda::fred2=2.0.7 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2"
@@ -18,7 +18,7 @@ process MHCFLURRY_PREDICTNEOEPITOPESCLASS1 {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.suffix ?: "${neoepitopes}_${meta}_predicted_neoepitopes_class_1"
+        def prefix           = task.ext.suffix ?: "${neoepitopes}_${meta.id}_predicted_neoepitopes_class_1"
 
         """
         mhcflurry-downloads --quiet fetch models_class1

@@ -1,5 +1,5 @@
-process OPENMS_FALSEDISCOVERYRATE  {
-    tag "$meta.id"
+process OPENMS_IDRIPPER {
+    tag "${meta.id}"
     label 'process_single'
 
     conda "bioconda::openms=3.0.0"
@@ -8,23 +8,23 @@ process OPENMS_FALSEDISCOVERYRATE  {
         'biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
-        tuple val(meta), path(idxml)
+        tuple val(meta), path(merged_idxml)
 
     output:
-        tuple val(meta), path("*.idXML"), emit: idxml
+        tuple val(meta), path("*.idXML"), emit: ripped
         path "versions.yml"             , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${idxml.baseName}_fdr"
+        def args             = task.ext.args  ?: ''
 
         """
-        FalseDiscoveryRate -in $idxml \\
-            -protein 'false' \\
-            -out ${prefix}.idXML \\
-            -threads $task.cpus
+        IDRipper -in $merged_idxml \\
+            -out . \\
+            -threads $task.cpus \\
+            $args
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

@@ -1,5 +1,5 @@
 process MHCFLURRY_PREDICTPSMS {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_medium'
 
     conda "bioconda::fred2=2.0.7 bioconda::mhcflurry=1.4.3 bioconda::mhcnuggets=2.3.2"

@@ -37,27 +37,37 @@ jobs:
 
       - name: Run pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --spectrum_batch_size 5000 --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results
 
-  test_additional_params:
-    name: Run pipeline with additional params
-    # Only run on push if this is the nf-core dev branch (merged PRs)
-    if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/mhcquant') }}"
+  profile:
+    name: Run profile tests
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/mhcquant') }}
     runs-on: ubuntu-latest
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
     strategy:
       matrix:
-        NXF_VER:
-          - "23.04.0"
-          - "latest-everything"
+        include:
+          # Test pipeline minimum Nextflow version
+          - NXF_VER: "23.04.0"
+            NXF_EDGE: ""
+          # Test latest edge release of Nextflow
+          - NXF_VER: ""
+            NXF_EDGE: "1"
+        tests: ["test_deeplc", "test_ms2pip", "test_ionannotator", "test_quant", "test_full"]
     steps:
       - name: Check out pipeline code
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v2
       - name: Install Nextflow
-        uses: nf-core/setup-nextflow@v1
-        with:
-          version: "${{ matrix.NXF_VER }}"
-
-      - name: Run pipeline with additional params
+        env:
+          NXF_VER: ${{ matrix.NXF_VER }}
+          # Uncomment only if the edge release is more recent than the latest stable release
+          # See https://github.com/nextflow-io/nextflow/issues/2467
+          # NXF_EDGE: ${{ matrix.NXF_EDGE }}
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --predict_class_1 --predict_class_2 --predict_RT --spectrum_batch_size 2000 --use_deeplc --use_ms2pip --outdir ./results
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Run pipeline with profile ${{ matrix.tests }}
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --max_memory '6.GB' --max_cpus 2 --spectrum_batch_size 5000 --outdir ./results

@@ -1,5 +1,5 @@
 process MHCNUGGETS_PEPTIDESCLASS2POST {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_low'
 
     conda "bioconda::mhcnuggets=2.3.2"
@@ -18,7 +18,7 @@ process MHCNUGGETS_PEPTIDESCLASS2POST {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.sample}_postprocessed"
+        def prefix           = task.ext.prefix ?: "${meta.id}_postprocessed"
 
         """
         postprocess_peptides_mhcnuggets.py --input $peptides \\
