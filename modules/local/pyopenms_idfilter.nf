@@ -1,6 +1,6 @@
 process PYOPENMS_IDFILTER {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_single'
 
     conda "bioconda::pyopenms=3.0.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

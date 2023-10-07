@@ -336,7 +336,7 @@ workflow MHCQUANT {
 
     if (params.annotate_ions) {
         // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_clean_mzml_file.map {meta, mzml -> [[id: meta.sample + '_' + meta.condition], mzml] }
+        ch_clean_mzml_file.map { meta, mzml -> [[id: meta.sample + '_' + meta.condition], mzml] }
             .groupTuple()
             .join(filter_q_value)
             .set{ ch_ion_annotator_input }
