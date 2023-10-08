@@ -109,6 +109,9 @@ Additional functionality contained by the pipeline currently includes:
 - Retention time prediction (`DeepLC`)
 - Peak intensity prediction (`MS2PIP`)
 
+> [!WARNING]
+> The refine fdr feature will be evaluated on a large benchmark dataset in the following releases.
+> Consider it as an experimental feature.
 #### Refine FDR
 
 - This application converts several OpenMS XML formats to mzTab. (`MzTabExporter`)
