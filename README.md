@@ -46,10 +46,11 @@ Each row represents a mass spectrometry run in one of the formats: raw, mzML, d
 Now, you can run the pipeline using:
 
 ```bash
-nextflow run nf-core/mhcquant -profile <docker/singularity/.../institute> \
-                                 --input 'samples.tsv' \
-                                 --fasta 'SWISSPROT_2020.fasta' \
-                                 --outdir ./results
+nextflow run nf-core/mhcquant
+    -profile <docker/singularity/.../institute> \
+    --input 'samples.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --outdir ./results
 ```
 
 > [!NOTE]
@@ -110,7 +111,7 @@ Additional functionality contained by the pipeline currently includes:
 - Peak intensity prediction (`MS2PIP`)
 
 > [!WARNING]
-> The refine fdr feature will be evaluated on a large benchmark dataset in the following releases.
+> The refine FDR feature will be evaluated on a large benchmark dataset in the following releases.
 > Consider it as an experimental feature.
 
 #### Refine FDR
