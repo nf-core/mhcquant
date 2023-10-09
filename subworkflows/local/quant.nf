@@ -45,7 +45,7 @@ workflow QUANT {
         // NOTE: This is an alternative filtering method that will be replaced by IDFilter with new release of OpenMS
         PYOPENMS_IDFILTER( ch_runs_to_be_filtered ).filtered
                 .map { meta, idxml -> [[id:meta.sample + '_' + meta.condition], [id:meta.id, file:idxml]] }
-                .groupTuple(sort: sortById)
+                .groupTuple( sort: sortById )
                 .map { meta, idxml -> [meta, idxml.file] }
                 .set { ch_runs_to_be_aligned }
         ch_versions = ch_versions.mix(PYOPENMS_IDFILTER.out.versions.ifEmpty(null))
@@ -56,21 +56,21 @@ workflow QUANT {
             mzml,
             merge_meta_map
         )
-        ch_versions = ch_versions.mix(MAP_ALIGNMENT.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix( MAP_ALIGNMENT.out.versions.ifEmpty(null) )
 
         // We need to merge groupwise the aligned idxml files together to use them as id_ext in featurefinder
-        OPENMS_IDMERGER_QUANT(MAP_ALIGNMENT.out.aligned_idxml
+        OPENMS_IDMERGER_QUANT( MAP_ALIGNMENT.out.aligned_idxml
                                     .map { meta, aligned_idxml -> [[id: meta.sample + '_' + meta.condition], aligned_idxml] }
                                     .groupTuple())
         ch_versions = ch_versions.mix(OPENMS_IDMERGER_QUANT.out.versions.ifEmpty(null))
 
         // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
         MAP_ALIGNMENT.out.aligned_mzml
-                .join(MAP_ALIGNMENT.out.aligned_idxml)
-                .map {meta, mzml, idxml -> [[id: meta.sample + '_' + meta.condition], meta, [id:meta.id, file:mzml], [id:meta.id, file:idxml]] }
-                .groupTuple(sort: sortById)
-                .map { group_meta, meta, mzml, idxml -> [group_meta, meta, mzml.file, idxml.file]}
-                .join(OPENMS_IDMERGER_QUANT.out.idxml)
+                .join( MAP_ALIGNMENT.out.aligned_idxml )
+                .map { meta, mzml, idxml -> [[id: meta.sample + '_' + meta.condition], meta, [id:meta.id, file:mzml], [id:meta.id, file:idxml]] }
+                .groupTuple( sort: sortById )
+                .map { group_meta, meta, mzml, idxml -> [group_meta, meta, mzml.file, idxml.file] }
+                .join( OPENMS_IDMERGER_QUANT.out.idxml )
                 .map { group_meta, meta, mzml, idxml, merged_idxml -> [meta, mzml, idxml, merged_idxml] }
                 .transpose()
                 .set { ch_runs_to_be_quantified }

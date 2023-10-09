@@ -32,51 +32,31 @@ On release, automated continuous integration tests run the pipeline on a full-si
 > to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
 > with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
 First, prepare a samplesheet with your input data that looks as follows:
 
-`samplesheet.csv`:
+`samplesheet.tsv`:
 
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+```tsv
+ID	Sample	Condition	ReplicateFileName
+1	msrun	tumor	/path/to/msrun.raw|mzML|d
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
+Each row represents a mass spectrometry run in one of the formats: raw, mzML, d
 
 Now, you can run the pipeline using:
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
 ```bash
-nextflow run nf-core/mhcquant \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+nextflow run nf-core/mhcquant
+    -profile <docker/singularity/.../institute> \
+    --input 'samples.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --outdir ./results
 ```
 
-:::warning
-Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
-provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
-see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
-:::
+> [!NOTE]
+> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/mhcquant/usage) and the [parameter documentation](https://nf-co.re/mhcquant/parameters).
-
-## Pipeline output
-
-=======
-
-```bash
-nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute> \
-                              --input 'samples.tsv' \
-                              --fasta 'SWISSPROT_2020.fasta' \
-                              --outdir ./results
-```
 
 ## Pipeline summary
 
@@ -130,11 +110,18 @@ Additional functionality contained by the pipeline currently includes:
 - Retention time prediction (`DeepLC`)
 - Peak intensity prediction (`MS2PIP`)
 
+> [!WARNING]
+> The refine FDR feature will be evaluated on a large benchmark dataset in the following releases.
+> Consider it as an experimental feature.
+
 #### Refine FDR
 
 - This application converts several OpenMS XML formats to mzTab. (`MzTabExporter`)
 - Predict psm results using mhcflurry to shrink search space (`mhcflurry`)
 - Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
+
+> [!WARNING]
+> The HLA prediction feature is outdated and will be reworked in the following releases
 
 #### Prediction of HLA class 1 peptides
 
@@ -148,8 +135,6 @@ Additional functionality contained by the pipeline currently includes:
 - Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
 
 ## Documentation
-
-> > > > > > > dev
 
 To see the the results of a test run with a full size dataset refer to the [results](https://nf-co.re/mhcquant/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the
