@@ -1,11 +1,11 @@
 process OPENMS_IDCONFLICTRESOLVER {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_single'
 
-    conda (params.enable_conda ? "bioconda::openms=2.8.0" : null)
+    conda "bioconda::openms=3.0.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:2.8.0--h7ca0330_2' :
-        'quay.io/biocontainers/openms:2.8.0--h7ca0330_2' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.0.0--h8964181_1' :
+        'biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
         tuple val(meta), path(consensus)

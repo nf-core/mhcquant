@@ -2,10 +2,10 @@ process OPENMS_COMETADAPTER {
     tag "$meta.id"
     label 'process_high'
 
-    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.8.0" : null)
+    conda "bioconda::openms-thirdparty=3.0.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms-thirdparty:2.8.0--h9ee0642_2' :
-        'quay.io/biocontainers/openms-thirdparty:2.8.0--h9ee0642_2' }"
+        'https://depot.galaxyproject.org/singularity/openms-thirdparty:3.0.0--h9ee0642_1' :
+        'biocontainers/openms-thirdparty:3.0.0--h9ee0642_1' }"
 
     input:
         tuple val(meta), path(mzml), path(fasta)
@@ -23,6 +23,7 @@ process OPENMS_COMETADAPTER {
         def args             = task.ext.args  ?: ''
 
         def mods             = params.fixed_mods != " " ? "-fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")}" : "-fixed_modifications"
+        def params_file      = params.default_params_file_comet != " " ? "-default_params_file ${params.default_params_file_comet}" : ""
         def xions            = params.use_x_ions ? "-use_X_ions true" : ""
         def zions            = params.use_z_ions ? "-use_Z_ions true" : ""
         def aions            = params.use_a_ions ? "-use_A_ions true" : ""
@@ -35,7 +36,8 @@ process OPENMS_COMETADAPTER {
             -out ${prefix}.idXML \\
             -database $fasta \\
             -threads $task.cpus \\
-            -pin_out ${prefix}.tsv \\
+            -pin_out ${prefix}_pin.tsv \\
+            $params_file \\
             $args \\
             $mods \\
             $xions \\

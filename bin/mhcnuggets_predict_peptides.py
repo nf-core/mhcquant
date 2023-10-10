@@ -176,7 +176,12 @@ def main():
         supp_alleles = parse_alleles(args.alleles)
 
         for allele in supp_alleles:
-            predict(class_="II", peptides_path=args.peptides, mhc=allele, output=allele + args.output)
+            predict(
+                class_="II",
+                peptides_path=args.peptides,
+                mhc=allele,
+                output=allele + args.output,
+            )
 
     else:
         op = open("predicted_neoepitopes_class_2", "w")

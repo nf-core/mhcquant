@@ -1,11 +1,11 @@
 process MHCNUGGETS_PEPTIDESCLASS2POST {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_low'
 
-    conda (params.enable_conda ? "bioconda::mhcnuggets=2.3.2" : null)
+    conda "bioconda::mhcnuggets=2.3.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mhcnuggets:2.3.2--py_0' :
-        'quay.io/biocontainers/mhcnuggets:2.3.2--py_0' }"
+        'biocontainers/mhcnuggets:2.3.2--py_0' }"
 
     input:
         tuple val(meta), path(peptides), path(peptide_to_geneID)
@@ -18,7 +18,7 @@ process MHCNUGGETS_PEPTIDESCLASS2POST {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.sample}_postprocessed"
+        def prefix           = task.ext.prefix ?: "${meta.id}_postprocessed"
 
         """
         postprocess_peptides_mhcnuggets.py --input $peptides \\

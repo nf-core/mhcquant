@@ -17,6 +17,7 @@
                     "description": "Input raw / mzML files listed in a tsv file (see help for details)",
                     "help_text": "Use this to specify a sample sheet table including your input raw or mzml files as well as their meta information such as SampleID and Condition. For example:\n\n| ID   | Sample      | Condition  |   ReplicateFileName                       |\n| -----|:------------:| ----------:|------------------------------------------:|\n| 1    | MM15_Melanom |      A     |   data/MM15_Melanom_W_1_A_standard.raw    |\n| 2    | MM15_Melanom |      B     |   data/MM15_Melanom_W_1_B_standard.raw    |\n| 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |\n\n```bash\n--input 'path/samples.tsv'\n```",
                     "format": "file-path",
+                    "exists": true,
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.tsv$",
                     "schema": "assets/schema_input.json",
@@ -243,11 +244,21 @@
                     "default": "high_res",
                     "fa_icon": "fas fa-wrench",
                     "description": "Comets theoretical_fragment_ions parameter: theoretical fragment ion peak representation, high-res: sum of intensities plus flanking bins, ion trap (low-res) ms/ms: sum of intensities of central M bin only"
+                },
+                "default_params_file_comet": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Default Comet params file. All parameters of this take precedence."
+                },
+                "filter_mzml": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Clean up mzml files and remove artificial charge 0 peptides."
                 }
             }
         },
-        "fdr_scoring": {
-            "title": "FDR Scoring",
+        "rescoring": {
+            "title": "Rescoring",
             "type": "object",
             "fa_icon": "fas fa-star-half-stroke",
             "description": "",
@@ -294,6 +305,49 @@
                     "type": "integer",
                     "fa_icon": "fas fa-train-track",
                     "description": "Maximum subset for percolator training iterations"
+                },
+                "use_deeplc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-microchip",
+                    "description": "Use DeepLC retention time features for Percolator rescoring",
+                    "help_text": "https://www.nature.com/articles/s41592-021-01301-5"
+                },
+                "deeplc_calibration_bins": {
+                    "type": "integer",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Number of bins (peptides) used for DeepLC calibration. For each bin the best hit is used."
+                },
+                "deeplc_calibration_mode": {
+                    "type": "string",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Specify the DeepLC calibration mode. rt_bin: bin peptides by RT, idx_bin: bin peptides by index, min_max: scale uncalibrated predictions to experimental RT range",
+                    "enum": ["rt_bin", "idx_bin", "min_max"]
+                },
+                "deeplc_add_abs_rt_error": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Add absolute RT error to of experimental and predicted RT to the feature set"
+                },
+                "deeplc_add_sqr_rt_error": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Add squared RT error to of experimental and predicted RT to the feature set"
+                },
+                "deeplc_add_log_rt_error": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "Add log RT error to of experimental and predicted RT to the feature set"
+                },
+                "use_ms2pip": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-microchip",
+                    "description": "Use MS2pip peak intensity prediction for Percolator rescoring",
+                    "help_text": "https://github.com/compomics/ms2pip"
+                },
+                "ms2pip_model_name": {
+                    "type": "string",
+                    "fa_icon": "fas fa-train-track",
+                    "description": "MS2pip model name defined (https://github.com/compomics/ms2pip#specialized-prediction-models)"
                 }
             }
         },
@@ -310,7 +364,7 @@
                     "description": "Skip quantification and only yield peptide identifications"
                 },
                 "quantification_fdr": {
-                    "type": "string",
+                    "type": "boolean",
                     "fa_icon": "fas fa-less-than",
                     "description": "Compute FDR for the targeted approach",
                     "help_text": "(Weisser H. and Choudhary J.S. J Proteome Res. 2017 Aug 4)"
@@ -318,6 +372,26 @@
                 "quantification_min_prob": {
                     "type": "number",
                     "description": "Specify a cut off probability value for quantification events as a filter"
+                },
+                "quantification_mz_window": {
+                    "type": "number",
+                    "description": "Specify a m/z window for matching between runs"
+                },
+                "quantification_rt_window": {
+                    "type": "number",
+                    "description": "Specify a rt window for matching between runs"
+                },
+                "quantification_mapping_tolerance": {
+                    "type": "number",
+                    "description": "Specify a rt mapping tolerance for mapping features between runs"
+                },
+                "quantification_peak_width": {
+                    "type": "number",
+                    "description": "Specify a peak width for feature extraction"
+                },
+                "quantification_min_peak_width": {
+                    "type": "number",
+                    "description": "Specify a minimum peak width for quantification"
                 }
             }
         },
@@ -384,20 +458,6 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-filter",
                     "description": "Set this option to not consider snps for variant translation"
-                }
-            }
-        },
-        "rt_prediction": {
-            "title": "RT Prediction",
-            "type": "object",
-            "fa_icon": "fas fa-timeline",
-            "description": "",
-            "default": "",
-            "properties": {
-                "predict_RT": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-wrench",
-                    "description": "Set this option to predict retention times of all identified peptides and possible neoepitopes based on high scoring ids"
                 }
             }
         },
@@ -485,7 +545,7 @@
                     "description": "Maximum amount of time that can be requested for any single job.",
                     "default": "240.h",
                     "fa_icon": "far fa-clock",
-                    "pattern": "^[\\d\\.]+\\.*(s|m|h|d|day)$",
+                    "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
                 }
@@ -556,6 +616,7 @@
                 },
                 "multiqc_config": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true
@@ -571,13 +632,6 @@
                     "description": "Custom MultiQC yaml file containing HTML including a methods description.",
                     "fa_icon": "fas fa-cog"
                 },
-                "tracedir": {
-                    "type": "string",
-                    "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "${params.outdir}/pipeline_info",
-                    "fa_icon": "fas fa-cogs",
-                    "hidden": true
-                },
                 "validate_params": {
                     "type": "boolean",
                     "description": "Boolean whether to validate parameters against the schema at runtime",
@@ -585,12 +639,26 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "show_hidden_params": {
+                "validationShowHiddenParams": {
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+                },
+                "validationFailUnrecognisedParams": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Validation of parameters fails when an unrecognised parameter is found.",
+                    "hidden": true,
+                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
+                },
+                "validationLenientMode": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Validation of parameters in lenient more.",
+                    "hidden": true,
+                    "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
             }
         }
@@ -609,7 +677,7 @@
             "$ref": "#/definitions/mass_spectrometry_data_processing"
         },
         {
-            "$ref": "#/definitions/fdr_scoring"
+            "$ref": "#/definitions/rescoring"
         },
         {
             "$ref": "#/definitions/quantification_options"
@@ -619,9 +687,6 @@
         },
         {
             "$ref": "#/definitions/variant_options"
-        },
-        {
-            "$ref": "#/definitions/rt_prediction"
         },
         {
             "$ref": "#/definitions/institutional_config_options"

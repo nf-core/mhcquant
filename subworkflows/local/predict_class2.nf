@@ -20,16 +20,16 @@ workflow PREDICT_CLASS2 {
     main:
         ch_versions = Channel.empty()
         ch_predicted_possible_neoepitopes = Channel.empty()
+        alleles = peptides_class_2_alleles.map{meta, alleles -> [[id:meta], alleles]}
 
         // Preprocess found peptides for MHCNuggets prediction class 2
         MHCNUGGETS_PEPTIDESCLASS2PRE(mztab)
         ch_versions = ch_versions.mix(MHCNUGGETS_PEPTIDESCLASS2PRE.out.versions.first().ifEmpty(null))
+
         // Predict found peptides using MHCNuggets class 2
         MHCNUGGETS_PREDICTPEPTIDESCLASS2(
             MHCNUGGETS_PEPTIDESCLASS2PRE.out.preprocessed
-                .map{ it -> [it[0].sample, it[0], it[1]] }
-                .join(peptides_class_2_alleles, by:0)
-                .map( it -> [it[1], it[2], it[3]])
+                .join(alleles)
         )
         ch_versions = ch_versions.mix(MHCNUGGETS_PREDICTPEPTIDESCLASS2.out.versions.first().ifEmpty(null))
         // Postprocess predicted MHCNuggets peptides class 2
@@ -37,7 +37,7 @@ workflow PREDICT_CLASS2 {
         ch_versions = ch_versions.mix(MHCNUGGETS_PEPTIDESCLASS2POST.out.versions.first().ifEmpty(null))
         if ( params.include_proteins_from_vcf ) {
             // Predict all possible class 2 neoepitopes from vcf
-            PREDICT_POSSIBLE_CLASS2_NEOEPITOPES(peptides_class_2_alleles.combine(ch_vcf_from_sheet, by:0))
+            PREDICT_POSSIBLE_CLASS2_NEOEPITOPES(alleles.combine(ch_vcf_from_sheet, by:0))
             ch_versions = ch_versions.mix(PREDICT_POSSIBLE_CLASS2_NEOEPITOPES.out.versions.first().ifEmpty(null))
             ch_predicted_possible_neoepitopes = PREDICT_POSSIBLE_CLASS2_NEOEPITOPES.out.csv
             // Resolve found class 2 neoepitopes
@@ -51,7 +51,7 @@ workflow PREDICT_CLASS2 {
             MHCNUGGETS_NEOEPITOPESCLASS2PRE(RESOLVE_FOUND_CLASS2_NEOEPITOPES.out.csv)
             ch_versions = ch_versions.mix(MHCNUGGETS_NEOEPITOPESCLASS2PRE.out.versions.first().ifEmpty(null))
             // Predict class 2 MHCNuggets
-            MHCNUGGETS_PREDICTNEOEPITOPESCLASS2(MHCNUGGETS_NEOEPITOPESCLASS2PRE.out.preprocessed.join(peptides_class_2_alleles, by:0))
+            MHCNUGGETS_PREDICTNEOEPITOPESCLASS2(MHCNUGGETS_NEOEPITOPESCLASS2PRE.out.preprocessed.join(alleles, by:0))
             ch_versions = ch_versions.mix(MHCNUGGETS_PREDICTNEOEPITOPESCLASS2.out.versions.first().ifEmpty(null))
             // Class 2 MHCNuggets Postprocessing
             MHCNUGGETS_NEOEPITOPESCLASS2POST(RESOLVE_FOUND_CLASS2_NEOEPITOPES.out.csv.join(MHCNUGGETS_PREDICTNEOEPITOPESCLASS2.out.csv, by:0))

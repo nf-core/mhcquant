@@ -1,11 +1,11 @@
 process OPENMS_FEATURELINKERUNLABELEDKD {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_single'
 
-    conda (params.enable_conda ? "bioconda::openms-thirdparty=2.8.0" : null)
+    conda "bioconda::openms-thirdparty=3.0.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms-thirdparty:2.8.0--h9ee0642_2' :
-        'quay.io/biocontainers/openms-thirdparty:2.8.0--h9ee0642_2' }"
+        'https://depot.galaxyproject.org/singularity/openms-thirdparty:3.0.0--h9ee0642_1' :
+        'biocontainers/openms-thirdparty:3.0.0--h9ee0642_1' }"
 
     input:
         tuple val(meta), path(features)

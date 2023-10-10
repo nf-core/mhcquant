@@ -149,7 +149,13 @@ def main():
 
     model.add_argument("-m", "--mztab", type=str, help="Path to mztab file")
 
-    model.add_argument("-f", "--file_format", type=str, default="csv", help="File format for output file")
+    model.add_argument(
+        "-f",
+        "--file_format",
+        type=str,
+        default="csv",
+        help="File format for output file",
+    )
 
     model.add_argument("-o", "--output", type=str, required=True, help="Output file path")
 

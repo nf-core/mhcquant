@@ -25,13 +25,15 @@ class RowChecker:
 
     """
 
-    VALID_FORMATS = (
-        ".raw",
-        ".mzML",
-    )
+    VALID_FORMATS = (".raw", ".mzml", ".d")
 
     def __init__(
-        self, id_col="ID", sample_col="Sample", condition_col="Condition", filename_col="ReplicateFileName", **kwargs
+        self,
+        id_col="ID",
+        sample_col="Sample",
+        condition_col="Condition",
+        filename_col="ReplicateFileName",
+        **kwargs,
     ):
         """
         Initialize the row checker with the expected column names.
@@ -91,7 +93,7 @@ class RowChecker:
 
     def _validate_ms_format(self, filename):
         """Assert that a given filename has one of the expected MS extensions."""
-        assert any(filename.endswith(extension) for extension in self.VALID_FORMATS), (
+        assert any(filename.lower().endswith(extension) for extension in self.VALID_FORMATS), (
             f"The file has an unrecognized extension: {filename}\n"
             f"It should be one of: {', '.join(self.VALID_FORMATS)}"
         )
@@ -141,9 +143,6 @@ def sniff_format(handle):
     peek = read_head(handle)
     handle.seek(0)
     sniffer = csv.Sniffer()
-    if not sniffer.has_header(peek):
-        logger.critical("The given sample sheet does not appear to contain a header.")
-        sys.exit(1)
     dialect = sniffer.sniff(peek)
     return dialect
 
