@@ -12,6 +12,7 @@ The directories listed below will be created in the results directory after the 
 
 - `*.mzTab`
 - `*.tsv`
+- `/modified_tsv/*.tsv`
 
 The mzTab output file follows the a [HUPO-PSI format](<https://www.mcponline.org/article/S1535-9476(20)32821-8/fulltext>) and combines all information of the sample-condition group extracted from a database search throughout the pipeline. A detailed explanation of the respective entries are elaborately explained [here](https://psidev.info/sites/default/files/2017-07/R2_The_ten_minute_guide_to_mzTab.pdf). MzTab files are compatible with the PRIDE Archive - proteomics data repository and can be uploaded as search files.
 
@@ -60,6 +61,8 @@ PEPTIDE contains information about peptide hits that were identified and corresp
 ```bash
 #PEPTIDE        rt      mz      score   rank    sequence        charge  aa_before       aa_after        score_type      search_identifier       accessions      FFId_category   fea
 ```
+
+Lastly, the TSV output that comprising similar information to the mzTab output, mentioned above is also available in an alternative TSV format (found in `modified_tsv/`). In this document peptide and consensus information is available in line. Furthermore, information regarding the modification and sequence are expanded, including the sequence without modifications and adding the information of the modification in an additional column.
 
 ### Intermediate results
 

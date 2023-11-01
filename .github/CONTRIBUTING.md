@@ -9,9 +9,7 @@ Please use the pre-filled template to save time.
 However, don't be put off by this template - other more general issues and suggestions are welcome!
 Contributions to the code are even more welcome ;)
 
-:::info
-If you need help using or modifying nf-core/mhcquant then the best place to ask is on the nf-core Slack [#mhcquant](https://nfcore.slack.com/channels/mhcquant) channel ([join our Slack here](https://nf-co.re/join/slack)).
-:::
+> If you need help using or modifying nf-core/mhcquant then the best place to ask is on the nf-core Slack [#mhcquant](https://nfcore.slack.com/channels/mhcquant) channel ([join our Slack here](https://nf-co.re/join/slack)).
 
 ## Contribution workflow
 
@@ -118,3 +116,4 @@ To get started:
 Devcontainer specs:
 
 - [DevContainer config](.devcontainer/devcontainer.json)
+- [Dockerfile](.devcontainer/Dockerfile)
