@@ -302,12 +302,12 @@ workflow MHCQUANT {
         }
     }
 
-    REWRITE_QUANT_TSV(OPENMS_TEXTEXPORTER.out.tsv)
-    ch_versions = ch_versions.mix(REWRITE_QUANT_TSV.out.versions.ifEmpty(null))
+    OPENMS_MZTABEXPORTER(ch_output)
+    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.ifEmpty(null))
 
     if (!params.skip_quantification) {
-        OPENMS_MZTABEXPORTER(ch_output)
-        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.ifEmpty(null))
+        REWRITE_QUANT_TSV(OPENMS_TEXTEXPORTER.out.tsv)
+        ch_versions = ch_versions.mix(REWRITE_QUANT_TSV.out.versions.ifEmpty(null))
     }
     
     //
