@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.5.1 - nfcore/mhcquant "Angry Bird" - yyyy/mm/dd
+
+### `Added`
+
+- [#291] Include module and R script to alter the tsv outcome of quantified data
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.5.0 - nfcore/mhcquant "Angry Bird" - 2023/10/09
 
 ### `Added`
