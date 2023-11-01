@@ -83,6 +83,7 @@ include { OPENMS_PERCOLATORADAPTER }                                        from
 include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
 
 include { OPENMS_TEXTEXPORTER }                                             from '../modules/local/openms_textexporter'
+include { REWRITE_QUANT_TSV }                                               from '../modules/local/rewrite_quant_tsv'
 include { OPENMS_MZTABEXPORTER }                                            from '../modules/local/openms_mztabexporter'
 
 
@@ -301,9 +302,14 @@ workflow MHCQUANT {
         }
     }
 
-    OPENMS_MZTABEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.ifEmpty(null))
+    REWRITE_QUANT_TSV(OPENMS_TEXTEXPORTER.out.tsv)
+    ch_versions = ch_versions.mix(REWRITE_QUANT_TSV.out.versions.ifEmpty(null))
 
+    if (!params.skip_quantification) {
+        OPENMS_MZTABEXPORTER(ch_output)
+        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.ifEmpty(null))
+    }
+    
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
     //
