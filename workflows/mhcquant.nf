@@ -74,6 +74,7 @@ include { OPENMS_COMETADAPTER }                                             from
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
 include { DEEPLC }                                                          from '../modules/local/deeplc'
 include { MS2PIP }                                                          from '../modules/local/ms2pip'
+include { MS2RESCORE }                                                        from '../modules/local/ms2rescore'
 
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
@@ -249,6 +250,15 @@ workflow MHCQUANT {
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_runs_to_merge)
     ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
+
+    // Run MS2Rescore
+    if params.use_ms2rescore {
+        MS2RESCORE(OPENMS_IDMERGER.out.idxml)
+        ch_versions = ch_versions.mix(MS2RESCORE.out.versions.ifEmpty(null))
+        ch_rescored_runs = MS2RESCORE.out.rescored_idxml
+    } else {
+        ch_rescored_runs = OPENMS_IDMERGER.out.rescored_idxml
+    }
 
     // Extract PSM features for Percolator
     OPENMS_PSMFEATUREEXTRACTOR(OPENMS_IDMERGER.out.idxml)
