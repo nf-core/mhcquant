@@ -277,6 +277,25 @@
                     "default": 0.01,
                     "description": "Specify the false discovery rate threshold at which peptide hits should be selected."
                 },
+                "rescoring_engine": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "default": "percolator",
+                    "description": "Specify the rescoring engine that should be used for rescoring. Either percolator or mokapot",
+                    "enum": ["percolator", "mokapot"]
+                },
+                "feature_generators": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "default": "ms2pip,deeplc",
+                    "description": "Specify the feature generator that should be used for rescoring. One or multiple of basic,ms2pip,deeplc,ionmob"
+                },
+                "ms2pip_model":{
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "default": "Immuno-HCD",
+                    "description": "Specify the ms2pip model that should be used for rescoring. Checkout the ms2pip documentation for available models."
+                },
                 "refine_fdr_on_predicted_subset": {
                     "type": "boolean",
                     "fa_icon": "fas fa-arrows-repeat",
@@ -305,49 +324,6 @@
                     "type": "integer",
                     "fa_icon": "fas fa-train-track",
                     "description": "Maximum subset for percolator training iterations"
-                },
-                "use_deeplc": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-microchip",
-                    "description": "Use DeepLC retention time features for Percolator rescoring",
-                    "help_text": "https://www.nature.com/articles/s41592-021-01301-5"
-                },
-                "deeplc_calibration_bins": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Number of bins (peptides) used for DeepLC calibration. For each bin the best hit is used."
-                },
-                "deeplc_calibration_mode": {
-                    "type": "string",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Specify the DeepLC calibration mode. rt_bin: bin peptides by RT, idx_bin: bin peptides by index, min_max: scale uncalibrated predictions to experimental RT range",
-                    "enum": ["rt_bin", "idx_bin", "min_max"]
-                },
-                "deeplc_add_abs_rt_error": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Add absolute RT error to of experimental and predicted RT to the feature set"
-                },
-                "deeplc_add_sqr_rt_error": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Add squared RT error to of experimental and predicted RT to the feature set"
-                },
-                "deeplc_add_log_rt_error": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Add log RT error to of experimental and predicted RT to the feature set"
-                },
-                "use_ms2pip": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-microchip",
-                    "description": "Use MS2pip peak intensity prediction for Percolator rescoring",
-                    "help_text": "https://github.com/compomics/ms2pip"
-                },
-                "ms2pip_model_name": {
-                    "type": "string",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "MS2pip model name defined (https://github.com/compomics/ms2pip#specialized-prediction-models)"
                 }
             }
         },

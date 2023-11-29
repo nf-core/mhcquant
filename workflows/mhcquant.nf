@@ -74,7 +74,8 @@ include { OPENMS_COMETADAPTER }                                             from
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
 include { DEEPLC }                                                          from '../modules/local/deeplc'
 include { MS2PIP }                                                          from '../modules/local/ms2pip'
-include { MS2RESCORE }                                                        from '../modules/local/ms2rescore'
+include { MS2RESCORE }                                                      from '../modules/local/ms2rescore'
+include { OPENMS_IDSCORESWITCHER }                                          from '../modules/local/openms_idscoreswitcher'
 
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
 include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
@@ -214,26 +215,8 @@ workflow MHCQUANT {
     // Run comet database search
     OPENMS_COMETADAPTER(ch_clean_mzml_file.join(ch_decoy_db, remainder:true))
 
-    // Run DeepLC if specified
-    if (params.use_deeplc){
-        DEEPLC(OPENMS_COMETADAPTER.out.idxml)
-        ch_versions = ch_versions.mix(DEEPLC.out.versions.ifEmpty(null))
-        ch_comet_out_idxml = DEEPLC.out.idxml
-    } else {
-        ch_comet_out_idxml = OPENMS_COMETADAPTER.out.idxml
-    }
-
-    // Run MS2PIP if specified
-    if (params.use_ms2pip){
-        MS2PIP(ch_comet_out_idxml.join(ch_clean_mzml_file))
-        ch_versions = ch_versions.mix(MS2PIP.out.versions.ifEmpty(null))
-        ch_comet_out_idxml_proceeding = MS2PIP.out.idxml
-    } else {
-        ch_comet_out_idxml_proceeding = ch_comet_out_idxml
-    }
-
     // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(ch_comet_out_idxml_proceeding.join(ch_decoy_db))
+    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
@@ -252,24 +235,38 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
 
     // Run MS2Rescore
-    if params.use_ms2rescore {
-        MS2RESCORE(OPENMS_IDMERGER.out.idxml)
-        ch_versions = ch_versions.mix(MS2RESCORE.out.versions.ifEmpty(null))
-        ch_rescored_runs = MS2RESCORE.out.rescored_idxml
+    ch_clean_mzml_file
+            .map { meta, mzml -> [[id: meta.sample + '_' + meta.condition], mzml] }
+            .groupTuple()
+            .join(OPENMS_IDMERGER.out.idxml)
+            .map { meta, mzml, idxml -> [meta, idxml, mzml, []] }
+            .set { ch_ms2rescore_in }
+
+    MS2RESCORE(ch_ms2rescore_in)
+    ch_versions = ch_versions.mix(MS2RESCORE.out.versions)
+
+    if (params.rescoring_engine == 'percolator') {
+        // TODO: Find a way to parse the feature names of ms2rescore and plug them into the feature extractor
+        // Extract PSM features for Percolator
+        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml
+                                        .join(MS2RESCORE.out.feature_names))
+        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
+
+        // Run Percolator
+        OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
+        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
+        ch_rescored_runs = OPENMS_PERCOLATORADAPTER.out.idxml
     } else {
-        ch_rescored_runs = OPENMS_IDMERGER.out.rescored_idxml
+        log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
+        // TODO: remove whitelist argument from idscoreswitcher
+        OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml
+                                    .map { meta, idxml -> [meta, idxml, []] })
+        ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.switched_idxml.map { tuple -> tuple.findAll { it != [] }}
     }
 
-    // Extract PSM features for Percolator
-    OPENMS_PSMFEATUREEXTRACTOR(OPENMS_IDMERGER.out.idxml)
-    ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
-
-    // Run Percolator
-    OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-    ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
-
     // Filter by percolator q-value
-    OPENMS_IDFILTER_Q_VALUE(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)] })
+    // TODO: Use empty list instead of null
+    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.flatMap { it -> [tuple(it[0], it[1], null)] })
     ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
 
     //
@@ -294,7 +291,7 @@ workflow MHCQUANT {
     // SUBWORKFLOW: QUANT
     //
     if (!params.skip_quantification) {
-        QUANT(merge_meta_map, OPENMS_PERCOLATORADAPTER.out.idxml, filter_q_value, ch_clean_mzml_file)
+        QUANT(merge_meta_map, ch_rescored_runs, filter_q_value, ch_clean_mzml_file)
         ch_versions = ch_versions.mix(QUANT.out.versions.ifEmpty(null))
         ch_output = QUANT.out.consensusxml
     } else {

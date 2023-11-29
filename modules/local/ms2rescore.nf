@@ -11,9 +11,10 @@ process MS2RESCORE {
     tuple val(meta), path(idxml), path(mzml), path(fasta)
 
     output:
-    tuple val(meta), path("*ms2rescore.idXML"), emit: rescored_idxml
-    path "versions.yml"                       , emit: versions
-    // TODO add parsing of the html report
+    tuple val(meta), path("*ms2rescore.idXML") , emit: idxml
+    tuple val(meta), path("*feature_names.tsv"), emit: feature_names
+    tuple val(meta), path("*.html" )           , optional:true, emit: html
+    path "versions.yml"                        , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,25 +22,18 @@ process MS2RESCORE {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}_ms2rescore"
-    def ms2pip_model = params.ms2pip_model_name ? "--ms2pip_model ${params.ms2pip_model_name}" : ''
-    def ms2_tolerance = 2 * float(params.fragment_mass_tolerance)
-    def rescoring_engine = params.rescoring_engine ? "--rescoring_engine ${params.rescoring_engine}"
 
     """
-    ms2rescore.py \\
+    ms2rescore_cli.py \\
        --psm_file $idxml \\
-       --spectrum_path $mzml \\
+       --spectrum_path . \\
        --output_path ${prefix}.idXML \\
        --processes $task.cpus \\
-       --feature_generators basic,ms2pip,deeplc \\
-       $ms2pip_model \\
-       $ms2_tolerance \\
-       $rescoring_engine \\
        $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        MS²Rescore: \$(echo \$(ms2rescore --version 2>&1) | grep -oP 'MS²Rescore \(v\K[^\)]+' ))
+        MS²Rescore: \$(echo \$(ms2rescore --version 2>&1) | grep -oP 'MS²Rescore \\(v\\K[^\\)]+' ))
     END_VERSIONS
     """
 
@@ -52,7 +46,7 @@ process MS2RESCORE {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        MS²Rescore: \$(echo \$(ms2rescore --version 2>&1) | grep -oP 'MS²Rescore \(v\K[^\)]+' ))
+        MS²Rescore: \$(echo \$(ms2rescore --version 2>&1) | grep -oP 'MS²Rescore \\(v\\K[^\\)]+' ))
     END_VERSIONS
     """
 }

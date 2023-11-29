@@ -21,6 +21,7 @@ process OPENMS_IDFILTER {
         def prefix           = task.ext.prefix ?: "${meta.id}_filtered"
         def args             = task.ext.args  ?: ''
 
+        // TODO: Fix such that [] emtpy list is provided as peptide filter, not null
         if (peptide_filter != null) {
             args += "-whitelist:peptides $peptide_filter"
         }

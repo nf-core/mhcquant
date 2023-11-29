@@ -18,6 +18,7 @@ process OPENMS_IDSCORESWITCHER {
         task.ext.when == null || task.ext.when
 
     script:
+        // TODO: fix naming to be more generic
         def prefix           = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}_switched"
         def args             = task.ext.args  ?: ''
 
@@ -25,9 +26,6 @@ process OPENMS_IDSCORESWITCHER {
         IDScoreSwitcher -in $idxml \\
             -out  ${prefix}.idXML \\
             -threads $task.cpus \\
-            -new_score 'COMET:xcorr' \\
-            -new_score_orientation 'higher_better' \\
-            -old_score 'q-value' \\
             $args
 
         cat <<-END_VERSIONS > versions.yml

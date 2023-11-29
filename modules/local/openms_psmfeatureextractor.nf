@@ -8,7 +8,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         'biocontainers/openms:3.0.0--h8964181_1' }"
 
     input:
-        tuple val(meta), path(idxml)
+        tuple val(meta), path(idxml), path(feature_file)
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
@@ -21,29 +21,14 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         def prefix           = task.ext.prefix ?: "${meta.id}_psm"
         def args             = task.ext.args ?: ''
         def extra_features = ""
-        if(params.use_deeplc || params.use_ms2pip){
-            extra_features = "-extra"
-        }
-        if(params.use_deeplc){
-            if(params.deeplc_add_abs_rt_error){
-                extra_features = "${extra_features} deeplc_abs_error"
-            }
-            if(params.deeplc_add_log_rt_error){
-                extra_features = "${extra_features} deeplc_log_error"
-            }
-            if(params.deeplc_add_sqr_rt_error || (!params.deeplc_add_sqr_rt_error && !params.deeplc_add_abs_rt_error && !params.deeplc_add_log_rt_error)){
-                extra_features = "${extra_features} deeplc_sqr_error"
-            }
-        }
-        if(params.use_ms2pip){
-            extra_features = "${extra_features} spectrum_correlation"
-        }
 
         """
+        extra_features=\$(awk 'NR > 1 && \$1 !~ /psm_file/ {printf \"%s \", \$2}' ${feature_file})
+
         PSMFeatureExtractor -in $idxml \\
             -out ${prefix}.idXML \\
             -threads $task.cpus \\
-            $extra_features \\
+            -extra \$extra_features \\
             $args
 
         cat <<-END_VERSIONS > versions.yml

@@ -55,7 +55,7 @@ jobs:
           # Test latest edge release of Nextflow
           - NXF_VER: ""
             NXF_EDGE: "1"
-        tests: ["test_deeplc", "test_ms2pip", "test_ionannotator", "test_full"]
+        tests: ["test_mokapot", "test_percolator", "test_ionannotator", "test_full"]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2

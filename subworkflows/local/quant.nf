@@ -28,6 +28,7 @@ workflow QUANT {
         OPENMS_IDRIPPER( merged_pout ).ripped
                 .join( merge_meta_map )
                 .join( filter_q_value )
+                // TODO: fdrfiltered is not needed for idscore switching, but for idfilter. This will be adressed in the next refacoring of the workflow
                 .map { group_meta, ripped, meta, fdrfiltered -> [meta, ripped, fdrfiltered] }
                 .transpose()
                 .set { ch_ripped_pout }
@@ -42,7 +43,7 @@ workflow QUANT {
         }
 
         // Filter runs based on fdr filtered coprocessed percolator output.
-        // NOTE: This is an alternative filtering method that will be replaced by IDFilter with new release of OpenMS
+        // TODO: This is an alternative filtering method that will be replaced by IDFilter with new release of OpenMS
         PYOPENMS_IDFILTER( ch_runs_to_be_filtered ).filtered
                 .map { meta, idxml -> [[id:meta.sample + '_' + meta.condition], [id:meta.id, file:idxml]] }
                 .groupTuple( sort: sortById )

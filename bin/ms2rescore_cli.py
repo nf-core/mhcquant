@@ -47,7 +47,8 @@ def parse_cli_arguments_to_config(**kwargs):
                                                                         "rng": kwargs['rng'],
                                                                         "max_workers": kwargs['processes']}
             if value == 'percolator':
-                config["ms2rescore"]["rescoring_engine"]["percolator"] = {}
+                logging.info("Percolator rescoring engine has been specified. Use the idXML containing rescoring features and run Percolator in a separate step.")
+                continue
 
         else:
             config["ms2rescore"][key] = value
@@ -76,9 +77,9 @@ def rescore_idxml(input_file, output_file, config):
 @click.option("-l", "--log_level", help="Logging level (default: `info`)", default="info")
 @click.option("-n", "--processes", help="Number of parallel processes available to MS²Rescore", type=int, default=1)
 @click.option("-f", "--fasta_file", help="Path to FASTA file")
-@click.option("-fg", "--feature_generators", help="Comma-separated list of feature generators to use (default: `basic,ms2pip,deeplc`). See ms2rescore doc for further information", default="basic,ms2pip,deeplc")
+@click.option("-fg", "--feature_generators", help="Comma-separated list of feature generators to use (default: `ms2pip,deeplc`). See ms2rescore doc for further information", default="")
 @click.option("-am", "--ms2pip_model", help="MS²PIP model (default: `Immuno-HCD`)", default="Immuno-HCD")
-@click.option("-ms2tol", "--ms2_tolerance", help="Fragment mass tolerance [Da](default: `0.02`)", type=int, default=0.02)
+@click.option("-ms2tol", "--ms2_tolerance", help="Fragment mass tolerance [Da](default: `0.02`)", type=float, default=0.02)
 @click.option("-re", "--rescoring_engine", help="Either mokapot or percolator (default: `mokapot`)", default="mokapot")
 @click.option("-rng", "--rng", help="Seed for mokapot's random number generator (default: `4711`)", type=int, default=4711)
 @click.option("-d", "--id_decoy_pattern", help="Regex decoy pattern (default: `DECOY_`)", default='^DECOY_')
