@@ -290,7 +290,7 @@
                     "default": "ms2pip,deeplc",
                     "description": "Specify the feature generator that should be used for rescoring. One or multiple of basic,ms2pip,deeplc,ionmob"
                 },
-                "ms2pip_model":{
+                "ms2pip_model": {
                     "type": "string",
                     "fa_icon": "fas fa-file-code",
                     "default": "Immuno-HCD",
