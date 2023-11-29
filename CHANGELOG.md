@@ -3,6 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.6.0dev - nfcore/mhcquant
+
+### `Added`
+
+- Adding MS²Rescore module with the underlying python CLI [#288](https://github.com/nf-core/mhcquant/issues/288)
+
+### `Deprecated`
+
+- Removed MS²PIP and DeepLC modules. These feature generators are now called via the MS²Rescore framework
+
 ## v2.5.0 - nfcore/mhcquant "Angry Bird" - 2023/10/09
 
 ### `Added`
