@@ -25,11 +25,11 @@ process MS2RESCORE {
 
     """
     ms2rescore_cli.py \\
-       --psm_file $idxml \\
-       --spectrum_path . \\
-       --output_path ${prefix}.idXML \\
-       --processes $task.cpus \\
-       $args
+        --psm_file $idxml \\
+        --spectrum_path . \\
+        --output_path ${prefix}.idXML \\
+        --processes $task.cpus \\
+        $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
