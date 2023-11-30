@@ -58,7 +58,7 @@ jobs:
         tests: ["test_mokapot", "test_percolator", "test_ionannotator"]
     steps:
       - name: Check out pipeline code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
       - name: Install Nextflow
         env:
           NXF_VER: ${{ matrix.NXF_VER }}
