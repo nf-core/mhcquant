@@ -72,8 +72,6 @@ include { OPENMS_PEAKPICKERHIRES }                                          from
 include { OPENMS_FILEFILTER }                                               from '../modules/local/openms_filefilter'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
-include { DEEPLC }                                                          from '../modules/local/deeplc'
-include { MS2PIP }                                                          from '../modules/local/ms2pip'
 include { MS2RESCORE }                                                      from '../modules/local/ms2rescore'
 include { OPENMS_IDSCORESWITCHER }                                          from '../modules/local/openms_idscoreswitcher'
 
