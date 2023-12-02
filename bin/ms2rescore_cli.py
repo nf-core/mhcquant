@@ -19,7 +19,7 @@ def parse_cli_arguments_to_config(**kwargs):
 
     for key, value in kwargs.items():
         # Skip these arguments since they need to set in a nested dict of feature_generators
-        if key in ["ms2pip_model", "ms2_tolerance"]:
+        if key in ["ms2pip_model", "ms2_tolerance", "rng"]:
             continue
 
         elif key == "feature_generators":
@@ -99,7 +99,7 @@ def rescore_idxml(input_file, output_file, config):
     help="Comma-separated list of feature generators to use (default: `ms2pip,deeplc`). See ms2rescore doc for further information",
     default="",
 )
-@click.option("-am", "--ms2pip_model", help="MS²PIP model (default: `Immuno-HCD`)", default="Immuno-HCD")
+@click.option("-pipm", "--ms2pip_model", help="MS²PIP model (default: `Immuno-HCD`)", type=str, default="Immuno-HCD")
 @click.option(
     "-ms2tol", "--ms2_tolerance", help="Fragment mass tolerance [Da](default: `0.02`)", type=float, default=0.02
 )
