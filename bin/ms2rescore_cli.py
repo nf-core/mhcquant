@@ -6,9 +6,14 @@ import click
 import importlib.resources
 import json
 import logging
+from typing import List
+
+import pandas as pd
 
 from ms2rescore import rescore, package_data
 from psm_utils.io.idxml import IdXMLReader, IdXMLWriter
+from psm_utils import PSMList
+import pyopenms as oms
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
@@ -63,7 +68,7 @@ def parse_cli_arguments_to_config(**kwargs):
     return config
 
 
-def rescore_idxml(input_file, output_file, config):
+def rescore_idxml(input_file, output_file, config) -> None:
     """Rescore PSMs in an idXML file and keep other information unchanged."""
     # Read PSMs
     reader = IdXMLReader(input_file)
@@ -72,9 +77,45 @@ def rescore_idxml(input_file, output_file, config):
     # Rescore
     rescore(config, psm_list)
 
+    # Filter out PeptideHits within PeptideIdentification(s) that could not be processed by all feature generators
+    peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids)
+
     # Write
-    writer = IdXMLWriter(output_file, reader.protein_ids, reader.peptide_ids)
+    writer = IdXMLWriter(output_file, reader.protein_ids, peptide_ids_filtered)
     writer.write_file(psm_list)
+
+
+def filter_out_artifact_psms(
+    psm_list: PSMList, peptide_ids: List[oms.PeptideIdentification]
+) -> List[oms.PeptideIdentification]:
+    """Filter out PeptideHits that could not be processed by all feature generators"""
+    num_mandatory_features = max([len(psm.rescoring_features) for psm in psm_list])
+    new_psm_list = PSMList(psm_list=[psm for psm in psm_list if len(psm.rescoring_features) == num_mandatory_features])
+
+    # get differing peptidoforms of both psm lists
+    psm_list_peptides = set([next(iter(psm.provenance_data.items()))[1] for psm in psm_list])
+    new_psm_list_peptides = set([next(iter(psm.provenance_data.items()))[1] for psm in new_psm_list])
+    not_supported_peptides = psm_list_peptides - new_psm_list_peptides
+
+    # no need to filter if all peptides are supported
+    if len(not_supported_peptides) == 0:
+        return peptide_ids
+    # Create new peptide ids and filter out not supported peptides
+    new_peptide_ids = []
+    for peptide_id in peptide_ids:
+        new_hits = []
+        for hit in peptide_id.getHits():
+            if hit.getSequence().toString() in not_supported_peptides:
+                continue
+            new_hits.append(hit)
+        if len(new_hits) == 0:
+            continue
+        peptide_id.setHits(new_hits)
+        new_peptide_ids.append(peptide_id)
+    logging.info(
+        f"Removed {len(psm_list_peptides) - len(new_psm_list_peptides)} PSMs. Peptides not supported: {not_supported_peptides}"
+    )
+    return new_peptide_ids
 
 
 @click.command()
