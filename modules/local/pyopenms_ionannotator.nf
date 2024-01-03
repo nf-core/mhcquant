@@ -2,7 +2,7 @@ process PYOPENMS_IONANNOTATOR {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::pyopenms=3.0.0"
+    conda "bioconda::pyopenms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pyopenms:3.0.0--py311h9b8898c_0' :
         'biocontainers/pyopenms:3.0.0--py311h9b8898c_0' }"
