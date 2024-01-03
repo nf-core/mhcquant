@@ -17,7 +17,7 @@ You will need to create a samplesheet with information about the samples you wou
 The `sample` identifiers have to be the same when you have multiple runs. The `Condition` identifiers can be used to further distinguish the sample groups.
 Below is an example for the same sample sequenced across 3 lanes:
 
-```csv title="samplesheet.tsv
+```tsv title="samplesheet.tsv
 ID  Sample  Condition  ReplicateFileName
 1   WT  A /path/to/MS/files/WT_A1.raw
 2   WT  A /path/to/MS/files/WT_A2.raw
