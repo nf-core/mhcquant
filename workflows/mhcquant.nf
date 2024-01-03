@@ -17,7 +17,7 @@ WorkflowMhcquant.initialise(params, log)
 
 // Input/output options
 if (params.input)   { sample_sheet = file(params.input) }
-if (params.fasta)   { params.fasta = params.fasta }
+if (params.fasta)   { params.fasta = params.fasta       }
 
 // MHC affinity prediction
 if (params.predict_class_1 || params.predict_class_2) {
@@ -152,32 +152,32 @@ workflow MHCQUANT {
 
     // Input fasta file
     Channel.fromPath(params.fasta)
-        .combine(INPUT_CHECK.out.ms_runs)
-        .map{ fasta, meta, ms_file -> [meta.subMap('id', 'sample', 'condition'), fasta] }
-        .ifEmpty { exit 1, "params.fasta was empty - no input file supplied" }
-        .set { input_fasta }
+        .map{ fasta -> [[id:fasta.getBaseName()], fasta] }
+        .ifEmpty { error ("params.fasta was empty - no input file supplied") }
+        .set { fasta_file }
 
     //
     // SUBWORKFLOW: Include protein information
     //
-    if (params.include_proteins_from_vcf) {
-        // Include the proteins from the vcf file to the fasta file
-        INCLUDE_PROTEINS(input_fasta)
-        ch_versions = ch_versions.mix(INCLUDE_PROTEINS.out.versions.ifEmpty(null))
-        ch_fasta_file = INCLUDE_PROTEINS.out.ch_fasta_file
-        ch_vcf_from_sheet = INCLUDE_PROTEINS.out.ch_vcf_from_sheet
-    } else {
-        ch_fasta_file = input_fasta
-        ch_vcf_from_sheet = Channel.empty()
-    }
-
+    // TODO: Temporary disabled because of outdated vcf parsing
+    //if (params.include_proteins_from_vcf) {
+    //    // Include the proteins from the vcf file to the fasta file
+    //    INCLUDE_PROTEINS(fasta_file)
+    //    ch_versions = ch_versions.mix(INCLUDE_PROTEINS.out.versions)
+    //    ch_fasta_file = INCLUDE_PROTEINS.out.ch_fasta_file
+    //    ch_vcf_from_sheet = INCLUDE_PROTEINS.out.ch_vcf_from_sheet
+    //} else {
+    //    ch_fasta_file = fasta_file
+    //    ch_vcf_from_sheet = Channel.empty()
+    //}
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
-        OPENMS_DECOYDATABASE(ch_fasta_file)
-        ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions.ifEmpty(null))
+        OPENMS_DECOYDATABASE(fasta_file)
+        ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
         ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy
+                                .map{ meta, fasta -> [fasta] }
     } else {
-        ch_decoy_db = ch_fasta_file
+        ch_decoy_db = fasta_file.map{ meta, fasta -> [fasta] }
     }
 
     // If mzml files are specified, they are encapsulated in a list [meta, [mzml]]. We need to extract the path for grouping later
@@ -211,10 +211,17 @@ workflow MHCQUANT {
     }
 
     // Run comet database search
-    OPENMS_COMETADAPTER(ch_clean_mzml_file.join(ch_decoy_db, remainder:true))
+    // TODO: Fix accordingly with vcf parsing
+    //if (params.include_proteins_from_vcf) {
+    //    OPENMS_COMETADAPTER(ch_clean_mzml_file.join(ch_decoy_db, remainder:true))
+    //} else {
+    //    OPENMS_COMETADAPTER(ch_clean_mzml_file.combine(ch_fasta_file.map{ meta, fasta -> [fasta] }))
+    //}
+    OPENMS_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
+    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions)
 
     // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.join(ch_decoy_db))
+    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.combine(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
