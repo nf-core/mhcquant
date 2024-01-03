@@ -296,6 +296,12 @@
                     "default": "Immuno-HCD",
                     "description": "Specify the ms2pip model that should be used for rescoring. Checkout the ms2pip documentation for available models."
                 },
+                "deeplc_calibration_set_size": {
+                    "type": "number",
+                    "fa_icon": "fas fa-file-code",
+                    "default": 0.15,
+                    "description": "Specify the number or percentage of PSMs that should be used for calibration of the deeplc model."
+                },
                 "refine_fdr_on_predicted_subset": {
                     "type": "boolean",
                     "fa_icon": "fas fa-arrows-repeat",

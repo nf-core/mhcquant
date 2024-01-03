@@ -18,13 +18,13 @@ import pyopenms as oms
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-def parse_cli_arguments_to_config(**kwargs):
+def parse_cli_arguments_to_config(kwargs):
     """Update default MS²Rescore config with CLI arguments"""
     config = json.load(importlib.resources.open_text(package_data, "config_default.json"))
 
     for key, value in kwargs.items():
         # Skip these arguments since they need to set in a nested dict of feature_generators
-        if key in ["ms2pip_model", "ms2_tolerance", "rng"]:
+        if key in ["ms2pip_model", "ms2_tolerance", "rng", "calibration_set_size"]:
             continue
 
         elif key == "feature_generators":
@@ -39,7 +39,9 @@ def parse_cli_arguments_to_config(**kwargs):
                     "ms2_tolerance": kwargs["ms2_tolerance"],
                 }
             if "deeplc" in feature_generators:
-                config["ms2rescore"]["feature_generators"]["deeplc"] = {"deeplc_retrain": False}
+                config["ms2rescore"]["feature_generators"]["deeplc"] = {
+                    "deeplc_retrain": False,
+                    "calibration_set_size": kwargs["calibration_set_size"]}
             if "maxquant" in feature_generators:
                 config["ms2rescore"]["feature_generators"]["maxquant"] = {}
             if "ionmob" in feature_generators:
@@ -144,6 +146,7 @@ def filter_out_artifact_psms(
 @click.option(
     "-ms2tol", "--ms2_tolerance", help="Fragment mass tolerance [Da](default: `0.02`)", type=float, default=0.02
 )
+@click.option("-cs", "--calibration_set_size", help="Percentage of number of calibration set for DeepLC (default: `0.15`)", default=0.15)
 @click.option("-re", "--rescoring_engine", help="Either mokapot or percolator (default: `mokapot`)", default="mokapot")
 @click.option(
     "-rng", "--rng", help="Seed for mokapot's random number generator (default: `4711`)", type=int, default=4711
