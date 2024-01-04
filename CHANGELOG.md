@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Adding MS²Rescore module with the underlying python CLI [#288](https://github.com/nf-core/mhcquant/issues/288)
 
+### `Fixed`
+
+- Create only one decoy database [#287](https://github.com/nf-core/mhcquant/issues/287)
+
 ### `Deprecated`
 
 - Removed MS²PIP and DeepLC modules. These feature generators are now called via the MS²Rescore framework
