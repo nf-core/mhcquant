@@ -18,7 +18,7 @@ import pyopenms as oms
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-def parse_cli_arguments_to_config(kwargs):
+def parse_cli_arguments_to_config(**kwargs):
     """Update default MS²Rescore config with CLI arguments"""
     config = json.load(importlib.resources.open_text(package_data, "config_default.json"))
 
