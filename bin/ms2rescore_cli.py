@@ -41,7 +41,8 @@ def parse_cli_arguments_to_config(kwargs):
             if "deeplc" in feature_generators:
                 config["ms2rescore"]["feature_generators"]["deeplc"] = {
                     "deeplc_retrain": False,
-                    "calibration_set_size": kwargs["calibration_set_size"]}
+                    "calibration_set_size": kwargs["calibration_set_size"],
+                }
             if "maxquant" in feature_generators:
                 config["ms2rescore"]["feature_generators"]["maxquant"] = {}
             if "ionmob" in feature_generators:
@@ -146,7 +147,12 @@ def filter_out_artifact_psms(
 @click.option(
     "-ms2tol", "--ms2_tolerance", help="Fragment mass tolerance [Da](default: `0.02`)", type=float, default=0.02
 )
-@click.option("-cs", "--calibration_set_size", help="Percentage of number of calibration set for DeepLC (default: `0.15`)", default=0.15)
+@click.option(
+    "-cs",
+    "--calibration_set_size",
+    help="Percentage of number of calibration set for DeepLC (default: `0.15`)",
+    default=0.15,
+)
 @click.option("-re", "--rescoring_engine", help="Either mokapot or percolator (default: `mokapot`)", default="mokapot")
 @click.option(
     "-rng", "--rng", help="Seed for mokapot's random number generator (default: `4711`)", type=int, default=4711
