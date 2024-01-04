@@ -2,10 +2,10 @@ process THERMORAWFILEPARSER {
     tag "$meta.id"
     label 'process_low'
 
-    conda "bioconda::thermorawfileparser=1.4.2"
+    conda "bioconda::thermorawfileparser=1.4.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/thermorawfileparser:1.4.2--ha8f3691_0' :
-        'biocontainers/thermorawfileparser:1.4.2--ha8f3691_0' }"
+        'https://depot.galaxyproject.org/singularity/thermorawfileparser:1.4.3--ha8f3691_0' :
+        'biocontainers/thermorawfileparser:1.4.3--ha8f3691_0' }"
 
     input:
         tuple val(meta), path(rawfile)
