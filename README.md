@@ -34,9 +34,9 @@ On release, automated continuous integration tests run the pipeline on a full-si
 
 First, prepare a samplesheet with your input data that looks as follows:
 
-`samplesheet.tsv`:
+`samplesheet.tsv`
 
-```tsv
+```tsv title="samplesheet.tsv
 ID	Sample	Condition	ReplicateFileName
 1	msrun	tumor	/path/to/msrun.raw|mzML|d
 ```
@@ -53,8 +53,9 @@ nextflow run nf-core/mhcquant
     --outdir ./results
 ```
 
-> [!NOTE]
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
+> [!WARNING]
+> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
+> see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/mhcquant/usage) and the [parameter documentation](https://nf-co.re/mhcquant/parameters).
 
