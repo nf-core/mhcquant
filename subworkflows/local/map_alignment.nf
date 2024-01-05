@@ -1,9 +1,6 @@
 /*
- * Perform the quantification of the samples when the parameter --skip_quantification is not provided
+ * Align retention times of runs to be able to quantify them.
  */
-
-include { OPENMS_FALSEDISCOVERYRATE }                                       from '../../modules/local/openms_falsediscoveryrate'
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_ALIGNMENT }                from '../../modules/local/openms_idfilter'
 include { OPENMS_MAPALIGNERIDENTIFICATION }                                 from '../../modules/local/openms_mapaligneridentification'
 include {
     OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERMZML
@@ -12,58 +9,44 @@ include {
 
 workflow MAP_ALIGNMENT {
     take:
-        indexed_hits
-        mzml_files
+        runs_to_be_aligned
+        mzml
+        merge_meta_map
 
     main:
         ch_versions = Channel.empty()
-        // Calculate fdr for id based alignment
-        OPENMS_FALSEDISCOVERYRATE(indexed_hits)
-        ch_versions = ch_versions.mix(OPENMS_FALSEDISCOVERYRATE.out.versions.first().ifEmpty(null))
-        // Filter fdr for id based alignment
-        OPENMS_IDFILTER_FOR_ALIGNMENT(OPENMS_FALSEDISCOVERYRATE.out.idxml
-                                        .flatMap { it -> [tuple(it[0], it[1], null)]})
-        ch_versions = ch_versions.mix(OPENMS_IDFILTER_FOR_ALIGNMENT.out.versions.first().ifEmpty(null))
 
-        // Group samples together if they are replicates
-        ch_grouped_fdr_filtered = OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
-            .map {
-                meta, raw ->
-                    [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
-                }
-            .groupTuple(by: [0])
-        // Compute alignment rt transformation
-        OPENMS_MAPALIGNERIDENTIFICATION(ch_grouped_fdr_filtered)
+        // Compute group-wise alignment rt transformation
+        OPENMS_MAPALIGNERIDENTIFICATION( runs_to_be_aligned )
         ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions.first().ifEmpty(null))
-        // Obtain the unique files that were present for the combined data
-        joined_trafos = OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
+
+        // Join run specific trafoXMLs with meta information
+        merge_meta_map
+            .join( OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml )
+            .map { groupMeta, meta, trafoxml -> [meta, trafoxml] }
             .transpose()
-            .flatMap {
-                meta, trafoxml ->
-                    ident = trafoxml.baseName.split('_-_')[0]
-                    [[[id:ident, sample:meta.sample, condition:meta.condition, ext:meta.ext], trafoxml]]
-            }
-        // Intermediate step to join RT transformation files with mzml channels
-        joined_trafos_mzmls = mzml_files.join(joined_trafos)
-        // Intermediate step to join RT transformation files with idxml channels
-        joined_trafos_ids = indexed_hits.join(joined_trafos)
+            .set { joined_trafos }
+
+        // Intermediate step to join RT transformation files with mzml channels -> [meta, idxml, mzml]
+        joined_trafos_mzmls = mzml.join(joined_trafos)
+
+        // Intermediate step to join RT transformation files with idxml channels -> [meta, idxml, trafoxml]
+        runs_to_be_aligned
+                .join( merge_meta_map )
+                .map { group_meta, idxml, meta -> [meta, idxml] }
+                .transpose()
+                .join( joined_trafos )
+                .set { joined_trafos_ids }
+
         // Align mzML files using trafoXMLs
         OPENMS_MAPRTTRANSFORMERMZML(joined_trafos_mzmls)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions.first().ifEmpty(null))
-        // Align unfiltered idXMLfiles using trafoXMLs
+        // Align idXMLfiles using trafoXMLs
         OPENMS_MAPRTTRANSFORMERIDXML(joined_trafos_ids)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERIDXML.out.versions.first().ifEmpty(null))
-        ch_proceeding_idx = OPENMS_MAPRTTRANSFORMERIDXML.out.aligned
-            .map {
-                meta, raw ->
-                [[id:meta.sample + "_" + meta.condition, sample:meta.sample, condition:meta.condition, ext:meta.ext], raw]
-            }
-            .groupTuple(by: [0])
 
     emit:
-        // Define the information that is returned by this workflow
         versions = ch_versions
-        ch_proceeding_idx
-        aligned_idfilter = OPENMS_IDFILTER_FOR_ALIGNMENT.out.idxml
+        aligned_idxml = OPENMS_MAPRTTRANSFORMERIDXML.out.aligned
         aligned_mzml = OPENMS_MAPRTTRANSFORMERMZML.out.aligned
 }

@@ -244,6 +244,16 @@
                     "default": "high_res",
                     "fa_icon": "fas fa-wrench",
                     "description": "Comets theoretical_fragment_ions parameter: theoretical fragment ion peak representation, high-res: sum of intensities plus flanking bins, ion trap (low-res) ms/ms: sum of intensities of central M bin only"
+                },
+                "default_params_file_comet": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Default Comet params file. All parameters of this take precedence."
+                },
+                "filter_mzml": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-file-code",
+                    "description": "Clean up mzml files and remove artificial charge 0 peptides."
                 }
             }
         },
@@ -266,6 +276,31 @@
                     "fa_icon": "fas fa-less-than",
                     "default": 0.01,
                     "description": "Specify the false discovery rate threshold at which peptide hits should be selected."
+                },
+                "rescoring_engine": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "default": "percolator",
+                    "description": "Specify the rescoring engine that should be used for rescoring. Either percolator or mokapot",
+                    "enum": ["percolator", "mokapot"]
+                },
+                "feature_generators": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "default": "ms2pip,deeplc",
+                    "description": "Specify the feature generator that should be used for rescoring. One or multiple of basic,ms2pip,deeplc,ionmob"
+                },
+                "ms2pip_model": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-code",
+                    "default": "Immuno-HCD",
+                    "description": "Specify the ms2pip model that should be used for rescoring. Checkout the ms2pip documentation for available models."
+                },
+                "deeplc_calibration_set_size": {
+                    "type": "number",
+                    "fa_icon": "fas fa-file-code",
+                    "default": 0.15,
+                    "description": "Specify the number or percentage of PSMs that should be used for calibration of the deeplc model."
                 },
                 "refine_fdr_on_predicted_subset": {
                     "type": "boolean",
@@ -295,54 +330,6 @@
                     "type": "integer",
                     "fa_icon": "fas fa-train-track",
                     "description": "Maximum subset for percolator training iterations"
-                },
-                "use_deeplc": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-microchip",
-                    "description": "Use DeepLC retention time features for Percolator rescoring",
-                    "help_text": "https://www.nature.com/articles/s41592-021-01301-5"
-                },
-                "deeplc_calibration_bins": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Number of bins (peptides) used for DeepLC calibration. For each bin the best hit is used."
-                },
-                "deeplc_calibration_mode": {
-                    "type": "string",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Specify the DeepLC calibration mode. rt_bin: bin peptides by RT, idx_bin: bin peptides by index, min_max: scale uncalibrated predictions to experimental RT range",
-                    "enum": ["rt_bin", "idx_bin", "min_max"]
-                },
-                "deeplc_add_abs_rt_error": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Add absolute RT error to of experimental and predicted RT to the feature set"
-                },
-                "deeplc_add_sqr_rt_error": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Add squared RT error to of experimental and predicted RT to the feature set"
-                },
-                "deeplc_add_log_rt_error": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "Add log RT error to of experimental and predicted RT to the feature set"
-                },
-                "use_ms2pip": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-microchip",
-                    "description": "Use MS2pip peak intensity prediction for Percolator rescoring",
-                    "help_text": "https://github.com/compomics/ms2pip"
-                },
-                "ms2pip_model_name": {
-                    "type": "string",
-                    "fa_icon": "fas fa-train-track",
-                    "description": "MS2pip model name defined (https://github.com/compomics/ms2pip#specialized-prediction-models)"
-                },
-                "default_params_file_comet": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-code",
-                    "description": "Default Comet params file. All parameters of this take precedence."
                 }
             }
         },
@@ -359,7 +346,7 @@
                     "description": "Skip quantification and only yield peptide identifications"
                 },
                 "quantification_fdr": {
-                    "type": "string",
+                    "type": "boolean",
                     "fa_icon": "fas fa-less-than",
                     "description": "Compute FDR for the targeted approach",
                     "help_text": "(Weisser H. and Choudhary J.S. J Proteome Res. 2017 Aug 4)"
@@ -367,6 +354,26 @@
                 "quantification_min_prob": {
                     "type": "number",
                     "description": "Specify a cut off probability value for quantification events as a filter"
+                },
+                "quantification_mz_window": {
+                    "type": "number",
+                    "description": "Specify a m/z window for matching between runs"
+                },
+                "quantification_rt_window": {
+                    "type": "number",
+                    "description": "Specify a rt window for matching between runs"
+                },
+                "quantification_mapping_tolerance": {
+                    "type": "number",
+                    "description": "Specify a rt mapping tolerance for mapping features between runs"
+                },
+                "quantification_peak_width": {
+                    "type": "number",
+                    "description": "Specify a peak width for feature extraction"
+                },
+                "quantification_min_peak_width": {
+                    "type": "number",
+                    "description": "Specify a minimum peak width for quantification"
                 }
             }
         },
@@ -433,20 +440,6 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-filter",
                     "description": "Set this option to not consider snps for variant translation"
-                }
-            }
-        },
-        "rt_prediction": {
-            "title": "RT Prediction",
-            "type": "object",
-            "fa_icon": "fas fa-timeline",
-            "description": "",
-            "default": "",
-            "properties": {
-                "predict_RT": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-wrench",
-                    "description": "Set this option to predict retention times of all identified peptides and possible neoepitopes based on high scoring ids"
                 }
             }
         },
@@ -551,14 +544,12 @@
                     "type": "boolean",
                     "description": "Display help text.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
-                    "default": false,
                     "hidden": true
                 },
                 "publish_dir_mode": {
@@ -582,7 +573,6 @@
                     "type": "boolean",
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
-                    "default": false,
                     "hidden": true
                 },
                 "max_multiqc_email_size": {
@@ -597,7 +587,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "default": false,
                     "hidden": true
                 },
                 "hook_url": {
@@ -636,7 +625,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
                 },
@@ -644,7 +632,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
                 },
@@ -652,7 +639,6 @@
                     "type": "boolean",
                     "fa_icon": "far fa-check-circle",
                     "description": "Validation of parameters in lenient more.",
-                    "default": false,
                     "hidden": true,
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
@@ -683,9 +669,6 @@
         },
         {
             "$ref": "#/definitions/variant_options"
-        },
-        {
-            "$ref": "#/definitions/rt_prediction"
         },
         {
             "$ref": "#/definitions/institutional_config_options"

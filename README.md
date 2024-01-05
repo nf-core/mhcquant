@@ -1,6 +1,7 @@
 # ![nf-core/mhcquant](docs/images/nf-core-mhcquant_logo_light.png#gh-light-mode-only) ![nf-core/mhcquant](docs/images/nf-core-mhcquant_logo_dark.png#gh-dark-mode-only)
 
-[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/mhcquant/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.1569909-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.1569909)
+[![GitHub Actions CI Status](https://github.com/nf-core/mhcquant/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/mhcquant/actions?query=workflow%3A%22nf-core+CI%22)
+[![GitHub Actions Linting Status](https://github.com/nf-core/mhcquant/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/mhcquant/actions?query=workflow%3A%22nf-core+linting%22)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/mhcquant/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.8427707-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.8427707)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
@@ -22,59 +23,41 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/mhcquant/results).
 
-![overview](assets/mhcquant_web.png)
+![overview](docs/images/mhcquant_subway.png)
 
 ## Usage
 
-> **Note**
+> [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
 > to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
 > with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
 First, prepare a samplesheet with your input data that looks as follows:
 
-`samplesheet.csv`:
+`samplesheet.tsv`
 
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+```tsv title="samplesheet.tsv
+ID	Sample	Condition	ReplicateFileName
+1	msrun	tumor	/path/to/msrun.raw|mzML|d
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
+Each row represents a mass spectrometry run in one of the formats: raw, mzML, d
 
 Now, you can run the pipeline using:
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
 ```bash
-nextflow run nf-core/mhcquant \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+nextflow run nf-core/mhcquant
+    -profile <docker/singularity/.../institute> \
+    --input 'samples.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --outdir ./results
 ```
 
-> **Warning:**
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
-> provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
+> [!WARNING]
+> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 > see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/mhcquant/usage) and the [parameter documentation](https://nf-co.re/mhcquant/parameters).
-
-## Pipeline output
-
-=======
-
-```bash
-nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute> \
-                              --input 'samples.tsv' \
-                              --fasta 'SWISSPROT_2020.fasta' \
-                              --outdir ./results
-```
 
 ## Pipeline summary
 
@@ -82,15 +65,34 @@ nextflow run nf-core/mhcquant -profile test,<docker/singularity/podman/shifter/c
 
 By default the pipeline currently performs the following
 
-- Identification of peptides in the MS/MS spectra using comet (`CometAdapter`)
+#### Identification
+
+- Identification of peptides in the MS/MS spectra using Comet (`CometAdapter`)
 - Refreshes the protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
-- Estimates the false discovery rate on peptide and protein level (`FalseDiscoveryRate`)
 - Filters peptide/protein identification results on ID based alignment (`IDFilter`)
-- Converts XML format to text files (`TextExporter`)
-- Merges several idXML files into one idXML file (`IDMerger`)
-- Extract PSM features for Percolator (`PSMFeatureExtractor`)
+- Merges idXML files of a sample-condition group into one idXML file (`IDMerger`)
+- Defines extra features for Percolator (`PSMFeatureExtractor`)
 - Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
-- Filters peptide/protein identification result (`IDFilter`)
+- Filters peptide/protein identification result based on Percolator q-value (`IDFilter`)
+- Splits merged idXML file into their respective runs again (`IDRipper`)
+- Uses Comet XCorr instead of percolator q-value as primary score for downstream purposess (`IDScoreSwitcher`)
+- Keeps peptides observed after FDR filtering in each run and selects the best peptide per run (`Pyopenms_IDFilter`)
+
+#### Map alignment
+
+- Corrects retention time distortions between runs, using information from peptides identified in different runs (`MapAlignerIdentification`)
+- Applies retention time transformations to runs (`MapRTTransformer`)
+
+#### Process features
+
+- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
+- Group corresponding features across labelfree experiments (`FeatureLinkerUnlabeledKD`)
+- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
+
+#### Output
+
+- Converts XML format to text files (`TextExporter`)
+- Converts XML format to mzTab files (`MzTabExporter`)
 
 ### Additional Steps
 
@@ -101,12 +103,17 @@ Additional functionality contained by the pipeline currently includes:
 - Inclusion of proteins in the reference database (`mhcnuggets`, `mhcflurry`, `fred2`)
 - Create a decoy peptide database from standard FASTA databases (`DecoyDatabase`)
 - Conversion of raw to mzML files (`ThermoRawFileParser`)
+- Conversion of tdf (`.d`) to mzML files (`tdf2mzml`)
 - Executing the peak picking with high_res algorithm (`PeakPickerHiRes`)
 
-#### Map alignment
+#### Additional features for rescoring
 
-- Corrects retention time distortions between maps, using information from peptides identified in different maps (`MapAlignerIdentification`)
-- Applies retention time transformations to maps (`MapRTTransformer`)
+- Retention time prediction (`DeepLC`)
+- Peak intensity prediction (`MS2PIP`)
+
+> [!WARNING]
+> The refine FDR feature will be evaluated on a large benchmark dataset in the following releases.
+> Consider it as an experimental feature.
 
 #### Refine FDR
 
@@ -114,13 +121,8 @@ Additional functionality contained by the pipeline currently includes:
 - Predict psm results using mhcflurry to shrink search space (`mhcflurry`)
 - Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
 
-#### Process features
-
-- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
-- Group corresponding features across labelfree experiments (`FeatureLinkerUnlabeledKD`)
-- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
-- Converts XML format to text files (`TextExporter`)
-- Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
+> [!WARNING]
+> The HLA prediction feature is outdated and will be reworked in the following releases
 
 #### Prediction of HLA class 1 peptides
 
@@ -129,14 +131,11 @@ Additional functionality contained by the pipeline currently includes:
 - Predict neoepitopes based on the peptide hits (`mhcnuggets`, `mhcflurry`, `fred2`)
 - Resolve found neoepitopes (`mhcnuggets`, `mhcflurry`, `fred2`)
 
-#### Prediction retention time
+#### Output
 
-- Used to train a model for peptide retention time prediction or peptide separation prediction (`RTModel`)
-- Retention Times Predictor Found Peptides and neoepitopes (`RTPredict`)
+- Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
 
 ## Documentation
-
-> > > > > > > dev
 
 To see the the results of a test run with a full size dataset refer to the [results](https://nf-co.re/mhcquant/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the
@@ -177,7 +176,7 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
-If you use nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.1569909](https://doi.org/10.5281/zenodo.1569909) and the corresponding manuscript:
+If you use nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.8427707](https://doi.org/10.5281/zenodo.8427707) and the corresponding manuscript:
 
 > **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**
 >
@@ -208,6 +207,14 @@ In addition, references of tools and data used in this pipeline are as follows:
 > **Percolator**
 >
 > Käll L. et al, _Nat Methods_ 2007 Nov;4(11):923-5. doi: [10.1038/nmeth1113](https://www.nature.com/articles/nmeth1113). Epub 2007 Oct 21.
+>
+> **Retention time prediction**
+>
+> Bouwmeester R. et al, _Nature Methods_ 2021 Oct;18(11):1363-1369. doi: [10.1038/s41592-021-01301-5](https://www.nature.com/articles/s41592-021-01301-5)
+>
+> **MS2 Peak intensity prediction**
+>
+> Gabriels R. et al, _Nucleic Acids Research_ 2019 Jul;47(W1):W295-9. doi: [10.1093/nar/gkz299](https://academic.oup.com/nar/article/47/W1/W295/5480903)
 >
 > **Identification based RT Alignment**
 >

@@ -2,10 +2,10 @@ process OPENMS_FILEFILTER {
     tag "$meta.id"
     label 'process_low'
 
-    conda "bioconda::openms=2.9.1"
+    conda "bioconda::openms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:2.9.1--h135471a_1' :
-        'biocontainers/openms:2.9.1--h135471a_1' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.1.0--h8964181_3' :
+        'biocontainers/openms:3.1.0--h8964181_3' }"
 
     input:
         tuple val(meta), path(mzml)
@@ -18,7 +18,7 @@ process OPENMS_FILEFILTER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${mzml.baseName}_cleaned"
+        def prefix           = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}"
         """
         FileFilter -in $mzml \\
             -out ${prefix}.mzML \\

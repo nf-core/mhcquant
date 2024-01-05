@@ -2,13 +2,13 @@ process OPENMS_IDFILTER {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::openms=2.9.1"
+    conda "bioconda::openms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:2.9.1--h135471a_1' :
-        'biocontainers/openms:2.9.1--h135471a_1' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.1.0--h8964181_3' :
+        'biocontainers/openms:3.1.0--h8964181_3' }"
 
     input:
-        tuple val(meta), path(idxml), file(peptide_filter)
+        tuple val(meta), path(idxml), val(peptide_filter)
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
@@ -18,20 +18,19 @@ process OPENMS_IDFILTER {
         task.ext.when == null || task.ext.when
 
     script:
-        def whitelist        = "$peptide_filter"
-        def prefix           = task.ext.prefix ?: "${meta.id}_-_${idxml.baseName}_filtered"
+        def prefix           = task.ext.prefix ?: "${meta.id}_filtered"
         def args             = task.ext.args  ?: ''
 
-        if (whitelist == "input.2") {
-            whitelist = " "
+        // TODO: Fix such that [] emtpy list is provided as peptide filter, not null
+        if (peptide_filter != null) {
+            args += "-whitelist:peptides $peptide_filter"
         }
 
         """
         IDFilter -in $idxml \\
             -out ${prefix}.idXML \\
             -threads $task.cpus \\
-            $args \\
-            $whitelist
+            $args
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

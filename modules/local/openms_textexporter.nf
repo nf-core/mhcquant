@@ -2,13 +2,13 @@ process OPENMS_TEXTEXPORTER {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::openms=2.9.1"
+    conda "bioconda::openms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:2.9.1--h135471a_1' :
-        'quay.io/biocontainers/openms:2.9.1--h135471a_1' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.1.0--h8964181_3' :
+        'biocontainers/openms:3.1.0--h8964181_3' }"
 
     input:
-        tuple val(meta), path(consensus_resolved)
+        tuple val(meta), path(file)
 
     output:
         tuple val(meta), path("*.tsv"), emit: tsv
@@ -22,7 +22,7 @@ process OPENMS_TEXTEXPORTER {
         def args             = task.ext.args  ?: ''
 
         """
-        TextExporter -in $consensus_resolved \\
+        TextExporter -in $file \\
             -out ${prefix}.tsv \\
             -threads $task.cpus \\
             -id:add_hit_metavalues 0 \\

@@ -1,5 +1,5 @@
 process MHCNUGGETS_PEPTIDESCLASS2PRE {
-    tag "$meta"
+    tag "$meta.id"
     label 'process_low'
 
     conda "bioconda::mhcnuggets=2.3.2"
@@ -19,7 +19,7 @@ process MHCNUGGETS_PEPTIDESCLASS2PRE {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.sample}_preprocessed_mhcnuggets_peptides"
+        def prefix           = task.ext.prefix ?: "${meta.id}_preprocessed_mhcnuggets_peptides"
 
         """
         preprocess_peptides_mhcnuggets.py --mztab $mztab \\

@@ -17,7 +17,7 @@ You will need to create a samplesheet with information about the samples you wou
 The `sample` identifiers have to be the same when you have multiple runs. The `Condition` identifiers can be used to further distinguish the sample groups.
 Below is an example for the same sample sequenced across 3 lanes:
 
-```tsv
+```tsv title="samplesheet.tsv
 ID  Sample  Condition  ReplicateFileName
 1   WT  A /path/to/MS/files/WT_A1.raw
 2   WT  A /path/to/MS/files/WT_A2.raw
@@ -57,12 +57,18 @@ ID  Sample  Condition ReplicateFileName
 
 An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
 
+## Rescoring using MS²Rescore
+
+By default the pipline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ionmob,maxquant,ms2pip`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
+
+MS²Rescore creates a comprehensive QC report of the added features used for rescoring. This report is only available if `--rescoring_engine mokapot` is specified (default: `percolator`). The report can be found in `<OUTDIR>/multiqc/ms2rescore`. Further information on the tool itself can be read up in the published paper [Declerq et al. 2022](<https://www.mcponline.org/article/S1535-9476(22)00074-3/fulltext>)
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```console
-nextflow run nf-core/mhcquant --input 'samples.tsv' --outdir <OUTDIR> --fasta 'SWISSPROT_2020.fasta' --allele_sheet 'alleles.tsv' -profile docker
+nextflow run nf-core/mhcquant --input 'samples.tsv' --outdir <OUTDIR> --fasta 'SWISSPROT_2020.fasta' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -80,7 +86,9 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 
-> ⚠️ Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
+:::warning
+Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
+:::
 
 The above pipeline run specified with a params file in yaml format:
 
@@ -117,11 +125,15 @@ This version number will be logged in reports when you run the pipeline, so that
 
 To further assist in reproducbility, you can use share and re-use [parameter files](#running-the-pipeline) to repeat pipeline runs with the same settings without having to write out a command with every single parameter.
 
-> 💡 If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
+:::tip
+If you wish to share such profile (such as upload as supplementary material for academic publications), make sure to NOT include cluster specific paths to files, nor institutional specific profiles.
+:::
 
 ## Core Nextflow arguments
 
-> **NB:** These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
+:::note
+These options are part of Nextflow and use a _single_ hyphen (pipeline parameters use a double-hyphen).
+:::
 
 ### `-profile`
 
@@ -129,7 +141,9 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 
 Several generic profiles are bundled with the pipeline which instruct the pipeline to use software packaged using different methods (Docker, Singularity, Podman, Shifter, Charliecloud, Apptainer, Conda) - see below.
 
-> We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
+:::info
+We highly recommend the use of Docker or Singularity containers for full pipeline reproducibility, however when this is not possible, Conda is also supported.
+:::
 
 The pipeline also dynamically loads configurations from [https://github.com/nf-core/configs](https://github.com/nf-core/configs) when it runs, making multiple config profiles for various institutional clusters available at run time. For more information and to see if your system is available in these configs please see the [nf-core/configs documentation](https://github.com/nf-core/configs#documentation).
 

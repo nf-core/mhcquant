@@ -1,24 +1,24 @@
 process PYOPENMS_IONANNOTATOR {
-    tag "$sample"
+    tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::pyopenms=2.8.0"
+    conda "bioconda::pyopenms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:2.8.0--py310h3dc0cdb_1' :
-        'biocontainers/pyopenms:2.8.0--py310h3dc0cdb_1' }"
+        'https://depot.galaxyproject.org/singularity/pyopenms:3.0.0--py311h9b8898c_0' :
+        'biocontainers/pyopenms:3.0.0--py311h9b8898c_0' }"
 
     input:
-        tuple val(sample), path(mzml), path(fdr_filtered_idxml)
+        tuple val(meta), path(mzml), path(fdr_filtered_idxml)
 
     output:
-        tuple val(sample), path("*.tsv"), path("*.tsv"), emit: tsv
+        tuple val(meta), path("*.tsv")  , emit: tsv
         path "versions.yml"             , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${mzml.baseName}"
+        def prefix           = task.ext.prefix ?: "${meta.id}"
         def args             = task.ext.args  ?: ''
 
         def xions            = params.use_x_ions ? "--use_x_ions" : ""
@@ -30,7 +30,7 @@ process PYOPENMS_IONANNOTATOR {
         get_ion_annotations.py \\
             --input $mzml \\
             -idxml $fdr_filtered_idxml \\
-            --prefix $sample \\
+            --prefix $meta.id \\
             $args \\
             $xions \\
             $zions \\

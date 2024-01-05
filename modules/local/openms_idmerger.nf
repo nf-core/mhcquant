@@ -2,13 +2,13 @@ process OPENMS_IDMERGER {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::openms=2.9.1"
+    conda "bioconda::openms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:2.9.1--h135471a_1' :
-        'biocontainers/openms:2.9.1--h135471a_1' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.1.0--h8964181_3' :
+        'biocontainers/openms:3.1.0--h8964181_3' }"
 
     input:
-        tuple val(meta), path(aligned)
+        tuple val(meta), path(idxmls)
 
     output:
         tuple val(meta), path("*.idXML"), emit: idxml
@@ -18,10 +18,10 @@ process OPENMS_IDMERGER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.sample}_${meta.condition}_all_ids_merged"
+        def prefix           = task.ext.prefix ?: "${meta.id}"
 
         """
-        IDMerger -in $aligned \\
+        IDMerger -in $idxmls \\
             -out ${prefix}.idXML \\
             -threads $task.cpus \\
             -annotate_file_origin true \\
