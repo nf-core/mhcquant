@@ -73,8 +73,6 @@ include { OPENMS_PEPTIDEINDEXER }                                           from
 include { MS2RESCORE }                                                      from '../modules/local/ms2rescore'
 include { OPENMS_IDSCORESWITCHER }                                          from '../modules/local/openms_idscoreswitcher'
 
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
-
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
 include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
@@ -102,11 +100,12 @@ include { PREDICT_CLASS2 }                                                  from
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { OPENMS_DECOYDATABASE        } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_PEAKPICKERHIRES      } from '../modules/nf-core/openms/peakpickerhires/main'
-include { OPENMS_IDMERGER             } from '../modules/nf-core/openms/idmerger/main'
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { OPENMS_DECOYDATABASE                       } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_PEAKPICKERHIRES                     } from '../modules/nf-core/openms/peakpickerhires/main'
+include { OPENMS_IDMERGER                            } from '../modules/nf-core/openms/idmerger/main'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE } from '../modules/nf-core/openms/idfilter/main'
+include { MULTIQC                                    } from '../modules/nf-core/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -269,8 +268,7 @@ workflow MHCQUANT {
     }
 
     // Filter by percolator q-value
-    // TODO: Use empty list instead of null
-    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.flatMap { it -> [tuple(it[0], it[1], null)] })
+    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.flatMap { it -> [tuple(it[0], it[1], [])] })
     ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
 
     //
@@ -279,7 +277,7 @@ workflow MHCQUANT {
     if (params.refine_fdr_on_predicted_subset && params.predict_class_1) {
         // Run the following subworkflow
         REFINE_FDR (
-            OPENMS_IDFILTER_Q_VALUE.out.idxml,
+            OPENMS_IDFILTER_Q_VALUE.out.filtered,
             OPENMS_PSMFEATUREEXTRACTOR.out.idxml,
             peptides_class_1_alleles
         )
@@ -288,7 +286,7 @@ workflow MHCQUANT {
         filter_q_value = REFINE_FDR.out.filter_refined_q_value
     } else {
         // Make sure that the columns that consists of the ID's, sample names and the idXML file names are returned
-        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml
+        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
     }
 
     //

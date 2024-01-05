@@ -7,8 +7,8 @@ include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPERC } from '../../modules
 include { OPENMS_MZTABEXPORTER as OPENMS_MZTABEXPORTERPSM }  from '../../modules/local/openms_mztabexporter'
 include { MHCFLURRY_PREDICTPSMS }                            from '../../modules/local/mhcflurry_predictpsms'
 include { OPENMS_PERCOLATORADAPTER }                         from '../../modules/local/openms_percolatoradapter'
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../../modules/local/openms_idfilter'
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../../modules/local/openms_idfilter'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_PSMS }          from '../../modules/nf-core/openms/idfilter/main'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_REFINED }       from '../../modules/nf-core/openms/idfilter/main'
 
 workflow REFINE_FDR {
     // Define the input parameters
@@ -36,16 +36,17 @@ workflow REFINE_FDR {
         ch_versions = ch_versions.mix(MHCFLURRY_PREDICTPSMS.out.versions)
 
         // Filter psm results by shrinked search space
+        // TODO: Check if filtering works properly when reevaluating this subworkflow
         OPENMS_IDFILTER_PSMS(psm_features.combine( MHCFLURRY_PREDICTPSMS.out.idxml, by: [0] ))
         ch_versions = ch_versions.mix(OPENMS_IDFILTER_PSMS.out.versions)
         // Recompute percolator fdr on shrinked search space
-        OPENMS_PERCOLATORADAPTER( OPENMS_IDFILTER_PSMS.out.idxml )
+        OPENMS_PERCOLATORADAPTER( OPENMS_IDFILTER_PSMS.out.filtered )
         ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         // Filter results by refined fdr
-        OPENMS_IDFILTER_REFINED(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], null)]})
+        OPENMS_IDFILTER_REFINED(OPENMS_PERCOLATORADAPTER.out.idxml.flatMap { it -> [tuple(it[0], it[1], [])]})
         ch_versions = ch_versions.mix(OPENMS_IDFILTER_REFINED.out.versions)
     emit:
         // Define the information that is returned by this workflow
-        filter_refined_q_value = OPENMS_IDFILTER_REFINED.out.idxml
+        filter_refined_q_value = OPENMS_IDFILTER_REFINED.out.filtered
         versions = ch_versions
 }
