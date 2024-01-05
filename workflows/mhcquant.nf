@@ -65,7 +65,6 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // MODULE: Loaded from modules/local/
 //
-include { OPENMS_DECOYDATABASE }                                            from '../modules/local/openms_decoydatabase'
 include { THERMORAWFILEPARSER }                                             from '../modules/local/thermorawfileparser'
 include { TDF2MZML }                                                        from '../modules/local/tdf2mzml'
 include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
@@ -105,6 +104,7 @@ include { PREDICT_CLASS2 }                                                  from
 //
 // MODULE: Installed directly from nf-core/modules
 //
+include { OPENMS_DECOYDATABASE        } from '../modules/nf-core/openms/decoydatabase/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -174,7 +174,7 @@ workflow MHCQUANT {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(fasta_file)
         ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
-        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy
+        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
                                 .map{ meta, fasta -> [fasta] }
     } else {
         ch_decoy_db = fasta_file.map{ meta, fasta -> [fasta] }
