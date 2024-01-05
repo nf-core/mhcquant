@@ -18,7 +18,7 @@ workflow MAP_ALIGNMENT {
 
         // Compute group-wise alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION( runs_to_be_aligned )
-        ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions)
 
         // Join run specific trafoXMLs with meta information
         merge_meta_map
@@ -40,10 +40,10 @@ workflow MAP_ALIGNMENT {
 
         // Align mzML files using trafoXMLs
         OPENMS_MAPRTTRANSFORMERMZML(joined_trafos_mzmls)
-        ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions)
         // Align idXMLfiles using trafoXMLs
         OPENMS_MAPRTTRANSFORMERIDXML(joined_trafos_ids)
-        ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERIDXML.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERIDXML.out.versions)
 
     emit:
         versions = ch_versions

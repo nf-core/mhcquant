@@ -184,18 +184,18 @@ workflow MHCQUANT {
     ch_ms_files = branched_ms_files.mzml.map{ meta, mzml -> [meta, mzml[0]]}
     // Raw file conversion
     THERMORAWFILEPARSER(branched_ms_files.raw)
-    ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions)
     ch_ms_files = ch_ms_files.mix(THERMORAWFILEPARSER.out.mzml)
 
     // timsTOF data conversion
     TDF2MZML(branched_ms_files.tdf)
-    ch_versions = ch_versions.mix(TDF2MZML.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(TDF2MZML.out.versions)
     ch_ms_files = ch_ms_files.mix(TDF2MZML.out.mzml)
 
     // Optional: Run Peak Picking as Preprocessing
     if (params.run_centroidisation) {
         OPENMS_PEAKPICKERHIRES(ch_ms_files)
-        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions)
         ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
     } else {
         ch_mzml_file = ch_ms_files
@@ -204,7 +204,7 @@ workflow MHCQUANT {
     // Optionally clean up mzML files
     if (params.filter_mzml){
         OPENMS_FILEFILTER(ch_mzml_file)
-        ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions)
         ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
     } else {
         ch_clean_mzml_file = ch_mzml_file
@@ -222,7 +222,7 @@ workflow MHCQUANT {
 
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.combine(ch_decoy_db))
-    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.idxml
@@ -237,7 +237,7 @@ workflow MHCQUANT {
 
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_runs_to_merge)
-    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions)
 
     // Run MS2Rescore
     ch_clean_mzml_file
@@ -254,11 +254,11 @@ workflow MHCQUANT {
         // Extract PSM features for Percolator
         OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml
                                         .join(MS2RESCORE.out.feature_names))
-        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
 
         // Run Percolator
         OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         ch_rescored_runs = OPENMS_PERCOLATORADAPTER.out.idxml
     } else {
         log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
@@ -271,7 +271,7 @@ workflow MHCQUANT {
     // Filter by percolator q-value
     // TODO: Use empty list instead of null
     OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.flatMap { it -> [tuple(it[0], it[1], null)] })
-    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
 
     //
     // SUBWORKFLOW: Refine the FDR values on the predicted subset
@@ -283,7 +283,7 @@ workflow MHCQUANT {
             OPENMS_PSMFEATUREEXTRACTOR.out.idxml,
             peptides_class_1_alleles
         )
-        ch_versions = ch_versions.mix(REFINE_FDR.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(REFINE_FDR.out.versions)
         // Define the outcome of the paramer to a fixed variable
         filter_q_value = REFINE_FDR.out.filter_refined_q_value
     } else {
@@ -296,7 +296,7 @@ workflow MHCQUANT {
     //
     if (!params.skip_quantification) {
         QUANT(merge_meta_map, ch_rescored_runs, filter_q_value, ch_clean_mzml_file)
-        ch_versions = ch_versions.mix(QUANT.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
     } else {
         ch_output = filter_q_value
@@ -304,7 +304,7 @@ workflow MHCQUANT {
 
     // Prepare for check if file is empty
     OPENMS_TEXTEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions)
     // Return an error message when there is only a header present in the document
     OPENMS_TEXTEXPORTER.out.tsv.map {
         meta, tsv -> if (tsv.size() < 130) {
@@ -313,7 +313,7 @@ workflow MHCQUANT {
     }
 
     OPENMS_MZTABEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions)
 
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
@@ -325,7 +325,7 @@ workflow MHCQUANT {
     //        peptides_class_1_alleles,
     //        ch_vcf_from_sheet
     //    )
-    //    ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.ifEmpty(null))
+    //    ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions)
     //    ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
     //} else {
     //    ch_predicted_possible_neoepitopes = Channel.empty()
@@ -340,7 +340,7 @@ workflow MHCQUANT {
     //        peptides_class_2_alleles,
     //        ch_vcf_from_sheet
     //    )
-    //    ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.ifEmpty(null))
+    //    ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions)
     //    ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
     //} else {
     //    ch_predicted_possible_neoepitopes_II = Channel.empty()
@@ -355,7 +355,7 @@ workflow MHCQUANT {
 
         // Annotate spectra with ion fragmentation information
         PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
-        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions)
     }
 
     //
