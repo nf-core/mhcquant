@@ -90,6 +90,11 @@ include { OPENMS_MZTABEXPORTER }                                            from
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { INCLUDE_PROTEINS }                                                from '../subworkflows/local/include_proteins'
+include { REFINE_FDR }                                                      from '../subworkflows/local/refine_fdr'
+include { QUANT }                                                           from '../subworkflows/local/quant'
+include { PREDICT_CLASS1 }                                                  from '../subworkflows/local/predict_class1'
+include { PREDICT_CLASS2 }                                                  from '../subworkflows/local/predict_class2'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,11 +119,6 @@ def multiqc_report = []
 // Sort closure for merging and splitting files
 def sortById = { a, b -> a.id <=> b.id }
 
-include { INCLUDE_PROTEINS }                                                from '../subworkflows/local/include_proteins'
-include { REFINE_FDR }                                                      from '../subworkflows/local/refine_fdr'
-include { QUANT }                                                           from '../subworkflows/local/quant'
-include { PREDICT_CLASS1 }                                                  from '../subworkflows/local/predict_class1'
-include { PREDICT_CLASS2 }                                                  from '../subworkflows/local/predict_class2'
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
@@ -251,7 +251,6 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(MS2RESCORE.out.versions)
 
     if (params.rescoring_engine == 'percolator') {
-        // TODO: Find a way to parse the feature names of ms2rescore and plug them into the feature extractor
         // Extract PSM features for Percolator
         OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml
                                         .join(MS2RESCORE.out.feature_names))
@@ -319,32 +318,33 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
     //
-    if (params.predict_class_1 & !params.skip_quantification) {
-        PREDICT_CLASS1 (
-            OPENMS_MZTABEXPORTER.out.mztab,
-            peptides_class_1_alleles,
-            ch_vcf_from_sheet
-        )
-        ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.ifEmpty(null))
-        ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
-    } else {
-        ch_predicted_possible_neoepitopes = Channel.empty()
-    }
-
+    // TODO: Temporary disabled because of outdated vcf parsing
+    //if (params.predict_class_1 & !params.skip_quantification) {
+    //    PREDICT_CLASS1 (
+    //        OPENMS_MZTABEXPORTER.out.mztab,
+    //        peptides_class_1_alleles,
+    //        ch_vcf_from_sheet
+    //    )
+    //    ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.ifEmpty(null))
+    //    ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
+    //} else {
+    //    ch_predicted_possible_neoepitopes = Channel.empty()
+    //}
     //
-    // SUBWORKFLOW: Predict class II (neoepitopes)
-    //
-    if (params.predict_class_2 & !params.skip_quantification) {
-        PREDICT_CLASS2 (
-            OPENMS_MZTABEXPORTER.out.mztab,
-            peptides_class_2_alleles,
-            ch_vcf_from_sheet
-        )
-        ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.ifEmpty(null))
-        ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
-    } else {
-        ch_predicted_possible_neoepitopes_II = Channel.empty()
-    }
+    ////
+    //// SUBWORKFLOW: Predict class II (neoepitopes)
+    ////
+    //if (params.predict_class_2 & !params.skip_quantification) {
+    //    PREDICT_CLASS2 (
+    //        OPENMS_MZTABEXPORTER.out.mztab,
+    //        peptides_class_2_alleles,
+    //        ch_vcf_from_sheet
+    //    )
+    //    ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.ifEmpty(null))
+    //    ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
+    //} else {
+    //    ch_predicted_possible_neoepitopes_II = Channel.empty()
+    //}
 
     if (params.annotate_ions) {
         // Join the ch_filtered_idxml and the ch_mzml_file
