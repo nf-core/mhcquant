@@ -8,7 +8,7 @@
 include { OPENMS_IDRIPPER                          } from '../../modules/local/openms_idripper'
 include { OPENMS_IDSCORESWITCHER                   } from '../../modules/local/openms_idscoreswitcher'
 include { PYOPENMS_IDFILTER                        } from '../../modules/local/pyopenms_idfilter'
-include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../modules/nf-core/openms/idmerger/main'
+include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../modules/nf-core/openms/idmerger/main'
 
 include { MAP_ALIGNMENT                            } from './map_alignment'
 include { PROCESS_FEATURE                          } from './process_feature'
