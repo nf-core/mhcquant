@@ -19,6 +19,11 @@
                         "branch": "master",
                         "git_sha": "0f4f5205a67d3a90adc8e341cf2b19a16f5cb272",
                         "installed_by": ["modules"]
+                    },
+                    "openms/peakpickerhires": {
+                        "branch": "master",
+                        "git_sha": "4e2cbac1db88f544711e488e552175368ca14588",
+                        "installed_by": ["modules"]
                     }
                 }
             }

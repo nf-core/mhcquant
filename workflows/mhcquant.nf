@@ -67,7 +67,6 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { THERMORAWFILEPARSER }                                             from '../modules/local/thermorawfileparser'
 include { TDF2MZML }                                                        from '../modules/local/tdf2mzml'
-include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
 include { OPENMS_FILEFILTER }                                               from '../modules/local/openms_filefilter'
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
@@ -86,7 +85,7 @@ include { OPENMS_MZTABEXPORTER }                                            from
 
 
 //
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
+// SUBWORKFLOW: Loaded from subworkflows/local/
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { INCLUDE_PROTEINS }                                                from '../subworkflows/local/include_proteins'
@@ -105,6 +104,7 @@ include { PREDICT_CLASS2 }                                                  from
 // MODULE: Installed directly from nf-core/modules
 //
 include { OPENMS_DECOYDATABASE        } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_PEAKPICKERHIRES      } from '../modules/nf-core/openms/peakpickerhires/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
