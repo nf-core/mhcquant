@@ -74,7 +74,6 @@ include { MS2RESCORE }                                                      from
 include { OPENMS_IDSCORESWITCHER }                                          from '../modules/local/openms_idscoreswitcher'
 
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
-include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
 
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
@@ -105,6 +104,7 @@ include { PREDICT_CLASS2 }                                                  from
 //
 include { OPENMS_DECOYDATABASE        } from '../modules/nf-core/openms/decoydatabase/main'
 include { OPENMS_PEAKPICKERHIRES      } from '../modules/nf-core/openms/peakpickerhires/main'
+include { OPENMS_IDMERGER             } from '../modules/nf-core/openms/idmerger/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 

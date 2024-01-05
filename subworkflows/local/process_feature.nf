@@ -2,7 +2,6 @@
  * Perform the quantification by extracting the feature intensities and group runs corresponding to the same sample and condition.
  */
 
-include { OPENMS_IDMERGER }                                                 from '../../modules/local/openms_idmerger'
 include { OPENMS_FEATUREFINDERIDENTIFICATION }                              from '../../modules/local/openms_featurefinderidentification'
 include { OPENMS_FEATURELINKERUNLABELEDKD }                                 from '../../modules/local/openms_featurelinkerunlabeledkd'
 include { OPENMS_IDCONFLICTRESOLVER }                                       from '../../modules/local/openms_idconflictresolver'

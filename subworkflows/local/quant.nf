@@ -4,13 +4,14 @@
  * It then aligns the retention times of the runs and merges the idxml files together to use them as id_ext in featurefinder
  * Finally, it performs the quantification and emits the consensusXML file
  */
-include { OPENMS_IDRIPPER }                                                 from '../../modules/local/openms_idripper'
-include { OPENMS_IDSCORESWITCHER }                                          from '../../modules/local/openms_idscoreswitcher'
-include { PYOPENMS_IDFILTER }                                               from '../../modules/local/pyopenms_idfilter'
-include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT }                        from '../../modules/local/openms_idmerger'
 
-include { MAP_ALIGNMENT }                                                   from './map_alignment'
-include { PROCESS_FEATURE }                                                 from './process_feature'
+include { OPENMS_IDRIPPER                          } from '../../modules/local/openms_idripper'
+include { OPENMS_IDSCORESWITCHER                   } from '../../modules/local/openms_idscoreswitcher'
+include { PYOPENMS_IDFILTER                        } from '../../modules/local/pyopenms_idfilter'
+include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../modules/nf-core/openms/idmerger/main'
+
+include { MAP_ALIGNMENT                            } from './map_alignment'
+include { PROCESS_FEATURE                          } from './process_feature'
 
 // Sort closure for merging and splitting files
 def sortById = { a, b -> a.id <=> b.id }
