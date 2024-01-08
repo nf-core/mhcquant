@@ -7,7 +7,7 @@
 
 include { OPENMS_IDRIPPER                          } from '../../modules/local/openms_idripper'
 include { OPENMS_IDSCORESWITCHER                   } from '../../modules/local/openms_idscoreswitcher'
-include { PYOPENMS_IDFILTER                        } from '../../modules/local/pyopenms_idfilter'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_QUANT } from '../../modules/nf-core/openms/idfilter/main'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../modules/nf-core/openms/idmerger/main'
 
 include { MAP_ALIGNMENT                            } from './map_alignment'
@@ -44,13 +44,12 @@ workflow QUANT {
         }
 
         // Filter runs based on fdr filtered coprocessed percolator output.
-        // TODO: This is an alternative filtering method that will be replaced by IDFilter with new release of OpenMS
-        PYOPENMS_IDFILTER( ch_runs_to_be_filtered ).filtered
+        OPENMS_IDFILTER_QUANT( ch_runs_to_be_filtered ).filtered
                 .map { meta, idxml -> [[id:meta.sample + '_' + meta.condition], [id:meta.id, file:idxml]] }
                 .groupTuple( sort: sortById )
                 .map { meta, idxml -> [meta, idxml.file] }
                 .set { ch_runs_to_be_aligned }
-        ch_versions = ch_versions.mix(PYOPENMS_IDFILTER.out.versions)
+        ch_versions = ch_versions.mix(OPENMS_IDFILTER_QUANT.out.versions)
 
         // Align retention times of runs
         MAP_ALIGNMENT(
