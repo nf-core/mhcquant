@@ -30,6 +30,11 @@
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
+                    "openms/idscoreswitcher": {
+                        "branch": "master",
+                        "git_sha": "733023d250311ee76c46d6863a4e056f9855eb5d",
+                        "installed_by": ["modules"]
+                    },
                     "openms/peakpickerhires": {
                         "branch": "master",
                         "git_sha": "4e2cbac1db88f544711e488e552175368ca14588",

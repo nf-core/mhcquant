@@ -6,7 +6,7 @@
  */
 
 include { OPENMS_IDRIPPER                          } from '../../modules/local/openms_idripper'
-include { OPENMS_IDSCORESWITCHER                   } from '../../modules/local/openms_idscoreswitcher'
+include { OPENMS_IDSCORESWITCHER                   } from '../../modules/nf-core/openms/idscoreswitcher/main'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_QUANT } from '../../modules/nf-core/openms/idfilter/main'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../modules/nf-core/openms/idmerger/main'
 
@@ -28,21 +28,23 @@ workflow QUANT {
         // Rip post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1, pout_filtered] [meta_run2, idxml_run2, pout_filtered] ...
         OPENMS_IDRIPPER( merged_pout ).ripped
                 .join( merge_meta_map )
-                .join( filter_q_value )
+                //.join( filter_q_value )
                 // TODO: fdrfiltered is not needed for idscore switching, but for idfilter. This will be adressed in the next refacoring of the workflow
-                .map { group_meta, ripped, meta, fdrfiltered -> [meta, ripped, fdrfiltered] }
+                .map { group_meta, ripped, meta -> [meta, ripped] }
                 .transpose()
                 .set { ch_ripped_pout }
         ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions)
-
+        ch_ripped_pout.view()
         // Switch to xcorr for filtering since q-values are set to 1 with peptide-level-fdr
         if (params.fdr_level == 'peptide_level_fdrs'){
-            ch_runs_to_be_filtered = OPENMS_IDSCORESWITCHER( ch_ripped_pout ).switched_idxml
+            ch_runs_to_be_filtered = OPENMS_IDSCORESWITCHER( ch_ripped_pout ).idxml
+                                            .join( filter_q_value )
             ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         } else {
             ch_runs_to_be_filtered = ch_ripped_pout
+                                            .join( filter_q_value )
         }
-
+        ch_runs_to_be_filtered.view()
         // Filter runs based on fdr filtered coprocessed percolator output.
         OPENMS_IDFILTER_QUANT( ch_runs_to_be_filtered ).filtered
                 .map { meta, idxml -> [[id:meta.sample + '_' + meta.condition], [id:meta.id, file:idxml]] }
