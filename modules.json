@@ -8,42 +8,58 @@
                     "custom/dumpsoftwareversions": {
                         "branch": "master",
                         "git_sha": "bba7e362e4afead70653f84d8700588ea28d0f9e",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "4ab13872435962dadc239979554d13709e20bf29",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "openms/decoydatabase": {
                         "branch": "master",
                         "git_sha": "0f4f5205a67d3a90adc8e341cf2b19a16f5cb272",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "openms/idfilter": {
                         "branch": "master",
                         "git_sha": "f1a1aa1931d1774a0735e34669d3b455c31f6a0b",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "openms/idmerger": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "openms/idripper": {
                         "branch": "master",
                         "git_sha": "82ae8a2a96e84fffb89b57f1ae8bf35ff4ae5f57",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "openms/idscoreswitcher": {
                         "branch": "master",
                         "git_sha": "733023d250311ee76c46d6863a4e056f9855eb5d",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     },
                     "openms/peakpickerhires": {
                         "branch": "master",
                         "git_sha": "4e2cbac1db88f544711e488e552175368ca14588",
-                        "installed_by": ["modules"]
+                        "installed_by": [
+                            "modules"
+                        ]
                     }
                 }
             }

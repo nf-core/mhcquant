@@ -5,7 +5,7 @@
  * Finally, it performs the quantification and emits the consensusXML file
  */
 
-include { OPENMS_IDRIPPER                          } from '../../modules/local/openms_idripper'
+include { OPENMS_IDRIPPER                          } from '../../modules/nf-core/openms/idripper/main'
 include { OPENMS_IDSCORESWITCHER                   } from '../../modules/nf-core/openms/idscoreswitcher/main'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_QUANT } from '../../modules/nf-core/openms/idfilter/main'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../modules/nf-core/openms/idmerger/main'
@@ -25,31 +25,37 @@ workflow QUANT {
 
     main:
         ch_versions = Channel.empty()
-        // Rip post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1, pout_filtered] [meta_run2, idxml_run2, pout_filtered] ...
-        OPENMS_IDRIPPER( merged_pout ).ripped
-                .join( merge_meta_map )
-                //.join( filter_q_value )
-                // TODO: fdrfiltered is not needed for idscore switching, but for idfilter. This will be adressed in the next refacoring of the workflow
-                .map { group_meta, ripped, meta -> [meta, ripped] }
-                .transpose()
-                .set { ch_ripped_pout }
+        // Rip post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1] [meta_run2, idxml_run2] ...
+        // We need to make sure that the order of the runs is the same as in the mzml files since IDRipper always sorts the runs
+        // (and nextflow does not guarantee the order of the maps in merged_meta_map)
+        OPENMS_IDRIPPER( merged_pout ).idxmls
+                .flatMap { merged_meta, idxmls -> idxmls.collect { file -> [[spectra: file.baseName], file] } }
+                // join on file basename to make sure that the order of the runs is the same as in the mzml files
+                // Is there a smoother way to do this?
+                .join( merge_meta_map
+                        .flatMap { merged_meta, metas -> metas }
+                        .map { meta -> [[spectra:meta.spectra], meta]} )
+                .map { spectra, idxmls, meta -> [meta, idxmls] }
+                .set { ch_ripped_idxml }
+
         ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions)
-        ch_ripped_pout.view()
         // Switch to xcorr for filtering since q-values are set to 1 with peptide-level-fdr
         if (params.fdr_level == 'peptide_level_fdrs'){
-            ch_runs_to_be_filtered = OPENMS_IDSCORESWITCHER( ch_ripped_pout ).idxml
-                                            .join( filter_q_value )
+            ch_runs_score_switched = OPENMS_IDSCORESWITCHER( ch_ripped_idxml ).idxml
             ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         } else {
-            ch_runs_to_be_filtered = ch_ripped_pout
-                                            .join( filter_q_value )
+            ch_runs_score_switched = ch_ripped_idxml
         }
-        ch_runs_to_be_filtered.view()
+        ch_runs_score_switched
+            .map { meta, idxml -> [[id: meta.sample + '_' + meta.condition], meta, idxml] }
+            .combine(filter_q_value, by:0)
+            .map { merge_id, meta, idxml, q_value -> [meta, idxml, q_value] }
+            .set { ch_runs_to_filter}
+
         // Filter runs based on fdr filtered coprocessed percolator output.
-        OPENMS_IDFILTER_QUANT( ch_runs_to_be_filtered ).filtered
-                .map { meta, idxml -> [[id:meta.sample + '_' + meta.condition], [id:meta.id, file:idxml]] }
-                .groupTuple( sort: sortById )
-                .map { meta, idxml -> [meta, idxml.file] }
+        OPENMS_IDFILTER_QUANT( ch_runs_to_filter ).filtered
+                .map { meta, idxml -> [[id:meta.sample + '_' + meta.condition], idxml] }
+                .groupTuple()
                 .set { ch_runs_to_be_aligned }
         ch_versions = ch_versions.mix(OPENMS_IDFILTER_QUANT.out.versions)
 

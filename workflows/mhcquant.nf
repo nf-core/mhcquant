@@ -71,7 +71,6 @@ include { OPENMS_FILEFILTER }                                               from
 include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
 include { MS2RESCORE }                                                      from '../modules/local/ms2rescore'
-include { OPENMS_IDSCORESWITCHER }                                          from '../modules/local/openms_idscoreswitcher'
 
 include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
@@ -103,6 +102,7 @@ include { PREDICT_CLASS2 }                                                  from
 include { OPENMS_DECOYDATABASE                       } from '../modules/nf-core/openms/decoydatabase/main'
 include { OPENMS_PEAKPICKERHIRES                     } from '../modules/nf-core/openms/peakpickerhires/main'
 include { OPENMS_IDMERGER                            } from '../modules/nf-core/openms/idmerger/main'
+include { OPENMS_IDSCORESWITCHER                     } from '../modules/nf-core/openms/idscoreswitcher/main.nf'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE } from '../modules/nf-core/openms/idfilter/main'
 include { MULTIQC                                    } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS                } from '../modules/nf-core/custom/dumpsoftwareversions/main'
@@ -141,11 +141,11 @@ workflow MHCQUANT {
         .branch {
             meta, filename ->
                 raw : meta.ext == 'raw'
-                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'spectra'), filename ]
                 mzml : meta.ext == 'mzml'
-                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'spectra'), filename ]
                 tdf : meta.ext == 'd'
-                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'spectra'), filename ]
                 other : true }
         .set { branched_ms_files }
 
