@@ -18,7 +18,7 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
         task.ext.when == null || task.ext.when
 
     script:
-        def out_names        = idxmls.collect { it.baseName+'.trafoXML' }.join(' ')
+        def out_names        = idxmls.collect { it.baseName.replace('_fdr_filtered','')+'.trafoXML' }.join(' ')
         def args             = task.ext.args  ?: ''
 
         """

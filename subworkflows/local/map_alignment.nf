@@ -9,40 +9,43 @@ include {
 
 workflow MAP_ALIGNMENT {
     take:
-        runs_to_be_aligned
-        mzml
+        ch_runs_to_be_aligned
+        ch_mzml
         merge_meta_map
 
     main:
         ch_versions = Channel.empty()
 
         // Compute group-wise alignment rt transformation
-        OPENMS_MAPALIGNERIDENTIFICATION( runs_to_be_aligned )
+        OPENMS_MAPALIGNERIDENTIFICATION( ch_runs_to_be_aligned )
         ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions)
 
         // Join run specific trafoXMLs with meta information
         merge_meta_map
-            .join( OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml )
-            .map { groupMeta, meta, trafoxml -> [meta, trafoxml] }
-            .transpose()
-            .set { joined_trafos }
-
-        // Intermediate step to join RT transformation files with mzml channels -> [meta, idxml, mzml]
-        joined_trafos_mzmls = mzml.join(joined_trafos)
-
-        // Intermediate step to join RT transformation files with idxml channels -> [meta, idxml, trafoxml]
-        runs_to_be_aligned
-                .join( merge_meta_map )
-                .map { group_meta, idxml, meta -> [meta, idxml] }
-                .transpose()
-                .join( joined_trafos )
-                .set { joined_trafos_ids }
+            .flatMap { group_meta, metas -> metas }
+            .map { meta -> [[spectra:meta.spectra], meta]}
+            .join( OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
+                    .flatMap { group_meta, trafoxmls -> trafoxmls.collect { trafoxml -> [[spectra: trafoxml.baseName], trafoxml] } })
+            .map { spectra, meta, trafoxml -> [meta, trafoxml] }
+            .set { ch_trafos }
 
         // Align mzML files using trafoXMLs
-        OPENMS_MAPRTTRANSFORMERMZML(joined_trafos_mzmls)
+        ch_trafos_mzmls = ch_mzml.join(ch_trafos)
+        ch_trafos_mzmls.view()
+        OPENMS_MAPRTTRANSFORMERMZML(ch_trafos_mzmls)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions)
+
         // Align idXMLfiles using trafoXMLs
-        OPENMS_MAPRTTRANSFORMERIDXML(joined_trafos_ids)
+        ch_runs_to_be_aligned
+                .flatMap { group_meta, idxmls -> idxmls.collect { idxml -> [[spectra: idxml.baseName.replace("_fdr_filtered","")], idxml] } }
+                .join( merge_meta_map
+                        .flatMap { group_meta, metas -> metas }
+                        .map { meta -> [[spectra:meta.spectra], meta]} )
+                .map { group_meta, idxml, meta -> [meta, idxml] }
+                .join( ch_trafos )
+                .set { ch_trafos_idxml }
+
+        OPENMS_MAPRTTRANSFORMERIDXML(ch_trafos_idxml)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERIDXML.out.versions)
 
     emit:

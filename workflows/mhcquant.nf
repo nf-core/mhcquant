@@ -115,8 +115,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS                } from '../modules/nf-core/
 
 // Info required for completion email and summary
 def multiqc_report = []
-// Sort closure for merging and splitting files
-def sortById = { a, b -> a.id <=> b.id }
 
 
 ////////////////////////////////////////////////////
@@ -141,11 +139,11 @@ workflow MHCQUANT {
         .branch {
             meta, filename ->
                 raw : meta.ext == 'raw'
-                    return [ meta.subMap('id', 'sample', 'condition', 'spectra'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
                 mzml : meta.ext == 'mzml'
-                    return [ meta.subMap('id', 'sample', 'condition', 'spectra'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
                 tdf : meta.ext == 'd'
-                    return [ meta.subMap('id', 'sample', 'condition', 'spectra'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
                 other : true }
         .set { branched_ms_files }
 
@@ -225,14 +223,14 @@ workflow MHCQUANT {
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.idxml
-            .map { meta, idxml -> [[id: meta.sample + '_' + meta.condition], meta] }
-            .groupTuple( sort: sortById )
-            .set { merge_meta_map }
+        .map { meta, idxml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), meta] }
+        .groupTuple()
+        .set { merge_meta_map }
 
     OPENMS_PEPTIDEINDEXER.out.idxml
-            .map { meta, idxml -> [[id: meta.sample + '_' + meta.condition], idxml] }
-            .groupTuple()
-            .set { ch_runs_to_merge }
+        .map { meta, idxml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), idxml] }
+        .groupTuple()
+        .set { ch_runs_to_merge }
 
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_runs_to_merge)
@@ -240,7 +238,7 @@ workflow MHCQUANT {
 
     // Run MS2Rescore
     ch_clean_mzml_file
-            .map { meta, mzml -> [[id: meta.sample + '_' + meta.condition], mzml] }
+            .map { meta, mzml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), mzml] }
             .groupTuple()
             .join(OPENMS_IDMERGER.out.idxml)
             .map { meta, mzml, idxml -> [meta, idxml, mzml, []] }
@@ -251,8 +249,7 @@ workflow MHCQUANT {
 
     if (params.rescoring_engine == 'percolator') {
         // Extract PSM features for Percolator
-        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml
-                                        .join(MS2RESCORE.out.feature_names))
+        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
         ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
 
         // Run Percolator
@@ -261,14 +258,14 @@ workflow MHCQUANT {
         ch_rescored_runs = OPENMS_PERCOLATORADAPTER.out.idxml
     } else {
         log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
-        // TODO: remove whitelist argument from idscoreswitcher
-        OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml
-                                    .map { meta, idxml -> [meta, idxml, []] })
-        ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.switched_idxml.map { tuple -> tuple.findAll { it != [] }}
+        // Switch comet e-value to mokapot q-value
+        OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
+        ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
+        ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
     }
 
     // Filter by percolator q-value
-    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.flatMap { it -> [tuple(it[0], it[1], [])] })
+    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
     ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
 
     //
@@ -283,21 +280,33 @@ workflow MHCQUANT {
         )
         ch_versions = ch_versions.mix(REFINE_FDR.out.versions)
         // Define the outcome of the paramer to a fixed variable
-        filter_q_value = REFINE_FDR.out.filter_refined_q_value
+        ch_filter_q_value = REFINE_FDR.out.filter_refined_q_value
     } else {
         // Make sure that the columns that consists of the ID's, sample names and the idXML file names are returned
-        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
+        ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
     }
 
     //
     // SUBWORKFLOW: QUANT
     //
     if (!params.skip_quantification) {
-        QUANT(merge_meta_map, ch_rescored_runs, filter_q_value, ch_clean_mzml_file)
+        QUANT(merge_meta_map, ch_rescored_runs, ch_filter_q_value, ch_clean_mzml_file)
         ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
     } else {
-        ch_output = filter_q_value
+        ch_output = ch_filter_q_value
+    }
+
+    if (params.annotate_ions) {
+        // Join the ch_filtered_idxml and the ch_mzml_file
+        ch_clean_mzml_file.map { meta, mzml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), mzml] }
+            .groupTuple()
+            .join(ch_filter_q_value)
+            .set{ ch_ion_annotator_input }
+
+        // Annotate spectra with ion fragmentation information
+        PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
+        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions)
     }
 
     // Prepare for check if file is empty
@@ -343,18 +352,6 @@ workflow MHCQUANT {
     //} else {
     //    ch_predicted_possible_neoepitopes_II = Channel.empty()
     //}
-
-    if (params.annotate_ions) {
-        // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_clean_mzml_file.map { meta, mzml -> [[id: meta.sample + '_' + meta.condition], mzml] }
-            .groupTuple()
-            .join(filter_q_value)
-            .set{ ch_ion_annotator_input }
-
-        // Annotate spectra with ion fragmentation information
-        PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
-        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions)
-    }
 
     //
     // MODULE: Pipeline reporting
