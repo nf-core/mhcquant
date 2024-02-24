@@ -31,7 +31,6 @@ workflow MAP_ALIGNMENT {
 
         // Align mzML files using trafoXMLs
         ch_trafos_mzmls = ch_mzml.join(ch_trafos)
-        ch_trafos_mzmls.view()
         OPENMS_MAPRTTRANSFORMERMZML(ch_trafos_mzmls)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions)
 
