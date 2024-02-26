@@ -122,7 +122,7 @@ Additional functionality contained by the pipeline currently includes:
 - Facilitates the input to, the call of and output integration of Percolator (`PercolatorAdapter`)
 
 > [!WARNING]
-> The HLA prediction feature is outdated and will be reworked in the following releases
+> The neo-epitope search and HLA prediction feature is broken and will be reworked in the following releases. See [#248](https://github.com/nf-core/mhcquant/issues/248) and [#278](https://github.com/nf-core/mhcquant/issues/278)
 
 #### Prediction of HLA class 1 peptides
 
