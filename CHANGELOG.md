@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - Added MS²Rescore module with the underlying python CLI [#293](https://github.com/nf-core/mhcquant/pull/293)
+- Template update 2.11 [#300](https://github.com/nf-core/mhcquant/pull/300)
+- Template update 2.12 [#303](https://github.com/nf-core/mhcquant/pull/303)
 
 ### `Fixed`
 

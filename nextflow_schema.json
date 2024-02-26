@@ -112,7 +112,7 @@
                 },
                 "fragment_mass_tolerance": {
                     "type": "number",
-                    "default": 0.02,
+                    "default": 0.01,
                     "fa_icon": "fas fa-indent",
                     "description": "Specify the fragment mass tolerance to be used for the comet database search.",
                     "help_text": "For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)"
@@ -287,7 +287,7 @@
                 "feature_generators": {
                     "type": "string",
                     "fa_icon": "fas fa-file-code",
-                    "default": "ms2pip,deeplc",
+                    "default": "deeplc,ms2pip",
                     "description": "Specify the feature generator that should be used for rescoring. One or multiple of basic,ms2pip,deeplc,ionmob"
                 },
                 "ms2pip_model": {

@@ -18,7 +18,7 @@ process OPENMS_FILEFILTER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}"
+        def prefix           = task.ext.prefix ?: "${mzml.baseName}_filtered"
         """
         FileFilter -in $mzml \\
             -out ${prefix}.mzML \\
