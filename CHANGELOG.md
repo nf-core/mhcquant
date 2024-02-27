@@ -7,17 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-- Adding MS²Rescore module with the underlying python CLI [#288](https://github.com/nf-core/mhcquant/issues/288)
+- Added MS²Rescore module with the underlying python CLI [#293](https://github.com/nf-core/mhcquant/pull/293)
 - Template update 2.11 [#300](https://github.com/nf-core/mhcquant/pull/300)
 - Template update 2.12 [#303](https://github.com/nf-core/mhcquant/pull/303)
 
 ### `Fixed`
 
-- Create only one decoy database [#287](https://github.com/nf-core/mhcquant/issues/287)
+- Create only one decoy database [#299](https://github.com/nf-core/mhcquant/pull/299)
+- Use `groupKey` to streamline group-wise processing [#310](https://github.com/nf-core/mhcquant/pull/310)
+- Replace `PYOPENMS_IDFILTER` with `OPENMS_IDFILTER` [#310](https://github.com/nf-core/mhcquant/pull/310)
+- Added nf-core modules [#310](https://github.com/nf-core/mhcquant/pull/310)
 
 ### `Deprecated`
 
-- Removed MS²PIP and DeepLC modules. These feature generators are now called via the MS²Rescore framework
+- Removed MS²PIP and DeepLC modules. These feature generators are now called via the MS²Rescore framework [#293](https://github.com/nf-core/mhcquant/pull/293)
 
 ## v2.5.0 - nfcore/mhcquant "Angry Bird" - 2023/10/09
 

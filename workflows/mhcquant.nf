@@ -65,31 +65,29 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // MODULE: Loaded from modules/local/
 //
-include { OPENMS_DECOYDATABASE }                                            from '../modules/local/openms_decoydatabase'
-include { THERMORAWFILEPARSER }                                             from '../modules/local/thermorawfileparser'
-include { TDF2MZML }                                                        from '../modules/local/tdf2mzml'
-include { OPENMS_PEAKPICKERHIRES }                                          from '../modules/local/openms_peakpickerhires'
-include { OPENMS_FILEFILTER }                                               from '../modules/local/openms_filefilter'
-include { OPENMS_COMETADAPTER }                                             from '../modules/local/openms_cometadapter'
-include { OPENMS_PEPTIDEINDEXER }                                           from '../modules/local/openms_peptideindexer'
-include { MS2RESCORE }                                                      from '../modules/local/ms2rescore'
-include { OPENMS_IDSCORESWITCHER }                                          from '../modules/local/openms_idscoreswitcher'
+include { TDF2MZML                   } from '../modules/local/tdf2mzml'
+include { OPENMS_FILEFILTER          } from '../modules/local/openms_filefilter'
+include { OPENMS_COMETADAPTER        } from '../modules/local/openms_cometadapter'
+include { OPENMS_PEPTIDEINDEXER      } from '../modules/local/openms_peptideindexer'
+include { MS2RESCORE                 } from '../modules/local/ms2rescore'
 
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE }                      from '../modules/local/openms_idfilter'
-include { OPENMS_IDMERGER }                                                 from '../modules/local/openms_idmerger'
+include { OPENMS_PSMFEATUREEXTRACTOR } from '../modules/local/openms_psmfeatureextractor'
+include { OPENMS_PERCOLATORADAPTER   } from '../modules/local/openms_percolatoradapter'
+include { PYOPENMS_IONANNOTATOR      } from '../modules/local/pyopenms_ionannotator'
 
-include { OPENMS_PSMFEATUREEXTRACTOR }                                      from '../modules/local/openms_psmfeatureextractor'
-include { OPENMS_PERCOLATORADAPTER }                                        from '../modules/local/openms_percolatoradapter'
-include { PYOPENMS_IONANNOTATOR }                                           from '../modules/local/pyopenms_ionannotator'
-
-include { OPENMS_TEXTEXPORTER }                                             from '../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER }                                            from '../modules/local/openms_mztabexporter'
+include { OPENMS_TEXTEXPORTER        } from '../modules/local/openms_textexporter'
+include { OPENMS_MZTABEXPORTER       } from '../modules/local/openms_mztabexporter'
 
 
 //
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
+// SUBWORKFLOW: Loaded from subworkflows/local/
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { INPUT_CHECK      } from '../subworkflows/local/input_check'
+include { INCLUDE_PROTEINS } from '../subworkflows/local/include_proteins'
+include { REFINE_FDR       } from '../subworkflows/local/refine_fdr'
+include { QUANT            } from '../subworkflows/local/quant'
+include { PREDICT_CLASS1   } from '../subworkflows/local/predict_class1'
+include { PREDICT_CLASS2   } from '../subworkflows/local/predict_class2'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,8 +98,14 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { THERMORAWFILEPARSER                        } from '../modules/nf-core/thermorawfileparser/main'
+include { OPENMS_DECOYDATABASE                       } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_PEAKPICKERHIRES                     } from '../modules/nf-core/openms/peakpickerhires/main'
+include { OPENMS_IDMERGER                            } from '../modules/nf-core/openms/idmerger/main'
+include { OPENMS_IDSCORESWITCHER                     } from '../modules/nf-core/openms/idscoreswitcher/main.nf'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE } from '../modules/nf-core/openms/idfilter/main'
+include { MULTIQC                                    } from '../modules/nf-core/multiqc/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,14 +115,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 
 // Info required for completion email and summary
 def multiqc_report = []
-// Sort closure for merging and splitting files
-def sortById = { a, b -> a.id <=> b.id }
 
-include { INCLUDE_PROTEINS }                                                from '../subworkflows/local/include_proteins'
-include { REFINE_FDR }                                                      from '../subworkflows/local/refine_fdr'
-include { QUANT }                                                           from '../subworkflows/local/quant'
-include { PREDICT_CLASS1 }                                                  from '../subworkflows/local/predict_class1'
-include { PREDICT_CLASS2 }                                                  from '../subworkflows/local/predict_class2'
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
@@ -142,11 +139,11 @@ workflow MHCQUANT {
         .branch {
             meta, filename ->
                 raw : meta.ext == 'raw'
-                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
                 mzml : meta.ext == 'mzml'
-                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
                 tdf : meta.ext == 'd'
-                    return [ meta.subMap('id', 'sample', 'condition'), filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
                 other : true }
         .set { branched_ms_files }
 
@@ -174,7 +171,7 @@ workflow MHCQUANT {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(fasta_file)
         ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
-        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy
+        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
                                 .map{ meta, fasta -> [fasta] }
     } else {
         ch_decoy_db = fasta_file.map{ meta, fasta -> [fasta] }
@@ -184,18 +181,18 @@ workflow MHCQUANT {
     ch_ms_files = branched_ms_files.mzml.map{ meta, mzml -> [meta, mzml[0]]}
     // Raw file conversion
     THERMORAWFILEPARSER(branched_ms_files.raw)
-    ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions.ifEmpty(null))
-    ch_ms_files = ch_ms_files.mix(THERMORAWFILEPARSER.out.mzml)
+    ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions)
+    ch_ms_files = ch_ms_files.mix(THERMORAWFILEPARSER.out.spectra)
 
     // timsTOF data conversion
     TDF2MZML(branched_ms_files.tdf)
-    ch_versions = ch_versions.mix(TDF2MZML.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(TDF2MZML.out.versions)
     ch_ms_files = ch_ms_files.mix(TDF2MZML.out.mzml)
 
     // Optional: Run Peak Picking as Preprocessing
     if (params.run_centroidisation) {
         OPENMS_PEAKPICKERHIRES(ch_ms_files)
-        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions)
         ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
     } else {
         ch_mzml_file = ch_ms_files
@@ -204,7 +201,7 @@ workflow MHCQUANT {
     // Optionally clean up mzML files
     if (params.filter_mzml){
         OPENMS_FILEFILTER(ch_mzml_file)
-        ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions)
         ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
     } else {
         ch_clean_mzml_file = ch_mzml_file
@@ -222,26 +219,26 @@ workflow MHCQUANT {
 
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.combine(ch_decoy_db))
-    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.idxml
-            .map { meta, idxml -> [[id: meta.sample + '_' + meta.condition], meta] }
-            .groupTuple( sort: sortById )
-            .set { merge_meta_map }
+        .map { meta, idxml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), meta] }
+        .groupTuple()
+        .set { merge_meta_map }
 
     OPENMS_PEPTIDEINDEXER.out.idxml
-            .map { meta, idxml -> [[id: meta.sample + '_' + meta.condition], idxml] }
-            .groupTuple()
-            .set { ch_runs_to_merge }
+        .map { meta, idxml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), idxml] }
+        .groupTuple()
+        .set { ch_runs_to_merge }
 
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_runs_to_merge)
-    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions)
 
     // Run MS2Rescore
     ch_clean_mzml_file
-            .map { meta, mzml -> [[id: meta.sample + '_' + meta.condition], mzml] }
+            .map { meta, mzml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), mzml] }
             .groupTuple()
             .join(OPENMS_IDMERGER.out.idxml)
             .map { meta, mzml, idxml -> [meta, idxml, mzml, []] }
@@ -251,28 +248,25 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(MS2RESCORE.out.versions)
 
     if (params.rescoring_engine == 'percolator') {
-        // TODO: Find a way to parse the feature names of ms2rescore and plug them into the feature extractor
         // Extract PSM features for Percolator
-        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml
-                                        .join(MS2RESCORE.out.feature_names))
-        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions.ifEmpty(null))
+        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
+        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
 
         // Run Percolator
         OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         ch_rescored_runs = OPENMS_PERCOLATORADAPTER.out.idxml
     } else {
         log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
-        // TODO: remove whitelist argument from idscoreswitcher
-        OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml
-                                    .map { meta, idxml -> [meta, idxml, []] })
-        ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.switched_idxml.map { tuple -> tuple.findAll { it != [] }}
+        // Switch comet e-value to mokapot q-value
+        OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
+        ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
+        ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
     }
 
     // Filter by percolator q-value
-    // TODO: Use empty list instead of null
-    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.flatMap { it -> [tuple(it[0], it[1], null)] })
-    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions.ifEmpty(null))
+    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
+    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
 
     //
     // SUBWORKFLOW: Refine the FDR values on the predicted subset
@@ -280,32 +274,44 @@ workflow MHCQUANT {
     if (params.refine_fdr_on_predicted_subset && params.predict_class_1) {
         // Run the following subworkflow
         REFINE_FDR (
-            OPENMS_IDFILTER_Q_VALUE.out.idxml,
+            OPENMS_IDFILTER_Q_VALUE.out.filtered,
             OPENMS_PSMFEATUREEXTRACTOR.out.idxml,
             peptides_class_1_alleles
         )
-        ch_versions = ch_versions.mix(REFINE_FDR.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(REFINE_FDR.out.versions)
         // Define the outcome of the paramer to a fixed variable
-        filter_q_value = REFINE_FDR.out.filter_refined_q_value
+        ch_filter_q_value = REFINE_FDR.out.filter_refined_q_value
     } else {
         // Make sure that the columns that consists of the ID's, sample names and the idXML file names are returned
-        filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.idxml
+        ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
     }
 
     //
     // SUBWORKFLOW: QUANT
     //
     if (!params.skip_quantification) {
-        QUANT(merge_meta_map, ch_rescored_runs, filter_q_value, ch_clean_mzml_file)
-        ch_versions = ch_versions.mix(QUANT.out.versions.ifEmpty(null))
+        QUANT(merge_meta_map, ch_rescored_runs, ch_filter_q_value, ch_clean_mzml_file)
+        ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
     } else {
-        ch_output = filter_q_value
+        ch_output = ch_filter_q_value
+    }
+
+    if (params.annotate_ions) {
+        // Join the ch_filtered_idxml and the ch_mzml_file
+        ch_clean_mzml_file.map { meta, mzml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), mzml] }
+            .groupTuple()
+            .join(ch_filter_q_value)
+            .set{ ch_ion_annotator_input }
+
+        // Annotate spectra with ion fragmentation information
+        PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
+        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions)
     }
 
     // Prepare for check if file is empty
     OPENMS_TEXTEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions)
     // Return an error message when there is only a header present in the document
     OPENMS_TEXTEXPORTER.out.tsv.map {
         meta, tsv -> if (tsv.size() < 130) {
@@ -314,49 +320,38 @@ workflow MHCQUANT {
     }
 
     OPENMS_MZTABEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions)
 
     //
     // SUBWORKFLOW: Predict class I (neoepitopes)
     //
-    if (params.predict_class_1 & !params.skip_quantification) {
-        PREDICT_CLASS1 (
-            OPENMS_MZTABEXPORTER.out.mztab,
-            peptides_class_1_alleles,
-            ch_vcf_from_sheet
-        )
-        ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions.ifEmpty(null))
-        ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
-    } else {
-        ch_predicted_possible_neoepitopes = Channel.empty()
-    }
-
+    // TODO: Temporary disabled because of outdated vcf parsing
+    //if (params.predict_class_1 & !params.skip_quantification) {
+    //    PREDICT_CLASS1 (
+    //        OPENMS_MZTABEXPORTER.out.mztab,
+    //        peptides_class_1_alleles,
+    //        ch_vcf_from_sheet
+    //    )
+    //    ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions)
+    //    ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
+    //} else {
+    //    ch_predicted_possible_neoepitopes = Channel.empty()
+    //}
     //
-    // SUBWORKFLOW: Predict class II (neoepitopes)
-    //
-    if (params.predict_class_2 & !params.skip_quantification) {
-        PREDICT_CLASS2 (
-            OPENMS_MZTABEXPORTER.out.mztab,
-            peptides_class_2_alleles,
-            ch_vcf_from_sheet
-        )
-        ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions.ifEmpty(null))
-        ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
-    } else {
-        ch_predicted_possible_neoepitopes_II = Channel.empty()
-    }
-
-    if (params.annotate_ions) {
-        // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_clean_mzml_file.map { meta, mzml -> [[id: meta.sample + '_' + meta.condition], mzml] }
-            .groupTuple()
-            .join(filter_q_value)
-            .set{ ch_ion_annotator_input }
-
-        // Annotate spectra with ion fragmentation information
-        PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
-        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions.ifEmpty(null))
-    }
+    ////
+    //// SUBWORKFLOW: Predict class II (neoepitopes)
+    ////
+    //if (params.predict_class_2 & !params.skip_quantification) {
+    //    PREDICT_CLASS2 (
+    //        OPENMS_MZTABEXPORTER.out.mztab,
+    //        peptides_class_2_alleles,
+    //        ch_vcf_from_sheet
+    //    )
+    //    ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions)
+    //    ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
+    //} else {
+    //    ch_predicted_possible_neoepitopes_II = Channel.empty()
+    //}
 
     //
     // MODULE: Pipeline reporting

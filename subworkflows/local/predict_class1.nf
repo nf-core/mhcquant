@@ -20,12 +20,12 @@ workflow PREDICT_CLASS1 {
 
         // If specified predict peptides using MHCFlurry
         MHCFLURRY_PREDICTPEPTIDESCLASS1(mztab.join(alleles))
-        ch_versions = ch_versions.mix(MHCFLURRY_PREDICTPEPTIDESCLASS1.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(MHCFLURRY_PREDICTPEPTIDESCLASS1.out.versions)
 
         if ( params.include_proteins_from_vcf ) {
             // Predict all possible neoepitopes from vcf
             PREDICT_POSSIBLE_CLASS1_NEOEPITOPES(alleles.combine(ch_vcf_from_sheet, by:0))
-            ch_versions = ch_versions.mix(PREDICT_POSSIBLE_CLASS1_NEOEPITOPES.out.versions.first().ifEmpty(null))
+            ch_versions = ch_versions.mix(PREDICT_POSSIBLE_CLASS1_NEOEPITOPES.out.versions)
             ch_predicted_possible_neoepitopes = PREDICT_POSSIBLE_CLASS1_NEOEPITOPES.out.csv
             // Resolve found neoepitopes
             RESOLVE_FOUND_CLASS1_NEOEPITOPES(
@@ -34,10 +34,10 @@ workflow PREDICT_CLASS1 {
                     .combine( ch_predicted_possible_neoepitopes, by:0)
                     .map( it -> [it[1], it[2], it[3]])
                 )
-            ch_versions = ch_versions.mix(RESOLVE_FOUND_CLASS1_NEOEPITOPES.out.versions.first().ifEmpty(null))
+            ch_versions = ch_versions.mix(RESOLVE_FOUND_CLASS1_NEOEPITOPES.out.versions)
             // Predict class 1 neoepitopes MHCFlurry
             MHCFLURRY_PREDICTNEOEPITOPESCLASS1(alleles.join(RESOLVE_FOUND_CLASS1_NEOEPITOPES.out.csv, by:0))
-            ch_versions = ch_versions.mix(MHCFLURRY_PREDICTNEOEPITOPESCLASS1.out.versions.first().ifEmpty(null))
+            ch_versions = ch_versions.mix(MHCFLURRY_PREDICTNEOEPITOPESCLASS1.out.versions)
         }
 
     emit:

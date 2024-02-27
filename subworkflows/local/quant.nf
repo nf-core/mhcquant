@@ -4,13 +4,14 @@
  * It then aligns the retention times of the runs and merges the idxml files together to use them as id_ext in featurefinder
  * Finally, it performs the quantification and emits the consensusXML file
  */
-include { OPENMS_IDRIPPER }                                                 from '../../modules/local/openms_idripper'
-include { OPENMS_IDSCORESWITCHER }                                          from '../../modules/local/openms_idscoreswitcher'
-include { PYOPENMS_IDFILTER }                                               from '../../modules/local/pyopenms_idfilter'
-include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT }                        from '../../modules/local/openms_idmerger'
 
-include { MAP_ALIGNMENT }                                                   from './map_alignment'
-include { PROCESS_FEATURE }                                                 from './process_feature'
+include { OPENMS_IDRIPPER                          } from '../../modules/nf-core/openms/idripper/main'
+include { OPENMS_IDSCORESWITCHER                   } from '../../modules/nf-core/openms/idscoreswitcher/main'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_QUANT } from '../../modules/nf-core/openms/idfilter/main'
+include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../modules/nf-core/openms/idmerger/main'
+
+include { MAP_ALIGNMENT                            } from './map_alignment'
+include { PROCESS_FEATURE                          } from './process_feature'
 
 // Sort closure for merging and splitting files
 def sortById = { a, b -> a.id <=> b.id }
@@ -24,32 +25,42 @@ workflow QUANT {
 
     main:
         ch_versions = Channel.empty()
-        // Rip post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1, pout_filtered] [meta_run2, idxml_run2, pout_filtered] ...
-        OPENMS_IDRIPPER( merged_pout ).ripped
-                .join( merge_meta_map )
-                .join( filter_q_value )
-                // TODO: fdrfiltered is not needed for idscore switching, but for idfilter. This will be adressed in the next refacoring of the workflow
-                .map { group_meta, ripped, meta, fdrfiltered -> [meta, ripped, fdrfiltered] }
-                .transpose()
-                .set { ch_ripped_pout }
-        ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions.ifEmpty(null))
+        // Split post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1] [meta_run2, idxml_run2] ...
+        // We need to make sure that the order of the runs is the same as in the mzml files since IDRipper always sorts the runs
+        // (and nextflow does not guarantee the order of the maps in merged_meta_map)
+        OPENMS_IDRIPPER( merged_pout ).idxmls
+                .flatMap { group_meta, idxmls -> idxmls.collect { idxml -> [[spectra: idxml.baseName], idxml] } }
+                // join on file basename to make sure that the order of the runs is the same as in the mzml files
+                // Is there a smoother way to do this?
+                .join( merge_meta_map
+                        .flatMap { group_meta, metas -> metas }
+                        .map { meta -> [[spectra:meta.spectra], meta]} )
+                .map { spectra, idxmls, meta -> [meta, idxmls] }
+                .set { ch_ripped_idxml }
+        ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions)
 
         // Switch to xcorr for filtering since q-values are set to 1 with peptide-level-fdr
         if (params.fdr_level == 'peptide_level_fdrs'){
-            ch_runs_to_be_filtered = OPENMS_IDSCORESWITCHER( ch_ripped_pout ).switched_idxml
-            ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions.ifEmpty(null))
+            ch_runs_score_switched = OPENMS_IDSCORESWITCHER( ch_ripped_idxml ).idxml
+            ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         } else {
-            ch_runs_to_be_filtered = ch_ripped_pout
+            ch_runs_score_switched = ch_ripped_idxml
         }
 
+        // Manipulate such that [meta_run1, idxml_run1, pout_group1], [meta_run2, idxml_run2, pout_group1] ...
+        ch_runs_score_switched
+            // Nextflow can only combine/join on the exact groupKey object, merge_id is not sufficient
+            .map { meta, idxml -> [groupKey([id: meta.sample + '_' + meta.condition], meta.group_count) , meta, idxml] }
+            .combine(filter_q_value, by:0)
+            .map { group_meta, meta, idxml, q_value -> [meta, idxml, q_value] }
+            .set { ch_runs_to_filter}
+
         // Filter runs based on fdr filtered coprocessed percolator output.
-        // TODO: This is an alternative filtering method that will be replaced by IDFilter with new release of OpenMS
-        PYOPENMS_IDFILTER( ch_runs_to_be_filtered ).filtered
-                .map { meta, idxml -> [[id:meta.sample + '_' + meta.condition], [id:meta.id, file:idxml]] }
-                .groupTuple( sort: sortById )
-                .map { meta, idxml -> [meta, idxml.file] }
+        OPENMS_IDFILTER_QUANT( ch_runs_to_filter ).filtered
+                .map { meta, idxml -> [ groupKey([id:meta.sample + '_' + meta.condition], meta.group_count), idxml] }
+                .groupTuple()
                 .set { ch_runs_to_be_aligned }
-        ch_versions = ch_versions.mix(PYOPENMS_IDFILTER.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_IDFILTER_QUANT.out.versions)
 
         // Align retention times of runs
         MAP_ALIGNMENT(
@@ -57,27 +68,27 @@ workflow QUANT {
             mzml,
             merge_meta_map
         )
-        ch_versions = ch_versions.mix( MAP_ALIGNMENT.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( MAP_ALIGNMENT.out.versions )
 
         // We need to merge groupwise the aligned idxml files together to use them as id_ext in featurefinder
         OPENMS_IDMERGER_QUANT( MAP_ALIGNMENT.out.aligned_idxml
-                                    .map { meta, aligned_idxml -> [[id: meta.sample + '_' + meta.condition], aligned_idxml] }
+                                    .map { meta, aligned_idxml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), aligned_idxml] }
                                     .groupTuple())
-        ch_versions = ch_versions.mix(OPENMS_IDMERGER_QUANT.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(OPENMS_IDMERGER_QUANT.out.versions)
 
         // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
         MAP_ALIGNMENT.out.aligned_mzml
                 .join( MAP_ALIGNMENT.out.aligned_idxml )
-                .map { meta, mzml, idxml -> [[id: meta.sample + '_' + meta.condition], meta, [id:meta.id, file:mzml], [id:meta.id, file:idxml]] }
-                .groupTuple( sort: sortById )
-                .map { group_meta, meta, mzml, idxml -> [group_meta, meta, mzml.file, idxml.file] }
+                .map { meta, mzml, idxml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), meta, mzml, idxml] }
+                .groupTuple()
+                .map { group_meta, meta, mzml, idxml -> [group_meta, meta, mzml, idxml] }
                 .join( OPENMS_IDMERGER_QUANT.out.idxml )
                 .map { group_meta, meta, mzml, idxml, merged_idxml -> [meta, mzml, idxml, merged_idxml] }
                 .transpose()
                 .set { ch_runs_to_be_quantified }
 
         PROCESS_FEATURE ( ch_runs_to_be_quantified )
-        ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions)
 
     emit:
         consensusxml = PROCESS_FEATURE.out.consensusxml
