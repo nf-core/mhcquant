@@ -187,9 +187,7 @@ if (params.predict_class_1 || params.predict_class_2) {
 // Generate methods description for MultiQC
 //
 def toolCitationText() {
-    // TODO nf-core: Optionally add in-text citation tools to this list.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
     def citation_text = [
             "Tools used in the workflow included:",
             "OpenMS (Pfeuffer et al. 2024),",
@@ -207,9 +205,7 @@ def toolCitationText() {
 }
 
 def toolBibliographyText() {
-    // TODO nf-core: Optionally add bibliographic entries to this list.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
     def reference_text = [
             "<li>Pfeuffer, J., Bielow, C., Wein, S. et al. OpenMS 3 enables reproducible analysis of large-scale mass spectrometry data. Nat Methods (2024). doi: /10.1038/s41592-024-02197-7.</li>",
             "<li>Eng JK., Hoopman MR., Jahan, TA. et al. A Deeper Look into Comet—Implementation and Features. J. Am. Soc. Mass Spectrom. 2015, 26, 11, 1865–1874 (2015). doi: /10.1007/s13361-015-1179-x.</li>",
