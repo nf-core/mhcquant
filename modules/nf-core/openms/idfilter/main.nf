@@ -4,8 +4,8 @@ process OPENMS_IDFILTER {
 
     conda "bioconda::openms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:3.1.0--h8964181_3' :
-        'biocontainers/openms:3.1.0--h8964181_3' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.1.0--h8964181_2' :
+        'biocontainers/openms:3.1.0--h8964181_2' }"
 
     input:
     tuple val(meta), path(id_file), path(filter_file)
