@@ -18,10 +18,9 @@
                     "help_text": "Use this to specify a sample sheet table including your input raw or mzml files as well as their meta information such as SampleID and Condition. For example:\n\n| ID   | Sample      | Condition  |   ReplicateFileName                       |\n| -----|:------------:| ----------:|------------------------------------------:|\n| 1    | MM15_Melanom |      A     |   data/MM15_Melanom_W_1_A_standard.raw    |\n| 2    | MM15_Melanom |      B     |   data/MM15_Melanom_W_1_B_standard.raw    |\n| 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |\n\n```bash\n--input 'path/samples.tsv'\n```",
                     "format": "file-path",
                     "exists": true,
-                    "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.tsv$",
                     "schema": "assets/schema_input.json",
-                    "fa_icon": "fas fa-file-csv"
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.tsv$"
                 },
                 "outdir": {
                     "type": "string",
@@ -456,13 +455,6 @@
                     "default": "master",
                     "hidden": true,
                     "fa_icon": "fas fa-users-cog"
-                },
-                "skip_multiqc": {
-                    "type": "boolean",
-                    "description": "Skip MultiQC.",
-                    "fa_icon": "fas fa-fast-forward",
-                    "hidden": true,
-                    "default": false
                 },
                 "custom_config_base": {
                     "type": "string",
