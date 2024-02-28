@@ -1,31 +1,3 @@
-if (params.fasta)   { params.fasta = params.fasta       }
-
-// MHC affinity prediction
-if (params.predict_class_1 || params.predict_class_2) {
-    Channel.from(file(params.allele_sheet, checkIfExists: true))
-        .splitCsv(header: true, sep:'\t')
-        .multiMap { col ->
-            classI: ["${col.Sample}", "${col.HLA_Alleles_Class_1}"]
-            classII: ["${col.Sample}", "${col.HLA_Alleles_Class_2}"] }
-        .set { ch_alleles_from_sheet }
-
-        // Allele class 1
-        if (params.predict_class_1) {
-            ch_alleles_from_sheet.classI
-                .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
-                .flatMap { it -> [tuple(it[0].toString(), it[1])] }
-                .set { peptides_class_1_alleles }
-        }
-
-        // Allele class 2
-        if (params.predict_class_2) {
-            ch_alleles_from_sheet.classII
-                .ifEmpty { exit 1, "params.allele_sheet was empty - no allele input file supplied" }
-                .flatMap { it -> [tuple(it[0].toString(), it[1])] }
-                .set { peptides_class_2_alleles }
-        }
-}
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
