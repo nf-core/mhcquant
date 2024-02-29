@@ -15,7 +15,7 @@ workflow PROCESS_FEATURE {
 
         // Quantify identifications using targeted feature extraction
         OPENMS_FEATUREFINDERIDENTIFICATION(ch_runs_to_be_quantified).featurexml
-                .map { meta, featurexml -> [ groupKey([id: meta.sample + '_' + meta.condition], meta.group_count), featurexml] }
+                .map { meta, featurexml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), featurexml] }
                 .groupTuple()
                 .set { ch_features_grouped }
         ch_versions = ch_versions.mix(OPENMS_FEATUREFINDERIDENTIFICATION.out.versions)
