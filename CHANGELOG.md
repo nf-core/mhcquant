@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace `PYOPENMS_IDFILTER` with `OPENMS_IDFILTER` [#310](https://github.com/nf-core/mhcquant/pull/310)
 - Added nf-core modules [#310](https://github.com/nf-core/mhcquant/pull/310)
 - Template update 2.13 [#311](https://github.com/nf-core/mhcquant/pull/311)
+- Template update 2.13.1 [#313](https://github.com/nf-core/mhcquant/pull/313)
 
 ### `Deprecated`
 
