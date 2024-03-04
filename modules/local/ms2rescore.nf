@@ -7,6 +7,9 @@ process MS2RESCORE {
         'https://depot.galaxyproject.org/singularity/ms2rescore:3.0.0--pyhdfd78af_0':
         'biocontainers/ms2rescore:3.0.0--pyhdfd78af_0' }"
 
+    // userEmulation settings when docker is specified
+    containerOptions = (workflow.containerEngine == 'docker') ? '-u $(id -u) -e "HOME=${HOME}" -v /etc/passwd:/etc/passwd:ro -v /etc/shadow:/etc/shadow:ro -v /etc/group:/etc/group:ro -v $HOME:$HOME' : ''
+
     input:
     tuple val(meta), path(idxml), path(mzml), path(fasta)
 
