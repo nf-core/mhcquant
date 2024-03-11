@@ -135,7 +135,7 @@ def filter_out_artifact_psms(
     "-o", "--output_path", help="Path and stem for output file names (default: derive from identification file)"
 )
 @click.option("-l", "--log_level", help="Logging level (default: `info`)", default="info")
-@click.option("-n", "--processes", help="Number of parallel processes available to MS²Rescore", type=int, default=1)
+@click.option("-n", "--processes", help="Number of parallel processes available to MS²Rescore", type=int, default=16)
 @click.option("-f", "--fasta_file", help="Path to FASTA file")
 @click.option(
     "-fg",
