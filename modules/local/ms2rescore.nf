@@ -8,7 +8,7 @@ process MS2RESCORE {
         'biocontainers/ms2rescore:3.0.1--pyhdfd78af_2' }"
 
     // userEmulation settings when docker is specified
-    //containerOptions = (workflow.containerEngine == 'docker') ? '-u $(id -u) -e "HOME=${HOME}" -v /etc/passwd:/etc/passwd:ro -v /etc/shadow:/etc/shadow:ro -v /etc/group:/etc/group:ro -v $HOME:$HOME' : ''
+    containerOptions = (workflow.containerEngine == 'docker') ? '-u $(id -u) -e "HOME=${HOME}" -v /etc/passwd:/etc/passwd:ro -v /etc/shadow:/etc/shadow:ro -v /etc/group:/etc/group:ro -v $HOME:$HOME' : ''
 
     input:
     tuple val(meta), path(idxml), path(mzml), path(fasta)
