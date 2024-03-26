@@ -26,9 +26,9 @@
             },
             "ReplicateFileName": {
                 "type": "string",
-                "format": "file-path",
+                "format": "path",
                 "exists": true,
-                "pattern": "^\\S+-?\\.(raw|RAW|mzML|mzML.gz|d|d.tar|d.tar.gz|d.zip)$",
+                "pattern": "^\\S+\\.(raw|RAW|mzML|mzML.gz|d|d.tar|d.tar.gz|d.zip)$",
                 "errorMessage": "MS file cannot contain spaces and must have one of the extensions: raw | RAW | mzML | mzML.gz | d | d.tar | d.tar.gz | d.zip"
             }
         },
