@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added nf-core modules [#310](https://github.com/nf-core/mhcquant/pull/310)
 - Template update 2.13 [#311](https://github.com/nf-core/mhcquant/pull/311)
 - Template update 2.13.1 [#313](https://github.com/nf-core/mhcquant/pull/313)
+- Template update 2.14.1 [#320](https://github.com/nf-core/mhcquant/pull/320)
 
 ### `Deprecated`
 
