@@ -293,20 +293,20 @@
                     "type": "string",
                     "fa_icon": "fas fa-file-code",
                     "default": "Immuno-HCD",
-                    "description": "Specify the ms2pip model that should be used for rescoring. Checkout the ms2pip documentation for available models."
+                    "description": "Specify the MS²PIP model that should be used for rescoring. Checkout the MS²PIP documentation for available models."
                 },
                 "ms2pip_model_dir": {
                     "type": "string",
                     "format": "directory-path",
                     "fa_icon": "fas fa-file-code",
                     "hidden": true,
-                    "description": "Specify the ms2pip model that should be used for rescoring. Checkout the ms2pip documentation for available models."
+                    "description": "Specify a local directory holding at least the MS²PIP models specified in `ms2pip_model`."
                 },
                 "deeplc_calibration_set_size": {
                     "type": "number",
                     "fa_icon": "fas fa-file-code",
                     "default": 0.15,
-                    "description": "Specify the number or percentage of PSMs that should be used for calibration of the deeplc model."
+                    "description": "Specify the number or percentage of PSMs that should be used for calibration of the DeepLC model."
                 },
                 "refine_fdr_on_predicted_subset": {
                     "type": "boolean",
