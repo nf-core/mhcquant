@@ -20,13 +20,11 @@ process OPENMS_PERCOLATORADAPTER {
     script:
         def prefix           = task.ext.prefix ?: "${meta.id}_pout"
         def args             = task.ext.args  ?: ''
-        def klammer          = (params.description_correct_features > 0 && params.klammer) ? "-klammer" : ""
 
         """
         OMP_NUM_THREADS=$task.cpus \\
         PercolatorAdapter -in $merged_with_features \\
             -out ${prefix}.idXML \\
-            $klammer \\
             $args
 
         cat <<-END_VERSIONS > versions.yml
