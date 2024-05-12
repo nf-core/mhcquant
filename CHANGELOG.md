@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - Added MS²Rescore module with the underlying python CLI [#293](https://github.com/nf-core/mhcquant/pull/293)
+- Added new flag `ms2pip_model_dir`, which allows specifying a cache directory for ms2pip models [#322](https://github.com/nf-core/mhcquant/pull/322)
 
 ### `Fixed`
 
