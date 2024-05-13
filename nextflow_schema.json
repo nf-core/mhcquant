@@ -275,7 +275,7 @@
                     "enum": [
                         "Immuno-HCD",
                         "timsTOF",
-                        "timsTOF2023"
+                        "timsTOF2023",
                         "CID",
                         "CIDch2",
                         "CID-TMT",
