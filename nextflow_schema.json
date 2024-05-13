@@ -20,7 +20,8 @@
                     "exists": true,
                     "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.tsv$"
+                    "pattern": "^\\S+\\.tsv$",
+                    "fa_icon": "fas fa-file"
                 },
                 "outdir": {
                     "type": "string",
@@ -46,89 +47,135 @@
             "title": "Database Options",
             "type": "object",
             "fa_icon": "fas fa-database",
-            "description": "",
-            "default": "",
+            "description": "Decoy Database generation settings",
+            "required": ["fasta"],
             "properties": {
                 "fasta": {
                     "type": "string",
-                    "fa_icon": "fas fa-file-code",
+                    "fa_icon": "fas fa-file",
                     "pattern": ".fasta$",
                     "description": "Input FASTA protein database",
-                    "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
-                },
-                "include_proteins_from_vcf": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-file-code",
-                    "description": "Set depending on whether variants should be translated to proteins and included into your fasta for database search."
+                    "help_text": "Path to the protein database file"
                 },
                 "skip_decoy_generation": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
-                    "description": "Add this parameter when you want to skip the generation of the decoy database, the consequence is that it prevents the generation of variants and FDR refinement",
-                    "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'.\nOne should consider though that this option will then prevent appending variants to the database and if not using reversed decoys the subset refinement FDR option will not work."
+                    "description": "Add this parameter when you want to skip the generation of the decoy database.",
+                    "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'."
                 }
             }
         },
         "preprocessing": {
-            "title": "Preprocessing",
+            "title": "Spectrum preprocessing",
             "type": "object",
-            "fa_icon": "fas fa-microchip",
-            "description": "",
+            "fa_icon": "fas fa-arrows-to-circle",
+            "description": "Define pre-search settings",
             "default": "",
             "properties": {
+                "run_centroidisation": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-border-center-v",
+                    "default": false,
+                    "description": "Include the flag when the specified ms level is not centroided (default=false). "
+                },
                 "pick_ms_levels": {
                     "type": "integer",
                     "fa_icon": "fas fa-layer-group",
                     "default": 2,
                     "description": "Specify the MS levels for which the peak picking is applied (unless you use `--run_centroidisation`)."
                 },
-                "run_centroidisation": {
+                "filter_mzml": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-border-center-v",
                     "default": false,
-                    "description": "Include the flag when the specified ms level is not centroided (default=false). "
+                    "fa_icon": "fas fa-filter",
+                    "description": "Clean up spectrum files and remove artificial charge 0 peptides."
                 }
             }
         },
-        "mass_spectrometry_data_processing": {
-            "title": "Mass Spectrometry Data Processing",
+        "search_settings": {
+            "title": "Database Search Settings",
             "type": "object",
-            "fa_icon": "fas fa-waveform-lines",
+            "fa_icon": "fas fa-magnifying-glass",
             "description": "",
             "default": "",
             "properties": {
-                "peptide_min_length": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-dash",
-                    "default": 8,
-                    "description": "Specify the minimum length of peptides to be considered after processing"
+                "instrument": {
+                    "type": "string",
+                    "default": "high_res",
+                    "enum": ["high_res", "low_res"],
+                    "hidden": true,
+                    "fa_icon": "fas fa-wrench",
+                    "description": "Comets theoretical_fragment_ions parameter: theoretical fragment ion peak representation, high_res: sum of intensities plus flanking bins, ion trap (low_res) ms/ms: sum of intensities of central M bin only"
                 },
-                "peptide_max_length": {
+                "enzyme": {
+                    "type": "string",
+                    "fa_icon": "fas fa-scissors",
+                    "default": "unspecific cleavage",
+                    "enum": [
+                        "unspecific cleavage",
+                        "no cleavage",
+                        "Arg-C/P",
+                        "Asp-N",
+                        "Lys-C",
+                        "Lys-N",
+                        "Chymotrypsin",
+                        "CNBr",
+                        "Trypsin",
+                        "Arg-C",
+                        "PepsinA",
+                        "Trypsin/P",
+                        "glutamyl endopeptidase"
+                    ],
+                    "description": "Specify which enzymatic restriction should be applied",
+                    "hidden": true,
+                    "help_text": "For HLA peptides rarely other enzymes are used, however most enzymes such as for example 'Trypsin' are available."
+                },
+                "activation_method": {
+                    "type": "string",
+                    "fa_icon": "fas fa-star-shooting",
+                    "default": "ALL",
+                    "enum": ["ALL", "CID", "ECD", "ETD", "PQD", "HCD", "IRMPD"],
+                    "description": "Specify which fragmentation method was used in the MS acquisition",
+                    "help_text": "If not specified, `ALL` tries to infer the fragmentation method based on the spectrum file"
+                },
+                "digest_mass_range": {
+                    "type": "string",
+                    "fa_icon": "fas fa-line-height",
+                    "description": "Specify the mass range in Dalton that peptides should fulfill to be considered for peptide spectrum matching."
+                },
+                "prec_charge": {
+                    "type": "string",
+                    "fa_icon": "fas fa-bolt",
+                    "description": "Specify the precursor charge range that peptides should fulfill to be considered for peptide spectrum matching."
+                },
+                "precursor_mass_tolerance": {
                     "type": "integer",
-                    "fa_icon": "fas fa-plus",
-                    "default": 12,
-                    "description": "Specify the maximum length of peptides to be considered after processing"
+                    "fa_icon": "fas fa-think-peaks",
+                    "default": 5,
+                    "description": "Specify the precursor mass tolerance to be used for the Comet database search.",
+                    "help_text": "For high-resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)"
+                },
+                "precursor_error_units": {
+                    "type": "string",
+                    "fa_icon": "fas fa-think-peaks",
+                    "default": "ppm",
+                    "enum": ["ppm", "Da", "amu"],
+                    "description": "Specify the unit of the precursor mass tolerance to be used for the Comet database search."
+                },
+                "fragment_bin_offset": {
+                    "type": "number",
+                    "fa_icon": "fas fa-pipe",
+                    "default": 0.0,
+                    "hidden": true,
+                    "description": "Specify the fragment bin offset to be used for the comet database search.",
+                    "help_text": "For high-resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: https://uwpr.github.io/Comet/parameters/parameters_202401/).\n This parameter needs to be combined with `fragment_bin_tol` parameter"
                 },
                 "fragment_mass_tolerance": {
                     "type": "number",
                     "default": 0.01,
-                    "fa_icon": "fas fa-indent",
+                    "fa_icon": "fas fa-pipe",
                     "description": "Specify the fragment mass tolerance to be used for the comet database search.",
-                    "help_text": "For High-Resolution instruments a fragment mass tolerance value of 0.02 is recommended. (See the Comet parameter documentation: eg. 0.02)"
-                },
-                "precursor_mass_tolerance": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-indent",
-                    "default": 5,
-                    "description": "Specify the precursor mass tolerance to be used for the comet database search.",
-                    "help_text": " For High-Resolution instruments a precursor mass tolerance value of 5ppm is recommended. (eg. 5)"
-                },
-                "fragment_bin_offset": {
-                    "type": "number",
-                    "fa_icon": "fas fa-indent",
-                    "default": 0.0,
-                    "description": "Specify the fragment bin offset to be used for the comet database search.",
-                    "help_text": "For High-Resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: eg. 0)"
+                    "help_text": "For high-resolution instruments a fragment mass tolerance value of 0.02 is recommended\n(See the Comet parameter documentation: https://uwpr.github.io/Comet/parameters/parameters_202401/).\nThe OpenCometAdapter mulitplies this parameter with 2 to align with other search engines."
                 },
                 "number_mods": {
                     "type": "integer",
@@ -136,133 +183,117 @@
                     "default": 3,
                     "description": "Specify the maximum number of modifications that should be contained in a peptide sequence match."
                 },
-                "num_hits": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-hashtag",
-                    "default": 1,
-                    "description": "Specify the number of hits that should be reported for each spectrum."
-                },
-                "digest_mass_range": {
-                    "type": "string",
-                    "fa_icon": "fas fa-chard-line",
-                    "default": "800:2500",
-                    "description": "Specify the mass range that peptides should fulfill to be considered for peptide spectrum matching."
-                },
-                "prec_charge": {
-                    "type": "string",
-                    "fa_icon": "fas fa-input-numeric",
-                    "default": "2:3",
-                    "description": "Specify the precursor charge range that peptides should fulfill to be considered for peptide spectrum matching."
-                },
-                "activation_method": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-code",
-                    "default": "ALL",
-                    "description": "Specify which fragmentation method was used in the MS acquisition",
-                    "enum": ["ALL", "CID", "ECD", "ETD", "PQD", "HCD", "IRMPD"]
-                },
-                "enzyme": {
-                    "type": "string",
-                    "fa_icon": "fas fa-dna",
-                    "default": "unspecific cleavage",
-                    "description": "Specify which enzymatic restriction should be applied",
-                    "hidden": true,
-                    "help_text": " for HLA peptides rarely other enzymes are used, however most enzymes such as for example 'Trypsin' are available (see OpenMS enzymes)"
-                },
-                "max_rt_alignment_shift": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-slider",
-                    "default": 300,
-                    "description": "Set a maximum retention time shift for the linear rt alignment"
-                },
                 "fixed_mods": {
                     "type": "string",
                     "fa_icon": "fas fa-cubes-stacked",
                     "description": "Specify which fixed modifications should be applied to the database search",
-                    "help_text": "e.g. 'Carbamidomethyl (C)' (see OpenMS modifications; for a list of options, see parameter description on https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html)"
+                    "help_text": "e.g. 'Carbamidomethyl (C)' (see OpenMS modifications; for a list of options, see parameter description on https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html).\nMultiple modifications can be specified by separating commas:`Oxidation (M),Carbamidomethyl (C)`"
                 },
                 "variable_mods": {
                     "type": "string",
                     "fa_icon": "fas fa-cubes-stacked",
                     "default": "Oxidation (M)",
                     "description": "Specify which variable modifications should be applied to the database search",
-                    "help_text": "e.g. 'Oxidation (M)' (see OpenMS modifications; for a list of options, see parameter description on https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html)"
+                    "help_text": "e.g. 'Oxidation (M)' (see OpenMS modifications; for a list of options, see parameter description on https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html).\nMultiple modifications can be specified by separating commas:`Oxidation (M),Carbamidomethyl (C)`"
+                },
+                "num_hits": {
+                    "type": "integer",
+                    "fa_icon": "fas fa-hashtag",
+                    "default": 1,
+                    "description": "Specify the number of hits that should be reported for each spectrum."
                 },
                 "use_x_ions": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-file-code",
+                    "fa_icon": "fas fa-wave-sine",
                     "description": "Include x ions into the peptide spectrum matching"
                 },
                 "use_z_ions": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-file-code",
+                    "fa_icon": "fas fa-wave-sine",
                     "description": "Include z ions into the peptide spectrum matching"
                 },
                 "use_a_ions": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-file-code",
+                    "fa_icon": "fas fa-wave-sine",
                     "description": "Include a ions into the peptide spectrum matching"
                 },
                 "use_c_ions": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-file-code",
+                    "fa_icon": "fas fa-wave-sine",
                     "description": "Include c ions into the peptide spectrum matching"
                 },
                 "use_NL_ions": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-file-code",
+                    "fa_icon": "fas fa-wave-sine",
                     "description": "Include NL ions into the peptide spectrum matching"
                 },
                 "remove_precursor_peak": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-file-code",
+                    "fa_icon": "fas fa-pipe",
                     "description": "Include if you want to remove all peaks around precursor m/z",
                     "default": false
                 },
                 "spectrum_batch_size": {
                     "type": "integer",
-                    "fa_icon": "fas fa-wave-sine",
+                    "fa_icon": "fas fa-truck-fast",
                     "default": 0,
+                    "hidden": true,
                     "description": "Size of Spectrum batch for Comet processing (Decrease/Increase depending on Memory Availability)"
-                },
-                "vcf_sheet": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-code",
-                    "pattern": "^\\S+\\.tsv$",
-                    "description": "Specify a .tsv file containing the information about genomic variants (vcf files < v.4.2) for each sample.",
-                    "help_text": "| Sample      | VCF_FileName           |\n| -------------| :---------------------:|\n| MM15_Melanom | data/MM15_variants.vcf |\n| MM17_Melanom | data/MM17_variants.vcf |"
-                },
-                "annotate_ions": {
-                    "type": "boolean",
-                    "default": "false",
-                    "fa_icon": "fas fa-tags",
-                    "description": "Set this option to create documents that are created to perform the ion annotation"
-                },
-                "instrument": {
-                    "type": "string",
-                    "default": "high_res",
-                    "fa_icon": "fas fa-wrench",
-                    "description": "Comets theoretical_fragment_ions parameter: theoretical fragment ion peak representation, high-res: sum of intensities plus flanking bins, ion trap (low-res) ms/ms: sum of intensities of central M bin only"
                 },
                 "default_params_file_comet": {
                     "type": "string",
                     "fa_icon": "fas fa-file-code",
-                    "description": "Default Comet params file. All parameters of this take precedence."
-                },
-                "filter_mzml": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-file-code",
-                    "description": "Clean up mzml files and remove artificial charge 0 peptides."
+                    "hidden": true,
+                    "description": "Specify custom Comet params file. All parameters of this take precedence."
                 }
             }
         },
-        "rescoring": {
-            "title": "Rescoring",
+        "rescoring_settings": {
+            "title": "Rescoring settings",
             "type": "object",
             "fa_icon": "fas fa-star-half-stroke",
             "description": "",
             "default": "",
             "properties": {
+                "rescoring_engine": {
+                    "type": "string",
+                    "fa_icon": "fas fa-wrench",
+                    "default": "percolator",
+                    "description": "Specify the rescoring engine that should be used for rescoring. Either percolator or mokapot",
+                    "enum": ["percolator", "mokapot"]
+                },
+                "feature_generators": {
+                    "type": "string",
+                    "fa_icon": "fas fa-head-side-gear",
+                    "default": "deeplc,ms2pip",
+                    "description": "Specify the feature generator that should be used for rescoring. One or multiple of basic,ms2pip,deeplc,ionmob"
+                },
+                "ms2pip_model": {
+                    "type": "string",
+                    "fa_icon": "fas fa-head-side-gear",
+                    "default": "Immuno-HCD",
+                    "enum": [
+                        "Immuno-HCD",
+                        "timsTOF",
+                        "CID",
+                        "CIDch2",
+                        "CID-TMT",
+                        "TMT",
+                        "HCD",
+                        "HCDch2",
+                        "TTOF5600",
+                        "iTRAQ",
+                        "iTRAQphospho"
+                    ],
+                    "description": "Specify the ms2pip model that should be used for rescoring. Checkout the ms2pip documentation for available models."
+                },
+                "deeplc_calibration_set_size": {
+                    "type": "number",
+                    "fa_icon": "fas fa-head-side-gear",
+                    "hidden": true,
+                    "default": 0.15,
+                    "description": "Specify the number or percentage of PSMs that should be used for calibration of the deeplc model."
+                },
                 "fdr_level": {
                     "type": "string",
                     "fa_icon": "fas fa-rectangle-code",
@@ -276,59 +307,12 @@
                     "default": 0.01,
                     "description": "Specify the false discovery rate threshold at which peptide hits should be selected."
                 },
-                "rescoring_engine": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-code",
-                    "default": "percolator",
-                    "description": "Specify the rescoring engine that should be used for rescoring. Either percolator or mokapot",
-                    "enum": ["percolator", "mokapot"]
-                },
-                "feature_generators": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-code",
-                    "default": "deeplc,ms2pip",
-                    "description": "Specify the feature generator that should be used for rescoring. One or multiple of basic,ms2pip,deeplc,ionmob"
-                },
-                "ms2pip_model": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-code",
-                    "default": "Immuno-HCD",
-                    "description": "Specify the ms2pip model that should be used for rescoring. Checkout the ms2pip documentation for available models."
-                },
-                "deeplc_calibration_set_size": {
-                    "type": "number",
-                    "fa_icon": "fas fa-file-code",
-                    "default": 0.15,
-                    "description": "Specify the number or percentage of PSMs that should be used for calibration of the deeplc model."
-                },
-                "refine_fdr_on_predicted_subset": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-arrows-repeat",
-                    "help_text": "SubsetFDR makes use of binding predictions applying the tool mhcflurry to subset all PSMs not passing the q-value threshold. If specified the FDR will be refined using Percolator on the subset of predicted binders among all PSMs resulting in an increased identification rate. (Please be aware that this option is only available for MHC class I data of alleles that are supported by mhcflurry)",
-                    "description": "Set if MHCquant should be run in SubsetFDR mode"
-                },
-                "subset_affinity_threshold": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-pen",
-                    "default": 500,
-                    "description": "Affinity threshold (nM) used to define binders for PSM subset selection in the FDR refinement procedure"
-                },
-                "description_correct_features": {
-                    "type": "integer",
-                    "fa_icon": "fas fa-pen",
-                    "description": "Specify percolator descriptor feature set",
-                    "help_text": "See percolator description (https://github.com/percolator/percolator/wiki/Retention-time-and-calibration)"
-                },
-                "klammer": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-microchip",
-                    "description": "Use klammer retention time features for Percolator rescoring",
-                    "help_text": "https://pubs.acs.org/doi/10.1021/ac070262k"
-                },
                 "subset_max_train": {
                     "type": "integer",
+                    "hidden": true,
+                    "default": 0,
                     "fa_icon": "fas fa-train-track",
-                    "description": "Maximum subset for percolator training iterations"
+                    "description": "Maximum subset for Percolator training iterations"
                 }
             }
         },
@@ -341,104 +325,86 @@
             "properties": {
                 "skip_quantification": {
                     "type": "boolean",
+                    "default": true,
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip quantification and only yield peptide identifications"
                 },
+                "max_rt_alignment_shift": {
+                    "type": "integer",
+                    "fa_icon": "fas fa-align-center",
+                    "default": 300,
+                    "description": "Set a maximum retention time shift for the linear RT alignment"
+                },
                 "quantification_fdr": {
                     "type": "boolean",
+                    "hidden": true,
                     "fa_icon": "fas fa-less-than",
                     "description": "Compute FDR for the targeted approach",
                     "help_text": "(Weisser H. and Choudhary J.S. J Proteome Res. 2017 Aug 4)"
                 },
                 "quantification_min_prob": {
                     "type": "number",
+                    "hidden": true,
+                    "default": 0,
                     "description": "Specify a cut off probability value for quantification events as a filter"
                 },
                 "quantification_mz_window": {
                     "type": "number",
+                    "hidden": true,
+                    "default": 5,
                     "description": "Specify a m/z window for matching between runs"
                 },
                 "quantification_rt_window": {
                     "type": "number",
+                    "hidden": true,
+                    "default": 0,
                     "description": "Specify a rt window for matching between runs"
                 },
                 "quantification_mapping_tolerance": {
                     "type": "number",
+                    "hidden": true,
+                    "default": 0,
                     "description": "Specify a rt mapping tolerance for mapping features between runs"
                 },
                 "quantification_peak_width": {
                     "type": "number",
+                    "hidden": true,
+                    "default": 60,
                     "description": "Specify a peak width for feature extraction"
                 },
                 "quantification_min_peak_width": {
                     "type": "number",
+                    "hidden": true,
+                    "default": 0.2,
                     "description": "Specify a minimum peak width for quantification"
                 }
             }
         },
-        "mhc_affinity_prediction": {
-            "title": "MHC affinity prediction",
+        "post_processing": {
+            "title": "Post Processing",
             "type": "object",
-            "fa_icon": "fas fa-magnifying-glass",
+            "fa_icon": "fas fa-waveform-lines",
             "description": "",
             "default": "",
             "properties": {
-                "allele_sheet": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-code",
-                    "pattern": "^\\S+\\.tsv$",
-                    "description": "Specify a .tsv file containing the MHC alleles of your probes as well as their metadata such as SampleID.",
-                    "help_text": "| Sample      | HLA_Alleles_Class_1                             | HLA_Alleles_Class_2                        |\n| -------------| :----------------------------------------------:| ------------------------------------------:|\n| MM15_Melanom | `A*03:01;A*68:01;B*27:05;B*35:03;C*02:02;C*04:01` | `HLA-DRB1*01:01;HLA-DQB1*03:19;HLA-DQA1*05:01` |\n| MM17_Melanom | `A*02:01;B*07:01;B*26:01;C*11:01;C*01:01` | `HLA-DRB1*01:02;HLA-DRB3*02:02;HLA-DRB4*01:03` |\n"
-                },
-                "predict_class_1": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-circle-1",
-                    "description": "Set flag depending on whether MHC class 1 binding predictions using the tool mhcflurry should be run."
-                },
-                "predict_class_2": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-circle-2",
-                    "description": "Set flag depending on whether MHC class 2 binding predictions using the tool mhcnuggets should be run."
-                }
-            }
-        },
-        "variant_options": {
-            "title": "Variant Options",
-            "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "",
-            "default": "",
-            "properties": {
-                "variant_reference": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file",
-                    "description": "Specify genomic reference used for variant annotation",
-                    "enum": ["GRCH37", "GRCH38"],
-                    "default": "GRCH38"
-                },
-                "variant_annotation_style": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file",
-                    "description": "Specify style of tool used for variant annotation - currently supported",
-                    "enum": ["SNPEFF", "VEP", "ANNOVAR"],
-                    "default": "SNPEFF"
-                },
-                "variant_indel_filter": {
-                    "type": "boolean",
+                "peptide_min_length": {
+                    "type": "integer",
                     "fa_icon": "fas fa-filter",
-                    "description": "Set this option to not consider insertions and deletions for variant translation",
-                    "default": false
+                    "default": 8,
+                    "description": "Specify the minimum length of peptides to be considered after processing"
                 },
-                "variant_frameshift_filter": {
-                    "type": "boolean",
+                "peptide_max_length": {
+                    "type": "integer",
                     "fa_icon": "fas fa-filter",
-                    "description": "Set this option to not consider frameshifts for variant translation",
-                    "default": false
+                    "default": 12,
+                    "description": "Specify the maximum length of peptides to be considered after processing"
                 },
-                "variant_snp_filter": {
+                "annotate_ions": {
                     "type": "boolean",
-                    "fa_icon": "fas fa-filter",
-                    "description": "Set this option to not consider snps for variant translation"
+                    "default": false,
+                    "fa_icon": "fas fa-tags",
+                    "description": "Create tsv files containing information about the MS2 ion annotations after processing.",
+                    "help_text": "The resulting tsv files should aid in spectrum validation downstream analyses"
                 }
             }
         },
@@ -655,19 +621,16 @@
             "$ref": "#/definitions/preprocessing"
         },
         {
-            "$ref": "#/definitions/mass_spectrometry_data_processing"
+            "$ref": "#/definitions/search_settings"
         },
         {
-            "$ref": "#/definitions/rescoring"
+            "$ref": "#/definitions/rescoring_settings"
         },
         {
             "$ref": "#/definitions/quantification_options"
         },
         {
-            "$ref": "#/definitions/mhc_affinity_prediction"
-        },
-        {
-            "$ref": "#/definitions/variant_options"
+            "$ref": "#/definitions/post_processing"
         },
         {
             "$ref": "#/definitions/institutional_config_options"

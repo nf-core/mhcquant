@@ -21,11 +21,7 @@ include { OPENMS_MZTABEXPORTER       } from '../modules/local/openms_mztabexport
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
 //
-include { INCLUDE_PROTEINS } from '../subworkflows/local/include_proteins'
-include { REFINE_FDR       } from '../subworkflows/local/refine_fdr'
 include { QUANT            } from '../subworkflows/local/quant'
-include { PREDICT_CLASS1   } from '../subworkflows/local/predict_class1'
-include { PREDICT_CLASS2   } from '../subworkflows/local/predict_class2'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,20 +72,7 @@ workflow MHCQUANT {
                 other : true }
         .set { branched_ms_files }
 
-    //
-    // SUBWORKFLOW: Include protein information
-    //
-    // TODO: Temporary disabled because of outdated vcf parsing
-    //if (params.include_proteins_from_vcf) {
-    //    // Include the proteins from the vcf file to the fasta file
-    //    INCLUDE_PROTEINS(ch_fasta)
-    //    ch_versions = ch_versions.mix(INCLUDE_PROTEINS.out.versions)
-    //    ch_fasta_file = INCLUDE_PROTEINS.out.ch_fasta_file
-    //    ch_vcf_from_sheet = INCLUDE_PROTEINS.out.ch_vcf_from_sheet
-    //} else {
-    //    ch_fasta_file = ch_fasta
-    //    ch_vcf_from_sheet = Channel.empty()
-    //}
+    // Decoy Database creation
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
@@ -132,12 +115,6 @@ workflow MHCQUANT {
     }
 
     // Run comet database search
-    // TODO: Fix accordingly with vcf parsing
-    //if (params.include_proteins_from_vcf) {
-    //    OPENMS_COMETADAPTER(ch_clean_mzml_file.join(ch_decoy_db, remainder:true))
-    //} else {
-    //    OPENMS_COMETADAPTER(ch_clean_mzml_file.combine(ch_fasta.map{ meta, fasta -> [fasta] }))
-    //}
     OPENMS_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions)
 
@@ -191,24 +168,7 @@ workflow MHCQUANT {
     // Filter by percolator q-value
     OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
     ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
-
-    //
-    // SUBWORKFLOW: Refine the FDR values on the predicted subset
-    //
-    if (params.refine_fdr_on_predicted_subset && params.predict_class_1) {
-        // Run the following subworkflow
-        REFINE_FDR (
-            OPENMS_IDFILTER_Q_VALUE.out.filtered,
-            OPENMS_PSMFEATUREEXTRACTOR.out.idxml,
-            peptides_class_1_alleles
-        )
-        ch_versions = ch_versions.mix(REFINE_FDR.out.versions)
-        // Define the outcome of the paramer to a fixed variable
-        ch_filter_q_value = REFINE_FDR.out.filter_refined_q_value
-    } else {
-        // Make sure that the columns that consists of the ID's, sample names and the idXML file names are returned
-        ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
-    }
+    ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
 
     //
     // SUBWORKFLOW: QUANT
@@ -221,6 +181,7 @@ workflow MHCQUANT {
         ch_output = ch_filter_q_value
     }
 
+    // Annotate Ions for follow-up spectrum validation
     if (params.annotate_ions) {
         // Join the ch_filtered_idxml and the ch_mzml_file
         ch_clean_mzml_file.map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), mzml] }
@@ -245,37 +206,6 @@ workflow MHCQUANT {
 
     OPENMS_MZTABEXPORTER(ch_output)
     ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions)
-
-    //
-    // SUBWORKFLOW: Predict class I (neoepitopes)
-    //
-    // TODO: Temporary disabled because of outdated vcf parsing
-    //if (params.predict_class_1 & !params.skip_quantification) {
-    //    PREDICT_CLASS1 (
-    //        OPENMS_MZTABEXPORTER.out.mztab,
-    //        peptides_class_1_alleles,
-    //        ch_vcf_from_sheet
-    //    )
-    //    ch_versions = ch_versions.mix(PREDICT_CLASS1.out.versions)
-    //    ch_predicted_possible_neoepitopes = PREDICT_CLASS1.out.ch_predicted_possible_neoepitopes
-    //} else {
-    //    ch_predicted_possible_neoepitopes = Channel.empty()
-    //}
-    //
-    ////
-    //// SUBWORKFLOW: Predict class II (neoepitopes)
-    ////
-    //if (params.predict_class_2 & !params.skip_quantification) {
-    //    PREDICT_CLASS2 (
-    //        OPENMS_MZTABEXPORTER.out.mztab,
-    //        peptides_class_2_alleles,
-    //        ch_vcf_from_sheet
-    //    )
-    //    ch_versions = ch_versions.mix(PREDICT_CLASS2.out.versions)
-    //    ch_predicted_possible_neoepitopes_II = PREDICT_CLASS2.out.ch_predicted_possible_neoepitopes
-    //} else {
-    //    ch_predicted_possible_neoepitopes_II = Channel.empty()
-    //}
 
     //
     // Collate and save software versions
