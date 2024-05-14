@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - Added MS²Rescore module with the underlying python CLI [#293](https://github.com/nf-core/mhcquant/pull/293)
+- Added support for handling various archive formats: `d|d.tar.gz|d.tar|d.zip|mzML.gz|raw|RAW|mzML` [#323](https://github.com/nf-core/mhcquant/pull/323)
+- Added test for timsTOF data [#323](https://github.com/nf-core/mhcquant/pull/323)
 
 ### `Fixed`
 
