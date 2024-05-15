@@ -55,6 +55,7 @@ workflow PREPARE_SPECTRA {
 
         // Gunzip mzML files
         GUNZIP(branched_ms_files.mzml_gz)
+        ch_versions = ch_versions.mix(GUNZIP.out.versions)
         // Initialize channel for ms files that do not need to be converted
         ch_ms_files = branched_ms_files.mzml
                         .mix(GUNZIP.out.gunzip,
