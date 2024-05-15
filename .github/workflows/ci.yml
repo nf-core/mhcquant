@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - dev
-      - master
+      - main
   pull_request:
   release:
     types: [published]
@@ -59,7 +59,7 @@ jobs:
           # Test latest edge release of Nextflow
           - NXF_VER: ""
             NXF_EDGE: "1"
-        tests: ["test_mokapot", "test_percolator", "test_ionannotator", "test_timstof", "test_full"]
+        tests: ${{ github.ref == 'refs/heads/main' && ['test_mokapot', 'test_percolator', 'test_ionannotator', 'test_timstof', 'test_full'] || ['test_mokapot', 'test_percolator', 'test_ionannotator'] }}
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -72,12 +72,6 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
-      - name:
-          Run pipeline with profile ${{ matrix.tests }}
-          # Run test_timstof and test_full only on push against master, since they are time-consuming
+      - name: Run pipeline with profile ${{ matrix.tests }}
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --max_memory '6.GB' --max_cpus 2 --spectrum_batch_size 5000 --outdir ./results
-          elif [[ "${{ github.ref }}" != "refs/heads/master" && ("${{ matrix.tests }}" != "test_timstof" && "${{ matrix.tests }}" != "test_full") ]]; then
-            nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --max_memory '6.GB' --max_cpus 2 --spectrum_batch_size 5000 --outdir ./results
-          fi
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --max_memory '6.GB' --max_cpus 2 --spectrum_batch_size 5000 --outdir ./results
