@@ -12,54 +12,59 @@ You will need to create a samplesheet with information about the samples you wou
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have multiple runs. The `Condition` identifiers can be used to further distinguish the sample groups.
-Below is an example for the same sample sequenced across 3 lanes:
-
-```tsv title="samplesheet.tsv
-ID  Sample  Condition  ReplicateFileName
-1   WT  A /path/to/MS/files/WT_A1.raw
-2   WT  A /path/to/MS/files/WT_A2.raw
-3   WT  A /path/to/MS/files/WT_A3.raw
-
-```
-
-### Full samplesheet
-
-The pipeline will auto-detect whether a sample is either in mzML, raw or Bruker's tdf file format using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 4 columns to match those defined in the table below.
-
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below.
-
-```tsv
-ID  Sample  Condition ReplicateFileName
-1   WT  A /path/to/MS/files/WT_A1.raw
-2   WT  A /path/to/MS/files/WT_A2.raw
-3   WT  A /path/to/MS/files/WT_A3.raw
-4   WT  B /path/to/MS/files/WT_B1.raw
-5   WT  B /path/to/MS/files/WT_B2.raw
-6   WT  B /path/to/MS/files/WT_B3.raw
-7   KO  A /path/to/MS/files/KO_A1.raw
-8   KO  A /path/to/MS/files/KO_A2.raw
-9   KO  A /path/to/MS/files/KO_A3.raw
-10  KO  B /path/to/MS/files/KO_B1.raw
-11  KO  B /path/to/MS/files/KO_B2.raw
-12  KO  B /path/to/MS/files/KO_B3.raw
-
-```
+### Samplesheet columns
 
 | Column              | Description                                                                                                                                                          |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ID`                | An incrementing value which acts as a unique number for the given sample                                                                                             |
-| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
+| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample. |
 | `Condition`         | Additional information of the sample can be defined here.                                                                                                            |
-| `ReplicateFileName` | Full path to the MS outcome file. These files have the extentions ".raw", ".mzML" or ".d"                                                                            |
+| `ReplicateFileName` | Full path to the MS file. These files have the extentions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip                                                                            |
+
+The pipeline will auto-detect whether a sample is either in mzML, raw or tdf file format using the information provided in the samplesheet.
 
 An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
 
+### Multiple runs of the same sample
+
+MS runs are merged on the `Sample` and `Condition` identifier combination before they are rescored with `Percolator`. Typically technical replicates of a sample are merged together to report one peptide list per sample. Below is an example of two runs from a treated and untreated tumor sample.
+
+```tsv title="samplesheet.tsv
+ID	Sample	Condition	ReplicateFileName
+1	tumor	treated	/path/to/msrun1.raw|mzML|d
+2	tumor	treated	/path/to/msrun2.raw|mzML|d
+3	tumor	untreated	/path/to/msrun3.raw|mzML|d
+4	tumor	untreated	/path/to/msrun4.raw|mzML|d
+5	control	treated	/path/to/msrun5.raw|mzML|d
+6	control	treated	/path/to/msrun6.raw|mzML|d
+7	control	untreated	/path/to/msrun7.raw|mzML|d
+8	control	untreated	/path/to/msrun8.raw|mzML|d
+```
+
+## Recommended search settings
+
+Fine-tuning search settings is important to obtain the most optimal results for your MS data. *These settings heavily depend on the MS instrument settings used to generate the data*. If you want to reprocess public data, make sure you use the settings mentioned in the methods section! The following table acts as an orientation of commonly used search settings for instruments:
+
+| MS-Device         | timsTOF           || Orbitrap Fusion Lumos || Q Exactive Orbitrap || LTQ Orbitrap XL   ||
+|-------------------|---------|----------|---------|--------------|---------|------------|---------|----------|
+|                   | class I | class II | class I | class II     | class I | class II   | class I | class II |
+| instrument        | high_res| high_res | high_res| high_res     | high_res| high_res   | low_res | low_res  |
+| digest_mass_range | 800:2500| 800:5000 | 800:2500| 800:5000     | 800:2500| 800:5000   | 800:2500| 800:5000 |
+| activation_method | CID     | CID      | HCD     | HCD          | HCD     | HCD        | CID     | CID      |
+| prec_charge       | 1:4     | 1:5      | 2:3     | 2:5          | 2:3     | 2:5        | 2:3     | 2:5      |
+| precursor_error_units| ppm  | ppm      | ppm     | ppm          | ppm     | ppm        |  ppm    | ppm      |
+| number_mods       | 3       | 5        | 3       | 5            | 3       | 5          | 3       | 5        |
+| precursor_mass_tolerance| 20| 20       | 5       | 5            | 5       | 5          | 5       | 5        |
+| fragment_mass_tolerance|0.02| 0.02     | 0.02    | 0.02         | 0.02    | 0.02       | 0.50025 | 0.50025  |
+| fragment_bin_offset| 0      | 0        | 0       | 0            | 0       | 0          | 0.4     | 0.4      |
+
+Modifications are specified via `--variable_mods` and `fixed_mods` using the [UNIMOD nomenclature](https://www.unimod.org/unimod_help.html) via OpenMS. Check out [helper page]( https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html) of OpenMS for the full list of options. Multiple modifications are specified as `'Oxidation (M),Acetyl (N-term),Phospho (S)'`.
+
+Further information about the command line arguments is documented on the [nf-core website](https://nf-co.re/mhcquant/dev/parameters) or by using `--help`.
+
 ## Rescoring using MS²Rescore
 
-By default the pipline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ionmob,maxquant,ms2pip`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
+By default the pipline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ms2pip`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
 
 MS²Rescore creates a comprehensive QC report of the added features used for rescoring. This report is only available if `--rescoring_engine mokapot` is specified (default: `percolator`). The report can be found in `<OUTDIR>/multiqc/ms2rescore`. Further information on the tool itself can be read up in the published paper [Declerq et al. 2022](<https://www.mcponline.org/article/S1535-9476(22)00074-3/fulltext>)
 
@@ -68,7 +73,15 @@ MS²Rescore creates a comprehensive QC report of the added features used for res
 The typical command for running the pipeline is as follows:
 
 ```console
-nextflow run nf-core/mhcquant --input 'samples.tsv' --outdir <OUTDIR> --fasta 'SWISSPROT_2020.fasta' -profile docker
+nextflow run nf-core/mhcquant \
+  --input 'samplesheet.tsv' \
+  --outdir <OUTDIR> \
+  --fasta 'SWISSPROT_2020.fasta' \
+  <search parameters> \
+  --peptide_min_length 8 \
+	--peptide_max_length 14 \
+  --ms2pip_model 'Immuno-HCD' \
+  -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -101,7 +114,6 @@ with `params.yaml` containing:
 ```yaml
 input: './samplesheet.csv'
 outdir: './results/'
-genome: 'GRCh37'
 <...>
 ```
 
