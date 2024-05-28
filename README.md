@@ -19,16 +19,15 @@
 
 ## Introduction
 
-**nfcore/mhcquant**  is a bioinformatics best-practice pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules, which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).
+**nfcore/mhcquant** is a bioinformatics best-practice pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules, which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).
 
 The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore and FDR rescoring is applied using Percolator based on a competitive target-decoy approach. For label free quantification all input files undergo identification-based retention time alignment, and targeted feature extraction matching ids between runs.
 
-![overview](assets/mhcquant_web.png)
+![overview](assets/mhcquant_subway.png)
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
 
 On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/mhcquant/results).
-
 
 ## Usage
 
@@ -160,7 +159,7 @@ You can cite the `nf-core` publication as follows:
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
 
 In addition, references of tools and data used in this pipeline are as follows:
->
+
 > **OpenMS framework**
 >
 > Pfeuffer J. et al, _Nat Methods_ 2024 Mar;21(3):365-367. doi: [0.1038/s41592-024-02197-7](https://www.nature.com/articles/s41592-024-02197-7).
@@ -179,7 +178,7 @@ In addition, references of tools and data used in this pipeline are as follows:
 >
 > **MS²Rescore framework**
 >
-> Buur L. M. et al, _J Proteome Res. 2024 Mar 16. doi: [10.1021/acs.jproteome.3c00785](https://pubs.acs.org/doi/10.1021/acs.jproteome.3c00785)
+> Buur L. M. et al, \_J Proteome Res. 2024 Mar 16. doi: [10.1021/acs.jproteome.3c00785](https://pubs.acs.org/doi/10.1021/acs.jproteome.3c00785)
 >
 > **Percolator**
 >

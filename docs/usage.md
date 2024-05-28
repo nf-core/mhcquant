@@ -14,12 +14,12 @@ You will need to create a samplesheet with information about the samples you wou
 
 ### Samplesheet columns
 
-| Column              | Description                                                                                                                                                          |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ID`                | An incrementing value which acts as a unique number for the given sample                                                                                             |
-| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample. |
-| `Condition`         | Additional information of the sample can be defined here.                                                                                                            |
-| `ReplicateFileName` | Full path to the MS file. These files have the extentions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip                                                                            |
+| Column              | Description                                                                                           |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ID`                | An incrementing value which acts as a unique number for the given sample                              |
+| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
+| `Condition`         | Additional information of the sample can be defined here.                                             |
+| `ReplicateFileName` | Full path to the MS file. These files have the extentions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
 
 The pipeline will auto-detect whether a sample is either in mzML, raw or tdf file format using the information provided in the samplesheet.
 
@@ -43,22 +43,22 @@ ID	Sample	Condition	ReplicateFileName
 
 ## Recommended search settings
 
-Fine-tuning search settings is important to obtain the most optimal results for your MS data. *These settings heavily depend on the MS instrument settings used to generate the data*. If you want to reprocess public data, make sure you use the settings mentioned in the methods section! The following table acts as an orientation of commonly used search settings for instruments:
+Fine-tuning search settings is important to obtain the most optimal results for your MS data. _These settings heavily depend on the MS instrument settings used to generate the data_. If you want to reprocess public data, make sure you use the settings mentioned in the methods section! The following table acts as an orientation of commonly used search settings for instruments:
 
-| MS-Device         | timsTOF           || Orbitrap Fusion Lumos || Q Exactive Orbitrap || LTQ Orbitrap XL   ||
-|-------------------|---------|----------|---------|--------------|---------|------------|---------|----------|
-|                   | class I | class II | class I | class II     | class I | class II   | class I | class II |
-| instrument        | high_res| high_res | high_res| high_res     | high_res| high_res   | low_res | low_res  |
-| digest_mass_range | 800:2500| 800:5000 | 800:2500| 800:5000     | 800:2500| 800:5000   | 800:2500| 800:5000 |
-| activation_method | CID     | CID      | HCD     | HCD          | HCD     | HCD        | CID     | CID      |
-| prec_charge       | 1:4     | 1:5      | 2:3     | 2:5          | 2:3     | 2:5        | 2:3     | 2:5      |
-| precursor_error_units| ppm  | ppm      | ppm     | ppm          | ppm     | ppm        |  ppm    | ppm      |
-| number_mods       | 3       | 5        | 3       | 5            | 3       | 5          | 3       | 5        |
-| precursor_mass_tolerance| 20| 20       | 5       | 5            | 5       | 5          | 5       | 5        |
-| fragment_mass_tolerance|0.02| 0.02     | 0.02    | 0.02         | 0.02    | 0.02       | 0.50025 | 0.50025  |
-| fragment_bin_offset| 0      | 0        | 0       | 0            | 0       | 0          | 0.4     | 0.4      |
+| MS-Device                | timsTOF  |          | Orbitrap Fusion Lumos |          | Q Exactive Orbitrap |          | LTQ Orbitrap XL |          |
+| ------------------------ | -------- | -------- | --------------------- | -------- | ------------------- | -------- | --------------- | -------- |
+|                          | class I  | class II | class I               | class II | class I             | class II | class I         | class II |
+| instrument               | high_res | high_res | high_res              | high_res | high_res            | high_res | low_res         | low_res  |
+| digest_mass_range        | 800:2500 | 800:5000 | 800:2500              | 800:5000 | 800:2500            | 800:5000 | 800:2500        | 800:5000 |
+| activation_method        | CID      | CID      | HCD                   | HCD      | HCD                 | HCD      | CID             | CID      |
+| prec_charge              | 1:4      | 1:5      | 2:3                   | 2:5      | 2:3                 | 2:5      | 2:3             | 2:5      |
+| precursor_error_units    | ppm      | ppm      | ppm                   | ppm      | ppm                 | ppm      | ppm             | ppm      |
+| number_mods              | 3        | 5        | 3                     | 5        | 3                   | 5        | 3               | 5        |
+| precursor_mass_tolerance | 20       | 20       | 5                     | 5        | 5                   | 5        | 5               | 5        |
+| fragment_mass_tolerance  | 0.02     | 0.02     | 0.02                  | 0.02     | 0.02                | 0.02     | 0.50025         | 0.50025  |
+| fragment_bin_offset      | 0        | 0        | 0                     | 0        | 0                   | 0        | 0.4             | 0.4      |
 
-Modifications are specified via `--variable_mods` and `fixed_mods` using the [UNIMOD nomenclature](https://www.unimod.org/unimod_help.html) via OpenMS. Check out [helper page]( https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html) of OpenMS for the full list of options. Multiple modifications are specified as `'Oxidation (M),Acetyl (N-term),Phospho (S)'`.
+Modifications are specified via `--variable_mods` and `fixed_mods` using the [UNIMOD nomenclature](https://www.unimod.org/unimod_help.html) via OpenMS. Check out [helper page](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html) of OpenMS for the full list of options. Multiple modifications are specified as `'Oxidation (M),Acetyl (N-term),Phospho (S)'`.
 
 Further information about the command line arguments is documented on the [nf-core website](https://nf-co.re/mhcquant/dev/parameters) or by using `--help`.
 
