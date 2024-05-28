@@ -21,9 +21,12 @@ MzTab files contain many columns and annotate the most important information - h
 PEP  sequence  accession  best_search_engine_score[1]  retention_time  charge  mass_to_charge  peptide_abundance_study_variable[1]
 ```
 
-Most important to know is that in this format we annotated the Comet XCorr of each peptide identification in the `best_search_engine_score[1]` column and peptide quantities in the `peptide_abundance_study_variable` columns. If `--skip_quantification` is specified the `best_search_engine_score[1]` holds the percolator q-value.
+By default (only identification) the `best_search_engine_score[1]` holds the percolator q-value. If `--quantify` is specified we annotated the Comet XCorr of each peptide identification in the `best_search_engine_score[1]` column and peptide quantities in the `peptide_abundance_study_variable` columns.
 
-The TSV output file is an alternative output of [OpenMS](https://www.openms.de/) comprising similar information to the mzTab output. A brief explanation of the structure is listed below. See documentation of the format or PSI documentation for more information about [annotated scores and format](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/release/latest/html/TOPP_TextExporter.html).
+The TSV output file is an alternative output of [OpenMS](https://www.openms.de/) comprising similar information to the mzTab output. The TSV output of identification runs is a simple tab-delimited file holding information about FDR-filtered peptides and currently all values produced by `MS²Rescore`. The TSV file in quantification mode (by using `--quantify`) is more complex and described in more detail below
+
+<details markdown="1">
+<summary>TSV Quant</summary
 
 MAP contains information about the different mzML files that were provided initially
 
@@ -60,6 +63,10 @@ PEPTIDE contains information about peptide hits that were identified and corresp
 ```bash
 #PEPTIDE        rt      mz      score   rank    sequence        charge  aa_before       aa_after        score_type      search_identifier       accessions      FFId_category   fea
 ```
+
+See documentation of the format or PSI documentation for more information about [annotated scores and format](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/release/latest/html/TOPP_TextExporter.html).
+
+</details>
 
 ### Intermediate results
 

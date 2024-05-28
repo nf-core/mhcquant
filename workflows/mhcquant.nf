@@ -142,7 +142,7 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: QUANT
     //
-    if (!params.skip_quantification) {
+    if (params.quantify) {
         QUANT(merge_meta_map, ch_rescored_runs, ch_filter_q_value, ch_clean_mzml_file)
         ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
