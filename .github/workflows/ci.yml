@@ -78,7 +78,7 @@ jobs:
 
   # Define a second workflow only against main with additional tests: test_timstof and test_full
   profile_main:
-    name: Run profile tests and additional full tests
+    name: Run timsTOF profile tests
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'nf-core/mhcquant' }}
     runs-on: ubuntu-latest
     env:
