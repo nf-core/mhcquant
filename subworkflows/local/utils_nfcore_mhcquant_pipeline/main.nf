@@ -164,7 +164,7 @@ def validateInputSamplesheet(input) {
 def getCustomExtension(file) {
     def name = file.getName()
     if (name =~ /.*\.(d\.tar\.gz|d\.tar|d\.zip|mzML\.gz|raw|RAW|mzML|d)$/) {
-        return name.split("\\.").drop(1).join(".")
+        return name.split("\\.").drop(1).join(".").toLowerCase()
     } else {
         return file.getExtension().toLowerCase()
     }
