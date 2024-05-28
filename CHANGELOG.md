@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template update 2.13.1 [#313](https://github.com/nf-core/mhcquant/pull/313)
 - Template update 2.14.1 [#320](https://github.com/nf-core/mhcquant/pull/320)
 
+### `Changed`
+
+- Set identifcation mode as default and rename `--skip_quantification` to `--quantify` [#323](https://github.com/nf-core/mhcquant/pull/323)
+
 ### `Deprecated`
 
 - Removed MS²PIP and DeepLC modules. These feature generators are now called via the MS²Rescore framework [#293](https://github.com/nf-core/mhcquant/pull/293)
