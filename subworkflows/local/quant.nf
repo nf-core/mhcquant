@@ -1,5 +1,5 @@
 /*
- * Perform the quantification of the samples when the parameter --skip_quantification is not provided
+ * Perform the quantification of the samples when the parameter --quantify is provided
  * This workflow splits the merged percolator output into the individual runs and filters them based on the q-value
  * It then aligns the retention times of the runs and merges the idxml files together to use them as id_ext in featurefinder
  * Finally, it performs the quantification and emits the consensusXML file

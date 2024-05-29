@@ -331,11 +331,11 @@
             "description": "",
             "default": "",
             "properties": {
-                "skip_quantification": {
+                "quantify": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip quantification and only yield peptide identifications"
+                    "description": "Turn on quantification mode"
                 },
                 "max_rt_alignment_shift": {
                     "type": "integer",
