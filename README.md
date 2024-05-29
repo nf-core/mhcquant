@@ -116,7 +116,7 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann) from the [Kohlbacher Lab](https://kohlbacherlab.org/). The pipeline was re-written in Nextflow DSL2 by [Marissa Dubbelaar](https://github.com/marissaDubbelaar) and was majorly improved by [Jonas Scheid](https://github.com/jonasscheid) and [Steffen Lemke](https://github.com/steffenlem) from [Peptide-based Immunotherapy](https://www.medizin.uni-tuebingen.de/en-de/peptid-basierte-immuntherapie) and [Quantitative Biology Center](https://uni-tuebingen.de/forschung/forschungsinfrastruktur/zentrum-fuer-quantitative-biologie-qbic/) in Tübingen.
+nf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann) from the [Kohlbacher Lab](https://kohlbacherlab.org/). The pipeline was re-written in Nextflow DSL2 by [Marissa Dubbelaar](https://github.com/marissaDubbelaar) and was significantly improved by [Jonas Scheid](https://github.com/jonasscheid) and [Steffen Lemke](https://github.com/steffenlem) from [Peptide-based Immunotherapy](https://www.medizin.uni-tuebingen.de/en-de/peptid-basierte-immuntherapie) and [Quantitative Biology Center](https://uni-tuebingen.de/forschung/forschungsinfrastruktur/zentrum-fuer-quantitative-biologie-qbic/) in Tübingen.
 
 Helpful contributors:
 
