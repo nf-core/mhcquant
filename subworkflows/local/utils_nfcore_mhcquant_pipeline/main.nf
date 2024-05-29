@@ -84,7 +84,7 @@ workflow PIPELINE_INITIALISATION {
         // get number of files per sample-condition
         .map { group_meta, metas, files -> [ group_meta, files.size()] }
         .combine( ch_input, by:0 )
-        .map { group_meta, group_count, meta, file -> [meta + ['group_count':group_count, 'spectra':file.baseName, 'ext':file.getExtension().toLowerCase()], file] }
+        .map { group_meta, group_count, meta, file -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file] }
         .set { ch_samplesheet }
 
     //
@@ -159,6 +159,15 @@ def validateInputSamplesheet(input) {
     }
 
     return [ metas[0], fastqs ]
+}
+
+def getCustomExtension(file) {
+    def name = file.getName()
+    if (name =~ /.*\.(d\.tar\.gz|d\.tar|d\.zip|mzML\.gz|raw|RAW|mzML|d)$/) {
+        return name.split("\\.").drop(1).join(".").toLowerCase()
+    } else {
+        return file.getExtension().toLowerCase()
+    }
 }
 
 //

@@ -7,7 +7,7 @@
 //
 // MODULE: Loaded from modules/local/
 //
-include { TDF2MZML                   } from '../modules/local/tdf2mzml'
+
 include { OPENMS_FILEFILTER          } from '../modules/local/openms_filefilter'
 include { OPENMS_COMETADAPTER        } from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER      } from '../modules/local/openms_peptideindexer'
@@ -21,7 +21,8 @@ include { OPENMS_MZTABEXPORTER       } from '../modules/local/openms_mztabexport
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
 //
-include { QUANT            } from '../subworkflows/local/quant'
+include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
+include { QUANT           } from '../subworkflows/local/quant'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,9 +33,7 @@ include { QUANT            } from '../subworkflows/local/quant'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { THERMORAWFILEPARSER                        } from '../modules/nf-core/thermorawfileparser/main'
 include { OPENMS_DECOYDATABASE                       } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_PEAKPICKERHIRES                     } from '../modules/nf-core/openms/peakpickerhires/main'
 include { OPENMS_IDMERGER                            } from '../modules/nf-core/openms/idmerger/main'
 include { OPENMS_IDSCORESWITCHER                     } from '../modules/nf-core/openms/idscoreswitcher/main.nf'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE } from '../modules/nf-core/openms/idfilter/main'
@@ -60,17 +59,9 @@ workflow MHCQUANT {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    ch_samplesheet
-        .branch {
-            meta, filename ->
-                raw : meta.ext == 'raw'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
-                mzml : meta.ext == 'mzml'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
-                tdf : meta.ext == 'd'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
-                other : true }
-        .set { branched_ms_files }
+    // Prepare spectra files (Decompress archives, convert to mzML, centroid if specified)
+    PREPARE_SPECTRA(ch_samplesheet)
+    ch_versions = ch_versions.mix(PREPARE_SPECTRA.out.versions)
 
     // Decoy Database creation
     if (!params.skip_decoy_generation) {
@@ -83,35 +74,13 @@ workflow MHCQUANT {
         ch_decoy_db = ch_fasta.map{ meta, fasta -> [fasta] }
     }
 
-    // Initialize channel for ms files that do not need to be converted
-    ch_ms_files = branched_ms_files.mzml
-
-    // Raw file conversion
-    THERMORAWFILEPARSER(branched_ms_files.raw)
-    ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions)
-    ch_ms_files = ch_ms_files.mix(THERMORAWFILEPARSER.out.spectra)
-
-    // timsTOF data conversion
-    TDF2MZML(branched_ms_files.tdf)
-    ch_versions = ch_versions.mix(TDF2MZML.out.versions)
-    ch_ms_files = ch_ms_files.mix(TDF2MZML.out.mzml)
-
-    // Optional: Run Peak Picking as Preprocessing
-    if (params.run_centroidisation) {
-        OPENMS_PEAKPICKERHIRES(ch_ms_files)
-        ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions)
-        ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
-    } else {
-        ch_mzml_file = ch_ms_files
-    }
-
     // Optionally clean up mzML files
     if (params.filter_mzml){
-        OPENMS_FILEFILTER(ch_mzml_file)
+        OPENMS_FILEFILTER(PREPARE_SPECTRA.out.mzml)
         ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions)
         ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
     } else {
-        ch_clean_mzml_file = ch_mzml_file
+        ch_clean_mzml_file = PREPARE_SPECTRA.out.mzml
     }
 
     // Run comet database search
@@ -173,7 +142,7 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: QUANT
     //
-    if (!params.skip_quantification) {
+    if (params.quantify) {
         QUANT(merge_meta_map, ch_rescored_runs, ch_filter_q_value, ch_clean_mzml_file)
         ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
