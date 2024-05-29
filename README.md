@@ -19,7 +19,7 @@
 
 ## Introduction
 
-**nfcore/mhcquant** is a bioinformatics best-practice pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules, which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).
+**nfcore/mhcquant** is a best-practice bioinformatics pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).
 
 The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore and FDR rescoring is applied using Percolator based on a competitive target-decoy approach. For label free quantification all input files undergo identification-based retention time alignment, and targeted feature extraction matching ids between runs.
 
