@@ -26,13 +26,13 @@
 
   > Gabriels R, Martens L, Degroeve S. Updated MS²PIP web server delivers fast and accurate MS² peak intensity prediction for multiple fragmentation methods, instruments and labeling techniques. Nucleic Acids Res. 2019 Jul 2;47(W1):W295-W299. doi: 10.1093/nar/gkz299. PMID: 31028400; PMCID: PMC6602496.
 
-- [MS²Rescore](https://pubmed.ncbi.nlm.nih.gov/35803561/)
-
-  > Declercq A, Bouwmeester R, Hirschler A, Carapito C, Degroeve S, Martens L, Gabriels R. MS²Rescore: Data-Driven Rescoring Dramatically Boosts Immunopeptide Identification Rates. Mol Cell Proteomics. 2022 Aug;21(8):100266. doi: 10.1016/j.mcpro.2022.100266. Epub 2022 Jul 6. PMID: 35803561; PMCID: PMC9411678.
-
 - [Ionmob](https://pubmed.ncbi.nlm.nih.gov/37540201/)
 
   > Teschner D, Gomez-Zepeda D, Declercq A, Łącki MK, Avci S, Bob K, Distler U, Michna T, Martens L, Tenzer S, Hildebrandt A. Ionmob: a Python package for prediction of peptide collisional cross-section values. Bioinformatics. 2023 Sep 2;39(9):btad486. doi: 10.1093/bioinformatics/btad486. PMID: 37540201; PMCID: PMC10521631.
+
+- [MS²Rescore](https://pubmed.ncbi.nlm.nih.gov/35803561/)
+
+  > Declercq A, Bouwmeester R, Hirschler A, Carapito C, Degroeve S, Martens L, Gabriels R. MS²Rescore: Data-Driven Rescoring Dramatically Boosts Immunopeptide Identification Rates. Mol Cell Proteomics. 2022 Aug;21(8):100266. doi: 10.1016/j.mcpro.2022.100266. Epub 2022 Jul 6. PMID: 35803561; PMCID: PMC9411678.
 
 - [Percolator](https://pubmed.ncbi.nlm.nih.gov/31407580/)
 
@@ -41,18 +41,6 @@
 - [Mokapot](https://pubmed.ncbi.nlm.nih.gov/33596079/)
 
   > Fondrie WE, Noble WS. mokapot: Fast and Flexible Semisupervised Learning for Peptide Detection. J Proteome Res. 2021 Apr 2;20(4):1966-1971. doi: 10.1021/acs.jproteome.0c01010. Epub 2021 Feb 17. PMID: 33596079; PMCID: PMC8022319.
-
-- [FRED2](https://pubmed.ncbi.nlm.nih.gov/27153717/)
-
-  > Schubert B, WalzerM, Brachvogel HP, Szolek A, Mohr C, Kohlbacher O, FRED 2: an immunoinformatics framework for Python, Bioinformatics, Volume 32, Issue 13, 1 July 2016, Pages 2044–2046. doi: 10.1093/bioinformatics/btw113. PubMed PMID: 27153717; PubMed Central PMCID; PMC4920123.
-
-- [MHCflurry](https://pubmed.ncbi.nlm.nih.gov/27153717/)
-
-  > O'Donnell TJ, Rubinsteyn A, Bonsack M, Riemer AB, Laserson U, Hammerbacher J. MHCflurry: Open-Source Class I MHC Binding Affinity Prediction. Cell Syst. 2018 Jul 25;7(1):129-132.e4. doi: 10.1016/j.cels.2018.05.014. Epub 2018 Jun 27. PMID: 29960884.
-
-- [MHCnugget](https://pubmed.ncbi.nlm.nih.gov/27153717/)
-
-  > Shao XM, Bhattacharya R, Huang J, Sivakumar IKA, Tokheim C, Zheng L, Hirsch D, Kaminow B, Omdahl A, Bonsack M, Riemer AB, Velculescu VE, Anagnostou V, Pagel KA, Karchin R. High-Throughput Prediction of MHC Class I and II Neoantigens with MHCnuggets. Cancer Immunol Res. 2020 Mar;8(3):396-408. doi: 10.1158/2326-6066.CIR-19-0464. Epub 2019 Dec 23. PMID: 31871119; PMCID: PMC7056596.
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 
