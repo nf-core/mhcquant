@@ -23,4 +23,17 @@ process TDF2MZML {
             tdf2mzml: \$(echo 0.3.0)
         END_VERSIONS
         """
+
+    stub:
+        def prefix           = task.ext.prefix ?: "${tdf.simpleName}"
+
+        """
+        touch ${prefix}.mzML
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            python: \$(python3 --version | cut -d ' ' -f2)
+            tdf2mzml: \$(echo 0.3.0)
+        END_VERSIONS
+        """
 }

@@ -22,8 +22,20 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
 
         """
         FeatureLinkerUnlabeledKD -in $features \\
-            -out '${prefix}.consensusXML' \\
+            -out ${prefix}.consensusXML \\
             -threads $task.cpus
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
+        """
+
+    stub:
+        def prefix           = task.ext.prefix ?: "${meta.id}_all_features_merged"
+
+        """
+        touch ${prefix}.consensusXML
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
