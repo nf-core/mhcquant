@@ -26,7 +26,7 @@ By default (only identification) the `best_search_engine_score[1]` holds the per
 The TSV output file is an alternative output of [OpenMS](https://www.openms.de/) comprising similar information to the mzTab output. The TSV output of identification runs is a simple tab-delimited file holding information about FDR-filtered peptides and currently all values produced by `MS²Rescore`. The TSV file in quantification mode (by using `--quantify`) is more complex and described in more detail below
 
 <details markdown="1">
-<summary>TSV Quant</summary
+<summary>TSV Quant</summary>
 
 MAP contains information about the different mzML files that were provided initially
 
