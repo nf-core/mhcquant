@@ -140,7 +140,7 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
-If you use nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.8427707](https://doi.org/10.5281/zenodo.8427707) and the corresponding manuscript:
+If you use nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.1569909](https://doi.org/10.5281/zenodo.1569909) and the corresponding manuscript:
 
 > **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**
 >
