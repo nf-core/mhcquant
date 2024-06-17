@@ -32,4 +32,17 @@ process OPENMS_MAPRTTRANSFORMER {
             openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
         END_VERSIONS
         """
+
+    stub:
+        def prefix           = task.ext.prefix ?: "${meta.id}"
+        def fileExt          = alignment_file.collect { it.name.tokenize("\\.")[1] }.join(' ')
+
+        """
+        touch ${prefix}.${fileExt}
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
+        """
 }

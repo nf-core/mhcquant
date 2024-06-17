@@ -77,9 +77,9 @@ nextflow run nf-core/mhcquant \
   --input 'samplesheet.tsv' \
   --outdir <OUTDIR> \
   --fasta 'SWISSPROT_2020.fasta' \
-  <search parameters> \
+  <SEARCH PARAMS> \
   --peptide_min_length 8 \
---peptide_max_length 14 \
+  --peptide_max_length 14 \
   --ms2pip_model 'Immuno-HCD' \
   -profile docker
 ```

@@ -20,7 +20,6 @@ process PYOPENMS_IONANNOTATOR {
     script:
         def prefix           = task.ext.prefix ?: "${meta.id}"
         def args             = task.ext.args  ?: ''
-
         def xions            = params.use_x_ions ? "--use_x_ions" : ""
         def zions            = params.use_z_ions ? "--use_z_ions" : ""
         def aions            = params.use_a_ions ? "--use_a_ions" : ""
@@ -37,6 +36,20 @@ process PYOPENMS_IONANNOTATOR {
             $aions \\
             $cions
 
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            pyopenms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
+        """
+
+    stub:
+        def prefix           = task.ext.prefix ?: "${meta.id}"
+        def args             = task.ext.args  ?: ''
+
+        """
+        touch ${prefix}_all_peaks.tsv
+        touch ${prefix}_matching_ions.tsv
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

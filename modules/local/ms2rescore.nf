@@ -46,6 +46,8 @@ process MS2RESCORE {
 
     """
     touch ${prefix}.idXML
+    touch ${meta.id}_feature_names.tsv
+    touch ${meta.id}.html
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

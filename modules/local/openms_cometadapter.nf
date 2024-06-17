@@ -52,4 +52,18 @@ process OPENMS_COMETADAPTER {
             openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
         END_VERSIONS
         """
+
+    stub:
+        def args = task.ext.args ?: ''
+        def prefix = task.ext.prefix ?: "${meta.id}_ms2rescore"
+
+        """
+        touch ${prefix}.idXML
+        touch  ${prefix}_pin.tsv
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
+        """
 }
