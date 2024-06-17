@@ -38,8 +38,6 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
     stub:
         def prefix           = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}"
         def args             = task.ext.args  ?: ''
-        def quant_fdr        = params.quantification_fdr ? "-id $id_int -id_ext $id_ext -svm:min_prob ${params.quantification_min_prob}" : "-id $id_ext"
-        args = args + " $quant_fdr"
 
         """
         touch ${prefix}.featureXML

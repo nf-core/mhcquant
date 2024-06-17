@@ -46,10 +46,6 @@ process PYOPENMS_IONANNOTATOR {
     stub:
         def prefix           = task.ext.prefix ?: "${meta.id}"
         def args             = task.ext.args  ?: ''
-        def xions            = params.use_x_ions ? "--use_x_ions" : ""
-        def zions            = params.use_z_ions ? "--use_z_ions" : ""
-        def aions            = params.use_a_ions ? "--use_a_ions" : ""
-        def cions            = params.use_c_ions ? "--use_c_ions" : ""
 
         """
         touch ${prefix}_all_peaks.tsv

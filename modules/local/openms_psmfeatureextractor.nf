@@ -40,7 +40,6 @@ process OPENMS_PSMFEATUREEXTRACTOR {
     stub:
         def prefix           = task.ext.prefix ?: "${meta.id}_psm"
         def args             = task.ext.args ?: ''
-        def extra_features = ""
 
         """
         touch ${prefix}.idXML

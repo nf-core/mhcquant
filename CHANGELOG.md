@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.6.0 - nfcore/mhcquant "Mr. Bob" - 2024/06/17
+## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
 
 ### `Added`
 
@@ -23,10 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template update 2.13 [#311](https://github.com/nf-core/mhcquant/pull/311)
 - Template update 2.13.1 [#313](https://github.com/nf-core/mhcquant/pull/313)
 - Template update 2.14.1 [#320](https://github.com/nf-core/mhcquant/pull/320)
+- Added stubs to local modules [#326](https://github.com/nf-core/mhcquant/pull/326)
 
 ### `Changed`
 
-- Set identifcation mode as default and rename `--skip_quantification` to `--quantify` [#323](https://github.com/nf-core/mhcquant/pull/323)
+- Set identification mode as default and rename `--skip_quantification` to `--quantify` [#323](https://github.com/nf-core/mhcquant/pull/323)
 
 ### `Deprecated`
 

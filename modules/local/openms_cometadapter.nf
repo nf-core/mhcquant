@@ -57,15 +57,6 @@ process OPENMS_COMETADAPTER {
         def args = task.ext.args ?: ''
         def prefix = task.ext.prefix ?: "${meta.id}_ms2rescore"
 
-        def mods             = params.fixed_mods != " " ? "-fixed_modifications ${params.fixed_mods.tokenize(',').collect { "'${it}'"}.join(" ")}" : "-fixed_modifications"
-        def params_file      = params.default_params_file_comet != " " ? "-default_params_file ${params.default_params_file_comet}" : ""
-        def xions            = params.use_x_ions ? "-use_X_ions true" : ""
-        def zions            = params.use_z_ions ? "-use_Z_ions true" : ""
-        def aions            = params.use_a_ions ? "-use_A_ions true" : ""
-        def cions            = params.use_c_ions ? "-use_C_ions true" : ""
-        def nlions           = params.use_NL_ions ? "-use_NL_ions true" : ""
-        def remove_precursor = params.remove_precursor_peak ? "-remove_precursor_peak yes" : ""
-
         """
         touch ${prefix}.idXML
         touch  ${prefix}_pin.tsv
