@@ -3,6 +3,36 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
+
+### `Added`
+
+- Added MS²Rescore module with the underlying python CLI [#293](https://github.com/nf-core/mhcquant/pull/293)
+- Added support for handling various archive formats: `d|d.tar.gz|d.tar|d.zip|mzML.gz|raw|RAW|mzML` [#323](https://github.com/nf-core/mhcquant/pull/323)
+- Added test for timsTOF data [#323](https://github.com/nf-core/mhcquant/pull/323)
+- Added new flag `ms2pip_model_dir`, which allows specifying a cache directory for ms2pip models [#322](https://github.com/nf-core/mhcquant/pull/322)
+
+### `Fixed`
+
+- Create only one decoy database [#299](https://github.com/nf-core/mhcquant/pull/299)
+- Template update 2.11 [#300](https://github.com/nf-core/mhcquant/pull/300)
+- Template update 2.12 [#303](https://github.com/nf-core/mhcquant/pull/303)
+- Use `groupKey` to streamline group-wise processing [#310](https://github.com/nf-core/mhcquant/pull/310)
+- Replace `PYOPENMS_IDFILTER` with `OPENMS_IDFILTER` [#310](https://github.com/nf-core/mhcquant/pull/310)
+- Added nf-core modules [#310](https://github.com/nf-core/mhcquant/pull/310)
+- Template update 2.13 [#311](https://github.com/nf-core/mhcquant/pull/311)
+- Template update 2.13.1 [#313](https://github.com/nf-core/mhcquant/pull/313)
+- Template update 2.14.1 [#320](https://github.com/nf-core/mhcquant/pull/320)
+- Added stubs to local modules [#326](https://github.com/nf-core/mhcquant/pull/326)
+
+### `Changed`
+
+- Set identification mode as default and rename `--skip_quantification` to `--quantify` [#323](https://github.com/nf-core/mhcquant/pull/323)
+
+### `Deprecated`
+
+- Removed MS²PIP and DeepLC modules. These feature generators are now called via the MS²Rescore framework [#293](https://github.com/nf-core/mhcquant/pull/293)
+
 ## v2.5.0 - nfcore/mhcquant "Angry Bird" - 2023/10/09
 
 ### `Added`

@@ -2,10 +2,10 @@ process OPENMS_PEPTIDEINDEXER {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::openms=3.0.0"
+    conda "bioconda::openms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:3.0.0--h8964181_1' :
-        'biocontainers/openms:3.0.0--h8964181_1' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.1.0--h8964181_3' :
+        'biocontainers/openms:3.1.0--h8964181_3' }"
 
     input:
         tuple val(meta), path(idxml), path(fasta)
@@ -27,6 +27,18 @@ process OPENMS_PEPTIDEINDEXER {
                 -fasta $fasta \\
                 -decoy_string DECOY \\
                 -enzyme:specificity none
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
+        """
+
+    stub:
+        def prefix           = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}_idx"
+
+        """
+        touch ${prefix}.idXML
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

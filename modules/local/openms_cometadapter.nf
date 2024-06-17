@@ -2,10 +2,10 @@ process OPENMS_COMETADAPTER {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::openms-thirdparty=3.0.0"
+    conda "bioconda::openms-thirdparty=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms-thirdparty:3.0.0--h9ee0642_1' :
-        'biocontainers/openms-thirdparty:3.0.0--h9ee0642_1' }"
+        'https://depot.galaxyproject.org/singularity/openms-thirdparty:3.1.0--h9ee0642_3' :
+        'biocontainers/openms-thirdparty:3.1.0--h9ee0642_3' }"
 
     input:
         tuple val(meta), path(mzml), path(fasta)
@@ -46,6 +46,20 @@ process OPENMS_COMETADAPTER {
             $cions \\
             $nlions \\
             $remove_precursor
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
+        """
+
+    stub:
+        def args = task.ext.args ?: ''
+        def prefix = task.ext.prefix ?: "${meta.id}_ms2rescore"
+
+        """
+        touch ${prefix}.idXML
+        touch  ${prefix}_pin.tsv
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

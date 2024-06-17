@@ -2,7 +2,7 @@ process PYOPENMS_IONANNOTATOR {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::pyopenms=3.0.0"
+    conda "bioconda::pyopenms=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pyopenms:3.0.0--py311h9b8898c_0' :
         'biocontainers/pyopenms:3.0.0--py311h9b8898c_0' }"
@@ -20,11 +20,10 @@ process PYOPENMS_IONANNOTATOR {
     script:
         def prefix           = task.ext.prefix ?: "${meta.id}"
         def args             = task.ext.args  ?: ''
-
-        def xions            = params.use_x_ions ? "-use_x_ions" : ""
-        def zions            = params.use_z_ions ? "-use_z_ions" : ""
-        def aions            = params.use_a_ions ? "-use_a_ions" : ""
-        def cions            = params.use_c_ions ? "-use_c_ions" : ""
+        def xions            = params.use_x_ions ? "--use_x_ions" : ""
+        def zions            = params.use_z_ions ? "--use_z_ions" : ""
+        def aions            = params.use_a_ions ? "--use_a_ions" : ""
+        def cions            = params.use_c_ions ? "--use_c_ions" : ""
 
         """
         get_ion_annotations.py \\
@@ -37,6 +36,20 @@ process PYOPENMS_IONANNOTATOR {
             $aions \\
             $cions
 
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            pyopenms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        END_VERSIONS
+        """
+
+    stub:
+        def prefix           = task.ext.prefix ?: "${meta.id}"
+        def args             = task.ext.args  ?: ''
+
+        """
+        touch ${prefix}_all_peaks.tsv
+        touch ${prefix}_matching_ions.tsv
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":

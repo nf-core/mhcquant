@@ -9,35 +9,27 @@
         "properties": {
             "ID": {
                 "type": "integer",
-                "errorMessage": "Provide an unique identifier for the replicate, must be a numeric value"
+                "errorMessage": "Provide an unique identifier for the replicate, must be a numeric value",
+                "meta": ["id"]
             },
             "Sample": {
                 "type": "string",
-                "pattern": "^\\S+-?",
-                "errorMessage": "Sample name must be provided and cannot contain spaces"
+                "pattern": "^\\S+$",
+                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "meta": ["sample"]
             },
             "Condition": {
                 "type": "string",
                 "pattern": "^\\S+-?",
-                "errorMessage": "Sample condition must be provided and cannot contain spaces"
+                "errorMessage": "Sample condition must be provided and cannot contain spaces",
+                "meta": ["condition"]
             },
             "ReplicateFileName": {
                 "type": "string",
-                "errorMessage": "MS file spaces and must have extension '.raw'|'.RAW', '.mzml'|'mzML', or '.d'",
-                "anyOf": [
-                    {
-                        "type": "string",
-                        "pattern": "^(?i)\\S+-?\\.raw$"
-                    },
-                    {
-                        "type": "string",
-                        "pattern": "^(?i)\\S+-?\\.mzML$"
-                    },
-                    {
-                        "type": "string",
-                        "pattern": "^\\S+-?\\.d$"
-                    }
-                ]
+                "format": "path",
+                "exists": true,
+                "pattern": "^\\S+\\.(raw|RAW|mzML|mzML.gz|d|d.tar|d.tar.gz|d.zip)$",
+                "errorMessage": "MS file cannot contain spaces and must have one of the extensions: raw | RAW | mzML | mzML.gz | d | d.tar | d.tar.gz | d.zip"
             }
         },
         "required": ["ID", "Sample", "Condition", "ReplicateFileName"]
