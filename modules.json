@@ -12,7 +12,7 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "b7ebe95761cd389603f9cc0e0dc384c0f663815a",
+                        "git_sha": "06c8865e36741e05ad32ef70ab3fac127486af48",
                         "installed_by": ["modules"]
                     },
                     "openms/decoydatabase": {
@@ -23,6 +23,11 @@
                     "openms/idfilter": {
                         "branch": "master",
                         "git_sha": "bbcad23c681ff85336aef1c41345bc313d921b5d",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/idmassaccuracy": {
+                        "branch": "master",
+                        "git_sha": "f768b283dbd8fc79d0d92b0f68665d7bed94cabc",
                         "installed_by": ["modules"]
                     },
                     "openms/idmerger": {

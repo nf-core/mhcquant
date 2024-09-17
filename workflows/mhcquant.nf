@@ -34,6 +34,7 @@ include { QUANT           } from '../subworkflows/local/quant'
 // MODULE: Installed directly from nf-core/modules
 //
 include { OPENMS_DECOYDATABASE                       } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_IDMASSACCURACY                      } from '../modules/nf-core/openms/idmassaccuracy/main'
 include { OPENMS_IDMERGER                            } from '../modules/nf-core/openms/idmerger/main'
 include { OPENMS_IDSCORESWITCHER                     } from '../modules/nf-core/openms/idscoreswitcher/main.nf'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE } from '../modules/nf-core/openms/idfilter/main'
@@ -90,6 +91,11 @@ workflow MHCQUANT {
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.combine(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
+
+    // Compute mass errors for multiQC report
+    OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.idxml))
+    ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(OPENMS_IDMASSACCURACY.out.frag_err.map{ meta, frag_err -> frag_err })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.idxml
@@ -223,7 +229,9 @@ workflow MHCQUANT {
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
         ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList()
+        ch_multiqc_logo.toList(),
+        [],
+        []
     )
 
     emit:
