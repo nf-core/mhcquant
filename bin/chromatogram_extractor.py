@@ -31,7 +31,7 @@ def main():
     mzml_file.load(input_file, exp)
 
     # Get RT and Spectrum TIC of MS1 Spectra
-    chromatogram = [(round(spectrum.getRT() / 60 ,0), spectrum.calculateTIC(), ) for spectrum in exp.getSpectra() if spectrum.getMSLevel() == 1]
+    chromatogram = [(spectrum.getRT() / 60 , spectrum.calculateTIC()) for spectrum in exp.getSpectra() if spectrum.getMSLevel() == 1]
     logging.info(f'Found {len(chromatogram)} MS1 Spectra')
     logging.info(f'RT range: {round(chromatogram[0][0],2)} - {round(chromatogram[-1][0],2)} [min]')
     # Create pandas df
