@@ -8,15 +8,16 @@
 // MODULE: Loaded from modules/local/
 //
 
-include { OPENMS_FILEFILTER          } from '../modules/local/openms_filefilter'
-include { OPENMS_COMETADAPTER        } from '../modules/local/openms_cometadapter'
-include { OPENMS_PEPTIDEINDEXER      } from '../modules/local/openms_peptideindexer'
-include { MS2RESCORE                 } from '../modules/local/ms2rescore'
-include { OPENMS_PSMFEATUREEXTRACTOR } from '../modules/local/openms_psmfeatureextractor'
-include { OPENMS_PERCOLATORADAPTER   } from '../modules/local/openms_percolatoradapter'
-include { PYOPENMS_IONANNOTATOR      } from '../modules/local/pyopenms_ionannotator'
-include { OPENMS_TEXTEXPORTER        } from '../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER       } from '../modules/local/openms_mztabexporter'
+include { OPENMS_FILEFILTER              } from '../modules/local/openms_filefilter'
+include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
+include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
+include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
+include { MS2RESCORE                     } from '../modules/local/ms2rescore'
+include { OPENMS_PSMFEATUREEXTRACTOR     } from '../modules/local/openms_psmfeatureextractor'
+include { OPENMS_PERCOLATORADAPTER       } from '../modules/local/openms_percolatoradapter'
+include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
+include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
+include { OPENMS_MZTABEXPORTER           } from '../modules/local/openms_mztabexporter'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
@@ -83,6 +84,11 @@ workflow MHCQUANT {
     } else {
         ch_clean_mzml_file = PREPARE_SPECTRA.out.mzml
     }
+
+    // Compute MS1 TICs for QC
+    PYOPENMS_CHROMATOGRAMEXTRACTOR(ch_clean_mzml_file)
+    ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
     // Run comet database search
     OPENMS_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))

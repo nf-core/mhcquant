@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.6.1dev
+
+### `Added`
+
+- Added `PYOPENMS_CHROMATOGRAMEXTRACTOR` extracting MS1 Chromatograms and visualize them in multiQC report [#329](https://github.com/nf-core/mhcquant/pull/329)
+
 ## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
 
 ### `Added`
