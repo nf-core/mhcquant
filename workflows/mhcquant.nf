@@ -12,6 +12,7 @@ include { OPENMS_FILEFILTER              } from '../modules/local/openms_filefil
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
 include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
+include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
 include { MS2RESCORE                     } from '../modules/local/ms2rescore'
 include { OPENMS_PSMFEATUREEXTRACTOR     } from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER       } from '../modules/local/openms_percolatoradapter'
@@ -101,7 +102,10 @@ workflow MHCQUANT {
     // Compute mass errors for multiQC report
     OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.idxml))
     ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(OPENMS_IDMASSACCURACY.out.frag_err.map{ meta, frag_err -> frag_err })
+    // Bin and count mass errors for multiQC report
+    DATAMASH_HISTOGRAM(OPENMS_IDMASSACCURACY.out.frag_err)
+    ch_versions = ch_versions.mix(DATAMASH_HISTOGRAM.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(DATAMASH_HISTOGRAM.out.binned_tsv.map{ meta, frag_err_hist -> frag_err_hist })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.idxml
