@@ -65,7 +65,6 @@ sp:
     fn: "*_chrom.csv"
   mass_error:
     fn: "*_binned.tsv"
-
 ### Define the order of sections
 #module_order:
 #  - custom_content
