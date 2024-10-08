@@ -12,6 +12,7 @@ include { OPENMS_FILEFILTER              } from '../modules/local/openms_filefil
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
 include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
+include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
 include { MS2RESCORE                     } from '../modules/local/ms2rescore'
 include { OPENMS_PSMFEATUREEXTRACTOR     } from '../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER       } from '../modules/local/openms_percolatoradapter'
@@ -35,6 +36,7 @@ include { QUANT           } from '../subworkflows/local/quant'
 // MODULE: Installed directly from nf-core/modules
 //
 include { OPENMS_DECOYDATABASE                       } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_IDMASSACCURACY                      } from '../modules/nf-core/openms/idmassaccuracy/main'
 include { OPENMS_IDMERGER                            } from '../modules/nf-core/openms/idmerger/main'
 include { OPENMS_IDSCORESWITCHER                     } from '../modules/nf-core/openms/idscoreswitcher/main.nf'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE } from '../modules/nf-core/openms/idfilter/main'
@@ -96,6 +98,14 @@ workflow MHCQUANT {
     // Index decoy and target hits
     OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.combine(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
+
+    // Compute mass errors for multiQC report
+    OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.idxml))
+    ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
+    // Bin and count mass errors for multiQC report
+    DATAMASH_HISTOGRAM(OPENMS_IDMASSACCURACY.out.frag_err)
+    ch_versions = ch_versions.mix(DATAMASH_HISTOGRAM.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(DATAMASH_HISTOGRAM.out.binned_tsv.map{ meta, frag_err_hist -> frag_err_hist })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.idxml

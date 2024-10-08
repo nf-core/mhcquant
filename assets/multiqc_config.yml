@@ -34,18 +34,38 @@ custom_data:
       It represents the total ion current (TIC) from the MS1 scan,
       which is useful for monitoring the overall elution profile of compounds during a chromatographic separation.
     pconfig:
-      id: "chromatogram"
-      title: "MS1 Chromatograms"
       xlab: "Retention time [min]"
       xmin: 0
       ylab: "Intensity"
       logswitch: true
       logswitch_active: true
 
+  # Mass error plot
+  mass_error:
+    plot_type: "linegraph"
+    file_format: "tsv"
+    section_name: "Fragment mass error"
+    description: |
+      The fragment mass error describes the differences between observed and theoretical fragment ion masses.
+      It helps assessing the accuracy and calibration of the mass spectrometer by visualizing the error range
+      and potential deviations. Depending on your configurations this error is plotted in Dalton (Da)
+      or parts-per-million (ppm).
+    pconfig:
+      xlab: "Mass deviation [Da/ppm]"
+      ylab: "Frequency"
+#id: custom_box
+#plot_type: 'box'
+#section_name: 'Custom box plot'
+#description: "Box plot for a sample"
+#pconfig:
+#    title: 'Box plot'
+
 sp:
   chromatogram:
     fn: "*_chrom.csv"
-## Define the order of sections
+  mass_error:
+    fn: "*_binned.tsv"
+### Define the order of sections
 #module_order:
 #  - custom_content
 #
@@ -53,3 +73,4 @@ sp:
 #custom_content:
 #  order:
 #    - chromatogram
+#    - mass_error
