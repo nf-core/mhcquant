@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `PYOPENMS_CHROMATOGRAMEXTRACTOR` extracting MS1 Chromatograms and visualize them in multiQC report [#329](https://github.com/nf-core/mhcquant/pull/329)
 - Added `OPENMS_IDMASSACCURACY` and `DATAMASH_HISTOGRAM` to compute fragment mass errors and visualizte them in multiQC report [#332](https://github.com/nf-core/mhcquant/pull/332)
 
+### `Fixed`
+
+- Template update 3.0.2 [#337](https://github.com/nf-core/mhcquant/pull/337)
+
 ## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
 
 ### `Added`
