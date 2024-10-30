@@ -561,22 +561,22 @@
             "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/definitions/database_options"
+            "$ref": "#/$defs/database_options"
         },
         {
-            "$ref": "#/definitions/preprocessing"
+            "$ref": "#/$defs/preprocessing"
         },
         {
-            "$ref": "#/definitions/search_settings"
+            "$ref": "#/$defs/search_settings"
         },
         {
-            "$ref": "#/definitions/rescoring_settings"
+            "$ref": "#/$defs/rescoring_settings"
         },
         {
-            "$ref": "#/definitions/quantification_options"
+            "$ref": "#/$defs/quantification_options"
         },
         {
-            "$ref": "#/definitions/post_processing"
+            "$ref": "#/$defs/post_processing"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

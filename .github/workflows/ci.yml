@@ -116,7 +116,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Run pipeline with profile ${{ matrix.tests }}
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --max_memory '6.GB' --max_cpus 2 --spectrum_batch_size 5000 --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --spectrum_batch_size 5000 --outdir ./results
 
   # Define a second workflow only against main with additional tests: test_timstof and test_full
   profile_main:
@@ -150,4 +150,4 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Run pipeline with profile ${{ matrix.tests }}
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --max_memory '6.GB' --max_cpus 2 --spectrum_batch_size 5000 --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.tests }},docker --spectrum_batch_size 5000 --outdir ./results
