@@ -35,10 +35,18 @@ workflow RESCORE {
 
     if (params.rescoring_engine == 'mokapot') {
         log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
+        if (params.global_fdr) {
+            log.warn "Global FDR is currently not supported by mokapot. The global_fdr parameter will be ignored."
+        }
         // Switch comet e-value to mokapot q-value
         OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
         ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
+
+        // Filter by mokapot q-value
+        OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
+        ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
+        ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
 
     } else {
         // Extract PSM features for Percolator
