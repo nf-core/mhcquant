@@ -1,6 +1,6 @@
 process OPENMS_PERCOLATORADAPTER {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_medium'
 
     conda "bioconda::openms-thirdparty=3.1.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -18,31 +18,33 @@ process OPENMS_PERCOLATORADAPTER {
         task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.id}_pout"
-        def args             = task.ext.args  ?: ''
+    def prefix           = task.ext.prefix ?: "${meta.id}_pout"
+    def args             = task.ext.args  ?: ''
+    """
+    PercolatorAdapter \\
+        -in $merged_with_features \\
+        -out ${prefix}.idXML \\
+        -threads $task.cpus \\
+        $args
 
-        """
-        OMP_NUM_THREADS=$task.cpus \\
-        PercolatorAdapter -in $merged_with_features \\
-            -out ${prefix}.idXML \\
-            $args
-
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-        END_VERSIONS
-        """
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        PercolatorAdapter: \$(PercolatorAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1)
+        percolator: \$(percolator -h 2>&1 | grep -E '^Percolator version(.*)' | sed 's/Percolator version //g')
+    END_VERSIONS
+    """
 
     stub:
-        def prefix           = task.ext.prefix ?: "${meta.id}_pout"
-        def args             = task.ext.args  ?: ''
+    def prefix           = task.ext.prefix ?: "${meta.id}_pout"
+    def args             = task.ext.args  ?: ''
 
-        """
-        touch ${prefix}.idXML
+    """
+    touch ${prefix}.idXML
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-        END_VERSIONS
-        """
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        PercolatorAdapter: \$(PercolatorAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1)
+        percolator: \$(percolator -h 2>&1 | grep -E '^Percolator version(.*)' | sed 's/Percolator version //g')
+    END_VERSIONS
+    """
 }

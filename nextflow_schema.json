@@ -315,6 +315,13 @@
                     "default": 0.01,
                     "description": "Specify the false discovery rate threshold at which peptide hits should be selected."
                 },
+                "global_fdr": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-less-than",
+                    "description": "Compute global FDR and backfilter sample-specific FDRs"
+                },
+
                 "subset_max_train": {
                     "type": "integer",
                     "hidden": true,
