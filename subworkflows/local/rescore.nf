@@ -15,7 +15,7 @@ include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_GLOBAL           } from '..
 // MODULE: Installed directly from nf-core/modules
 //
 
-include { OPENMS_IDMERGER; OPENMS_IDMERGER as OPENMS_IDMERGER_GLOBAL  } from '../../modules/nf-core/openms/idmerger/main'
+include { OPENMS_IDMERGER as OPENMS_IDMERGER_GLOBAL                   } from '../../modules/nf-core/openms/idmerger/main'
 include { OPENMS_IDSCORESWITCHER                                      } from '../../modules/nf-core/openms/idscoreswitcher/main.nf'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE;
           OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE_GLOBAL;
@@ -77,4 +77,5 @@ workflow RESCORE {
     emit:
         rescored_runs = ch_rescored_runs
         fdr_filtered = ch_filter_q_value
+        versions = ch_versions
 }
