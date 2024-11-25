@@ -9,7 +9,7 @@
 include { MS2RESCORE                                                  } from '../../modules/local/ms2rescore'
 include { OPENMS_PSMFEATUREEXTRACTOR                                  } from '../../modules/local/openms_psmfeatureextractor'
 include { OPENMS_PERCOLATORADAPTER;
-          OPENMS_PERCOLATORADAPTER as OPENMS_PERCOLATORADAPTER_GLOBAL } from '../../modules/local/openms_percolatoradapter'
+        OPENMS_PERCOLATORADAPTER as OPENMS_PERCOLATORADAPTER_GLOBAL } from '../../modules/local/openms_percolatoradapter'
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_GLOBAL           } from '../../modules/local/openms_textexporter'
 //
 // MODULE: Installed directly from nf-core/modules
@@ -18,8 +18,8 @@ include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_GLOBAL           } from '..
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_GLOBAL                   } from '../../modules/nf-core/openms/idmerger/main'
 include { OPENMS_IDSCORESWITCHER                                      } from '../../modules/nf-core/openms/idscoreswitcher/main.nf'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE;
-          OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE_GLOBAL;
-          OPENMS_IDFILTER as OPENMS_IDFILTER_GLOBAL                   } from '../../modules/nf-core/openms/idfilter/main'
+        OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE_GLOBAL;
+        OPENMS_IDFILTER as OPENMS_IDFILTER_GLOBAL                   } from '../../modules/nf-core/openms/idfilter/main'
 
 workflow RESCORE {
 
@@ -41,18 +41,18 @@ workflow RESCORE {
         ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
 
     } else {
-		// Extract PSM features for Percolator
-		OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
-		ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
+        // Extract PSM features for Percolator
+        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
+        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
 
         // Run Percolator with local FDR
-		OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-		ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
+        OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
+        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         ch_pout = OPENMS_PERCOLATORADAPTER.out.idxml
 
-		if (params.global_fdr) {
+        if (params.global_fdr) {
             // Merge all samples into one group
-			OPENMS_IDMERGER_GLOBAL(OPENMS_PSMFEATUREEXTRACTOR.out.idxml.map {group_meta, idxml -> [[id:'global'], idxml] }.groupTuple())
+            OPENMS_IDMERGER_GLOBAL(OPENMS_PSMFEATUREEXTRACTOR.out.idxml.map {group_meta, idxml -> [[id:'global'], idxml] }.groupTuple())
             // Run Percolator with global FDR
             OPENMS_PERCOLATORADAPTER_GLOBAL(OPENMS_IDMERGER_GLOBAL.out.idxml)
             ch_rescored_runs = OPENMS_PERCOLATORADAPTER_GLOBAL.out.idxml
@@ -65,14 +65,14 @@ workflow RESCORE {
             // Save globally merged runs in tsv
             OPENMS_TEXTEXPORTER_GLOBAL(OPENMS_PERCOLATORADAPTER_GLOBAL.out.idxml)
 
-		} else {
+        } else {
             ch_rescored_runs = ch_pout
             // Filter by percolator q-value
             OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
             ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
             ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
         }
-	}
+    }
 
     emit:
         rescored_runs = ch_rescored_runs
