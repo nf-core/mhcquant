@@ -13,9 +13,6 @@ include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chrom
 include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
 include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
-include { MS2RESCORE                     } from '../modules/local/ms2rescore'
-include { OPENMS_PSMFEATUREEXTRACTOR     } from '../modules/local/openms_psmfeatureextractor'
-include { OPENMS_PERCOLATORADAPTER       } from '../modules/local/openms_percolatoradapter'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
 include { OPENMS_MZTABEXPORTER           } from '../modules/local/openms_mztabexporter'
@@ -24,6 +21,7 @@ include { OPENMS_MZTABEXPORTER           } from '../modules/local/openms_mztabex
 // SUBWORKFLOW: Loaded from subworkflows/local/
 //
 include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
+include { RESCORE         } from '../subworkflows/local/rescore'
 include { QUANT           } from '../subworkflows/local/quant'
 
 /*
@@ -35,16 +33,14 @@ include { QUANT           } from '../subworkflows/local/quant'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { OPENMS_DECOYDATABASE                       } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_IDMASSACCURACY                      } from '../modules/nf-core/openms/idmassaccuracy/main'
-include { OPENMS_IDMERGER                            } from '../modules/nf-core/openms/idmerger/main'
-include { OPENMS_IDSCORESWITCHER                     } from '../modules/nf-core/openms/idscoreswitcher/main.nf'
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE } from '../modules/nf-core/openms/idfilter/main'
-include { MULTIQC                                    } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                           } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc                       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML                     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                     } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
+include { OPENMS_DECOYDATABASE   } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_IDMASSACCURACY  } from '../modules/nf-core/openms/idmassaccuracy/main'
+include { OPENMS_IDMERGER        } from '../modules/nf-core/openms/idmerger/main'
+include { MULTIQC                } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap       } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,42 +124,22 @@ workflow MHCQUANT {
             .groupTuple()
             .join(OPENMS_IDMERGER.out.idxml)
             .map { meta, mzml, idxml -> [meta, idxml, mzml, []] }
-            .set { ch_ms2rescore_in }
+            .set { ch_rescore_in }
 
-    MS2RESCORE(ch_ms2rescore_in)
-    ch_versions = ch_versions.mix(MS2RESCORE.out.versions)
-
-    if (params.rescoring_engine == 'percolator') {
-        // Extract PSM features for Percolator
-        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
-        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
-
-        // Run Percolator
-        OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
-        ch_rescored_runs = OPENMS_PERCOLATORADAPTER.out.idxml
-    } else {
-        log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
-        // Switch comet e-value to mokapot q-value
-        OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
-        ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
-    }
-
-    // Filter by percolator q-value
-    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
-    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
-    ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
-
+    //
+    // SUBWORKFLOW: RESCORE WITH MOKKAPOT OR PERCOLATOR AND FILTER BY Q-VALUE ON LOCAL/GLOBAL FDR
+    //
+    RESCORE( ch_rescore_in )
+    ch_versions = ch_versions.mix(RESCORE.out.versions)
     //
     // SUBWORKFLOW: QUANT
     //
     if (params.quantify) {
-        QUANT(merge_meta_map, ch_rescored_runs, ch_filter_q_value, ch_clean_mzml_file)
+        QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
         ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
     } else {
-        ch_output = ch_filter_q_value
+        ch_output = RESCORE.out.fdr_filtered
     }
 
     // Annotate Ions for follow-up spectrum validation
@@ -171,7 +147,7 @@ workflow MHCQUANT {
         // Join the ch_filtered_idxml and the ch_mzml_file
         ch_clean_mzml_file.map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), mzml] }
             .groupTuple()
-            .join(ch_filter_q_value)
+            .join(RESCORE.out.fdr_filtered)
             .set{ ch_ion_annotator_input }
 
         // Annotate spectra with ion fragmentation information

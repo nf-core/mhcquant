@@ -87,6 +87,8 @@ This folder contains the intermediate results from various steps of the MHCquant
     - `{Sample}_{Condition}_pout.idXML`: Unfiltered percolator output.
     - `{Sample}_{Condition}_pout_filtered.idXML`: FDR-filtered percolator output.
 
+  - `global_fdr`: Contains global FDR-filtered list of all runs in a `tsv` file
+
   - `features`: Holds information of quantified features in `featureXML` files as a result of the [FeatureFinderIdentification](https://openms.de/doxygen/release/3.0.0/html/TOPP_FeatureFinderIdentification.html) in the quantification mode.
 
 - `ion_annotations`
