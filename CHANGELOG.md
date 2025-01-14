@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - Template update 3.0.2 [#337](https://github.com/nf-core/mhcquant/pull/337)
+- Template update 3.1.1 [#346](https://github.com/nf-core/mhcquant/pull/346)
 
 ## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
 
