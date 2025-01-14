@@ -23,7 +23,7 @@ process OPENMS_TEXTEXPORTER {
 
         """
         TextExporter -in $file \\
-            -out ${prefix}.tsv \\
+            -out ${prefix}_exported.tsv \\
             -threads $task.cpus \\
             -id:add_hit_metavalues 0 \\
             -id:peptides_only \\

@@ -12,7 +12,7 @@ include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chrom
 include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER           } from '../modules/local/openms_mztabexporter'
+include { SUMMARIZE_RESULTS              } from '../modules/local/summarize_results'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
@@ -189,8 +189,18 @@ workflow MHCQUANT {
         }
     }
 
-    OPENMS_MZTABEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions)
+    // Process the tsv file to facilitate visualization with MultiQC
+    SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
+    ch_versions = ch_versions.mix(SUMMARIZE_RESULTS.out.versions)
+
+    ch_multiqc_files = ch_multiqc_files.mix(
+        SUMMARIZE_RESULTS.out.hist_mz,
+        SUMMARIZE_RESULTS.out.hist_rt,
+        SUMMARIZE_RESULTS.out.hist_scores,
+        SUMMARIZE_RESULTS.out.hist_xcorr,
+        SUMMARIZE_RESULTS.out.lengths,
+        SUMMARIZE_RESULTS.out.stats
+    )
 
     //
     // Collate and save software versions

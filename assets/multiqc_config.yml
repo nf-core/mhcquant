@@ -54,6 +54,66 @@ custom_data:
     pconfig:
       xlab: "Mass deviation [Da/ppm]"
       ylab: "Frequency"
+
+  stats_table:
+    plot_type: "table"
+    file_format: "csv"
+    section_name: "General Statistics"
+    pconfig:
+      id: "general_stats"
+      title: "General Statistics"
+
+  len_plot:
+    plot_type: "linegraph"
+    file_format: "csv"
+    section_name: "Peptide lengths"
+    pconfig:
+      id: "length_dist"
+      title: "Distribution of peptide lengths"
+      xlab: "Length"
+      ylab: "Frequency"
+
+  mz_plot:
+    plot_type: "linegraph"
+    file_format: "csv"
+    section_name: "Mass-to-Charge"
+    pconfig:
+      id: "histogram_mz"
+      title: "Mass-to-Charge Histogram"
+      xlab: "m/z"
+      ylab: "Frequency"
+
+  rt_plot:
+    plot_type: "linegraph"
+    file_format: "csv"
+    section_name: "Retention time"
+    pconfig:
+      id: "histogram_rt"
+      title: "Retention time Histogram"
+      xlab: "Retention time"
+      ylab: "Frequency"
+
+  qvalue_plot:
+    plot_type: "linegraph"
+    file_format: "csv"
+    section_name: "Q-Value"
+    pconfig:
+      id: "histogram_scores"
+      title: "Percolator q-value Histogram"
+      description: "A q-value histogram in Percolator visualizes q-value distributions for PSMs, helping set the FDR threshold (typically 1%). It ensures only high-confidence identifications are retained, with a sharp drop-off beyond the threshold."
+      xlab: "q-value"
+      ylab: "Frequency"
+
+  scores_plot_xcorr:
+    plot_type: "linegraph"
+    file_format: "csv"
+    section_name: "Xcorr-Value"
+    pconfig:
+      id: "histogram_scores_xcorr"
+      title: "Comet Xcorr Histogram"
+      description: "A Comet Xcorr histogram visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
+      xlab: "Xcorr"
+      ylab: "Frequency"
 #id: custom_box
 #plot_type: 'box'
 #section_name: 'Custom box plot'
@@ -66,6 +126,18 @@ sp:
     fn: "*_chrom.csv"
   mass_error:
     fn: "*_binned.tsv"
+  stats_table:
+    fn: "*_general_stats.csv"
+  len_plot:
+    fn: "*_peptide_length.csv"
+  mz_plot:
+    fn: "*_histogram_mz.csv"
+  rt_plot:
+    fn: "*_histogram_rt.csv"
+  qvalue_plot:
+    fn: "*_histogram_scores.csv"
+  scores_plot_xcorr:
+    fn: "*_histogram_xcorr_scores.csv"
 ### Define the order of sections
 #module_order:
 #  - custom_content
