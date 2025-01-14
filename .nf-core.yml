@@ -11,4 +11,4 @@ template:
   name: mhcquant
   org: nf-core
   outdir: .
-  version: 2.6.1dev
+  version: 2.7.0dev
