@@ -1,9 +1,7 @@
-bump_version: null
 lint:
   files_unchanged:
     - .github/CONTRIBUTING.md
-nf_core_version: 3.0.2
-org_path: null
+nf_core_version: 3.1.1
 repository_type: pipeline
 template:
   author: Jonas Scheid, Steffen Lemke, Leon Bichmann, Marissa Dubbelaar
@@ -13,6 +11,4 @@ template:
   name: mhcquant
   org: nf-core
   outdir: .
-  skip_features: null
   version: 2.6.1dev
-update: null
