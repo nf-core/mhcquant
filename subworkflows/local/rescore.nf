@@ -25,6 +25,7 @@ workflow RESCORE {
 
     take:
         ch_merged_runs
+        ch_multiqc_files
 
     main:
         ch_versions = Channel.empty()
@@ -56,6 +57,7 @@ workflow RESCORE {
         // Run Percolator with local FDR
         OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
         ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(OPENMS_PERCOLATORADAPTER.out.feature_weights.map{ meta, feature_weights -> feature_weights })
         ch_pout = OPENMS_PERCOLATORADAPTER.out.idxml
 
         if (params.global_fdr) {
@@ -86,4 +88,5 @@ workflow RESCORE {
         rescored_runs = ch_rescored_runs
         fdr_filtered = ch_filter_q_value
         versions = ch_versions
+        multiqc_files = ch_multiqc_files
 }
