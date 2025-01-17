@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `PYOPENMS_CHROMATOGRAMEXTRACTOR` extracting MS1 Chromatograms and visualize them in multiQC report [#329](https://github.com/nf-core/mhcquant/pull/329)
 - Added `OPENMS_IDMASSACCURACY` and `DATAMASH_HISTOGRAM` to compute fragment mass errors and visualizte them in multiQC report [#332](https://github.com/nf-core/mhcquant/pull/332)
 - Added global fdr evaluation in new local subworkflow `RESCORE` [#338](https://github.com/nf-core/mhcquant/pull/338)
-- Added `-weights` parameter in `OPENMS_PERCOLATORADAPTER` and visualize the median feature weights in multiQC report
+- Added `-weights` parameter in `OPENMS_PERCOLATORADAPTER` and visualize the median feature weights in multiQC report [#347](https://github.com/nf-core/mhcquant/pull/347)
 
 ### `Fixed`
 
