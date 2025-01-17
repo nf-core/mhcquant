@@ -13,7 +13,7 @@ process OPENMS_PERCOLATORADAPTER {
     output:
         tuple val(meta), path("*.idXML")                         , emit: idxml
         tuple val(meta), path("*_percolator_feature_weights.tsv"), emit: feature_weights, optional: true
-        tuple val(meta), path("*_percolator_feature_weights.tsv"), emit: feature_weights, optional: true
+        path "versions.yml"                                      , emit: versions
 
     when:
         task.ext.when == null || task.ext.when
