@@ -18,9 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
-| Dependency            | Old version  | New version |
-| --------------------- |--------------|-------------|
-| `MultiQC`             | 1.25.1       | 1.26        |
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `MultiQC`  | 1.25.1      | 1.26        |
 
 ## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
 
