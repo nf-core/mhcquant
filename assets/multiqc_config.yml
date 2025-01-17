@@ -20,6 +20,7 @@ disable_version_detection: true
 # Modules to run
 run_modules:
   - custom_content
+  - percolator
 
 # Custom tables and plots
 custom_data:
