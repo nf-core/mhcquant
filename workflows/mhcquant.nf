@@ -129,8 +129,9 @@ workflow MHCQUANT {
     //
     // SUBWORKFLOW: RESCORE WITH MOKKAPOT OR PERCOLATOR AND FILTER BY Q-VALUE ON LOCAL/GLOBAL FDR
     //
-    RESCORE( ch_rescore_in )
+    RESCORE( ch_rescore_in, ch_multiqc_files )
     ch_versions = ch_versions.mix(RESCORE.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(RESCORE.out.multiqc_files)
     //
     // SUBWORKFLOW: QUANT
     //
