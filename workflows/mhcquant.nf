@@ -13,6 +13,8 @@ include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chrom
 include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
 include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
+include { EASYPQP_CONVERT                } from '../modules/local/easypqp/convert'
+include { EASYPQP_LIBRARY                } from '../modules/local/easypqp/library'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
 include { OPENMS_MZTABEXPORTER           } from '../modules/local/openms_mztabexporter'
@@ -33,14 +35,15 @@ include { QUANT           } from '../subworkflows/local/quant'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { OPENMS_DECOYDATABASE   } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_IDMASSACCURACY  } from '../modules/nf-core/openms/idmassaccuracy/main'
-include { OPENMS_IDMERGER        } from '../modules/nf-core/openms/idmerger/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
+include { OPENMS_DECOYDATABASE                           } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_IDMASSACCURACY                          } from '../modules/nf-core/openms/idmassaccuracy/main'
+include { OPENMS_IDMERGER                                } from '../modules/nf-core/openms/idmerger/main'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_SPECLIB } from '../modules/nf-core/openms/idfilter/main'
+include { MULTIQC                                        } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                               } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                         } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                         } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -131,6 +134,34 @@ workflow MHCQUANT {
     //
     RESCORE( ch_rescore_in )
     ch_versions = ch_versions.mix(RESCORE.out.versions)
+
+    //
+    // GENERATE SPECTRUM LIBRARY
+    //
+    RESCORE.out.fdr_filtered.join(ch_clean_mzml_file).view()
+    OPENMS_COMETADAPTER.out.idxml
+            .map { meta, idxml -> [ [id: "${meta.sample}_${meta.condition}"], meta, idxml] }
+            .combine(RESCORE.out.fdr_filtered, by:0)
+            .map { groupKey, meta, comet_idxml, fdr_filtered_idxml -> [meta, comet_idxml, fdr_filtered_idxml] }
+            .set { ch_fdrfilter_comet_idxml }
+
+    OPENMS_IDFILTER_FOR_SPECLIB(ch_fdrfilter_comet_idxml)
+
+    unimod = file("$projectDir/assets/250120_unimod_tables.xml", checkIfExists: true)
+    EASYPQP_CONVERT(OPENMS_IDFILTER_FOR_SPECLIB.out.filtered.join(ch_clean_mzml_file), unimod)
+    ch_versions = ch_versions.mix(EASYPQP_CONVERT.out.versions)
+
+    EASYPQP_CONVERT.out.psmpkl
+        .map { meta, psmpkl -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), psmpkl] }
+        .groupTuple()
+        .set { ch_psmpkl }
+    EASYPQP_CONVERT.out.peakpkl
+        .map { meta, peakpkl -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), peakpkl] }
+        .groupTuple()
+        .set { ch_peakpkl }
+
+    EASYPQP_LIBRARY(ch_psmpkl.join(ch_peakpkl))
+
     //
     // SUBWORKFLOW: QUANT
     //

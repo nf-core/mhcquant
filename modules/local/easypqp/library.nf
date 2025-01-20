@@ -1,0 +1,48 @@
+process EASYPQP_LIBRARY {
+    tag "$meta.id"
+    label 'process_single'
+
+    conda "bioconda::easypqp=0.1.50"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/easypqp:0.1.50--pyhdfd78af_1' :
+        'biocontainers/easypqp:0.1.50--pyhdfd78af_1' }"
+
+    input:
+    tuple val(meta), path(psmpkl), path(peakpkl)
+
+    output:
+    tuple val(meta), path("*.tsv") , emit: tsv
+    path "versions.yml"            , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
+    """
+    easypqp library \
+        --out ${prefix}_speclib.tsv \
+        $args \
+        $psmpkl $peakpkl
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        easypqp: \$(easypqp --version 2>&1 | sed 's/easypqp, version //; s/Using.*\$//')
+    END_VERSIONS
+    """
+
+    stub:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
+    """
+    touch "${prefix}_speclib.tsv"
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        easypqp: \$(easypqp --version 2>&1 | sed 's/easypqp, version //; s/Using.*\$//')
+    END_VERSIONS
+    """
+}
