@@ -22,6 +22,10 @@ process EASYPQP_LIBRARY {
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
+    export MPLCONFIGDIR=/tmp/matplotlib
+    export XDG_CACHE_HOME=/tmp/fontconfig-cache
+    mkdir -p \$MPLCONFIGDIR \$XDG_CACHE_HOME
+
     easypqp library \
         --out ${prefix}_speclib.tsv \
         $args \
@@ -38,6 +42,10 @@ process EASYPQP_LIBRARY {
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
+    export MPLCONFIGDIR=/tmp/matplotlib
+    export XDG_CACHE_HOME=/tmp/fontconfig-cache
+    mkdir -p \$MPLCONFIGDIR \$XDG_CACHE_HOME
+
     touch "${prefix}_speclib.tsv"
 
     cat <<-END_VERSIONS > versions.yml

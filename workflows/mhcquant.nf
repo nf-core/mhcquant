@@ -8,16 +8,17 @@
 // MODULE: Loaded from modules/local/
 //
 
-include { OPENMS_FILEFILTER              } from '../modules/local/openms_filefilter'
-include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
-include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
-include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
-include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
-include { EASYPQP_CONVERT                } from '../modules/local/easypqp/convert'
-include { EASYPQP_LIBRARY                } from '../modules/local/easypqp/library'
-include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
-include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER           } from '../modules/local/openms_mztabexporter'
+include { OPENMS_FILEFILTER                       } from '../modules/local/openms_filefilter'
+include { PYOPENMS_CHROMATOGRAMEXTRACTOR          } from '../modules/local/pyopenms_chromatogramextractor'
+include { OPENMS_COMETADAPTER                     } from '../modules/local/openms_cometadapter'
+include { OPENMS_PEPTIDEINDEXER                   } from '../modules/local/openms_peptideindexer'
+include { DATAMASH_HISTOGRAM                      } from '../modules/local/datamash_histogram'
+include { EASYPQP_CONVERT                         } from '../modules/local/easypqp/convert'
+include { EASYPQP_LIBRARY;
+        EASYPQP_LIBRARY as EASYPQP_LIBRARY_GLOBAL } from '../modules/local/easypqp/library'
+include { PYOPENMS_IONANNOTATOR                   } from '../modules/local/pyopenms_ionannotator'
+include { OPENMS_TEXTEXPORTER                     } from '../modules/local/openms_textexporter'
+include { OPENMS_MZTABEXPORTER                    } from '../modules/local/openms_mztabexporter'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
@@ -161,6 +162,19 @@ workflow MHCQUANT {
         .set { ch_peakpkl }
 
     EASYPQP_LIBRARY(ch_psmpkl.join(ch_peakpkl))
+    ch_versions = ch_versions.mix(EASYPQP_LIBRARY.out.versions)
+
+    if (params.global_fdr) {
+        EASYPQP_CONVERT.out.psmpkl
+            .map { meta, psmpkl -> [[id: "global"], psmpkl] }
+            .groupTuple()
+            .set { ch_global_psmpkl }
+        EASYPQP_CONVERT.out.peakpkl
+            .map { meta, peakpkl -> [[id: "global"], peakpkl] }
+            .groupTuple()
+            .set { ch_global_peakpkl }
+        EASYPQP_LIBRARY_GLOBAL(ch_global_psmpkl.join(ch_global_peakpkl))
+    }
 
     //
     // SUBWORKFLOW: QUANT
