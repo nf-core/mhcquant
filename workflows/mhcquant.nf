@@ -8,7 +8,6 @@
 // MODULE: Loaded from modules/local/
 //
 
-include { OPENMS_FILEFILTER              } from '../modules/local/openms_filefilter'
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
 include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
 include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
@@ -33,6 +32,7 @@ include { QUANT           } from '../subworkflows/local/quant'
 //
 // MODULE: Installed directly from nf-core/modules
 //
+include { OPENMS_FILEFILTER      } from '../modules/nf-core/openms/filefilter/main'
 include { OPENMS_DECOYDATABASE   } from '../modules/nf-core/openms/decoydatabase/main'
 include { OPENMS_IDMASSACCURACY  } from '../modules/nf-core/openms/idmassaccuracy/main'
 include { OPENMS_IDMERGER        } from '../modules/nf-core/openms/idmerger/main'
@@ -77,7 +77,7 @@ workflow MHCQUANT {
     if (params.filter_mzml){
         OPENMS_FILEFILTER(PREPARE_SPECTRA.out.mzml)
         ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions)
-        ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
+        ch_clean_mzml_file = OPENMS_FILEFILTER.out.mzml
     } else {
         ch_clean_mzml_file = PREPARE_SPECTRA.out.mzml
     }

@@ -20,6 +20,11 @@
                         "git_sha": "bbcad23c681ff85336aef1c41345bc313d921b5d",
                         "installed_by": ["modules"]
                     },
+                    "openms/filefilter": {
+                        "branch": "master",
+                        "git_sha": "26a34ecd378f06094eb253615932d8cc634474cb",
+                        "installed_by": ["modules"]
+                    },
                     "openms/idfilter": {
                         "branch": "master",
                         "git_sha": "bbcad23c681ff85336aef1c41345bc313d921b5d",
