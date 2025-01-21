@@ -55,6 +55,11 @@
                         "git_sha": "bbcad23c681ff85336aef1c41345bc313d921b5d",
                         "installed_by": ["modules"]
                     },
+                    "openms/peptideindexer": {
+                        "branch": "master",
+                        "git_sha": "573ba82ecf1505775d1a4332bc3cf55cacc3d094",
+                        "installed_by": ["modules"]
+                    },
                     "thermorawfileparser": {
                         "branch": "master",
                         "git_sha": "2d0e53d398315b4e8ed06e81c175dc05d90f33d5",
