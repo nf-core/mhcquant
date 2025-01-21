@@ -70,7 +70,7 @@ workflow MHCQUANT {
         ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
         ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta.map{ meta, fasta -> [fasta] }
     } else {
-        ch_decoy_db = ch_fasta
+        ch_decoy_db = ch_fasta.map{ meta, fasta -> [fasta] }
     }
 
     // Optionally clean up mzML files
