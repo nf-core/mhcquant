@@ -9,7 +9,6 @@
 //
 
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
-include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
 include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
