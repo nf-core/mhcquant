@@ -414,6 +414,12 @@
                     "default": 12,
                     "description": "Specify the maximum length of peptides to be considered after processing"
                 },
+                "generate_speclib": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-database",
+                    "description": "Generate a spectral library from the search results. If `global_fdr` is specified, an additional global FDR-filtered library is generated from all MSruns in the samplesheet."
+                },
                 "annotate_ions": {
                     "type": "boolean",
                     "default": false,
