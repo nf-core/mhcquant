@@ -8,14 +8,14 @@
 // MODULE: Loaded from modules/local/
 //
 
-include { OPENMS_FILEFILTER                       } from '../modules/local/openms_filefilter'
-include { PYOPENMS_CHROMATOGRAMEXTRACTOR          } from '../modules/local/pyopenms_chromatogramextractor'
-include { OPENMS_COMETADAPTER                     } from '../modules/local/openms_cometadapter'
-include { OPENMS_PEPTIDEINDEXER                   } from '../modules/local/openms_peptideindexer'
-include { DATAMASH_HISTOGRAM                      } from '../modules/local/datamash_histogram'
-include { PYOPENMS_IONANNOTATOR                   } from '../modules/local/pyopenms_ionannotator'
-include { OPENMS_TEXTEXPORTER                     } from '../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER                    } from '../modules/local/openms_mztabexporter'
+include { OPENMS_FILEFILTER              } from '../modules/local/openms_filefilter'
+include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
+include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
+include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
+include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
+include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
+include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
+include { OPENMS_MZTABEXPORTER           } from '../modules/local/openms_mztabexporter'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
