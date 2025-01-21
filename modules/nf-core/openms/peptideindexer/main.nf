@@ -8,8 +8,7 @@ process OPENMS_PEPTIDEINDEXER {
         'biocontainers/openms:3.2.0--haddbca4_4' }"
 
     input:
-    tuple val(meta), path(id_file)
-    tuple val(meta), path(id_fasta)
+    tuple val(meta), path(id_file), path(fasta)
 
     output:
     tuple val(meta), path("*.idXML"), emit: id_file_pi
@@ -25,7 +24,7 @@ process OPENMS_PEPTIDEINDEXER {
     """
     PeptideIndexer \\
         -in $id_file \\
-        -fasta $id_fasta \\
+        -fasta $fasta \\
         -out ${prefix}.idXML \\
         -threads $task.cpus \\
         $args \\
