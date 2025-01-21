@@ -1,6 +1,7 @@
 lint:
   files_unchanged:
     - .github/CONTRIBUTING.md
+    - assets/250120_unimod_tables.xml
 nf_core_version: 3.1.1
 repository_type: pipeline
 template:
