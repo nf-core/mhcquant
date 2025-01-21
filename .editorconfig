@@ -28,6 +28,9 @@ indent_style = unset
 [/assets/email*]
 indent_size = unset
 
+[/assets/250120_unimod_tables.xml]
+indent_size = unset
+
 # ignore python and markdown
 [*.{py,md}]
 indent_style = unset
