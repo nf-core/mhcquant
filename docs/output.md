@@ -90,6 +90,11 @@ This folder contains the intermediate results from various steps of the MHCquant
 
   - `features`: Holds information of quantified features in `featureXML` files as a result of the [FeatureFinderIdentification](https://openms.de/doxygen/release/3.0.0/html/TOPP_FeatureFinderIdentification.html) in the quantification mode.
 
+- `spectrum_library`
+
+  - `{Sample}_{Condition}_speclib.tsv`: FDR-filtered spectrum library for sample-condition pair
+  - `global_speclib.tsv`: Global FDR-filtered spectrum library for all MS runs in samplesheet. This file is only written if `--global_fdr` is specified
+
 - `ion_annotations`
 
   - `{Sample}_{Condition}_all_peaks.tsv`: Contains metadata of all measured ions of peptides reported after peptide identification.
