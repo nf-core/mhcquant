@@ -29,6 +29,7 @@ indent_style = unset
 indent_size = unset
 
 [/assets/250120_unimod_tables.xml]
+indent_style = unset
 indent_size = unset
 
 # ignore python and markdown
