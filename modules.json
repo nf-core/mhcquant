@@ -20,6 +20,11 @@
                         "git_sha": "bbcad23c681ff85336aef1c41345bc313d921b5d",
                         "installed_by": ["modules"]
                     },
+                    "openms/filefilter": {
+                        "branch": "master",
+                        "git_sha": "26a34ecd378f06094eb253615932d8cc634474cb",
+                        "installed_by": ["modules"]
+                    },
                     "openms/idfilter": {
                         "branch": "master",
                         "git_sha": "bbcad23c681ff85336aef1c41345bc313d921b5d",
@@ -48,6 +53,16 @@
                     "openms/peakpickerhires": {
                         "branch": "master",
                         "git_sha": "bbcad23c681ff85336aef1c41345bc313d921b5d",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/peptideindexer": {
+                        "branch": "master",
+                        "git_sha": "573ba82ecf1505775d1a4332bc3cf55cacc3d094",
+                        "installed_by": ["modules"]
+                    },
+                    "openmsthirdparty/cometadapter": {
+                        "branch": "master",
+                        "git_sha": "573ba82ecf1505775d1a4332bc3cf55cacc3d094",
                         "installed_by": ["modules"]
                     },
                     "thermorawfileparser": {

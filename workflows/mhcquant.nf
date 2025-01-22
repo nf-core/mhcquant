@@ -8,10 +8,7 @@
 // MODULE: Loaded from modules/local/
 //
 
-include { OPENMS_FILEFILTER              } from '../modules/local/openms_filefilter'
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
-include { OPENMS_COMETADAPTER            } from '../modules/local/openms_cometadapter'
-include { OPENMS_PEPTIDEINDEXER          } from '../modules/local/openms_peptideindexer'
 include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
@@ -33,14 +30,17 @@ include { QUANT           } from '../subworkflows/local/quant'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { OPENMS_DECOYDATABASE   } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_IDMASSACCURACY  } from '../modules/nf-core/openms/idmassaccuracy/main'
-include { OPENMS_IDMERGER        } from '../modules/nf-core/openms/idmerger/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
+include { OPENMS_FILEFILTER             } from '../modules/nf-core/openms/filefilter/main'
+include { OPENMS_DECOYDATABASE          } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_IDMASSACCURACY         } from '../modules/nf-core/openms/idmassaccuracy/main'
+include { OPENMSTHIRDPARTY_COMETADAPTER } from '../modules/nf-core/openmsthirdparty/cometadapter/main'
+include { OPENMS_PEPTIDEINDEXER         } from '../modules/nf-core/openms/peptideindexer/main'
+include { OPENMS_IDMERGER               } from '../modules/nf-core/openms/idmerger/main'
+include { MULTIQC                       } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap              } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText        } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,8 +67,7 @@ workflow MHCQUANT {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
         ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
-        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
-                                .map{ meta, fasta -> [fasta] }
+        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta.map{ meta, fasta -> [fasta] }
     } else {
         ch_decoy_db = ch_fasta.map{ meta, fasta -> [fasta] }
     }
@@ -77,7 +76,7 @@ workflow MHCQUANT {
     if (params.filter_mzml){
         OPENMS_FILEFILTER(PREPARE_SPECTRA.out.mzml)
         ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions)
-        ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
+        ch_clean_mzml_file = OPENMS_FILEFILTER.out.mzml
     } else {
         ch_clean_mzml_file = PREPARE_SPECTRA.out.mzml
     }
@@ -88,15 +87,15 @@ workflow MHCQUANT {
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
     // Run comet database search
-    OPENMS_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
-    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions)
+    OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
+    ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
 
     // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.combine(ch_decoy_db))
+    OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Compute mass errors for multiQC report
-    OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.idxml))
+    OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.id_file_pi))
     ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
     // Bin and count mass errors for multiQC report
     DATAMASH_HISTOGRAM(OPENMS_IDMASSACCURACY.out.frag_err)
@@ -104,12 +103,13 @@ workflow MHCQUANT {
     ch_multiqc_files = ch_multiqc_files.mix(DATAMASH_HISTOGRAM.out.binned_tsv.map{ meta, frag_err_hist -> frag_err_hist })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
-    OPENMS_PEPTIDEINDEXER.out.idxml
+    OPENMS_PEPTIDEINDEXER.out.id_file_pi.view()
+    OPENMS_PEPTIDEINDEXER.out.id_file_pi
         .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta] }
         .groupTuple()
         .set { merge_meta_map }
 
-    OPENMS_PEPTIDEINDEXER.out.idxml
+    OPENMS_PEPTIDEINDEXER.out.id_file_pi
         .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), idxml] }
         .groupTuple()
         .set { ch_runs_to_merge }

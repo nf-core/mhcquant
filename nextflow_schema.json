@@ -231,7 +231,7 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-pipe",
                     "description": "Include if you want to remove all peaks around precursor m/z",
-                    "default": false
+                    "default": "false"
                 },
                 "spectrum_batch_size": {
                     "type": "integer",
