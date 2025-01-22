@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added global fdr evaluation in new local subworkflow `RESCORE` [#338](https://github.com/nf-core/mhcquant/pull/338)
 - Added `-weights` parameter in `OPENMS_PERCOLATORADAPTER` and visualize the median feature weights in multiQC report [#347](https://github.com/nf-core/mhcquant/pull/347)
 - Added flag `generate_speclib` that will generate a spectrum library for DIA searches with EasyPQP [#349](https://github.com/nf-core/mhcquant/pull/349)
+- Replace local with nf-core modules [#350](https://github.com/nf-core/mhcquant/pull/347)
 
 ### `Fixed`
 
