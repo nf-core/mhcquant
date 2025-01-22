@@ -19,6 +19,7 @@ include { OPENMS_MZTABEXPORTER           } from '../modules/local/openms_mztabex
 //
 include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
 include { RESCORE         } from '../subworkflows/local/rescore'
+include { SPECLIB         } from '../subworkflows/local/speclib'
 include { QUANT           } from '../subworkflows/local/quant'
 
 /*
@@ -30,17 +31,18 @@ include { QUANT           } from '../subworkflows/local/quant'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { OPENMS_FILEFILTER             } from '../modules/nf-core/openms/filefilter/main'
-include { OPENMS_DECOYDATABASE          } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_IDMASSACCURACY         } from '../modules/nf-core/openms/idmassaccuracy/main'
-include { OPENMSTHIRDPARTY_COMETADAPTER } from '../modules/nf-core/openmsthirdparty/cometadapter/main'
-include { OPENMS_PEPTIDEINDEXER         } from '../modules/nf-core/openms/peptideindexer/main'
-include { OPENMS_IDMERGER               } from '../modules/nf-core/openms/idmerger/main'
-include { MULTIQC                       } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap              } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText        } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
+include { OPENMS_FILEFILTER                              } from '../modules/nf-core/openms/filefilter/main'
+include { OPENMS_DECOYDATABASE                           } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_IDMASSACCURACY                          } from '../modules/nf-core/openms/idmassaccuracy/main'
+include { OPENMSTHIRDPARTY_COMETADAPTER                  } from '../modules/nf-core/openmsthirdparty/cometadapter/main'
+include { OPENMS_PEPTIDEINDEXER                          } from '../modules/nf-core/openms/peptideindexer/main'
+include { OPENMS_IDMERGER                                } from '../modules/nf-core/openms/idmerger/main'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_SPECLIB } from '../modules/nf-core/openms/idfilter/main'
+include { MULTIQC                                        } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                               } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                         } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                         } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,7 +105,6 @@ workflow MHCQUANT {
     ch_multiqc_files = ch_multiqc_files.mix(DATAMASH_HISTOGRAM.out.binned_tsv.map{ meta, frag_err_hist -> frag_err_hist })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
-    OPENMS_PEPTIDEINDEXER.out.id_file_pi.view()
     OPENMS_PEPTIDEINDEXER.out.id_file_pi
         .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta] }
         .groupTuple()
@@ -132,6 +133,25 @@ workflow MHCQUANT {
     RESCORE( ch_rescore_in, ch_multiqc_files )
     ch_versions = ch_versions.mix(RESCORE.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(RESCORE.out.multiqc_files)
+
+    // GENERATE SPECTRUM LIBRARY
+    if (params.generate_speclib) {
+    OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
+            .map { meta, idxml -> [ [id: "${meta.sample}_${meta.condition}"], meta, idxml] }
+            .combine(RESCORE.out.fdr_filtered, by:0)
+            .map { groupKey, meta, comet_idxml, fdr_filtered_idxml -> [meta, comet_idxml, fdr_filtered_idxml] }
+            .set { ch_fdrfilter_comet_idxml }
+
+    // Backfilter Comet identifications with FDR threshold
+    OPENMS_IDFILTER_FOR_SPECLIB(ch_fdrfilter_comet_idxml)
+
+    //
+    // SUBWORKFLOW: SPECLIB
+    //
+    SPECLIB(OPENMS_IDFILTER_FOR_SPECLIB.out.filtered, ch_clean_mzml_file)
+    ch_versions = ch_versions.mix(SPECLIB.out.versions)
+    }
+
     //
     // SUBWORKFLOW: QUANT
     //
