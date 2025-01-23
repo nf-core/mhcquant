@@ -33,16 +33,20 @@ def main():
     # Get RT and Spectrum TIC of MS1 Spectra
     chromatogram = [(spectrum.getRT() / 60 , spectrum.calculateTIC()) for spectrum in exp.getSpectra() if spectrum.getMSLevel() == 1]
     logging.info(f'Found {len(chromatogram)} MS1 Spectra')
-    logging.info(f'RT range: {round(chromatogram[0][0],2)} - {round(chromatogram[-1][0],2)} [min]')
-    # Create pandas df
-    chromatogram_df = pd.DataFrame(chromatogram, columns=['RT', 'TIC'])
-    # bin data into minutes and take the mean of the TIC
-    chromatogram_df = chromatogram_df.groupby('RT').mean().reset_index()
-    # Add RT=0 and Intensity=0 to start and end of chromatogram_df
-    start = pd.DataFrame([{'RT': 0, 'TIC': 0}])
-    end = pd.DataFrame([{'RT': chromatogram_df['RT'].max(), 'TIC': 0}])
-    # Concatenate the DataFrames
-    chromatogram_df = pd.concat([start, chromatogram_df, end], ignore_index=True)
+    try:
+        logging.info(f'RT range: {round(chromatogram[0][0],2)} - {round(chromatogram[-1][0],2)} [min]')
+        # Create pandas df
+        chromatogram_df = pd.DataFrame(chromatogram, columns=['RT', 'TIC'])
+        # bin data into minutes and take the mean of the TIC
+        chromatogram_df = chromatogram_df.groupby('RT').mean().reset_index()
+        # Add RT=0 and Intensity=0 to start and end of chromatogram_df
+        start = pd.DataFrame([{'RT': 0, 'TIC': 0}])
+        end = pd.DataFrame([{'RT': chromatogram_df['RT'].max(), 'TIC': 0}])
+        # Concatenate the DataFrames
+        chromatogram_df = pd.concat([start, chromatogram_df, end], ignore_index=True)
+    except:
+        logging.warning(f'Could not parse spectra. Writing empty file..')
+        chromatogram_df = pd.DataFrame([{'RT': 0, 'TIC': 0}])
 
     # Write to csv
     chromatogram_df.to_csv(output_file, index=False, header=False)
