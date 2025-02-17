@@ -33,7 +33,7 @@ process EASYPQP_LIBRARY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        easypqp: \$(easypqp --version 2>&1 | sed 's/easypqp, version //; s/Using.*\$//')
+        easypqp: \$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+')
     END_VERSIONS
     """
 
@@ -50,7 +50,7 @@ process EASYPQP_LIBRARY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        easypqp: \$(easypqp --version 2>&1 | sed 's/easypqp, version //; s/Using.*\$//')
+        easypqp: \$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+')
     END_VERSIONS
     """
 }
