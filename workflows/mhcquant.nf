@@ -97,7 +97,7 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Compute mass errors for multiQC report
-    OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.id_file_pi))
+    OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.indexed_idxml))
     ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
     // Bin and count mass errors for multiQC report
     DATAMASH_HISTOGRAM(OPENMS_IDMASSACCURACY.out.frag_err)
@@ -105,12 +105,12 @@ workflow MHCQUANT {
     ch_multiqc_files = ch_multiqc_files.mix(DATAMASH_HISTOGRAM.out.binned_tsv.map{ meta, frag_err_hist -> frag_err_hist })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
-    OPENMS_PEPTIDEINDEXER.out.id_file_pi
+    OPENMS_PEPTIDEINDEXER.out.indexed_idxml
         .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta] }
         .groupTuple()
         .set { merge_meta_map }
 
-    OPENMS_PEPTIDEINDEXER.out.id_file_pi
+    OPENMS_PEPTIDEINDEXER.out.indexed_idxml
         .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), idxml] }
         .groupTuple()
         .set { ch_runs_to_merge }
