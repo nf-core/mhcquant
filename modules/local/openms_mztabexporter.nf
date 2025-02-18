@@ -2,10 +2,10 @@ process OPENMS_MZTABEXPORTER {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::openms=3.1.0"
+    conda "bioconda::openms=3.3.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:3.1.0--h8964181_3' :
-        'biocontainers/openms:3.1.0--h8964181_3' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.3.0--h0656172_8' :
+        'biocontainers/openms:3.3.0--h0656172_8' }"
 
     input:
         tuple val(meta), path(in_file)

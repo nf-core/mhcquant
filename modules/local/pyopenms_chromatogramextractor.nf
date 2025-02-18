@@ -2,10 +2,10 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::pyopenms=3.1.0"
+    conda "bioconda::pyopenms=3.3.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.1.0--py311h9b8898c_0' :
-        'biocontainers/pyopenms:3.1.0--py311h9b8898c_0' }"
+        'https://depot.galaxyproject.org/singularity/pyopenms:3.3.0--py313h9b5bd11_0' :
+        'biocontainers/pyopenms:3.3.0--py313h9b5bd11_0' }"
 
     input:
         tuple val(meta), path(mzml)
