@@ -2,10 +2,10 @@ process MS2RESCORE {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::ms2rescore=3.0.1"
+    conda "bioconda::ms2rescore=3.1.4"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ms2rescore:3.0.1--pyhdfd78af_2':
-        'biocontainers/ms2rescore:3.0.1--pyhdfd78af_2' }"
+        'https://depot.galaxyproject.org/singularity/ms2rescore:3.1.4--pyh7e72e81_0':
+        'biocontainers/ms2rescore:3.1.4--pyh7e72e81_0' }"
 
     // userEmulation settings when docker is specified
     containerOptions = (workflow.containerEngine == 'docker') ? '-u $(id -u) -e "HOME=${HOME}" -v /etc/passwd:/etc/passwd:ro -v /etc/shadow:/etc/shadow:ro -v /etc/group:/etc/group:ro -v $HOME:$HOME' : ''

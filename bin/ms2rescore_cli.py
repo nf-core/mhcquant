@@ -48,6 +48,8 @@ def parse_cli_arguments_to_config(**kwargs):
                 config["ms2rescore"]["feature_generators"]["maxquant"] = {}
             if "ionmob" in feature_generators:
                 config["ms2rescore"]["feature_generators"]["ionmob"] = {}
+            if "im2deep" in feature_generators:
+                config["ms2rescore"]["feature_generators"]["im2deep"] = {}
 
         elif key == "rescoring_engine":
             # Reset rescoring engine dict we want to allow only computing features
