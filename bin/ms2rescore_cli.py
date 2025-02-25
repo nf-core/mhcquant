@@ -59,7 +59,6 @@ def parse_cli_arguments_to_config(**kwargs):
                     "write_weights": True,
                     "write_txt": False,
                     "write_flashlfq": False,
-                    "rng": kwargs["rng"],
                     "max_workers": kwargs["processes"],
                 }
             if value == "percolator":
@@ -158,9 +157,6 @@ def filter_out_artifact_psms(
     default=0.15,
 )
 @click.option("-re", "--rescoring_engine", help="Either mokapot or percolator (default: `mokapot`)", default="mokapot")
-@click.option(
-    "-rng", "--rng", help="Seed for mokapot's random number generator (default: `4711`)", type=int, default=4711
-)
 @click.option("-d", "--id_decoy_pattern", help="Regex decoy pattern (default: `DECOY_`)", default="^DECOY_")
 @click.option(
     "-lsb",
