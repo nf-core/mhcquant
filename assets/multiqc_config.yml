@@ -200,3 +200,9 @@ percolator:
       - "observed_retention_time_best"
       - "rt_diff_best"
       - "observed_retention_time"
+    im2deep:
+      - "ccs_observed_im2deep"
+      - "ccs_predicted_im2deep"
+      - "ccs_error_im2deep"
+      - "abs_ccs_error_im2deep"
+      - "perc_ccs_error_im2deep"

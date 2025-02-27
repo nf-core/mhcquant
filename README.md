@@ -175,6 +175,10 @@ In addition, references of tools and data used in this pipeline are as follows:
 >
 > Declercq A. et al, _Nucleic Acids Res._ 2023 Jul 5;51(W1):W338-W342. doi: [10.1093/nar/gkad335](https://academic.oup.com/nar/article/51/W1/W338/7151340?login=false)
 >
+> **CCS prediction**
+>
+> Declercq A. et al _Journal of Proteome Research_ 2025 Feb 6. doi: [10.1021/acs.jproteome.4c00609](https://pubs.acs.org/doi/10.1021/acs.jproteome.4c00609)
+>
 > **MS²Rescore framework**
 >
 > Buur L. M. et al, \_J Proteome Res. 2024 Mar 16. doi: [10.1021/acs.jproteome.3c00785](https://pubs.acs.org/doi/10.1021/acs.jproteome.3c00785)

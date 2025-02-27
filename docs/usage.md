@@ -64,7 +64,7 @@ Further information about the command line arguments is documented on the [nf-co
 
 ## Rescoring using MS²Rescore
 
-By default the pipline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ms2pip`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
+By default the pipline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ms2pip,ionmob,im2deep`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
 
 MS²Rescore creates a comprehensive QC report of the added features used for rescoring. This report is only available if `--rescoring_engine mokapot` is specified (default: `percolator`). The report can be found in `<OUTDIR>/multiqc/ms2rescore`. Further information on the tool itself can be read up in the published paper [Declerq et al. 2022](<https://www.mcponline.org/article/S1535-9476(22)00074-3/fulltext>)
 
