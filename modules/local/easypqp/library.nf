@@ -2,10 +2,10 @@ process EASYPQP_LIBRARY {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::easypqp=0.1.50"
+    conda "bioconda::easypqp=0.1.51"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/easypqp:0.1.50--pyhdfd78af_1' :
-        'biocontainers/easypqp:0.1.50--pyhdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/easypqp:0.1.51--pyhdfd78af_0' :
+        'biocontainers/easypqp:0.1.51--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(psmpkl), path(peakpkl)
