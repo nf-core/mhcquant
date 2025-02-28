@@ -136,20 +136,23 @@ workflow MHCQUANT {
 
     // GENERATE SPECTRUM LIBRARY
     if (params.generate_speclib) {
-    OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
-            .map { meta, idxml -> [ [id: "${meta.sample}_${meta.condition}"], meta, idxml] }
-            .combine(RESCORE.out.fdr_filtered, by:0)
-            .map { groupKey, meta, comet_idxml, fdr_filtered_idxml -> [meta, comet_idxml, fdr_filtered_idxml] }
-            .set { ch_fdrfilter_comet_idxml }
+        OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
+                .map { meta, idxml -> [ [id: "${meta.sample}_${meta.condition}"], meta, idxml] }
+                .combine(RESCORE.out.fdr_filtered, by:0)
+                .map { groupKey, meta, comet_idxml, fdr_filtered_idxml -> [meta, comet_idxml, fdr_filtered_idxml] }
+                .set { ch_fdrfilter_comet_idxml }
 
-    // Backfilter Comet identifications with FDR threshold
-    OPENMS_IDFILTER_FOR_SPECLIB(ch_fdrfilter_comet_idxml)
+        // Backfilter Comet identifications with FDR threshold
+        OPENMS_IDFILTER_FOR_SPECLIB(ch_fdrfilter_comet_idxml)
+            .filtered
+            .filter { meta, idxml -> idxml.countLines() > 130 }
+            .set { ch_fdrfilter_comet_idxml_filtered }
 
-    //
-    // SUBWORKFLOW: SPECLIB
-    //
-    SPECLIB(OPENMS_IDFILTER_FOR_SPECLIB.out.filtered, ch_clean_mzml_file)
-    ch_versions = ch_versions.mix(SPECLIB.out.versions)
+        //
+        // SUBWORKFLOW: SPECLIB
+        //
+        SPECLIB(ch_fdrfilter_comet_idxml_filtered, ch_clean_mzml_file)
+        ch_versions = ch_versions.mix(SPECLIB.out.versions)
     }
 
     //
