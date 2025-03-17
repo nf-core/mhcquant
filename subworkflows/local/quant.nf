@@ -9,6 +9,7 @@ include { OPENMS_IDRIPPER                          } from '../../modules/nf-core
 include { OPENMS_IDSCORESWITCHER                   } from '../../modules/nf-core/openms/idscoreswitcher/main'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_QUANT } from '../../modules/nf-core/openms/idfilter/main'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../modules/nf-core/openms/idmerger/main'
+include { OPENMS_MZTABEXPORTER                     } from '../../modules/local/openms_mztabexporter'
 
 include { MAP_ALIGNMENT                            } from './map_alignment'
 include { PROCESS_FEATURE                          } from './process_feature'
@@ -89,6 +90,9 @@ workflow QUANT {
 
         PROCESS_FEATURE ( ch_runs_to_be_quantified )
         ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions)
+
+        OPENMS_MZTABEXPORTER(PROCESS_FEATURE.out.consensusxml)
+        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions)
 
     emit:
         consensusxml = PROCESS_FEATURE.out.consensusxml

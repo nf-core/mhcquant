@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added flag `generate_speclib` that will generate a spectrum library for DIA searches with EasyPQP [#349](https://github.com/nf-core/mhcquant/pull/349)
 - Replace local with nf-core modules [#350](https://github.com/nf-core/mhcquant/pull/347)
 - Added support for CCS-based rescoring with `IM2Deep` feature generator [#358](https://github.com/nf-core/mhcquant/pull/358)
+- Added multiple plots to MultiQC report by @JuliaGraf [#361](https://github.com/nf-core/mhcquant/pull/361)
+- Added ability to reduce output columns by @JuliaGraf [#361](https://github.com/nf-core/mhcquant/pull/361)
 
 ### `Fixed`
 

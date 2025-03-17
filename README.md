@@ -130,6 +130,7 @@ Helpful contributors:
 - [Christian Fufezan](https://github.com/fu)
 - [Sven Fillinger](https://github.com/sven1103)
 - [Kevin Menden](https://github.com/KevinMenden)
+- [Julia Graf](https://github.com/JuliaGraf)
 
 ## Contributions and Support
 
