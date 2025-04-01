@@ -16,6 +16,7 @@ include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
+include { SDRF_CONVERT              } from '../../../modules/local/sdrf_convert/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,7 +32,7 @@ workflow PIPELINE_INITIALISATION {
     monochrome_logs   // boolean: Do not use coloured log outputs
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
-    input             //  string: Path to input samplesheet
+    input             //  string: Path to input SDRF file
 
     main:
 
@@ -64,18 +65,31 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
-    // Create channel from input file provided through params.input
+    // Process SDRF file and convert to samplesheet format
     //
+    SDRF_CONVERT(input)
+    ch_versions = ch_versions.mix(SDRF_CONVERT.out.versions)
 
+    //
+    // Create channel from converted samplesheet
+    //
     Channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map { meta, file ->  [meta.subMap('sample','condition'), meta, file] }
+        .fromPath(SDRF_CONVERT.out.samplesheet)
+        .splitCsv(header: true, sep: '\t')
+        .map { row -> 
+            def meta = [
+                id: row.ID,
+                sample: row.Sample,
+                condition: row.Condition
+            ]
+            [ meta, file(row.ReplicateFileName) ]
+        }
         .tap { ch_input }
         .groupTuple()
         // get number of files per sample-condition
-        .map { group_meta, metas, files -> [ group_meta, files.size()] }
+        .map { meta, files -> [ meta, files.size()] }
         .combine( ch_input, by:0 )
-        .map { group_meta, group_count, meta, file -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file] }
+        .map { meta, group_count, file -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file] }
         .set { ch_samplesheet }
 
     //
@@ -88,6 +102,7 @@ workflow PIPELINE_INITIALISATION {
     emit:
     samplesheet = ch_samplesheet
     fasta       = ch_fasta
+    versions    = ch_versions
 }
 
 /*
@@ -182,6 +197,7 @@ def toolCitationText() {
             "MapAligner (Weisser et al. 2013)",
             "FeatureFinder (Weisser et al. 2017)",
             "MultiQC (Ewels et al. 2016)",
+            "SDRF-Pipelines (BigBio)",
             "."
         ].join(' ').trim()
 
@@ -199,7 +215,8 @@ def toolBibliographyText() {
             "<li>Käll, L., Canterbury, J., Weston, J. et al. Semi-supervised learning for peptide identification from shotgun proteomics datasets. Nat Methods 4, 923–925 (2007). doi: /10.1038/nmeth1113<li>",
             "<li>Hendrik Weisser, Sven Nahnsen, Jonas Grossmann et al. An Automated Pipeline for High-Throughput Label-Free Quantitative Proteomics. Journal of Proteome Research 2013 12 (4), 1628-1644. doi: 10.1021/pr300992u<li>",
             "<li>Hendrik Weisser and Jyoti S. Choudhary, Journal of Proteome Research 2017 16 (8), 2964-2974. doi: /10.1021/acs.jproteome.7b00248<li>",
-            "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
+            "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>",
+            "<li>SDRF-Pipelines: A set of pipelines for extracting, processing and validating SDRF files. https://github.com/bigbio/sdrf-pipelines</li>"
         ].join(' ').trim()
 
     return reference_text
@@ -236,4 +253,3 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
-

@@ -4,41 +4,44 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
-## Samplesheet input
+## SDRF input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-separated file with 4 columns, and a header row as shown in the examples below.
+You will need to create an SDRF (Sample and Data Relationship Format) file with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. SDRF is a standardized format used in proteomics that contains rich metadata about samples.
 
 ```bash
---input '[path to samplesheet file]'
+--input '[path to SDRF file]'
 ```
 
-### Samplesheet columns
+### SDRF format
 
-| Column              | Description                                                                                           |
-| ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ID`                | An incrementing value which acts as a unique number for the given sample                              |
-| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
-| `Condition`         | Additional information of the sample can be defined here.                                             |
-| `ReplicateFileName` | Full path to the MS file. These files have the extentions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
+SDRF files contain detailed sample metadata in a tabular format with specific columns for sample characteristics, data file locations, and experimental factors. The pipeline uses sdrf-pipelines to process this file and extract the necessary information.
 
-The pipeline will auto-detect whether a sample is either in mzML, raw or tdf file format using the information provided in the samplesheet.
+Key columns in an SDRF file include:
 
-An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
+| Column                      | Description                                                                                           |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `source name`               | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
+| `characteristics[organism]` | The organism from which the sample was derived                                                        |
+| `comment[data file]`        | Full path to the MS file. These files have the extentions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
+| `factor value[...]`         | Experimental factors that can be used for grouping samples                                            |
+| `characteristics[mhc type]` | MHC alleles present in the sample (important for MHC peptide analysis)                                |
+
+The pipeline will auto-detect whether a sample is either in mzML, raw or tdf file format using the information provided in the SDRF file.
+
+An [example SDRF file](../assets/example_sdrf.tsv) has been provided with the pipeline.
 
 ### Multiple runs of the same sample
 
-MS runs are merged on the `Sample` and `Condition` identifier combination before they are rescored with `Percolator`. Typically technical replicates of a sample are merged together to report one peptide list per sample. Below is an example of two runs from a treated and untreated tumor sample.
+MS runs are merged based on the `source name` and factor values before they are rescored with `Percolator`. Typically technical replicates of a sample are merged together to report one peptide list per sample.
 
-```tsv title="samplesheet.tsv
-ID	Sample	Condition	ReplicateFileName
-1	tumor	treated	/path/to/msrun1.raw|mzML|d
-2	tumor	treated	/path/to/msrun2.raw|mzML|d
-3	tumor	untreated	/path/to/msrun3.raw|mzML|d
-4	tumor	untreated	/path/to/msrun4.raw|mzML|d
-5	control	treated	/path/to/msrun5.raw|mzML|d
-6	control	treated	/path/to/msrun6.raw|mzML|d
-7	control	untreated	/path/to/msrun7.raw|mzML|d
-8	control	untreated	/path/to/msrun8.raw|mzML|d
+For example, in the provided example SDRF file, there are multiple technical replicates for each sample (e.g., sample1_classI, sample1_classII), and these will be merged together during processing.
+
+### Creating SDRF files
+
+You can create SDRF files manually or use tools like the [SDRF Composer](https://github.com/bigbio/sdrf-composer) to generate them. The sdrf-pipelines tool also provides validation functionality to ensure your SDRF file is correctly formatted:
+
+```bash
+parse_sdrf.py validate -s your_sdrf_file.tsv
 ```
 
 ## Recommended search settings
@@ -74,7 +77,7 @@ The typical command for running the pipeline is as follows:
 
 ```console
 nextflow run nf-core/mhcquant \
-  --input 'samplesheet.tsv' \
+  --input 'sdrf_file.tsv' \
   --outdir <OUTDIR> \
   --fasta 'SWISSPROT_2020.fasta' \
   <SEARCH PARAMS> \
@@ -111,7 +114,7 @@ nextflow run nf-core/mhcquant -profile docker -params-file params.yaml
 with:
 
 ```yaml title="params.yaml"
-input: './samplesheet.csv'
+input: './sdrf_file.tsv'
 outdir: './results/'
 <...>
 ```
@@ -232,4 +235,3 @@ We recommend adding the following line to your environment to limit this (typica
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
-```
