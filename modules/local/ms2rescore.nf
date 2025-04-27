@@ -41,7 +41,6 @@ process MS2RESCORE {
     """
 
     stub:
-    def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}_ms2rescore"
 
     """
