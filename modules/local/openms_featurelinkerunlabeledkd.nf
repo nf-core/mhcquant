@@ -8,38 +8,38 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
         'biocontainers/openms-thirdparty:3.3.0--h9ee0642_8' }"
 
     input:
-        tuple val(meta), path(features)
+    tuple val(meta), path(features)
 
     output:
-        tuple val(meta), path("*.consensusXML"), emit: consensusxml
-        path "versions.yml"                    , emit: versions
+    tuple val(meta), path("*.consensusXML"), emit: consensusxml
+    path "versions.yml"                    , emit: versions
 
     when:
-        task.ext.when == null || task.ext.when
+    task.ext.when == null || task.ext.when
 
     script:
-        def prefix           = task.ext.prefix ?: "${meta.id}_all_features_merged"
+    def prefix = task.ext.prefix ?: "${meta.id}_all_features_merged"
 
-        """
-        FeatureLinkerUnlabeledKD -in $features \\
-            -out ${prefix}.consensusXML \\
-            -threads $task.cpus
+    """
+    FeatureLinkerUnlabeledKD -in $features \\
+        -out ${prefix}.consensusXML \\
+        -threads $task.cpus
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-        END_VERSIONS
-        """
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+    END_VERSIONS
+    """
 
     stub:
-        def prefix           = task.ext.prefix ?: "${meta.id}_all_features_merged"
+    def prefix = task.ext.prefix ?: "${meta.id}_all_features_merged"
 
-        """
-        touch ${prefix}.consensusXML
+    """
+    touch ${prefix}.consensusXML
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-        END_VERSIONS
-        """
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+    END_VERSIONS
+    """
 }

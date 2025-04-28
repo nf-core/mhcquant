@@ -39,8 +39,8 @@ process DATAMASH_HISTOGRAM {
     """
 
     stub:
-    def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
+
     """
     touch ${prefix}_binned.tsv
 

@@ -8,19 +8,20 @@ process OPENMS_PERCOLATORADAPTER {
         'biocontainers/openms-thirdparty:3.3.0--h9ee0642_8' }"
 
     input:
-        tuple val(meta), path(merged_with_features)
+    tuple val(meta), path(merged_with_features)
 
     output:
-        tuple val(meta), path("*.idXML")                         , emit: idxml
-        tuple val(meta), path("*_percolator_feature_weights.tsv"), emit: feature_weights, optional: true
-        path "versions.yml"                                      , emit: versions
+    tuple val(meta), path("*.idXML")                         , emit: idxml
+    tuple val(meta), path("*_percolator_feature_weights.tsv"), emit: feature_weights, optional: true
+    path "versions.yml"                                      , emit: versions
 
     when:
-        task.ext.when == null || task.ext.when
+    task.ext.when == null || task.ext.when
 
     script:
-    def prefix           = task.ext.prefix ?: "${meta.id}_pout"
-    def args             = task.ext.args  ?: ''
+    def args   = task.ext.args  ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}_pout"
+
     """
     PercolatorAdapter \\
         -in $merged_with_features \\
@@ -36,8 +37,7 @@ process OPENMS_PERCOLATORADAPTER {
     """
 
     stub:
-    def prefix           = task.ext.prefix ?: "${meta.id}_pout"
-    def args             = task.ext.args  ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}_pout"
 
     """
     touch ${prefix}.idXML
