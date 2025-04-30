@@ -103,7 +103,6 @@
                     "type": "string",
                     "default": "high_res",
                     "enum": ["high_res", "low_res"],
-                    "hidden": true,
                     "fa_icon": "fas fa-wrench",
                     "description": "Comets theoretical_fragment_ions parameter: theoretical fragment ion peak representation, high_res: sum of intensities plus flanking bins, ion trap (low_res) ms/ms: sum of intensities of central M bin only"
                 },
@@ -166,7 +165,6 @@
                     "type": "number",
                     "fa_icon": "fas fa-pipe",
                     "default": 0.0,
-                    "hidden": true,
                     "description": "Specify the fragment bin offset to be used for the comet database search.",
                     "help_text": "For high-resolution instruments a fragment bin offset of 0 is recommended. (See the Comet parameter documentation: https://uwpr.github.io/Comet/parameters/parameters_202401/).\n This parameter needs to be combined with `fragment_bin_tol` parameter"
                 },
