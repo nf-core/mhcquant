@@ -12,62 +12,62 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "f80914f78fb7fa1c00b14cfeb29575ee12240d9c",
+                        "git_sha": "7b50cb7be890e4b28cffb82e438cc6a8d7805d3f",
                         "installed_by": ["modules"]
                     },
                     "openms/decoydatabase": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openms/filefilter": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openms/idfilter": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openms/idmassaccuracy": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openms/idmerger": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openms/idripper": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openms/idscoreswitcher": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openms/peakpickerhires": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openms/peptideindexer": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "openmsthirdparty/cometadapter": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "0a42e8fb96e7a97a0d01070770be12b33426bb70",
                         "installed_by": ["modules"]
                     },
                     "thermorawfileparser": {
                         "branch": "master",
-                        "git_sha": "a6d37035ce97c6bc5e0d8ab5463565c3f6b3bf4c",
+                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["modules"]
                     }
                 }
