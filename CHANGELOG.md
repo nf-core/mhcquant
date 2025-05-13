@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.7.0dev - [date]
+## v3.0.0dev - [date]
 
 ### `Added`
 
@@ -24,7 +24,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template update 3.1.2 [#354](https://github.com/nf-core/mhcquant/pull/354)
 - Template update 3.2.0 [#356](https://github.com/nf-core/mhcquant/pull/356)
 - Template update 3.2.1 [#369](https://github.com/nf-core/mhcquant/pull/369)
-- Bump OpenMS version 3.1.0 -> 3.3.0 [#358](https://github.com/nf-core/mhcquant/pull/358)
+- Bump OpenMS version 3.1.0 -> 3.4.0 [#370](https://github.com/nf-core/mhcquant/pull/358)
+
+### `Dependencies`
+
+| Dependency            | Old version | New version |
+| --------------------- | ----------- | ----------- |
+| `MultiQC`             | 1.21.0      | 1.28.0      |
+| `MS2Rescore`          | 3.0.1       | 3.1.4       |
+| `Nf-core`             | 2.14.1      | 3.2.1       |
+| `OpenMS`              | 3.1.0       | 3.4.0       |
+| `Thermorawfileparser` | 1.4.3       | 1.4.5       |
 
 ## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
 
