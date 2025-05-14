@@ -8,11 +8,11 @@
 // MODULE: Loaded from modules/local/
 //
 
-include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
+include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chromatogramextractor'
 include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
-include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
-include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
-include { SUMMARIZE_RESULTS              } from '../modules/local/summarize_results'
+include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
+include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
+include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/

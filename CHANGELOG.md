@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | Dependency            | Old version | New version |
 | --------------------- | ----------- | ----------- |
 | `MultiQC`             | 1.21.0      | 1.28.0      |
-| `MS2Rescore`          | 3.0.1       | 3.1.4       |
+| `MS2Rescore`          | 3.0.1       | 3.1.5       |
 | `Nf-core`             | 2.14.1      | 3.2.1       |
 | `OpenMS`              | 3.1.0       | 3.4.0       |
 | `Thermorawfileparser` | 1.4.3       | 1.4.5       |
