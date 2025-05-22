@@ -3,6 +3,39 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.0.0 - Monrepos - 22/05/2025
+
+### `Added`
+
+- Added `PYOPENMS_CHROMATOGRAMEXTRACTOR` extracting MS1 Chromatograms and visualize them in multiQC report [#329](https://github.com/nf-core/mhcquant/pull/329)
+- Added `OPENMS_IDMASSACCURACY` and `DATAMASH_HISTOGRAM` to compute fragment mass errors and visualizte them in multiQC report [#332](https://github.com/nf-core/mhcquant/pull/332)
+- Added global fdr evaluation in new local subworkflow `RESCORE` [#338](https://github.com/nf-core/mhcquant/pull/338)
+- Added `-weights` parameter in `OPENMS_PERCOLATORADAPTER` and visualize the median feature weights in multiQC report [#347](https://github.com/nf-core/mhcquant/pull/347)
+- Added flag `generate_speclib` that will generate a spectrum library for DIA searches with EasyPQP [#349](https://github.com/nf-core/mhcquant/pull/349)
+- Replace local with nf-core modules [#350](https://github.com/nf-core/mhcquant/pull/347)
+- Added support for CCS-based rescoring with `IM2Deep` feature generator [#358](https://github.com/nf-core/mhcquant/pull/358)
+- Added multiple plots to MultiQC report by @JuliaGraf [#361](https://github.com/nf-core/mhcquant/pull/361)
+- Added ability to reduce output columns by @JuliaGraf [#361](https://github.com/nf-core/mhcquant/pull/361)
+
+### `Fixed`
+
+- Template update 3.0.2 [#337](https://github.com/nf-core/mhcquant/pull/337)
+- Template update 3.1.1 [#346](https://github.com/nf-core/mhcquant/pull/346)
+- Template update 3.1.2 [#354](https://github.com/nf-core/mhcquant/pull/354)
+- Template update 3.2.0 [#356](https://github.com/nf-core/mhcquant/pull/356)
+- Template update 3.2.1 [#369](https://github.com/nf-core/mhcquant/pull/369)
+- Bump OpenMS version 3.1.0 -> 3.4.0 [#370](https://github.com/nf-core/mhcquant/pull/358)
+
+### `Dependencies`
+
+| Dependency            | Old version | New version |
+| --------------------- | ----------- | ----------- |
+| `MultiQC`             | 1.21.0      | 1.28.0      |
+| `MS2Rescore`          | 3.0.1       | 3.1.5       |
+| `Nf-core`             | 2.14.1      | 3.2.1       |
+| `OpenMS`              | 3.1.0       | 3.4.0       |
+| `Thermorawfileparser` | 1.4.3       | 1.4.5       |
+
 ## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
 
 ### `Added`

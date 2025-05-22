@@ -8,20 +8,18 @@
 // MODULE: Loaded from modules/local/
 //
 
-include { OPENMS_FILEFILTER          } from '../modules/local/openms_filefilter'
-include { OPENMS_COMETADAPTER        } from '../modules/local/openms_cometadapter'
-include { OPENMS_PEPTIDEINDEXER      } from '../modules/local/openms_peptideindexer'
-include { MS2RESCORE                 } from '../modules/local/ms2rescore'
-include { OPENMS_PSMFEATUREEXTRACTOR } from '../modules/local/openms_psmfeatureextractor'
-include { OPENMS_PERCOLATORADAPTER   } from '../modules/local/openms_percolatoradapter'
-include { PYOPENMS_IONANNOTATOR      } from '../modules/local/pyopenms_ionannotator'
-include { OPENMS_TEXTEXPORTER        } from '../modules/local/openms_textexporter'
-include { OPENMS_MZTABEXPORTER       } from '../modules/local/openms_mztabexporter'
+include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chromatogramextractor'
+include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
+include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
+include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
+include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
 //
 include { PREPARE_SPECTRA } from '../subworkflows/local/prepare_spectra'
+include { RESCORE         } from '../subworkflows/local/rescore'
+include { SPECLIB         } from '../subworkflows/local/speclib'
 include { QUANT           } from '../subworkflows/local/quant'
 
 /*
@@ -33,15 +31,18 @@ include { QUANT           } from '../subworkflows/local/quant'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { OPENMS_DECOYDATABASE                       } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_IDMERGER                            } from '../modules/nf-core/openms/idmerger/main'
-include { OPENMS_IDSCORESWITCHER                     } from '../modules/nf-core/openms/idscoreswitcher/main.nf'
-include { OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE } from '../modules/nf-core/openms/idfilter/main'
-include { MULTIQC                                    } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                           } from 'plugin/nf-validation'
-include { paramsSummaryMultiqc                       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML                     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                     } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
+include { OPENMS_FILEFILTER                              } from '../modules/nf-core/openms/filefilter/main'
+include { OPENMS_DECOYDATABASE                           } from '../modules/nf-core/openms/decoydatabase/main'
+include { OPENMS_IDMASSACCURACY                          } from '../modules/nf-core/openms/idmassaccuracy/main'
+include { OPENMSTHIRDPARTY_COMETADAPTER                  } from '../modules/nf-core/openmsthirdparty/cometadapter/main'
+include { OPENMS_PEPTIDEINDEXER                          } from '../modules/nf-core/openms/peptideindexer/main'
+include { OPENMS_IDMERGER                                } from '../modules/nf-core/openms/idmerger/main'
+include { OPENMS_IDFILTER as OPENMS_IDFILTER_FOR_SPECLIB } from '../modules/nf-core/openms/idfilter/main'
+include { MULTIQC                                        } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                               } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                         } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                         } from '../subworkflows/local/utils_nfcore_mhcquant_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,8 +69,7 @@ workflow MHCQUANT {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
         ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
-        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
-                                .map{ meta, fasta -> [fasta] }
+        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta.map{ meta, fasta -> [fasta] }
     } else {
         ch_decoy_db = ch_fasta.map{ meta, fasta -> [fasta] }
     }
@@ -78,26 +78,39 @@ workflow MHCQUANT {
     if (params.filter_mzml){
         OPENMS_FILEFILTER(PREPARE_SPECTRA.out.mzml)
         ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions)
-        ch_clean_mzml_file = OPENMS_FILEFILTER.out.cleaned_mzml
+        ch_clean_mzml_file = OPENMS_FILEFILTER.out.mzml
     } else {
         ch_clean_mzml_file = PREPARE_SPECTRA.out.mzml
     }
 
+    // Compute MS1 TICs for QC
+    PYOPENMS_CHROMATOGRAMEXTRACTOR(ch_clean_mzml_file)
+    ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
+
     // Run comet database search
-    OPENMS_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
-    ch_versions = ch_versions.mix(OPENMS_COMETADAPTER.out.versions)
+    OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
+    ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
 
     // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(OPENMS_COMETADAPTER.out.idxml.combine(ch_decoy_db))
+    OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
+    // Compute mass errors for multiQC report
+    OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.indexed_idxml))
+    ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
+    // Bin and count mass errors for multiQC report
+    DATAMASH_HISTOGRAM(OPENMS_IDMASSACCURACY.out.frag_err)
+    ch_versions = ch_versions.mix(DATAMASH_HISTOGRAM.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(DATAMASH_HISTOGRAM.out.binned_tsv.map{ meta, frag_err_hist -> frag_err_hist })
+
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
-    OPENMS_PEPTIDEINDEXER.out.idxml
+    OPENMS_PEPTIDEINDEXER.out.indexed_idxml
         .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta] }
         .groupTuple()
         .set { merge_meta_map }
 
-    OPENMS_PEPTIDEINDEXER.out.idxml
+    OPENMS_PEPTIDEINDEXER.out.indexed_idxml
         .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), idxml] }
         .groupTuple()
         .set { ch_runs_to_merge }
@@ -112,42 +125,45 @@ workflow MHCQUANT {
             .groupTuple()
             .join(OPENMS_IDMERGER.out.idxml)
             .map { meta, mzml, idxml -> [meta, idxml, mzml, []] }
-            .set { ch_ms2rescore_in }
+            .set { ch_rescore_in }
 
-    MS2RESCORE(ch_ms2rescore_in)
-    ch_versions = ch_versions.mix(MS2RESCORE.out.versions)
+    //
+    // SUBWORKFLOW: RESCORE WITH MOKKAPOT OR PERCOLATOR AND FILTER BY Q-VALUE ON LOCAL/GLOBAL FDR
+    //
+    RESCORE( ch_rescore_in, ch_multiqc_files )
+    ch_versions = ch_versions.mix(RESCORE.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(RESCORE.out.multiqc_files)
 
-    if (params.rescoring_engine == 'percolator') {
-        // Extract PSM features for Percolator
-        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
-        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
+    // GENERATE SPECTRUM LIBRARY
+    if (params.generate_speclib) {
+        OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
+                .map { meta, idxml -> [ [id: "${meta.sample}_${meta.condition}"], meta, idxml] }
+                .combine(RESCORE.out.fdr_filtered, by:0)
+                .map { groupKey, meta, comet_idxml, fdr_filtered_idxml -> [meta, comet_idxml, fdr_filtered_idxml] }
+                .set { ch_fdrfilter_comet_idxml }
 
-        // Run Percolator
-        OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
-        ch_rescored_runs = OPENMS_PERCOLATORADAPTER.out.idxml
-    } else {
-        log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
-        // Switch comet e-value to mokapot q-value
-        OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
-        ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
+        // Backfilter Comet identifications with FDR threshold
+        OPENMS_IDFILTER_FOR_SPECLIB(ch_fdrfilter_comet_idxml)
+            .filtered
+            .filter { meta, idxml -> idxml.countLines() > 130 }
+            .set { ch_fdrfilter_comet_idxml_filtered }
+
+        //
+        // SUBWORKFLOW: SPECLIB
+        //
+        SPECLIB(ch_fdrfilter_comet_idxml_filtered, ch_clean_mzml_file)
+        ch_versions = ch_versions.mix(SPECLIB.out.versions)
     }
-
-    // Filter by percolator q-value
-    OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
-    ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
-    ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
 
     //
     // SUBWORKFLOW: QUANT
     //
     if (params.quantify) {
-        QUANT(merge_meta_map, ch_rescored_runs, ch_filter_q_value, ch_clean_mzml_file)
+        QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
         ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
     } else {
-        ch_output = ch_filter_q_value
+        ch_output = RESCORE.out.fdr_filtered
     }
 
     // Annotate Ions for follow-up spectrum validation
@@ -155,7 +171,7 @@ workflow MHCQUANT {
         // Join the ch_filtered_idxml and the ch_mzml_file
         ch_clean_mzml_file.map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), mzml] }
             .groupTuple()
-            .join(ch_filter_q_value)
+            .join(RESCORE.out.fdr_filtered)
             .set{ ch_ion_annotator_input }
 
         // Annotate spectra with ion fragmentation information
@@ -173,8 +189,18 @@ workflow MHCQUANT {
         }
     }
 
-    OPENMS_MZTABEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions)
+    // Process the tsv file to facilitate visualization with MultiQC
+    SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
+    ch_versions = ch_versions.mix(SUMMARIZE_RESULTS.out.versions)
+
+    ch_multiqc_files = ch_multiqc_files.mix(
+        SUMMARIZE_RESULTS.out.hist_mz,
+        SUMMARIZE_RESULTS.out.hist_rt,
+        SUMMARIZE_RESULTS.out.hist_scores,
+        SUMMARIZE_RESULTS.out.hist_xcorr,
+        SUMMARIZE_RESULTS.out.lengths,
+        SUMMARIZE_RESULTS.out.stats
+    )
 
     //
     // Collate and save software versions
@@ -182,10 +208,11 @@ workflow MHCQUANT {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_pipeline_software_mqc_versions.yml',
+            name: 'nf_core_'  +  'mhcquant_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
+
 
     //
     // MODULE: MultiQC
@@ -202,15 +229,14 @@ workflow MHCQUANT {
     summary_params      = paramsSummaryMap(
         workflow, parameters_schema: "nextflow_schema.json")
     ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
-
+    ch_multiqc_files = ch_multiqc_files.mix(
+        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
         file(params.multiqc_methods_description, checkIfExists: true) :
         file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
     ch_methods_description                = Channel.value(
         methodsDescriptionText(ch_multiqc_custom_methods_description))
 
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_methods_description.collectFile(
@@ -223,12 +249,14 @@ workflow MHCQUANT {
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
         ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList()
+        ch_multiqc_logo.toList(),
+        [],
+        []
     )
 
-    emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
+
 }
 
 /*

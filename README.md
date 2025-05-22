@@ -9,7 +9,7 @@
 [![GitHub Actions Linting Status](https://github.com/nf-core/mhcquant/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/mhcquant/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/mhcquant/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.8427707-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.8427707)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A524.04.2-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
@@ -61,8 +61,7 @@ nextflow run nf-core/mhcquant
 ```
 
 > [!WARNING]
-> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
-> see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
+> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/mhcquant/usage) and the [parameter documentation](https://nf-co.re/mhcquant/parameters).
 
@@ -131,6 +130,7 @@ Helpful contributors:
 - [Christian Fufezan](https://github.com/fu)
 - [Sven Fillinger](https://github.com/sven1103)
 - [Kevin Menden](https://github.com/KevinMenden)
+- [Julia Graf](https://github.com/JuliaGraf)
 
 ## Contributions and Support
 
@@ -175,6 +175,10 @@ In addition, references of tools and data used in this pipeline are as follows:
 > **MS² Peak intensity prediction**
 >
 > Declercq A. et al, _Nucleic Acids Res._ 2023 Jul 5;51(W1):W338-W342. doi: [10.1093/nar/gkad335](https://academic.oup.com/nar/article/51/W1/W338/7151340?login=false)
+>
+> **CCS prediction**
+>
+> Declercq A. et al _Journal of Proteome Research_ 2025 Feb 6. doi: [10.1021/acs.jproteome.4c00609](https://pubs.acs.org/doi/10.1021/acs.jproteome.4c00609)
 >
 > **MS²Rescore framework**
 >
