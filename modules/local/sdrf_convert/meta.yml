@@ -1,0 +1,33 @@
+name: sdrf_convert
+description: Converts SDRF files to MHCquant-compatible samplesheet format
+keywords:
+  - sdrf
+  - convert
+  - samplesheet
+tools:
+  - sdrf-pipelines:
+      description: A set of pipelines for extracting, processing and validating SDRF files
+      homepage: https://github.com/bigbio/sdrf-pipelines
+      documentation: https://github.com/bigbio/sdrf-pipelines
+      tool_dev_url: https://github.com/bigbio/sdrf-pipelines
+      doi: ""
+      licence: ["Apache-2.0"]
+
+input:
+  - sdrf:
+      type: file
+      description: SDRF file
+      pattern: "*.{tsv}"
+
+output:
+  - samplesheet:
+      type: file
+      description: Converted samplesheet in MHCquant-compatible format
+      pattern: "*.{tsv}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@nf-core/mhcquant"
