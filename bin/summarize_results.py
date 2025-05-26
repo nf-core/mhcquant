@@ -118,12 +118,16 @@ def process_file(file, prefix, quantify, keep_cols):
         data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
         return
 
+    # Remove modification information from the sequence column
+    data["peptidoform"] = data["sequence"]
+    data["sequence"] = data["sequence"].apply(lambda seq: re.sub(r'\(.*?\)', '', seq))
+
     # ---------------------------------
     # Length distribution plot
     # ---------------------------------
 
     # Remove everything inside parentheses, including the parentheses.
-    seq_length = data["sequence"].apply(lambda seq: len(re.sub(r'\(.*?\)', '', seq)))
+    seq_length = data["sequence"].apply(lambda seq: len(seq))
     seq_length = dict(Counter(seq_length))
     with open(f"{prefix}_peptide_length.csv", "w") as f:
         for length, count in seq_length.items():
@@ -133,8 +137,8 @@ def process_file(file, prefix, quantify, keep_cols):
     # General statistics
     # ---------------------------------
 
-    n_peptides = len(set(data["sequence"]))
-    n_modified_peptides = sum(1 for s in set(data["sequence"]) if '(' in s)
+    n_peptides = len(set(data["peptidoform"]))
+    n_modified_peptides = sum(1 for s in set(data["peptidoform"]) if '(' in s)
     # Split the accession codes and count each protein accession individually
     n_proteins = len(set([protein for entry in data["accessions"] for protein in entry.split(';')]))
     with open(f"{prefix}_general_stats.csv", "w") as f:
