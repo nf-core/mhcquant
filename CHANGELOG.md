@@ -3,6 +3,14 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### `Added`
+
+- Added a peptidoform column to the pipeline output [#376](https://github.com/nf-core/mhcquant/pull/376)
+
+### `Fixed`
+### `Dependencies`
+### `Deprecated`
+
 ## 3.0.0 - Monrepos - 22/05/2025
 
 ### `Added`
