@@ -114,6 +114,12 @@ custom_data:
       description: "A Comet Xcorr histogram visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
       xlab: "Xcorr"
       ylab: "Frequency"
+
+  epicore_length_dist:
+    section_name: "epicore_length_dist"
+  epicore_epitope_intensity_hist:
+    section_name: "epicore_epitope_intensity_hist"
+
 #id: custom_box
 #plot_type: 'box'
 #section_name: 'Custom box plot'
@@ -138,6 +144,11 @@ sp:
     fn: "*_histogram_scores.csv"
   scores_plot_xcorr:
     fn: "*_histogram_xcorr_scores.csv"
+  epicore_length_dist:
+    fn: "length_distributions.html"
+  epicore_epitope_intensity_hist:
+    fn: "epitope_intensity_hist.html"
+  
 ### Define the order of sections
 #module_order:
 #  - custom_content

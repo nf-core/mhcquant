@@ -13,6 +13,7 @@ include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histo
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
 include { SUMMARIZE_RESULTS              } from '../modules/local/summarize_results'
+include { EPICORE                        } from '../modules/local/epicore'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
@@ -192,15 +193,35 @@ workflow MHCQUANT {
     // Process the tsv file to facilitate visualization with MultiQC
     SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
     ch_versions = ch_versions.mix(SUMMARIZE_RESULTS.out.versions)
+    
+    //
+    // EPICORE
+    // 
+    if (params.epicore) {
+        EPICORE(ch_fasta, SUMMARIZE_RESULTS.out.final_tsv, SUMMARIZE_RESULTS.out.stats, SUMMARIZE_RESULTS.out.meta_out)
 
-    ch_multiqc_files = ch_multiqc_files.mix(
-        SUMMARIZE_RESULTS.out.hist_mz,
-        SUMMARIZE_RESULTS.out.hist_rt,
-        SUMMARIZE_RESULTS.out.hist_scores,
-        SUMMARIZE_RESULTS.out.hist_xcorr,
-        SUMMARIZE_RESULTS.out.lengths,
-        SUMMARIZE_RESULTS.out.stats
-    )
+        ch_versions = ch_versions.mix(EPICORE.out.versions)
+        
+        ch_multiqc_files = ch_multiqc_files.mix(
+            SUMMARIZE_RESULTS.out.hist_mz,
+            SUMMARIZE_RESULTS.out.hist_rt,
+            SUMMARIZE_RESULTS.out.hist_scores,
+            SUMMARIZE_RESULTS.out.hist_xcorr,
+            SUMMARIZE_RESULTS.out.lengths,
+            EPICORE.out.stats, 
+            EPICORE.out.length_dist, 
+            EPICORE.out.intensity_hist
+        )
+    } else {
+        ch_multiqc_files = ch_multiqc_files.mix(
+            SUMMARIZE_RESULTS.out.hist_mz,
+            SUMMARIZE_RESULTS.out.hist_rt,
+            SUMMARIZE_RESULTS.out.hist_scores,
+            SUMMARIZE_RESULTS.out.hist_xcorr,
+            SUMMARIZE_RESULTS.out.lengths,
+            SUMMARIZE_RESULTS.out.stats
+        )
+    }
 
     //
     // Collate and save software versions
@@ -212,7 +233,6 @@ workflow MHCQUANT {
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
-
 
     //
     // MODULE: MultiQC

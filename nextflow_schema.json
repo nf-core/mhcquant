@@ -426,7 +426,74 @@
                     "fa_icon": "fas fa-tags",
                     "description": "Create tsv files containing information about the MS2 ion annotations after processing.",
                     "help_text": "The resulting tsv files should aid in spectrum validation downstream analyses"
+                },
+                "epicore" : {
+                    "type": "boolean", 
+                    "default": false, 
+                    "fa_icon": "fas fa-layer-group", 
+                    "description": "Compute core epitopes from overlapping peptides."          
+                }, 
+                "seq_column" : {
+                    "type": "string", 
+                    "default": "",
+                    "fa_icon": "fas fa-dna",
+                    "description": "Specify the column containing the peptide sequence information."
+                },
+                "protacc_column" : {
+                    "type" : "string", 
+                    "default": "", 
+                    "hidden": true, 
+                    "description": "Specify the column containing the protein accessions of the peptide."
+                }, 
+                "start_column" : {
+                    "type" : "string", 
+                    "default" : "",
+                    "hidden": true, 
+                    "decsription": "Specify the column containing the start prosition of the peptide in the proetin sequence."
+                },
+                "end_column" : {
+                    "type" : "string", 
+                    "default" : "", 
+                    "hidden": true, 
+                    "decsription": "Specify the column containing the end prosition of the peptide in the proetin sequence."
+                }, 
+                "intensity_column" : {
+                    "type" : "string", 
+                    "default" : "", 
+                    "hidden" : true, 
+                    "description" :"Specify the column containing the end prosition of the peptide in the proetin sequence."
+                }, 
+                "mod_pattern": {
+                    "type" : "string", 
+                    "default" : "", 
+                    "hidden" : true, 
+                    "description" :"Specify the delimiter separating the peptide sequence from modifications."
+                },
+                "delimiter": {
+                    "type" : "string", 
+                    "default" : "", 
+                    "hidden" : true, 
+                    "description" :"Specify the delimiter separating multiple entries in one cell."
+                },
+                "min_overlap": {
+                    "type" : "string", 
+                    "default" : "", 
+                    "hidden" : true, 
+                    "description" :"Specify the minimal overlap of two peptides so they are grouped together."
+                },
+                "max_step_size": {
+                    "type" : "string", 
+                    "default" : "", 
+                    "hidden" : true, 
+                    "description" :"Specify the maximal difference between the start position of two peptides so they are still grouped together."
+                },
+                "min_epi_length": {
+                    "type" : "string", 
+                    "default" : "", 
+                    "hidden" : true, 
+                    "description" :"Specify the minimal length of an core epitope."
                 }
+
             }
         },
         "institutional_config_options": {

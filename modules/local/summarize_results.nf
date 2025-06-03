@@ -16,6 +16,7 @@ process SUMMARIZE_RESULTS {
     path '*_general_stats.csv'             , emit: stats
     path '*.tsv'                           , emit: final_tsv
     path 'versions.yml'                    , emit: versions
+    val(meta)                              , emit: meta_out
 
     script:
         def args = task.ext.args ?: ''
