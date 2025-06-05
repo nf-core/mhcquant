@@ -12,7 +12,7 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "7b50cb7be890e4b28cffb82e438cc6a8d7805d3f",
+                        "git_sha": "471cf3ca1617271b9b6fea09ea2ebdee78b874de",
                         "installed_by": ["modules"]
                     },
                     "openms/decoydatabase": {
