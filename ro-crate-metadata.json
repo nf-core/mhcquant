@@ -22,8 +22,8 @@
             "@id": "./",
             "@type": "Dataset",
             "creativeWorkStatus": "InProgress",
-            "datePublished": "2025-04-30T12:27:00+00:00",
-            "description": "<h1>\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"docs/images/nf-core-mhcquant_logo_dark.png\">\n    <img alt=\"nf-core/mhcquant\" src=\"docs/images/nf-core-mhcquant_logo_light.png\">\n  </picture>\n</h1>\n\n[![GitHub Actions CI Status](https://github.com/nf-core/mhcquant/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/mhcquant/actions/workflows/ci.yml)\n[![GitHub Actions Linting Status](https://github.com/nf-core/mhcquant/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/mhcquant/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/mhcquant/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.8427707-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.8427707)\n[![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)\n\n[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A524.04.2-23aa62.svg)](https://www.nextflow.io/)\n[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)\n[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)\n[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)\n[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/mhcquant)\n\n[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23mhcquant-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/mhcquant)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)\n\n## Introduction\n\n**nf-core/mhcquant** is a bioinformatics pipeline that ...\n\n<!-- TODO nf-core:\n   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the\n   major pipeline sections and the types of output it produces. You're giving an overview to someone new\n   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction\n-->\n\n<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core\n     workflows use the \"tube map\" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->\n<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))\n\n## Usage\n\n> [!NOTE]\n> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.\n\n<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.\n     Explain what rows and columns represent. For instance (please edit as appropriate):\n\nFirst, prepare a samplesheet with your input data that looks as follows:\n\n`samplesheet.csv`:\n\n```csv\nsample,fastq_1,fastq_2\nCONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz\n```\n\nEach row represents a fastq file (single-end) or a pair of fastq files (paired end).\n\n-->\n\nNow, you can run the pipeline using:\n\n<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->\n\n```bash\nnextflow run nf-core/mhcquant \\\n   -profile <docker/singularity/.../institute> \\\n   --input samplesheet.csv \\\n   --outdir <OUTDIR>\n```\n\n> [!WARNING]\n> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).\n\nFor more details and further functionality, please refer to the [usage documentation](https://nf-co.re/mhcquant/usage) and the [parameter documentation](https://nf-co.re/mhcquant/parameters).\n\n## Pipeline output\n\nTo see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/mhcquant/results) tab on the nf-core website pipeline page.\nFor more details about the output files and reports, please refer to the\n[output documentation](https://nf-co.re/mhcquant/output).\n\n## Credits\n\nnf-core/mhcquant was originally written by Jonas Scheid, Steffen Lemke, Leon Bichmann, Marissa Dubbelaar.\n\nWe thank the following people for their extensive assistance in the development of this pipeline:\n\n<!-- TODO nf-core: If applicable, make list of people who have also contributed -->\n\n## Contributions and Support\n\nIf you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).\n\nFor further information or help, don't hesitate to get in touch on the [Slack `#mhcquant` channel](https://nfcore.slack.com/channels/mhcquant) (you can join with [this invite](https://nf-co.re/join/slack)).\n\n## Citations\n\n<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->\n<!-- If you use nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.8427707](https://doi.org/10.5281/zenodo.8427707) -->\n\n<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->\n\nAn extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.\n\nYou can cite the `nf-core` publication as follows:\n\n> **The nf-core framework for community-curated bioinformatics pipelines.**\n>\n> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.\n>\n> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).\n",
+            "datePublished": "2025-06-03T11:02:02+00:00",
+            "description": "<h1>\n  <picture>\n    <source media=\"(prefers-color-scheme: dark)\" srcset=\"docs/images/nf-core-mhcquant_logo_dark.png\">\n    <img alt=\"nf-core/mhcquant\" src=\"docs/images/nf-core-mhcquant_logo_light.png\">\n  </picture>\n</h1>\n\n[![GitHub Actions CI Status](https://github.com/nf-core/mhcquant/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/mhcquant/actions/workflows/ci.yml)\n[![GitHub Actions Linting Status](https://github.com/nf-core/mhcquant/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/mhcquant/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/mhcquant/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.8427707-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.8427707)\n[![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)\n\n[![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.04.2-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)\n[![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.1-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.1)\n[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)\n[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)\n[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)\n[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/mhcquant)\n\n[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23mhcquant-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/mhcquant)[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)\n\n## Introduction\n\n**nfcore/mhcquant** is a best-practice bioinformatics pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).\n\nThe pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS\u00b2Rescore. FDR rescoring is applied using Percolator based on a competitive target-decoy approach. For label free quantification all input files undergo identification-based retention time alignment, and targeted feature extraction matching ids between runs.\n\n![overview](assets/mhcquant_subway.png)\n\nThe pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!\n\nOn release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/mhcquant/results).\n\n## Usage\n\n> [!NOTE]\n> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how\n> to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)\n> with `-profile test` before running the workflow on actual data.\n\nFirst, prepare a samplesheet with your input data that looks as follows:\n\n`samplesheet.tsv`\n\n```tsv title=\"samplesheet.tsv\nID\tSample\tCondition\tReplicateFileName\n1\ttumor\ttreated\t/path/to/msrun1.raw|mzML|d\n2\ttumor\ttreated\t/path/to/msrun2.raw|mzML|d\n3\ttumor\tuntreated\t/path/to/msrun3.raw|mzML|d\n4\ttumor\tuntreated\t/path/to/msrun4.raw|mzML|d\n```\n\nEach row represents a mass spectrometry run in one of the formats: raw, RAW, mzML, mzML.gz, d, d.tar.gz, d.zip\n\nNow, you can run the pipeline using:\n\n```bash\nnextflow run nf-core/mhcquant\n    -profile <docker/singularity/.../institute> \\\n    --input 'samplesheet.tsv' \\\n    --fasta 'SWISSPROT_2020.fasta' \\\n    --outdir ./results\n```\n\n> [!WARNING]\n> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).\n\nFor more details and further functionality, please refer to the [usage documentation](https://nf-co.re/mhcquant/usage) and the [parameter documentation](https://nf-co.re/mhcquant/parameters).\n\n## Pipeline summary\n\n### Default Steps\n\nBy default the pipeline currently performs identification of MHC class I peptides with HCD settings:\n\n- Preparing spectra dependent on the input format (`PrepareSpectra`)\n- Creation of reversed decoy database (`DecoyDatabase`)\n- Identification of peptides in the MS/MS spectra (`CometAdapter`)\n- Refreshes the protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)\n- Merges identification files with the same `Sample` and `Condition` label (`IDMerger`)\n- Prediction of retention times and MS2 intensities (`MS\u00b2Rescore`)\n- Extract PSM features for Percolator (`PSMFeatureExtractor`)\n- Peptide-spectrum-match rescoring using Percolator (`PercolatorAdapter`)\n- Filters peptide identification result according to 1\\% FDR (`IDFilter`)\n- Converts identification result to tab-separated files (`TextExporter`)\n- Converts identification result to mzTab files (`MzTabExporter`)\n\n### Additional Steps\n\nAdditional functionality contained by the pipeline currently includes:\n\n#### Quantification\n\n- Corrects retention time distortions between runs (`MapAlignerIdentification`)\n- Applies retention time transformations to runs (`MapRTTransformer`)\n- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)\n- Group corresponding features across label-free experiments (`FeatureLinkerUnlabeledKD`)\n- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)\n\n#### Output\n\n- Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)\n\n## Documentation\n\nTo see the the results of a test run with a full size dataset refer to the [results](https://nf-co.re/mhcquant/results) tab on the nf-core website pipeline page.\nFor more details about the output files and reports, please refer to the\n[output documentation](https://nf-co.re/mhcquant/output).\n\n1. [Nextflow installation](https://nf-co.re/usage/installation)\n2. Pipeline configuration\n   - [Pipeline installation](https://nf-co.re/usage/local_installation)\n   - [Adding your own system config](https://nf-co.re/usage/adding_own_config)\n3. [Running the pipeline](https://nf-co.re/mhcquant/docs/usage.md)\n   - This includes tutorials, FAQs, and troubleshooting instructions\n4. [Output and how to interpret the results](https://nf-co.re/mhcquant/docs/output.md)\n\n## Credits\n\nnf-core/mhcquant was originally written by [Leon Bichmann](https://github.com/Leon-Bichmann) from the [Kohlbacher Lab](https://kohlbacherlab.org/). The pipeline was re-written in Nextflow DSL2 by [Marissa Dubbelaar](https://github.com/marissaDubbelaar) and was significantly improved by [Jonas Scheid](https://github.com/jonasscheid) and [Steffen Lemke](https://github.com/steffenlem) from [Peptide-based Immunotherapy](https://www.medizin.uni-tuebingen.de/en-de/peptid-basierte-immuntherapie) and [Quantitative Biology Center](https://uni-tuebingen.de/forschung/forschungsinfrastruktur/zentrum-fuer-quantitative-biologie-qbic/) in T\u00fcbingen.\n\nHelpful contributors:\n\n- [Lukas Heumos](https://github.com/Zethson)\n- [Alexander Peltzer](https://github.com/apeltzer)\n- [Maxime Garcia](https://github.com/maxulysse)\n- [Gisela Gabernet](https://github.com/ggabernet)\n- [Susanne Jodoin](https://github.com/SusiJo)\n- [Oskar Wacker](https://github.com/WackerO)\n- [Leon Kuchenbecker](https://github.com/lkuchenb)\n- [Phil Ewels](https://github.com/ewels)\n- [Christian Fufezan](https://github.com/fu)\n- [Sven Fillinger](https://github.com/sven1103)\n- [Kevin Menden](https://github.com/KevinMenden)\n- [Julia Graf](https://github.com/JuliaGraf)\n\n## Contributions and Support\n\nIf you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).\n\nFor further information or help, don't hesitate to get in touch on the [Slack `#mhcquant` channel](https://nfcore.slack.com/channels/mhcquant) (you can join with [this invite](https://nf-co.re/join/slack)).\n\n## Citations\n\nIf you use nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.1569909](https://doi.org/10.5281/zenodo.1569909) and the corresponding manuscript:\n\n> **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**\n>\n> Leon Bichmann, Annika Nelde, Michael Ghosh, Lukas Heumos, Christopher Mohr, Alexander Peltzer, Leon Kuchenbecker, Timo Sachsenberg, Juliane S. Walz, Stefan Stevanovi\u0107, Hans-Georg Rammensee & Oliver Kohlbacher\n>\n> _Journal of Proteome Research_ 2019 18 (11), 3876-3884. doi: [10.1021/acs.jproteome.9b00313](https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00313)\n\nAn extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.\n\nYou can cite the `nf-core` publication as follows:\n\n> **The nf-core framework for community-curated bioinformatics pipelines.**\n>\n> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.\n>\n> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).\n\nIn addition, references of tools and data used in this pipeline are as follows:\n\n> **OpenMS framework**\n>\n> Pfeuffer J. et al, _Nat Methods_ 2024 Mar;21(3):365-367. doi: [0.1038/s41592-024-02197-7](https://www.nature.com/articles/s41592-024-02197-7).\n>\n> **Comet Search Engine**\n>\n> Eng J.K. et al, _J Am Soc Mass Spectrom._ 2015 Nov;26(11):1865-74. doi: [10.1007/s13361-015-1179-x](https://pubs.acs.org/doi/10.1007/s13361-015-1179-x).\n>\n> **Retention time prediction**\n>\n> Bouwmeester R. et al, _Nature Methods_ 2021 Oct;18(11):1363-1369. doi: [10.1038/s41592-021-01301-5](https://www.nature.com/articles/s41592-021-01301-5)\n>\n> **MS\u00b2 Peak intensity prediction**\n>\n> Declercq A. et al, _Nucleic Acids Res._ 2023 Jul 5;51(W1):W338-W342. doi: [10.1093/nar/gkad335](https://academic.oup.com/nar/article/51/W1/W338/7151340?login=false)\n>\n> **CCS prediction**\n>\n> Declercq A. et al _Journal of Proteome Research_ 2025 Feb 6. doi: [10.1021/acs.jproteome.4c00609](https://pubs.acs.org/doi/10.1021/acs.jproteome.4c00609)\n>\n> **MS\u00b2Rescore framework**\n>\n> Buur L. M. et al, \\_J Proteome Res. 2024 Mar 16. doi: [10.1021/acs.jproteome.3c00785](https://pubs.acs.org/doi/10.1021/acs.jproteome.3c00785)\n>\n> **Percolator**\n>\n> K\u00e4ll L. et al, _Nat Methods_ 2007 Nov;4(11):923-5. doi: [10.1038/nmeth1113](https://www.nature.com/articles/nmeth1113).\n>\n> **Identification based RT Alignment**\n>\n> Weisser H. et al, _J Proteome Res._ 2013 Apr 5;12(4):1628-44. doi: [10.1021/pr300992u](https://pubs.acs.org/doi/10.1021/pr300992u)\n>\n> **Targeted peptide quantification**\n>\n> Weisser H. et al, _J Proteome Res._ 2017 Aug 4;16(8):2964-2974. doi: [10.1021/acs.jproteome.7b00248](https://pubs.acs.org/doi/10.1021/acs.jproteome.7b00248)\n",
             "hasPart": [
                 {
                     "@id": "main.nf"
@@ -99,7 +99,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#b0929725-e98e-4b1f-9c40-c9c718ec6c28"
+                    "@id": "#561af933-805d-4e30-a06c-e84983fee2b1"
                 }
             ],
             "name": "nf-core/mhcquant"
@@ -121,20 +121,24 @@
         },
         {
             "@id": "main.nf",
-            "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+            "@type": [
+                "File",
+                "SoftwareSourceCode",
+                "ComputationalWorkflow"
+            ],
             "creator": [
-                {
-                    "@id": "https://orcid.org/0000-0001-7135-0073"
-                },
                 {
                     "@id": "https://orcid.org/0000-0002-8937-3457"
                 },
                 {
                     "@id": "https://orcid.org/0000-0002-6503-2180"
+                },
+                {
+                    "@id": "https://orcid.org/0000-0001-7135-0073"
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2025-04-30T12:27:00Z",
+            "dateModified": "2025-06-03T11:02:02Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -146,13 +150,17 @@
                 "openms",
                 "peptides"
             ],
-            "license": ["MIT"],
+            "license": [
+                "MIT"
+            ],
             "maintainer": [
                 {
-                    "@id": "https://orcid.org/0000-0001-7135-0073"
+                    "@id": "https://orcid.org/0000-0002-5923-1343"
                 }
             ],
-            "name": ["nf-core/mhcquant"],
+            "name": [
+                "nf-core/mhcquant"
+            ],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
@@ -180,11 +188,11 @@
             "version": "!>=24.04.2"
         },
         {
-            "@id": "#b0929725-e98e-4b1f-9c40-c9c718ec6c28",
+            "@id": "#561af933-805d-4e30-a06c-e84983fee2b1",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#12fe45d1-692e-4a34-ade5-2a83d545d02f"
+                    "@id": "#32db2d32-0bc4-4c6d-9849-5616a9adbc49"
                 }
             ],
             "mainEntity": {
@@ -193,10 +201,10 @@
             "name": "Test suite for nf-core/mhcquant"
         },
         {
-            "@id": "#12fe45d1-692e-4a34-ade5-2a83d545d02f",
+            "@id": "#32db2d32-0bc4-4c6d-9849-5616a9adbc49",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/mhcquant",
-            "resource": "repos/nf-core/mhcquant/actions/workflows/ci.yml",
+            "resource": "repos/nf-core/mhcquant/actions/workflows/nf-test.yml",
             "runsOn": {
                 "@id": "https://w3id.org/ro/terms/test#GithubService"
             },
@@ -322,22 +330,16 @@
             "url": "https://nf-co.re/"
         },
         {
-            "@id": "https://orcid.org/0000-0001-7135-0073",
+            "@id": "https://orcid.org/0000-0002-5923-1343",
             "@type": "Person",
-            "email": "bichmann@informatik.uni-tuebingen.de",
-            "name": "Leon Bichmann"
+            "email": "jonas.scheid@uni-tuebingen.de",
+            "name": "Jonas Scheid"
         },
         {
-            "@id": "https://orcid.org/0000-0002-8937-3457",
+            "@id": "https://orcid.org/0000-0002-4930-1467",
             "@type": "Person",
-            "email": "lukas.heumos@gmail.com",
-            "name": "Lukas Heumos"
-        },
-        {
-            "@id": "https://orcid.org/0000-0002-6503-2180",
-            "@type": "Person",
-            "email": "apeltzer@users.noreply.github.com",
-            "name": "Alexander Peltzer"
+            "email": "marissaDubbelaar@users.noreply.github.com",
+            "name": "Marissa Dubbelaar"
         }
     ]
 }
