@@ -155,7 +155,7 @@
             ],
             "maintainer": [
                 {
-                    "@id": "https://orcid.org/0000-0001-7135-0073"
+                    "@id": "https://orcid.org/0000-0002-5923-1343"
                 }
             ],
             "name": [
@@ -330,22 +330,16 @@
             "url": "https://nf-co.re/"
         },
         {
-            "@id": "https://orcid.org/0000-0002-8937-3457",
+            "@id": "https://orcid.org/0000-0002-5923-1343",
             "@type": "Person",
-            "email": "lukas.heumos@gmail.com",
-            "name": "Lukas Heumos"
+            "email": "jonas.scheid@uni-tuebingen.de",
+            "name": "Jonas Scheid"
         },
         {
-            "@id": "https://orcid.org/0000-0002-6503-2180",
+            "@id": "https://orcid.org/0000-0002-4930-1467",
             "@type": "Person",
-            "email": "apeltzer@users.noreply.github.com",
-            "name": "Alexander Peltzer"
-        },
-        {
-            "@id": "https://orcid.org/0000-0001-7135-0073",
-            "@type": "Person",
-            "email": "bichmann@informatik.uni-tuebingen.de",
-            "name": "Leon Bichmann"
+            "email": "marissaDubbelaar@users.noreply.github.com",
+            "name": "Marissa Dubbelaar"
         }
     ]
 }
