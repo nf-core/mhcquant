@@ -45,7 +45,7 @@
                     "pyopenms": "/workspace/mhcquant/.nf"
                 },
                 "Workflow": {
-                    "nf-core/mhcquant": "v3.0.0"
+                    "nf-core/mhcquant": "v3.1.0dev"
                 }
             },
             [
@@ -63,6 +63,7 @@
                 "multiqc",
                 "multiqc/ms2rescore",
                 "multiqc/multiqc_data",
+                "multiqc/multiqc_data/BETA-multiqc.parquet",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc_chromatogram.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
@@ -113,14 +114,7 @@
             ],
             [
                 "HepG2_A.tsv:md5,0fb7d3db1b1733bae992b2dd1239c595",
-                "HepG2_rep1_small_pin.tsv:md5,fe922af7f0f919b6e6a7df8abf3e9b85",
-                "HepG2_rep2_small_pin.tsv:md5,a61f580f218012607b83719fd466df9d",
-                "HepG2_rep3_small_pin.tsv:md5,42e75ffb909386799c6c7e085b838f03",
-                "HepG2_A_ms2rescore.idXML:md5,783d159c09877669bb2d71bcc493d17b",
-                "HepG2_A_pout.idXML:md5,0f3c3cac715acaf9c61aa4afeedf78f5",
-                "HepG2_A_pout_filtered.idXML:md5,6a167c22d833c314b4b57537fd5f3e97",
-                "HepG2_A_psm.idXML:md5,f2bba44b6c1a5fac10669e2b0268982c",
-                "multiqc_chromatogram.txt:md5,b37148a392ee368e685b3c5f9af846f2",
+                "multiqc_chromatogram.txt:md5,f2f618e6fea89293377cd23ea3b37367",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
                 "multiqc_general_stats.txt:md5,804fbfbdf38330e7baf4df7620f9397c",
                 "multiqc_histogram_mz.txt:md5,9dcadc47d65c40deca3dc8aeb1d8bcb9",
@@ -135,6 +129,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-04T13:57:51.316811395"
+        "timestamp": "2025-06-05T13:34:53.013454728"
     }
 }
