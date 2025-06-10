@@ -28,7 +28,8 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyOpenMS: \$(pip show pyopenms | grep Version | cut -d ' ' -f 2)
+        python: \$(python --version | sed 's/Python //')
+        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
     END_VERSIONS
     """
 
@@ -40,7 +41,8 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyOpenMS: \$(pip show pyopenms | grep Version | cut -d ' ' -f 2)
+        python: \$(python --version | sed 's/Python //')
+        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
     END_VERSIONS
     """
 }
