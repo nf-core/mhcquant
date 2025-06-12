@@ -115,7 +115,6 @@
                 "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml"
             ],
             [
-                "HepG2_A.tsv:md5,0fb7d3db1b1733bae992b2dd1239c595",
                 "multiqc_chromatogram.txt:md5,f2f618e6fea89293377cd23ea3b37367",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
                 "multiqc_general_stats.txt:md5,804fbfbdf38330e7baf4df7620f9397c",
@@ -131,6 +130,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-10T12:20:40.187744046"
+        "timestamp": "2025-06-12T10:26:10.428484046"
     }
 }
