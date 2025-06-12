@@ -41,7 +41,7 @@ def parse_cli_arguments_to_config(**kwargs):
                 }
             if "deeplc" in feature_generators:
                 config["ms2rescore"]["feature_generators"]["deeplc"] = {
-                    "deeplc_retrain": False,
+                    "deeplc_retrain": True,
                     "calibration_set_size": kwargs["calibration_set_size"],
                 }
             if "maxquant" in feature_generators:
