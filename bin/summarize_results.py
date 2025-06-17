@@ -166,6 +166,12 @@ def process_file(file, prefix, quantify, keep_cols):
     data["COMET:xcorr"].astype(float).to_csv(
         f"{prefix}_xcorr_scores.csv", index=False, header=False
     )
+    if 'intensity_cf' in data.columns:
+        np.log10(data["intensity_cf"].astype(float)).to_csv(
+            f"{prefix}_peptide_intensity.csv",
+            index=False,
+            header=False
+        )
 
     # Filter the columns down to a user-defined subset of columns
     if keep_cols:

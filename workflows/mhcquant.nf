@@ -193,8 +193,9 @@ workflow MHCQUANT {
         SUMMARIZE_RESULTS.out.hist_mz,
         SUMMARIZE_RESULTS.out.hist_rt,
         SUMMARIZE_RESULTS.out.hist_scores,
-        SUMMARIZE_RESULTS.out.hist_xcorr,
+        SUMMARIZE_RESULTS.out.xcorr,
         SUMMARIZE_RESULTS.out.lengths,
+        SUMMARIZE_RESULTS.out.intensities,
         SUMMARIZE_RESULTS.out.stats
     )
 
