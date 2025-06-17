@@ -110,7 +110,7 @@ custom_data:
     pconfig:
       id: "scores_xcorr"
       title: "Comet Xcorr Distribution"
-      description: "The Comet Xcorr plot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
+      description: "The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
       xlab: "Xcorr"
 
   peptide_intensity_plot:
