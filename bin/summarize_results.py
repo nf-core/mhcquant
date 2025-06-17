@@ -175,6 +175,10 @@ def process_file(file, prefix, quantify, keep_cols):
         keep_cols = list(dict.fromkeys(keep_cols))
         data = data.loc[:, keep_cols]
 
+    # Round all floating point values to 5 decimal places to ensure nf-test checksum stability is guaranteed
+    float_cols = data.select_dtypes(include=['float']).columns
+    data.loc[:, float_cols] = data.loc[:, float_cols].round(5)
+
     data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
 
 
