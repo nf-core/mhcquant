@@ -167,7 +167,7 @@ def process_file(file, prefix, quantify, keep_cols):
         f"{prefix}_xcorr_scores.csv", index=False, header=False
     )
     if 'intensity_cf' in data.columns:
-        np.log10(data["intensity_cf"].astype(float)).to_csv(
+        np.log2(data["intensity_cf"].astype(float)).to_csv(
             f"{prefix}_peptide_intensity.csv",
             index=False,
             header=False

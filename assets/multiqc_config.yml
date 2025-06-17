@@ -116,12 +116,12 @@ custom_data:
   peptide_intensity_plot:
     plot_type: "boxplot"
     file_format: "csv"
-    section_name: "Peptide Intensity (log10)"
+    section_name: "Peptide Intensity"
     pconfig:
       id: "peptide_intensity"
-      title: "Peptide Intensity Distribution (log10)"
-      description: "Comparison of log10-transformed peptide intensities across samples. Helps assess data consistency and detect potential outliers or batch effects."
-      xlab: "log10(Intensity)"
+      title: "Peptide Intensity Distribution"
+      description: "Comparison of log2-transformed peptide intensities across samples. Helps assess data consistency and detect potential outliers or batch effects."
+      xlab: "log2(Intensity)"
 #id: custom_box
 #plot_type: 'box'
 #section_name: 'Custom box plot'
