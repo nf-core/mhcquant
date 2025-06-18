@@ -115,10 +115,13 @@ custom_data:
       xlab: "Xcorr"
       ylab: "Frequency"
 
-  epicore_length_dist:
-    section_name: "epicore_length_dist"
-  epicore_epitope_intensity_hist:
-    section_name: "epicore_epitope_intensity_hist"
+  epicore_length_distribution:
+    file_format: "html"
+    section_name: "Epicore length distribution"
+
+  epicore_intensity_histogram:
+    file_format: "html"
+    section_name: "Epicore intensity histogram"
 
 #id: custom_box
 #plot_type: 'box'
@@ -144,10 +147,10 @@ sp:
     fn: "*_histogram_scores.csv"
   scores_plot_xcorr:
     fn: "*_histogram_xcorr_scores.csv"
-  epicore_length_dist:
-    fn: "length_distributions.html"
-  epicore_epitope_intensity_hist:
-    fn: "epitope_intensity_hist.html"
+  epicore_length_distribution:
+    fn: "epicore_length_distribution.html"
+  epicore_intensity_histogram:
+    fn: "epicore_intensity_histogram.html"
   
 ### Define the order of sections
 #module_order:
