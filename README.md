@@ -107,7 +107,7 @@ For more details about the output files and reports, please refer to the
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
-   - [Pipeline installation](https://nf-co.re/usage/local_installation)
+   - [Pipeline installation](https://nf-co.re/docs/usage/getting_started/offline)
    - [Adding your own system config](https://nf-co.re/usage/adding_own_config)
 3. [Running the pipeline](https://nf-co.re/mhcquant/docs/usage.md)
    - This includes tutorials, FAQs, and troubleshooting instructions
