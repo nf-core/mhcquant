@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- Fixed an issue with not providing the full process name in conf/base.config [#384](https://github.com/nf-core/mhcquant/pull/384)
+
 ### `Dependencies`
 
 ### `Deprecated`
