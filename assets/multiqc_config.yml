@@ -43,7 +43,7 @@ custom_data:
 
   # Mass error plot
   mass_error:
-    plot_type: "linegraph"
+    plot_type: "boxplot"
     file_format: "tsv"
     section_name: "Fragment mass error"
     description: |
@@ -53,7 +53,6 @@ custom_data:
       or parts-per-million (ppm).
     pconfig:
       xlab: "Mass deviation [Da/ppm]"
-      ylab: "Frequency"
 
   stats_table:
     plot_type: "table"
@@ -105,15 +104,24 @@ custom_data:
       ylab: "Frequency"
 
   scores_plot_xcorr:
-    plot_type: "linegraph"
+    plot_type: "boxplot"
     file_format: "csv"
     section_name: "Xcorr-Value"
     pconfig:
-      id: "histogram_scores_xcorr"
-      title: "Comet Xcorr Histogram"
-      description: "A Comet Xcorr histogram visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
+      id: "scores_xcorr"
+      title: "Comet Xcorr Distribution"
+      description: "The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
       xlab: "Xcorr"
-      ylab: "Frequency"
+
+  peptide_intensity_plot:
+    plot_type: "boxplot"
+    file_format: "csv"
+    section_name: "Peptide Intensity"
+    pconfig:
+      id: "peptide_intensity"
+      title: "Peptide Intensity Distribution"
+      description: "Comparison of log2-transformed peptide intensities across samples. Helps assess data consistency and detect potential outliers or batch effects."
+      xlab: "log2(Intensity)"
 #id: custom_box
 #plot_type: 'box'
 #section_name: 'Custom box plot'
@@ -125,7 +133,7 @@ sp:
   chromatogram:
     fn: "*_chrom.csv"
   mass_error:
-    fn: "*_binned.tsv"
+    fn: "*frag_mass_err.tsv"
   stats_table:
     fn: "*_general_stats.csv"
   len_plot:
@@ -137,7 +145,9 @@ sp:
   qvalue_plot:
     fn: "*_histogram_scores.csv"
   scores_plot_xcorr:
-    fn: "*_histogram_xcorr_scores.csv"
+    fn: "*_xcorr_scores.csv"
+  peptide_intensity_plot:
+    fn: "*_peptide_intensity.csv"
 ### Define the order of sections
 #module_order:
 #  - custom_content

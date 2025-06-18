@@ -12,8 +12,9 @@ process SUMMARIZE_RESULTS {
     path '*_histogram_mz.csv'           , emit: hist_mz, optional: true
     path '*_histogram_rt.csv'           , emit: hist_rt, optional: true
     path '*_histogram_scores.csv'       , emit: hist_scores, optional: true
-    path '*_histogram_xcorr_scores.csv' , emit: hist_xcorr, optional: true
+    path '*_xcorr_scores.csv'           , emit: xcorr, optional: true
     path '*_peptide_length.csv'         , emit: lengths, optional: true
+    path '*_peptide_intensity.csv'      , emit: intensities, optional: true
     path '*_general_stats.csv'          , emit: stats
     path '*.tsv'                        , emit: final_tsv
     path 'versions.yml'                 , emit: versions
@@ -44,8 +45,9 @@ process SUMMARIZE_RESULTS {
     touch ${prefix}_histogram_mz.csv
     touch ${prefix}_histogram_rt.csv
     touch ${prefix}_histogram_scores.csv
-    touch ${prefix}_histogram_xcorr_scores.csv
+    touch ${prefix}_xcorr_scores.csv
     touch ${prefix}_peptide_length.csv
+    touch ${prefix}_peptide_intensity.csv
     touch ${prefix}_general_stats.csv
     touch ${prefix}.tsv
 

@@ -151,8 +151,7 @@ def process_file(file, prefix, quantify, keep_cols):
 
     histograms = [[data["mz"].astype(float), f"{prefix}_histogram_mz.csv"],
                   [data["observed_retention_time_best"].astype(float), f"{prefix}_histogram_rt.csv"],
-                  [data["score"].astype(float), f"{prefix}_histogram_scores.csv"],
-                  [data["COMET:xcorr"].astype(float), f"{prefix}_histogram_xcorr_scores.csv"]]
+                  [data["score"].astype(float), f"{prefix}_histogram_scores.csv"]]
 
     for values, title in histograms:
         hist, bin_edges = np.histogram(values, bins='auto')
@@ -160,6 +159,19 @@ def process_file(file, prefix, quantify, keep_cols):
             for i in range(len(bin_edges) - 1):
                 bin_midpoint = (bin_edges[i] + bin_edges[i + 1]) / 2
                 f.write(f'{bin_midpoint},{hist[i]}\n')
+
+    # ---------------------------------
+    # Box plots
+    # ---------------------------------
+    data["COMET:xcorr"].astype(float).to_csv(
+        f"{prefix}_xcorr_scores.csv", index=False, header=False
+    )
+    if 'intensity_cf' in data.columns:
+        np.log2(data["intensity_cf"].astype(float)).to_csv(
+            f"{prefix}_peptide_intensity.csv",
+            index=False,
+            header=False
+        )
 
     # Filter the columns down to a user-defined subset of columns
     if keep_cols:
