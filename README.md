@@ -36,26 +36,26 @@ On release, automated continuous integration tests run the pipeline on a full-si
 > to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
 > with `-profile test` before running the workflow on actual data.
 
-First, prepare a samplesheet with your input data that looks as follows:
+First, prepare an SDRF (Sample and Data Relationship Format) file with your input data. SDRF is a standardized format used in proteomics that contains rich metadata about samples. Here's a simplified example:
 
-`samplesheet.tsv`
+`sdrf_file.tsv`
 
-```tsv title="samplesheet.tsv
-ID	Sample	Condition	ReplicateFileName
-1	tumor	treated	/path/to/msrun1.raw|mzML|d
-2	tumor	treated	/path/to/msrun2.raw|mzML|d
-3	tumor	untreated	/path/to/msrun3.raw|mzML|d
-4	tumor	untreated	/path/to/msrun4.raw|mzML|d
+```tsv title="sdrf_file.tsv
+source name	characteristics[organism]	characteristics[organism part]	comment[data file]	comment[technical replicate]	factor value[organism part]
+sample1_classI	Homo sapiens	Brain	/path/to/sample1_classI_techRep1.mzML	1	Brain
+sample1_classI	Homo sapiens	Brain	/path/to/sample1_classI_techRep2.mzML	2	Brain
+sample2_classI	Homo sapiens	Liver	/path/to/sample2_classI_techRep1.mzML	1	Liver
+sample2_classI	Homo sapiens	Liver	/path/to/sample2_classI_techRep2.mzML	2	Liver
 ```
 
 Each row represents a mass spectrometry run in one of the formats: raw, RAW, mzML, mzML.gz, d, d.tar.gz, d.zip
 
-Now, you can run the pipeline using:
+Now, you can run the pipeline using your SDRF file:
 
 ```bash
 nextflow run nf-core/mhcquant
     -profile <docker/singularity/.../institute> \
-    --input 'samplesheet.tsv' \
+    --input 'sdrf_file.tsv' \
     --fasta 'SWISSPROT_2020.fasta' \
     --outdir ./results
 ```
@@ -71,6 +71,7 @@ For more details and further functionality, please refer to the [usage documenta
 
 By default the pipeline currently performs identification of MHC class I peptides with HCD settings:
 
+- Converting SDRF file to internal format (`SDRF_CONVERT`)
 - Preparing spectra dependent on the input format (`PrepareSpectra`)
 - Creation of reversed decoy database (`DecoyDatabase`)
 - Identification of peptides in the MS/MS spectra (`CometAdapter`)
