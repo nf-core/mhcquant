@@ -119,16 +119,7 @@
                 "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml"
             ],
             [
-                "HepG2_A_all_peaks.tsv:md5,ef64558b8d138e08a760064275a78c43",
-                "HepG2_A_matching_ions.tsv:md5,d3d8a4c2aae89c9c63917a0e07028015",
-                "multiqc_chromatogram.txt:md5,f2f618e6fea89293377cd23ea3b37367",
-                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_general_stats.txt:md5,592421ddbebf3e5142ae10a48700ba6a",
-                "multiqc_histogram_mz.txt:md5,d373e77b4d545b12a225bc4058812957",
-                "multiqc_histogram_rt.txt:md5,56b7c2bf41e9108f1d9a861f0950db0b",
-                "multiqc_histogram_scores.txt:md5,e1a72c3c1e925d8fd4678b5ff3bee919",
-                "multiqc_mass_error.txt:md5,67775c6d40c5932d64335c9fd18cb824",
-                "multiqc_scores_xcorr.txt:md5,16a01bfc119a2266dc919386c7aa2b73"
+                 
             ],
             [
                 [
