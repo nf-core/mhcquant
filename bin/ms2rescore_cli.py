@@ -24,7 +24,7 @@ def parse_cli_arguments_to_config(**kwargs):
 
     for key, value in kwargs.items():
         # Skip these arguments since they need to set in a nested dict of feature_generators
-        if key in ["ms2pip_model", "ms2_tolerance", "rng", "calibration_set_size"]:
+        if key in ["ms2pip_model", "ms2_tolerance", "test_fdr", "calibration_set_size"]:
             continue
 
         elif key == "feature_generators":
@@ -60,6 +60,7 @@ def parse_cli_arguments_to_config(**kwargs):
                     "write_txt": False,
                     "write_flashlfq": False,
                     "max_workers": kwargs["processes"],
+                    "test_fdr" : kwargs["test_fdr"]
                 }
             if value == "percolator":
                 logging.info(
@@ -80,7 +81,7 @@ def rescore_idxml(input_file, output_file, config) -> None:
     psm_list = reader.read_file()
 
     # Rescore
-    rescore(config, psm_list)
+    rescore(config, psm_list, )
 
     # Filter out PeptideHits within PeptideIdentification(s) that could not be processed by all feature generators
     peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids)
@@ -157,6 +158,7 @@ def filter_out_artifact_psms(
     default=0.15,
 )
 @click.option("-re", "--rescoring_engine", help="Either mokapot or percolator (default: `mokapot`)", default="mokapot")
+@click.option("--test_fdr", help="Test FDR for Mokapot (default: `0.05`)", type=float, default=0.05)
 @click.option("-d", "--id_decoy_pattern", help="Regex decoy pattern (default: `DECOY_`)", default="^DECOY_")
 @click.option(
     "-lsb",
