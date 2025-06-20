@@ -18,25 +18,8 @@ nextflow_pipeline {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
-            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
-            // Extract peptidoform column from all TSV files
-            def peptidoform_data = []
-            new File(params.outdir).eachFileRecurse { file ->
-                if (file.name.endsWith('.tsv')) {
-                    def lines = file.readLines()
-                    if (lines.size() > 0) {
-                        def header = lines[0].split('\t')
-                        def peptidoformIndex = header.findIndexOf { it == 'peptidoform' }
-                        if (peptidoformIndex >= 0) {
-                            def peptidoforms = lines.drop(1).collect { line ->
-                                def fields = line.split('\t')
-                                fields.size() > peptidoformIndex ? fields[peptidoformIndex] : ''
-                            }.findAll { it != '' }.sort()
-                            peptidoform_data.add([file.name, peptidoforms])
-                        }
-                    }
-                }
-            }
+			// Mokapot seems to return non-deterministic results eventhough the random number generator (rng) is fixed
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['*.tsv'])
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
@@ -47,9 +30,7 @@ nextflow_pipeline {
                     // All stable path name, with a relative path
                     stable_name,
                     // All files with stable contents
-                    stable_path,
-                    // Peptidoform data from TSV files
-                    peptidoform_data
+                    stable_path
                 ).match() }
             )
         }

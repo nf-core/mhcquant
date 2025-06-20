@@ -24,7 +24,7 @@ def parse_cli_arguments_to_config(**kwargs):
 
     for key, value in kwargs.items():
         # Skip these arguments since they need to set in a nested dict of feature_generators
-        if key in ["ms2pip_model", "ms2_tolerance", "rng", "calibration_set_size"]:
+        if key in ["ms2pip_model", "ms2_tolerance", "calibration_set_size"]:
             continue
 
         elif key == "feature_generators":
@@ -59,7 +59,7 @@ def parse_cli_arguments_to_config(**kwargs):
                     "write_weights": True,
                     "write_txt": False,
                     "write_flashlfq": False,
-                    "max_workers": kwargs["processes"],
+                    "max_workers": kwargs["processes"]
                 }
             if value == "percolator":
                 logging.info(

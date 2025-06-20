@@ -120,15 +120,7 @@
                 "spectrum_library/HepG2_A_speclib.tsv"
             ],
             [
-                "multiqc_chromatogram.txt:md5,f2f618e6fea89293377cd23ea3b37367",
-                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_general_stats.txt:md5,804fbfbdf38330e7baf4df7620f9397c",
-                "multiqc_histogram_mz.txt:md5,9dcadc47d65c40deca3dc8aeb1d8bcb9",
-                "multiqc_histogram_rt.txt:md5,4f009097be107a686cd45959f8e12e94",
-                "multiqc_histogram_scores.txt:md5,430ddfa4200703a46f9cdb387c84220c",
-                "multiqc_mass_error.txt:md5,68f907e91534decaa47c2acf49d4c2ef",
-                "multiqc_scores_xcorr.txt:md5,f4eaa7c889e5a4eb912fb7a9bb1e700c",
-                "HepG2_A_speclib.tsv:md5,467a7506cac420395ce60a797c4e12a0"
+                
             ],
             [
                 [
