@@ -96,10 +96,10 @@ custom_data:
     plot_type: "linegraph"
     file_format: "csv"
     section_name: "Q-Value"
+    description: "A q-value histogram in Percolator visualizes q-value distributions for PSMs, helping set the FDR threshold (typically 1%). It ensures only high-confidence identifications are retained, with a sharp drop-off beyond the threshold."
     pconfig:
       id: "histogram_scores"
       title: "Percolator q-value Histogram"
-      description: "A q-value histogram in Percolator visualizes q-value distributions for PSMs, helping set the FDR threshold (typically 1%). It ensures only high-confidence identifications are retained, with a sharp drop-off beyond the threshold."
       xlab: "q-value"
       ylab: "Frequency"
 
@@ -107,20 +107,20 @@ custom_data:
     plot_type: "boxplot"
     file_format: "csv"
     section_name: "Xcorr-Value"
+    description: "The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
     pconfig:
       id: "scores_xcorr"
       title: "Comet Xcorr Distribution"
-      description: "The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
       xlab: "Xcorr"
 
   peptide_intensity_plot:
     plot_type: "boxplot"
     file_format: "csv"
     section_name: "Peptide Intensity"
+    description: "Comparison of log2-transformed peptide intensities across samples. Helps assess data consistency and detect potential outliers or batch effects."
     pconfig:
       id: "peptide_intensity"
       title: "Peptide Intensity Distribution"
-      description: "Comparison of log2-transformed peptide intensities across samples. Helps assess data consistency and detect potential outliers or batch effects."
       xlab: "log2(Intensity)"
 #id: custom_box
 #plot_type: 'box'
