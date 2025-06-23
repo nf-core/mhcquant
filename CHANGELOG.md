@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for CCS-based rescoring with `IM2Deep` feature generator [#358](https://github.com/nf-core/mhcquant/pull/358)
 - Added multiple plots to MultiQC report by @JuliaGraf [#361](https://github.com/nf-core/mhcquant/pull/361)
 - Added ability to reduce output columns by @JuliaGraf [#361](https://github.com/nf-core/mhcquant/pull/361)
+- Added epicore module by @janaHoffmann1 [#386](https://github.com/nf-core/mhcquant/pull/386)
 
 ### `Fixed`
 
