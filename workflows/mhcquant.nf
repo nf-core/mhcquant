@@ -189,15 +189,15 @@ workflow MHCQUANT {
     // Process the tsv file to facilitate visualization with MultiQC
     SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
     ch_versions = ch_versions.mix(SUMMARIZE_RESULTS.out.versions)
-    
+
     //
     // EPICORE
-    // 
+    //
     if (params.epicore) {
         EPICORE(ch_fasta, SUMMARIZE_RESULTS.out.final_tsv, SUMMARIZE_RESULTS.out.stats, SUMMARIZE_RESULTS.out.meta_out)
 
         ch_versions = ch_versions.mix(EPICORE.out.versions)
-        
+
         ch_multiqc_files = ch_multiqc_files.mix(
             SUMMARIZE_RESULTS.out.hist_mz,
             SUMMARIZE_RESULTS.out.hist_rt,
@@ -205,8 +205,8 @@ workflow MHCQUANT {
             SUMMARIZE_RESULTS.out.xcorr,
             SUMMARIZE_RESULTS.out.lengths,
             SUMMARIZE_RESULTS.out.intensities,
-            EPICORE.out.stats, 
-            EPICORE.out.length_dist, 
+            EPICORE.out.stats,
+            EPICORE.out.length_dist,
             EPICORE.out.intensity_hist
         )
     } else {

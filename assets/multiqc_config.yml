@@ -162,7 +162,7 @@ sp:
     fn: "epicore_length_distribution.html"
   epicore_intensity_histogram:
     fn: "epicore_intensity_histogram.html"
- 
+
 ### Define the order of sections
 #module_order:
 #  - custom_content
