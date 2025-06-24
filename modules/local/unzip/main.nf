@@ -36,8 +36,8 @@ process UNZIP {
     """
 
     stub:
-
     prefix = task.ext.prefix ?: ( meta.id ? "${meta.id}" : archive.baseName)
+
     """
     touch ${prefix}.d
 

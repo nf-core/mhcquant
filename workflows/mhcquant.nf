@@ -8,12 +8,19 @@
 // MODULE: Loaded from modules/local/
 //
 
+<<<<<<< HEAD
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
 include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
 include { SUMMARIZE_RESULTS              } from '../modules/local/summarize_results'
 include { EPICORE                        } from '../modules/local/epicore'
+=======
+include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chromatogramextractor'
+include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
+include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
+include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
+>>>>>>> upstream/dev
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
@@ -100,10 +107,7 @@ workflow MHCQUANT {
     // Compute mass errors for multiQC report
     OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.indexed_idxml))
     ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
-    // Bin and count mass errors for multiQC report
-    DATAMASH_HISTOGRAM(OPENMS_IDMASSACCURACY.out.frag_err)
-    ch_versions = ch_versions.mix(DATAMASH_HISTOGRAM.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(DATAMASH_HISTOGRAM.out.binned_tsv.map{ meta, frag_err_hist -> frag_err_hist })
+    ch_multiqc_files = ch_multiqc_files.mix(OPENMS_IDMASSACCURACY.out.frag_err.map{ meta, frag_err -> frag_err })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.indexed_idxml
@@ -208,6 +212,7 @@ workflow MHCQUANT {
             SUMMARIZE_RESULTS.out.hist_scores,
             SUMMARIZE_RESULTS.out.hist_xcorr,
             SUMMARIZE_RESULTS.out.lengths,
+            SUMMARIZE_RESULTS.out.intensities,
             EPICORE.out.stats, 
             EPICORE.out.length_dist, 
             EPICORE.out.intensity_hist
@@ -219,6 +224,7 @@ workflow MHCQUANT {
             SUMMARIZE_RESULTS.out.hist_scores,
             SUMMARIZE_RESULTS.out.hist_xcorr,
             SUMMARIZE_RESULTS.out.lengths,
+            SUMMARIZE_RESULTS.out.intensities,
             SUMMARIZE_RESULTS.out.stats
         )
     }

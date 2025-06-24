@@ -3,7 +3,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.7.0dev - [date]
+## 3.1.0dev - [Release Name] - [Date]
+
+### `Added`
+
+- Added a peptidoform column to the pipeline output [#376](https://github.com/nf-core/mhcquant/pull/376)
+- Added Boxplot of intensity distributions to the MulitQC report [#382](https://github.com/nf-core/mhcquant/pull/382)
+
+### `Fixed`
+
+- Fixed an issue with not providing the full process name in conf/base.config [#384](https://github.com/nf-core/mhcquant/pull/384)
+
+### `Dependencies`
+
+### `Deprecated`
+
+## 3.0.0 - Monrepos - 22/05/2025
 
 ### `Added`
 
@@ -24,7 +39,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template update 3.1.1 [#346](https://github.com/nf-core/mhcquant/pull/346)
 - Template update 3.1.2 [#354](https://github.com/nf-core/mhcquant/pull/354)
 - Template update 3.2.0 [#356](https://github.com/nf-core/mhcquant/pull/356)
-- Bump OpenMS version 3.1.0 -> 3.3.0 [#358](https://github.com/nf-core/mhcquant/pull/358)
+- Template update 3.2.1 [#369](https://github.com/nf-core/mhcquant/pull/369)
+- Bump OpenMS version 3.1.0 -> 3.4.0 [#370](https://github.com/nf-core/mhcquant/pull/358)
+
+### `Dependencies`
+
+| Dependency            | Old version | New version |
+| --------------------- | ----------- | ----------- |
+| `MultiQC`             | 1.21.0      | 1.28.0      |
+| `MS2Rescore`          | 3.0.1       | 3.1.5       |
+| `Nf-core`             | 2.14.1      | 3.2.1       |
+| `OpenMS`              | 3.1.0       | 3.4.0       |
+| `Thermorawfileparser` | 1.4.3       | 1.4.5       |
 
 ## v2.6.0 - nfcore/mhcquant "Mr Bob" - 2024/06/17
 
