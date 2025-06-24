@@ -8,19 +8,11 @@
 // MODULE: Loaded from modules/local/
 //
 
-<<<<<<< HEAD
-include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms_chromatogramextractor'
-include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
-include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms_ionannotator'
-include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms_textexporter'
-include { SUMMARIZE_RESULTS              } from '../modules/local/summarize_results'
-include { EPICORE                        } from '../modules/local/epicore'
-=======
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chromatogramextractor'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
 include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
->>>>>>> upstream/dev
+include { EPICORE                        } from '../modules/local/epicore'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
@@ -210,7 +202,7 @@ workflow MHCQUANT {
             SUMMARIZE_RESULTS.out.hist_mz,
             SUMMARIZE_RESULTS.out.hist_rt,
             SUMMARIZE_RESULTS.out.hist_scores,
-            SUMMARIZE_RESULTS.out.hist_xcorr,
+            SUMMARIZE_RESULTS.out.xcorr,
             SUMMARIZE_RESULTS.out.lengths,
             SUMMARIZE_RESULTS.out.intensities,
             EPICORE.out.stats, 
@@ -222,7 +214,7 @@ workflow MHCQUANT {
             SUMMARIZE_RESULTS.out.hist_mz,
             SUMMARIZE_RESULTS.out.hist_rt,
             SUMMARIZE_RESULTS.out.hist_scores,
-            SUMMARIZE_RESULTS.out.hist_xcorr,
+            SUMMARIZE_RESULTS.out.xcorr,
             SUMMARIZE_RESULTS.out.lengths,
             SUMMARIZE_RESULTS.out.intensities,
             SUMMARIZE_RESULTS.out.stats
