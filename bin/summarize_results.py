@@ -126,18 +126,17 @@ def process_file(file, prefix, quantify, keep_cols):
     # Length distribution plot
     # ---------------------------------
 
-    # Remove everything inside parentheses, including the parentheses.
     seq_length = data["sequence"].apply(lambda seq: len(seq))
     seq_length = dict(Counter(seq_length))
     with open(f"{prefix}_peptide_length.csv", "w") as f:
         for length, count in seq_length.items():
-            f.write(f"{length},{count}\n")
+            f.write(f"{length},{count / len(data.index)}\n")
 
     # ---------------------------------
     # General statistics
     # ---------------------------------
 
-    n_peptides = len(set(data["peptidoform"]))
+    n_peptides = len(set(data["sequence"]))
     n_modified_peptides = sum(1 for s in set(data["peptidoform"]) if '(' in s)
     # Split the accession codes and count each protein accession individually
     n_proteins = len(set([protein for entry in data["accessions"] for protein in entry.split(';')]))
