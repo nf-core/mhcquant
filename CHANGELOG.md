@@ -13,8 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - Fixed an issue with not providing the full process name in conf/base.config [#384](https://github.com/nf-core/mhcquant/pull/384)
+- Template update 3.1.1, migrate to nf-test [#379](https://github.com/nf-core/mhcquant/pull/379)
 
 ### `Dependencies`
+
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `MultiQC`  | 1.28.0      | 1.29.0      |
+| `Nf-core`  | 3.2.1       | 3.3.1       |
 
 ### `Deprecated`
 

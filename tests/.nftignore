@@ -1,0 +1,15 @@
+.DS_Store
+multiqc/multiqc_data/fastqc_top_overrepresented_sequences_table.txt
+multiqc/multiqc_data/multiqc.log
+multiqc/multiqc_data/multiqc_data.json
+multiqc/multiqc_data/BETA-multiqc.parquet
+multiqc/multiqc_data/*.txt
+multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
+multiqc/multiqc_report.html
+pipeline_info/*.{html,json,txt,yml}
+intermediate_results/comet/*
+intermediate_results/rescoring/*
+intermediate_results/ion_annotations/*
+global_fdr/global.tsv
+spectrum_library/*_speclib.tsv
+*.tsv

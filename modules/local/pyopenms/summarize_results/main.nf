@@ -34,7 +34,8 @@ process SUMMARIZE_RESULTS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyopenms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        python: \$(python --version | sed 's/Python //')
+        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
     END_VERSIONS
     """
 
@@ -53,7 +54,8 @@ process SUMMARIZE_RESULTS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyopenms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        python: \$(python --version | sed 's/Python //')
+        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
     END_VERSIONS
     """
 }
