@@ -440,61 +440,19 @@
                     "fa_icon": "fa-solid fa-stairs",
                     "description": "Compute core epitopes from overlapping peptides."
                 },
-                "seq_column": {
-                    "type": "string",
-                    "default": "",
-                    "fa_icon": "fa-solid fa-table",
-                    "description": "Specify the column containing the peptide sequence information."
-                },
-                "protacc_column": {
-                    "type": "string",
-                    "default": "",
-                    "fa_icon": "fa-solid fa-table",
-                    "description": "Specify the column containing the protein accessions of the peptide."
-                },
-                "start_column": {
-                    "type": "string",
-                    "default": "",
-                    "fa_icon": "fa-solid fa-table",
-                    "description": "Specify the column containing the start position of the peptide in the protein sequence."
-                },
-                "end_column": {
-                    "type": "string",
-                    "default": "",
-                    "fa_icon": "fa-solid fa-table",
-                    "description": "Specify the column containing the end position of the peptide in the protein sequence."
-                },
-                "intensity_column": {
-                    "type": "string",
-                    "default": "",
-                    "fa_icon": "fa-solid fa-table",
-                    "description": "Specify the column containing the intensity of the peptide."
-                },
-                "mod_pattern": {
-                    "type": "string",
-                    "default": "",
-                    "fa_icon": "fa-solid fa-hashtag",
-                    "description": "Specify the delimiter separating the peptide sequence from modifications."
-                },
-                "delimiter": {
-                    "type": "string",
-                    "default": "",
-                    "fa_icon": "fa-solid fa-minus",
-                    "description": "Specify the delimiter separating multiple entries in one cell."
-                },
-                "min_overlap": {
+                "epicore_min_overlap": {
                     "type": "string",
                     "default": "11",
                     "fa_icon": "fas fa-filter",
                     "description": "Specify the minimal overlap of two peptides so they are grouped together."
                 },
-                "max_step_size": {
+                "epicore_max_step_size": {
                     "type": "string",
                     "default": "5",
                     "fa_icon": "fas fa-filter",
                     "description": "Specify the maximal difference between the start position of two peptides so they are still grouped together."
                 },
-                "min_epi_length": {
+                "epicore_min_epi_length": {
                     "type": "string",
                     "default": "11",
                     "fa_icon": "fas fa-filter",
