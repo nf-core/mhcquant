@@ -9,9 +9,8 @@ process EPICORE {
 
     input:
         tuple val(meta_fasta), path(fasta)
-        path(quantification_tsv)
+        tuple path(quantification_tsv), val(meta)
         path(general_stats)
-        val(meta)
 
     output:
         path "*_general_stats.csv",                 emit: stats
@@ -45,8 +44,8 @@ process EPICORE {
         """
         touch ${prefix}_general_stats.csv
         touch ${meta.id}_epicore.csv
-        touch length_distributions.html
-        touch epitope_intensity_hist.html
+        touch epicore_length_distribution.html
+        touch epicore_intensity_hist.html
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
             epicore: \$(epicore --version | grep 'epicore' | cut -d ' ' -f3)

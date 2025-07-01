@@ -15,10 +15,9 @@ process SUMMARIZE_RESULTS {
     path '*_xcorr_scores.csv'           , emit: xcorr, optional: true
     path '*_peptide_length.csv'         , emit: lengths, optional: true
     path '*_peptide_intensity.csv'      , emit: intensities, optional: true
-    path '*_general_stats.csv'          , emit: stats
-    path '*.tsv'                        , emit: final_tsv
+    path('*_general_stats.csv')         , emit: stats
+    tuple path('*.tsv'), val(meta)      , emit: final_tsv
     path 'versions.yml'                 , emit: versions
-    val(meta)                           , emit: meta_out
 
     script:
     def args = task.ext.args ?: ''

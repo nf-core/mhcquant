@@ -193,33 +193,26 @@ workflow MHCQUANT {
     //
     // EPICORE
     //
+
+
     if (params.epicore) {
-        EPICORE(ch_fasta, SUMMARIZE_RESULTS.out.final_tsv, SUMMARIZE_RESULTS.out.stats, SUMMARIZE_RESULTS.out.meta_out)
-
+        EPICORE(ch_fasta, SUMMARIZE_RESULTS.out.final_tsv, SUMMARIZE_RESULTS.out.stats)
         ch_versions = ch_versions.mix(EPICORE.out.versions)
-
         ch_multiqc_files = ch_multiqc_files.mix(
-            SUMMARIZE_RESULTS.out.hist_mz,
-            SUMMARIZE_RESULTS.out.hist_rt,
-            SUMMARIZE_RESULTS.out.hist_scores,
-            SUMMARIZE_RESULTS.out.xcorr,
-            SUMMARIZE_RESULTS.out.lengths,
-            SUMMARIZE_RESULTS.out.intensities,
-            EPICORE.out.stats,
             EPICORE.out.length_dist,
             EPICORE.out.intensity_hist
         )
-    } else {
-        ch_multiqc_files = ch_multiqc_files.mix(
-            SUMMARIZE_RESULTS.out.hist_mz,
-            SUMMARIZE_RESULTS.out.hist_rt,
-            SUMMARIZE_RESULTS.out.hist_scores,
-            SUMMARIZE_RESULTS.out.xcorr,
-            SUMMARIZE_RESULTS.out.lengths,
-            SUMMARIZE_RESULTS.out.intensities,
-            SUMMARIZE_RESULTS.out.stats
-        )
     }
+
+    ch_multiqc_files = ch_multiqc_files.mix(
+        SUMMARIZE_RESULTS.out.hist_mz,
+        SUMMARIZE_RESULTS.out.hist_rt,
+        SUMMARIZE_RESULTS.out.hist_scores,
+        SUMMARIZE_RESULTS.out.xcorr,
+        SUMMARIZE_RESULTS.out.lengths,
+        SUMMARIZE_RESULTS.out.intensities,
+        params.epicore ? EPICORE.out.stats : SUMMARIZE_RESULTS.out.stats
+    )
 
     //
     // Collate and save software versions
