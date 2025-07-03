@@ -17,6 +17,9 @@ report_section_order:
 export_plots: true
 disable_version_detection: true
 
+# Control how outliers are displayed in box plots
+boxplot_boxpoints: "false"
+
 # Modules to run
 run_modules:
   - custom_content
