@@ -79,7 +79,6 @@ workflow PIPELINE_INITIALISATION {
         .set { ch_samplesheet_raw }
 
     ch_samplesheet = ch_samplesheet_raw.map { meta, file, fasta -> [ meta, file ]}
-    ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), fasta] }
 
     //
     // Create channel from the reference_database through params.fasta or from the samplesheet fasta files
@@ -91,6 +90,7 @@ workflow PIPELINE_INITIALISATION {
             .set { ch_fasta }
     } else {
         // Check if the FASTA files were provided in the samplesheet
+        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), fasta] }
         ch_fasta
             .map { meta, fasta -> fasta }
             .flatten()
