@@ -69,19 +69,17 @@ workflow PIPELINE_INITIALISATION {
 
     Channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .multiMap { meta, file, fasta ->
-            files: [meta.subMap('sample','condition'), meta, file]
-            fastas: [meta, fasta]
-        }
-        .set { ch_input }
-
-    ch_input.files
+        .map { meta, file, fasta -> [meta.subMap('sample','condition'), meta, file, fasta] }
+        .tap { ch_input }
         .groupTuple()
         // get number of files per sample-condition
-        .map { group_meta, metas, files -> [ group_meta, files.size()] }
-        .combine( ch_input.files, by:0 )
-        .map { group_meta, group_count, meta, file -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file] }
-        .set { ch_samplesheet }
+        .map { group_meta, metas, files, fastas -> [ group_meta, files.size()] }
+        .combine( ch_input, by:0 )
+        .map { group_meta, group_count, meta, file, fasta -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file, fasta] }
+        .set { ch_samplesheet_raw }
+
+    ch_samplesheet = ch_samplesheet_raw.map { meta, file, fasta -> [ meta, file ]}
+    ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), fasta] }
 
     //
     // Create channel from the reference_database through params.fasta or from the samplesheet fasta files
@@ -93,7 +91,7 @@ workflow PIPELINE_INITIALISATION {
             .set { ch_fasta }
     } else {
         // Check if the FASTA files were provided in the samplesheet
-        ch_input.fastas
+        ch_fasta
             .map { meta, fasta -> fasta }
             .flatten()
             .ifEmpty {
@@ -104,7 +102,6 @@ workflow PIPELINE_INITIALISATION {
                     2. Include a 'fasta' column in your samplesheet
                     '''.stripIndent()
             }
-        ch_fasta = ch_input.fastas
     }
 
     emit:

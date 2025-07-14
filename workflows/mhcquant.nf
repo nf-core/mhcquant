@@ -68,9 +68,9 @@ workflow MHCQUANT {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
         ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
-        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta.map{ meta, fasta -> [fasta] }
+        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
     } else {
-        ch_decoy_db = ch_fasta.map{ meta, fasta -> [fasta] }
+        ch_decoy_db = ch_fasta
     }
 
     // Optionally clean up mzML files
@@ -87,14 +87,20 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
-    ch_clean_mzml_file.view()
-    ch_decoy_db.view()
     // Run comet database search
-    OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
+    if (params.fasta) {
+        OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
+    } else {
+        OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db, by: 0))
+    }
     ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
 
     // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db))
+    if (params.fasta) {
+        OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }, by: 0))
+    } else {
+        OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db, by: 0))
+    }
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Compute mass errors for multiQC report
