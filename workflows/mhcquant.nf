@@ -87,6 +87,8 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
+    ch_clean_mzml_file.view()
+    ch_decoy_db.view()
     // Run comet database search
     OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
     ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)

@@ -69,21 +69,43 @@ workflow PIPELINE_INITIALISATION {
 
     Channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map { meta, file ->  [meta.subMap('sample','condition'), meta, file] }
-        .tap { ch_input }
+        .multiMap { meta, file, fasta ->
+            files: [meta.subMap('sample','condition'), meta, file]
+            fastas: [meta, fasta]
+        }
+        .set { ch_input }
+
+    ch_input.files
         .groupTuple()
         // get number of files per sample-condition
         .map { group_meta, metas, files -> [ group_meta, files.size()] }
-        .combine( ch_input, by:0 )
+        .combine( ch_input.files, by:0 )
         .map { group_meta, group_count, meta, file -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file] }
         .set { ch_samplesheet }
 
     //
-    // Create channel from the mandatory reference_database through params.fasta
+    // Create channel from the reference_database through params.fasta or from the samplesheet fasta files
     //
-    Channel.fromPath(params.fasta, checkIfExists: true)
-        .map { fasta -> [[id:fasta.getBaseName()], fasta] }
-        .set { ch_fasta }
+
+    if (params.fasta) {
+        Channel.fromPath(params.fasta, checkIfExists: true)
+            .map { fasta -> [[id:fasta.getBaseName()], fasta] }
+            .set { ch_fasta }
+    } else {
+        // Check if the FASTA files were provided in the samplesheet
+        ch_input.fastas
+            .map { meta, fasta -> fasta }
+            .flatten()
+            .ifEmpty {
+                error '''\
+                    Error: No FASTA files provided.
+                    Please either:
+                    1. Use --fasta parameter, or
+                    2. Include a 'fasta' column in your samplesheet
+                    '''.stripIndent()
+            }
+        ch_fasta = ch_input.fastas
+    }
 
     emit:
     samplesheet = ch_samplesheet
