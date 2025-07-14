@@ -97,7 +97,7 @@ workflow MHCQUANT {
 
     // Index decoy and target hits
     if (params.fasta) {
-        OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }, by: 0))
+        OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
     } else {
         OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db, by: 0))
     }
