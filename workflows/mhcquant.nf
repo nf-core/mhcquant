@@ -87,20 +87,15 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
-    // Run comet database search
+    // Run comet database search and index decoy and target hits
     if (params.fasta) {
         OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
-    } else {
-        OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db, by: 0))
-    }
-    ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
-
-    // Index decoy and target hits
-    if (params.fasta) {
         OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
     } else {
+        OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db, by: 0))
         OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db, by: 0))
     }
+    ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Compute mass errors for multiQC report
