@@ -15,7 +15,7 @@ You will need to create a samplesheet with information about the samples you wou
 ### Samplesheet columns
 
 | Column              | Description                                                                                           |
-|---------------------|-------------------------------------------------------------------------------------------------------|
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
 | `ID`                | An incrementing value which acts as a unique number for the given sample                              |
 | `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
 | `Condition`         | Additional information of the sample can be defined here.                                             |
@@ -24,7 +24,6 @@ You will need to create a samplesheet with information about the samples you wou
 
 > [!WARNING]
 > The `Fasta` column is optional, but you can use it to provide sample-specific FASTA files. If you want to use the same FASTA file for all samples, provide it via the `--fasta` parameter. Please ensure you use one of these options.
-
 
 The pipeline will auto-detect whether a sample is either in mzML, raw or tdf file format using the information provided in the samplesheet.
 
