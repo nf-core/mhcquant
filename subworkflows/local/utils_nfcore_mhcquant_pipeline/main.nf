@@ -88,6 +88,19 @@ workflow PIPELINE_INITIALISATION {
         Channel.fromPath(params.fasta, checkIfExists: true)
             .map { fasta -> [[id:fasta.getBaseName()], fasta] }
             .set { ch_fasta }
+
+        ch_samplesheet_raw
+            .map{ meta, file, fasta -> fasta }
+            .flatten()
+            .first()
+            .subscribe {
+                log.warn """\
+                    Both --fasta and samplesheet FASTA files were provided!
+                    The pipeline will use --fasta (${params.fasta}), ignoring samplesheet FASTA entries.
+                    To use the samplesheet FASTA files instead, remove the --fasta parameter.
+                    """.stripIndent()
+            }
+
     } else {
         // Check if the FASTA files were provided in the samplesheet
         ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), fasta] }
