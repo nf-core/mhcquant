@@ -112,7 +112,7 @@ workflow PIPELINE_INITIALISATION {
                     Error: No FASTA files provided.
                     Please either:
                     1. Use --fasta parameter, or
-                    2. Include a 'fasta' column in your samplesheet
+                    2. Include a 'Fasta' column in your samplesheet
                     '''.stripIndent()
             }
     }
