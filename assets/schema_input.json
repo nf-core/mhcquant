@@ -35,8 +35,8 @@
                 "type": "string",
                 "format": "path",
                 "exists": true,
-                "pattern": "^\\S+\\.(fasta|fa)$",
-                "errorMessage": "FASTA file cannot contain spaces and must have one of the extensions: fasta | fa"
+                "pattern": "^\\S+\\.(fasta|fa|fas|fna|faa|ffn)$",
+                "errorMessage": "FASTA file cannot contain spaces and must have one of the extensions: fasta | fa | fas | fna | faa | ffn"
             }
         },
         "required": ["ID", "Sample", "Condition", "ReplicateFileName"]
