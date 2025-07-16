@@ -93,7 +93,7 @@ workflow MHCQUANT {
         OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
     } else {
         ch_clean_mzml_file
-            .map { meta, mzml -> [ [sample: "${meta.sample}", condition:"${meta.condition}"], meta, mzml] }
+            .map { meta, mzml -> [ meta.subMap('sample', 'condition'), meta, mzml] }
             .combine(ch_decoy_db, by: 0)
             .map { groupKey, meta, mzml, fasta -> [meta, mzml, fasta] }
             .set { ch_comet_in }
@@ -101,7 +101,7 @@ workflow MHCQUANT {
         OPENMSTHIRDPARTY_COMETADAPTER(ch_comet_in)
 
         OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
-            .map { meta, idxml -> [ [sample: "${meta.sample}", condition:"${meta.condition}"], meta, idxml] }
+            .map { meta, idxml -> [ meta.subMap('sample', 'condition'), meta, idxml] }
             .combine(ch_decoy_db, by: 0)
             .map { groupKey, meta, idxml, fasta -> [meta, idxml, fasta] }
             .set { ch_peptideindexer_in }
