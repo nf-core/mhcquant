@@ -92,8 +92,21 @@ workflow MHCQUANT {
         OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
         OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
     } else {
-        OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db, by: 0))
-        OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db, by: 0))
+        ch_clean_mzml_file
+            .map { meta, mzml -> [ [sample: "${meta.sample}", condition:"${meta.condition}"], meta, mzml] }
+            .combine(ch_decoy_db, by: 0)
+            .map { groupKey, meta, mzml, fasta -> [meta, mzml, fasta] }
+            .set { ch_comet_in }
+
+        OPENMSTHIRDPARTY_COMETADAPTER(ch_comet_in)
+
+        OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
+            .map { meta, idxml -> [ [sample: "${meta.sample}", condition:"${meta.condition}"], meta, idxml] }
+            .combine(ch_decoy_db, by: 0)
+            .map { groupKey, meta, idxml, fasta -> [meta, idxml, fasta] }
+            .set { ch_peptideindexer_in }
+
+        OPENMS_PEPTIDEINDEXER(ch_peptideindexer_in)
     }
     ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)

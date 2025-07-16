@@ -103,7 +103,7 @@ workflow PIPELINE_INITIALISATION {
 
     } else {
         // Check if the FASTA files were provided in the samplesheet
-        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), fasta] }
+        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ meta.subMap('sample', 'condition'), fasta] }
         ch_fasta
             .map { meta, fasta -> fasta }
             .flatten()
@@ -115,6 +115,11 @@ workflow PIPELINE_INITIALISATION {
                     2. Include a 'Fasta' column in your samplesheet
                     '''.stripIndent()
             }
+        // Group FASTA files by sample and condition and keep only the first FASTA file per sample-condition
+        ch_fasta
+            .groupTuple()
+            .map { group_meta, fastas -> [group_meta, fastas.first()] }
+            .set { ch_fasta }
     }
 
     emit:
