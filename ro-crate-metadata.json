@@ -99,7 +99,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#561af933-805d-4e30-a06c-e84983fee2b1"
+                    "@id": "#dfb28c9e-1ee7-4bc4-bdc0-106e203c3344"
                 }
             ],
             "name": "nf-core/mhcquant"
@@ -138,7 +138,7 @@
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2025-06-03T11:02:02Z",
+            "dateModified": "2025-07-08T11:38:57Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -150,17 +150,8 @@
                 "openms",
                 "peptides"
             ],
-            "license": [
-                "MIT"
-            ],
-            "maintainer": [
-                {
-                    "@id": "https://orcid.org/0000-0002-5923-1343"
-                }
-            ],
-            "name": [
-                "nf-core/mhcquant"
-            ],
+            "license": ["MIT"],
+            "name": ["nf-core/mhcquant"],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
@@ -185,14 +176,14 @@
             "url": {
                 "@id": "https://www.nextflow.io/"
             },
-            "version": "!>=24.04.2"
+            "version": "!>=24.10.5"
         },
         {
-            "@id": "#561af933-805d-4e30-a06c-e84983fee2b1",
+            "@id": "#dfb28c9e-1ee7-4bc4-bdc0-106e203c3344",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#32db2d32-0bc4-4c6d-9849-5616a9adbc49"
+                    "@id": "#7d8016f8-b58b-449b-95ac-07faec9b688d"
                 }
             ],
             "mainEntity": {
@@ -201,7 +192,7 @@
             "name": "Test suite for nf-core/mhcquant"
         },
         {
-            "@id": "#32db2d32-0bc4-4c6d-9849-5616a9adbc49",
+            "@id": "#7d8016f8-b58b-449b-95ac-07faec9b688d",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/mhcquant",
             "resource": "repos/nf-core/mhcquant/actions/workflows/nf-test.yml",
