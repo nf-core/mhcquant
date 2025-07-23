@@ -68,9 +68,9 @@ workflow MHCQUANT {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
         ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
-        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta.map{ meta, fasta -> [fasta] }
+        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
     } else {
-        ch_decoy_db = ch_fasta.map{ meta, fasta -> [fasta] }
+        ch_decoy_db = ch_fasta
     }
 
     // Optionally clean up mzML files
@@ -87,12 +87,28 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
-    // Run comet database search
-    OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
-    ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
+    // Run comet database search and index decoy and target hits
+    if (params.fasta) {
+        OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
+        OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }))
+    } else {
+        ch_clean_mzml_file
+            .map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta, mzml] }
+            .combine(ch_decoy_db, by: 0)
+            .map { groupKey, meta, mzml, fasta -> [meta, mzml, fasta] }
+            .set { ch_comet_in }
 
-    // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db))
+        OPENMSTHIRDPARTY_COMETADAPTER(ch_comet_in)
+
+        OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
+            .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta, idxml] }
+            .combine(ch_decoy_db, by: 0)
+            .map { groupKey, meta, idxml, fasta -> [meta, idxml, fasta] }
+            .set { ch_peptideindexer_in }
+
+        OPENMS_PEPTIDEINDEXER(ch_peptideindexer_in)
+    }
+    ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Compute mass errors for multiQC report
