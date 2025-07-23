@@ -63,6 +63,7 @@
                 "multiqc/ms2rescore",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/BETA-multiqc.parquet",
+                "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc_chromatogram.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
@@ -73,9 +74,11 @@
                 "multiqc/multiqc_data/multiqc_histogram_scores.txt",
                 "multiqc/multiqc_data/multiqc_length_dist.txt",
                 "multiqc/multiqc_data/multiqc_mass_error.txt",
+                "multiqc/multiqc_data/multiqc_percolator_barplot.txt",
                 "multiqc/multiqc_data/multiqc_scores_xcorr.txt",
                 "multiqc/multiqc_data/multiqc_software_versions.txt",
                 "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_data/percolator_plot.txt",
                 "multiqc/multiqc_plots",
                 "multiqc/multiqc_plots/pdf",
                 "multiqc/multiqc_plots/pdf/chromatogram-cnt.pdf",
@@ -86,6 +89,8 @@
                 "multiqc/multiqc_plots/pdf/histogram_scores.pdf",
                 "multiqc/multiqc_plots/pdf/length_dist.pdf",
                 "multiqc/multiqc_plots/pdf/mass_error.pdf",
+                "multiqc/multiqc_plots/pdf/percolator_plot-cnt.pdf",
+                "multiqc/multiqc_plots/pdf/percolator_plot-pct.pdf",
                 "multiqc/multiqc_plots/pdf/scores_xcorr.pdf",
                 "multiqc/multiqc_plots/png",
                 "multiqc/multiqc_plots/png/chromatogram-cnt.png",
@@ -96,6 +101,8 @@
                 "multiqc/multiqc_plots/png/histogram_scores.png",
                 "multiqc/multiqc_plots/png/length_dist.png",
                 "multiqc/multiqc_plots/png/mass_error.png",
+                "multiqc/multiqc_plots/png/percolator_plot-cnt.png",
+                "multiqc/multiqc_plots/png/percolator_plot-pct.png",
                 "multiqc/multiqc_plots/png/scores_xcorr.png",
                 "multiqc/multiqc_plots/svg",
                 "multiqc/multiqc_plots/svg/chromatogram-cnt.svg",
@@ -106,13 +113,15 @@
                 "multiqc/multiqc_plots/svg/histogram_scores.svg",
                 "multiqc/multiqc_plots/svg/length_dist.svg",
                 "multiqc/multiqc_plots/svg/mass_error.svg",
+                "multiqc/multiqc_plots/svg/percolator_plot-cnt.svg",
+                "multiqc/multiqc_plots/svg/percolator_plot-pct.svg",
                 "multiqc/multiqc_plots/svg/scores_xcorr.svg",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml"
             ],
             [
-                 
+                
             ],
             [
                 [
@@ -376,8 +385,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "24.10.5"
+            "nextflow": "25.04.6"
         },
-        "timestamp": "2025-06-20T08:25:22.414604503"
+        "timestamp": "2025-07-22T12:51:34.437972791"
     }
 }
