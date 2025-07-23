@@ -103,7 +103,7 @@ workflow PIPELINE_INITIALISATION {
 
     } else {
         // Check if the FASTA files were provided in the samplesheet
-        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ meta.subMap('sample', 'condition'), fasta] }
+        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), fasta] }
         ch_fasta
             .map { meta, fasta -> fasta }
             .flatten()
