@@ -2,10 +2,10 @@ process EPICORE {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::epicore=0.1.5"
+    conda "bioconda::epicore=0.1.6"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/epicore:0.1.5--pyhdfd78af_0' :
-        'biocontainers/epicore:0.1.5--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/epicore:0.1.6--pyhdfd78af_0' :
+        'biocontainers/epicore:0.1.6--pyhdfd78af_0' }"
 
     input:
         path(fasta)
@@ -13,7 +13,7 @@ process EPICORE {
 
     output:
         path "*_general_stats.csv",                 emit: stats
-        path "${meta.id}.csv",                      emit: final_epicore_tsv
+        path "${meta.id}.tsv",                      emit: final_epicore_tsv
         path "epicore_length_distribution.html",    emit: length_dist
         path "epicore_intensity_histogram.html",    emit: intensity_hist
         path "versions.yml",                        emit: versions
@@ -25,7 +25,7 @@ process EPICORE {
 
         epicore --reference_proteome $fasta --out_dir . generate-epicore-csv $args --evidence_file $result_tsv --html
 
-        mv pep_cores_mapping.csv ${prefix}.csv
+        mv pep_cores_mapping.tsv ${prefix}.tsv
         mv length_distributions.html epicore_length_distribution.html
         mv epitope_intensity_hist.html epicore_intensity_histogram.html
 
