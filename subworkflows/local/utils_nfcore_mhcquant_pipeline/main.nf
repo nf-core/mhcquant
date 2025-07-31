@@ -69,21 +69,58 @@ workflow PIPELINE_INITIALISATION {
 
     Channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map { meta, file ->  [meta.subMap('sample','condition'), meta, file] }
+        .map { meta, file, fasta -> [meta.subMap('sample','condition'), meta, file, fasta] }
         .tap { ch_input }
         .groupTuple()
         // get number of files per sample-condition
-        .map { group_meta, metas, files -> [ group_meta, files.size()] }
+        .map { group_meta, metas, files, fastas -> [ group_meta, files.size()] }
         .combine( ch_input, by:0 )
-        .map { group_meta, group_count, meta, file -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file] }
-        .set { ch_samplesheet }
+        .map { group_meta, group_count, meta, file, fasta -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file, fasta] }
+        .set { ch_samplesheet_raw }
+
+    ch_samplesheet = ch_samplesheet_raw.map { meta, file, fasta -> [ meta, file ]}
 
     //
-    // Create channel from the mandatory reference_database through params.fasta
+    // Create channel from the reference_database through params.fasta or from the samplesheet fasta files
     //
-    Channel.fromPath(params.fasta, checkIfExists: true)
-        .map { fasta -> [[id:fasta.getBaseName()], fasta] }
-        .set { ch_fasta }
+
+    if (params.fasta) {
+        Channel.fromPath(params.fasta, checkIfExists: true)
+            .map { fasta -> [[id:fasta.getBaseName()], fasta] }
+            .set { ch_fasta }
+
+        ch_samplesheet_raw
+            .map{ meta, file, fasta -> fasta }
+            .flatten()
+            .first()
+            .subscribe {
+                log.warn """\
+                    Both --fasta and samplesheet FASTA files were provided!
+                    The pipeline will use --fasta (${params.fasta}), ignoring samplesheet FASTA entries.
+                    To use the samplesheet FASTA files instead, remove the --fasta parameter.
+                    """.stripIndent()
+            }
+
+    } else {
+        // Check if the FASTA files were provided in the samplesheet
+        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), fasta] }
+        ch_fasta
+            .map { meta, fasta -> fasta }
+            .flatten()
+            .ifEmpty {
+                error '''\
+                    Error: No FASTA files provided.
+                    Please either:
+                    1. Use --fasta parameter, or
+                    2. Include a 'Fasta' column in your samplesheet
+                    '''.stripIndent()
+            }
+        // Group FASTA files by sample and condition and keep only the first FASTA file per sample-condition
+        ch_fasta
+            .groupTuple()
+            .map { group_meta, fastas -> [group_meta, fastas.first()] }
+            .set { ch_fasta }
+    }
 
     emit:
     samplesheet = ch_samplesheet

@@ -57,6 +57,7 @@
                 "multiqc/ms2rescore",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/BETA-multiqc.parquet",
+                "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc_chromatogram.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
@@ -111,8 +112,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "24.10.5"
+            "nextflow": "25.04.6"
         },
-        "timestamp": "2025-06-20T13:09:05.526500293"
+        "timestamp": "2025-07-22T15:35:46.259013567"
     }
 }

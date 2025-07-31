@@ -9,18 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a peptidoform column to the pipeline output [#376](https://github.com/nf-core/mhcquant/pull/376)
 - Added Boxplot of intensity distributions to the MulitQC report [#382](https://github.com/nf-core/mhcquant/pull/382)
+- Added a `Fasta` column to the input samplesheet to enable sample-specific FASTA files [#391](https://github.com/nf-core/mhcquant/pull/391)
 
 ### `Fixed`
 
 - Fixed an issue with not providing the full process name in conf/base.config [#384](https://github.com/nf-core/mhcquant/pull/384)
 - Template update 3.1.1, migrate to nf-test [#379](https://github.com/nf-core/mhcquant/pull/379)
+- Fixed the binning of the TICs histogram and move the general stats table to the top of the report [#388](https://github.com/nf-core/mhcquant/pull/388)
 
 ### `Dependencies`
 
 | Dependency | Old version | New version |
 | ---------- | ----------- | ----------- |
-| `MultiQC`  | 1.28.0      | 1.29.0      |
-| `Nf-core`  | 3.2.1       | 3.3.1       |
+| `MultiQC`  | 1.28.0      | 1.30.0      |
+| `Nf-core`  | 3.2.1       | 3.3.2       |
 
 ### `Deprecated`
 

@@ -24,6 +24,15 @@ run_modules:
 
 # Custom tables and plots
 custom_data:
+  # Summary of general statistics
+  stats_table:
+    plot_type: "table"
+    file_format: "csv"
+    section_name: "General Statistics"
+    pconfig:
+      id: "general_stats"
+      title: "General Statistics"
+
   # Summary of chromatogram plot
   chromatogram:
     plot_type: "linegraph"
@@ -53,14 +62,6 @@ custom_data:
       or parts-per-million (ppm).
     pconfig:
       xlab: "Mass deviation [Da/ppm]"
-
-  stats_table:
-    plot_type: "table"
-    file_format: "csv"
-    section_name: "General Statistics"
-    pconfig:
-      id: "general_stats"
-      title: "General Statistics"
 
   len_plot:
     plot_type: "linegraph"

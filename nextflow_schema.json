@@ -48,7 +48,6 @@
             "type": "object",
             "fa_icon": "fas fa-database",
             "description": "Decoy Database generation settings",
-            "required": ["fasta"],
             "properties": {
                 "fasta": {
                     "type": "string",
