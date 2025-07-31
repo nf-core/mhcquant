@@ -196,13 +196,15 @@ workflow MHCQUANT {
 
 
     if (params.epicore) {
-        EPICORE(ch_fasta, SUMMARIZE_RESULTS.out.final_tsv, SUMMARIZE_RESULTS.out.stats)
+        EPICORE(ch_fasta.map{ it.last()}, SUMMARIZE_RESULTS.out.epicore_input)
         ch_versions = ch_versions.mix(EPICORE.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(
             EPICORE.out.length_dist,
             EPICORE.out.intensity_hist
         )
     }
+
+
 
     ch_multiqc_files = ch_multiqc_files.mix(
         SUMMARIZE_RESULTS.out.hist_mz,
@@ -211,7 +213,7 @@ workflow MHCQUANT {
         SUMMARIZE_RESULTS.out.xcorr,
         SUMMARIZE_RESULTS.out.lengths,
         SUMMARIZE_RESULTS.out.intensities,
-        params.epicore ? EPICORE.out.stats : SUMMARIZE_RESULTS.out.stats
+        params.epicore ? EPICORE.out.stats : SUMMARIZE_RESULTS.out.epicore_input.map { meta, tsv, stats -> stats }
     )
 
     //

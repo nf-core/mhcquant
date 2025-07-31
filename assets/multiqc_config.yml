@@ -127,10 +127,12 @@ custom_data:
   epicore_length_distribution:
     file_format: "html"
     section_name: "Epicore length distribution"
+    description: "The histogram visualizes the number and length of the input peptides in the evidence file in grey. The red bars correspond to the number of identified consensus epitopes and their length."
 
   epicore_intensity_histogram:
     file_format: "html"
     section_name: "Epicore intensity histogram"
+    description: "The histogram visualizes how many peptides contribute to each identified consensus epitope."
 
 #id: custom_box
 #plot_type: 'box'

@@ -33,6 +33,12 @@ The TSV output of MHCquant is a tab-delimited file holding information about FDR
 | IM2Deep  | `ccs_observed_im2deep`          | Observed peptide collisional cross-section (CCS) value.                                                                                                                               |
 | IM2Deep  | `ccs_predicted_im2deep`         | Predicted peptide CCS value by IM2Deep.                                                                                                                                               |
 | IM2Deep  | `ccs_error_im2deep`             | Difference between observed and predicted CCS values; indicates prediction accuracy.                                                                                                  |
+| Epicore  | `entire_epitope_sequence`                | The sequences of the epicore groups to which the peptide belongs.                                                                                                                     |
+| Epicore  | `core_epitope_sequence`            | The core sequences of the epicore groups to which the peptide belongs.                                                                                                                     |
+| Epicore  | `proteome_occurrence`           | The accessions and positions of the core epitopes.                                                                                                                                        |
+| Epicore  | `consensus_epitope_intensity`       | The sum of the intensities of all peptides belonging to the epicore group.                                                                                                            |
+| Epicore  | `relative_consensus_epitope_intensity`       | The relative epicore group intensity (core_epitope_intensity divided by the total intensity in the evidence file).                                                                       |
+
 
 The TSV file in quantification mode (by using `--quantify`) additionally holds the columns `rt_cf|0|1|..`, `mz_cf|0|1|..`, `intensity_cf|0|1|..`, and `charge_cf|0|1|..`, where `cf` (consensus feature) represents the aggregated value of the individual MS runs (`0|1|..`) that are part of the `<Sample>_<Condition>` group in the input samplesheet. Use e.g. the individual intensities of MS runs to compare two groups and conduct a differential-presentation analysis.
 

@@ -8,9 +8,8 @@ process EPICORE {
         'biocontainers/epicore:0.1.5--pyhdfd78af_0' }"
 
     input:
-        tuple val(meta_fasta), path(fasta)
-        tuple path(quantification_tsv), val(meta)
-        path(general_stats)
+        path(fasta)
+        tuple val(meta), path(result_tsv), path(general_stats)
 
     output:
         path "*_general_stats.csv",                 emit: stats
@@ -24,7 +23,7 @@ process EPICORE {
         def prefix = task.ext.prefix ?: "${meta.id}"
         """#!/bin/bash
 
-        epicore --reference_proteome $fasta --out_dir . generate-epicore-csv $args --evidence_file $quantification_tsv --html
+        epicore --reference_proteome $fasta --out_dir . generate-epicore-csv $args --evidence_file $result_tsv --html
 
         mv pep_cores_mapping.csv ${prefix}.csv
         mv length_distributions.html epicore_length_distribution.html
