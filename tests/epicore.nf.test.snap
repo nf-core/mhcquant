@@ -1,8 +1,11 @@
 {
     "-profile test_epicore": {
         "content": [
-            21,
+            22,
             {
+                "EPICORE": {
+                    "epicore": "v0.1.6"
+                },
                 "MS2RESCORE": {
                     "MS\u00b2Rescore": "3.1.5)"
                 },
@@ -387,6 +390,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-08-01T08:05:37.019177332"
+        "timestamp": "2025-08-01T09:21:49.276980172"
     }
 }
