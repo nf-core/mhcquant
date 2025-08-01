@@ -35,7 +35,7 @@ The TSV output of MHCquant is a tab-delimited file holding information about FDR
 | IM2Deep  | `ccs_error_im2deep`                    | Difference between observed and predicted CCS values; indicates prediction accuracy.                                                                                                  |
 | Epicore  | `entire_epitope_sequence`              | Sequences of epicore groups to which the peptide belongs.                                                                                                                     |
 | Epicore  | `core_epitope_sequence`                | The core sequences of the epicore groups to which the peptide belongs.                                                                                                                |
-| Epicore  | `proteome_occurrence`                  | The accessions and positions of the core epitopes.                                                                                                                                    |
+| Epicore  | `proteome_occurrence`                  | Protein accessions and positions of core epitopes.                                                                                                                                    |
 | Epicore  | `consensus_epitope_intensity`          | The sum of the intensities of all peptides belonging to the epicore group.                                                                                                            |
 | Epicore  | `relative_consensus_epitope_intensity` | The relative epicore group intensity (core_epitope_intensity divided by the total intensity in the evidence file).                                                                    |
 
