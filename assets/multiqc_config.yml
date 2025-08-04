@@ -17,6 +17,9 @@ report_section_order:
 export_plots: true
 disable_version_detection: true
 
+# Control how outliers are displayed in box plots
+boxplot_boxpoints: "false"
+
 # Modules to run
 run_modules:
   - custom_content
@@ -67,6 +70,8 @@ custom_data:
     plot_type: "linegraph"
     file_format: "csv"
     section_name: "Peptide lengths"
+    description: |
+      This plot shows the distribution of peptide sequence lengths to assess variability and typical length ranges.
     pconfig:
       id: "length_dist"
       title: "Distribution of peptide lengths"
@@ -77,6 +82,9 @@ custom_data:
     plot_type: "linegraph"
     file_format: "csv"
     section_name: "Mass-to-Charge"
+    description: |
+      This plot displays the distribution of precursor ion mass-to-charge (m/z) values detected in the dataset.
+      It helps identify the typical m/z ranges and assess the overall coverage and instrument performance during acquisition.
     pconfig:
       id: "histogram_mz"
       title: "Mass-to-Charge Histogram"
@@ -87,6 +95,9 @@ custom_data:
     plot_type: "linegraph"
     file_format: "csv"
     section_name: "Retention time"
+    description: |
+      This plot shows the distribution of peptide retention times across the chromatographic gradient.
+      It provides insight into peptide elution profiles and helps assess gradient performance and sample complexity.
     pconfig:
       id: "histogram_rt"
       title: "Retention time Histogram"
@@ -97,10 +108,12 @@ custom_data:
     plot_type: "linegraph"
     file_format: "csv"
     section_name: "Q-Value"
+    description: |
+      A q-value histogram in Percolator visualizes q-value distributions for PSMs, helping set the FDR threshold (typically 1%).
+      It ensures only high-confidence identifications are retained, with a sharp drop-off beyond the threshold.
     pconfig:
       id: "histogram_scores"
       title: "Percolator q-value Histogram"
-      description: "A q-value histogram in Percolator visualizes q-value distributions for PSMs, helping set the FDR threshold (typically 1%). It ensures only high-confidence identifications are retained, with a sharp drop-off beyond the threshold."
       xlab: "q-value"
       ylab: "Frequency"
 
@@ -108,10 +121,13 @@ custom_data:
     plot_type: "boxplot"
     file_format: "csv"
     section_name: "Xcorr-Value"
+    description: |
+      The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality.
+      Higher Xcorr values signify better peptide-spectrum matches.
+      This helps set a threshold to filter out low-confidence identifications.
     pconfig:
       id: "scores_xcorr"
       title: "Comet Xcorr Distribution"
-      description: "The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
       xlab: "Xcorr"
       ylab: "Frequency"
 
@@ -119,10 +135,12 @@ custom_data:
     plot_type: "boxplot"
     file_format: "csv"
     section_name: "Peptide Intensity"
+    description: |
+      Comparison of log2-transformed peptide intensities across samples.
+      Helps assess data consistency and detect potential outliers or batch effects.
     pconfig:
       id: "peptide_intensity"
       title: "Peptide Intensity Distribution"
-      description: "Comparison of log2-transformed peptide intensities across samples. Helps assess data consistency and detect potential outliers or batch effects."
       xlab: "log2(Intensity)"
 
   epicore_length_distribution:

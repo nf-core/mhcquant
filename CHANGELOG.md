@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a peptidoform column to the pipeline output [#376](https://github.com/nf-core/mhcquant/pull/376)
 - Added Boxplot of intensity distributions to the MulitQC report [#382](https://github.com/nf-core/mhcquant/pull/382)
+- Added a config option to hide outliers in box plots, add plot descriptions [#387](https://github.com/nf-core/mhcquant/pull/387)
 - Added a `Fasta` column to the input samplesheet to enable sample-specific FASTA files [#391](https://github.com/nf-core/mhcquant/pull/391)
 
 ### `Fixed`
