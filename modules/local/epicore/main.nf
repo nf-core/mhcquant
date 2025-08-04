@@ -25,7 +25,7 @@ process EPICORE {
 
     epicore --reference_proteome $fasta --out_dir . generate-epicore-csv $args --evidence_file $result_tsv --html
 
-    mv pep_cores_mapping.tsv ${prefix}.tsv 
+    mv pep_cores_mapping.tsv ${prefix}.tsv
     mv length_distributions.html epicore_length_distribution.html
     mv epitope_intensity_hist.html epicore_intensity_histogram.html
 
