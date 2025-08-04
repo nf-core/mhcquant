@@ -19,35 +19,38 @@ process EPICORE {
         path "versions.yml",                        emit: versions
 
     script:
-        def args = task.ext.args ?: ''
-        def prefix = task.ext.prefix ?: "${meta.id}"
-        """#!/bin/bash
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
 
-        epicore --reference_proteome $fasta --out_dir . generate-epicore-csv $args --evidence_file $result_tsv --html
+    epicore --reference_proteome $fasta --out_dir . generate-epicore-csv $args --evidence_file $result_tsv --html
 
-        mv pep_cores_mapping.tsv ${prefix}.tsv
-        mv length_distributions.html epicore_length_distribution.html
-        mv epitope_intensity_hist.html epicore_intensity_histogram.html
+    mv pep_cores_mapping.tsv ${prefix}.tsv 
+    mv length_distributions.html epicore_length_distribution.html
+    mv epitope_intensity_hist.html epicore_intensity_histogram.html
 
-        wc -l < epitopes.csv | awk '{print \$1 - 1}' > epicores.txt
+    wc -l < epitopes.csv | awk '{print \$1 - 1}' > epicores.txt
 
-        awk 'NR==1 {print \$0 ",# Epicores"; next} NR==2 {getline extra < "epicores.txt"; print \$0 "," extra}' $general_stats > _modified_$general_stats
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            epicore: \$(epicore --version | grep 'epicore' | cut -d ' ' -f3)
-        """
+    awk 'NR==1 {print \$0 ",# Epicores"; next} NR==2 {getline extra < "epicores.txt"; print \$0 "," extra}' $general_stats > _modified_$general_stats
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        epicore: \$(echo \$(epicore --version) | grep 'epicore' | cut -d ' ' -f3 | cut -c2-)
+    END_VERSIONS
+    """
 
     stub:
-        def args = task.ext.args ?: ''
-        def prefix = task.ext.prefix ?: "${meta.id}"
-        """
-        touch ${prefix}_general_stats.csv
-        touch ${meta.id}_epicore.csv
-        touch epicore_length_distribution.html
-        touch epicore_intensity_hist.html
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            epicore: \$(epicore --version | grep 'epicore' | cut -d ' ' -f3)
-        END_VERSIONS
-        """
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}_general_stats.csv
+    touch ${prefix}.tsv
+    touch epicore_length_distribution.html
+    touch epicore_intensity_hist.html
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        epicore: \$(echo \$(epicore --version) | grep 'epicore' | cut -d ' ' -f3 | cut -c2-)
+    END_VERSIONS
+    """
 }
