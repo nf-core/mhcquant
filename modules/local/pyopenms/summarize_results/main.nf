@@ -9,15 +9,14 @@ process SUMMARIZE_RESULTS {
     tuple val(meta), path(file)
 
     output:
-    path '*_histogram_mz.csv'           , emit: hist_mz, optional: true
-    path '*_histogram_rt.csv'           , emit: hist_rt, optional: true
-    path '*_histogram_scores.csv'       , emit: hist_scores, optional: true
-    path '*_xcorr_scores.csv'           , emit: xcorr, optional: true
-    path '*_peptide_length.csv'         , emit: lengths, optional: true
-    path '*_peptide_intensity.csv'      , emit: intensities, optional: true
-    path '*_general_stats.csv'          , emit: stats
-    path '*.tsv'                        , emit: final_tsv
-    path 'versions.yml'                 , emit: versions
+    path '*_histogram_mz.csv'                                   , emit: hist_mz, optional: true
+    path '*_histogram_rt.csv'                                   , emit: hist_rt, optional: true
+    path '*_histogram_scores.csv'                               , emit: hist_scores, optional: true
+    path '*_xcorr_scores.csv'                                   , emit: xcorr, optional: true
+    path '*_peptide_length.csv'                                 , emit: lengths, optional: true
+    path '*_peptide_intensity.csv'                              , emit: intensities, optional: true
+    tuple val(meta), path('*.tsv'), path('*_general_stats.csv') , emit: epicore_input
+    path 'versions.yml'                                         , emit: versions
 
     script:
     def args = task.ext.args ?: ''
@@ -33,7 +32,8 @@ process SUMMARIZE_RESULTS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyopenms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        python: \$(python --version | sed 's/Python //')
+        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
     END_VERSIONS
     """
 
@@ -52,7 +52,8 @@ process SUMMARIZE_RESULTS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pyopenms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
+        python: \$(python --version | sed 's/Python //')
+        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
     END_VERSIONS
     """
 }

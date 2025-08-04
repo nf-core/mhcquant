@@ -6,7 +6,7 @@
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-separated file with 4 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-separated file with at least four columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
@@ -19,7 +19,11 @@ You will need to create a samplesheet with information about the samples you wou
 | `ID`                | An incrementing value which acts as a unique number for the given sample                              |
 | `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
 | `Condition`         | Additional information of the sample can be defined here.                                             |
-| `ReplicateFileName` | Full path to the MS file. These files have the extentions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
+| `ReplicateFileName` | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
+| `Fasta`             | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
+
+> [!WARNING]
+> The `Fasta` column is optional, but you can use it to provide sample-specific FASTA files. If you want to use the same FASTA file for all samples, provide it via the `--fasta` parameter. Please ensure you use one of these options.
 
 The pipeline will auto-detect whether a sample is either in mzML, raw or tdf file format using the information provided in the samplesheet.
 
