@@ -426,6 +426,39 @@
                 }
             }
         },
+        "epicore_options": {
+            "title": "Epicore Options",
+            "type": "object",
+            "fa_icon": "fa-solid fa-stairs",
+            "description": "",
+            "default": "",
+            "properties": {
+                "epicore": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fa-solid fa-stairs",
+                    "description": "Compute core epitopes from overlapping peptides."
+                },
+                "epicore_min_overlap": {
+                    "type": "string",
+                    "default": "11",
+                    "fa_icon": "fas fa-filter",
+                    "description": "Specify the minimal overlap of two peptides so they are grouped together."
+                },
+                "epicore_max_step_size": {
+                    "type": "string",
+                    "default": "5",
+                    "fa_icon": "fas fa-filter",
+                    "description": "Specify the maximal difference between the start position of two peptides so they are still grouped together."
+                },
+                "epicore_min_epi_length": {
+                    "type": "string",
+                    "default": "11",
+                    "fa_icon": "fas fa-filter",
+                    "description": "Specify the minimal length of an core epitope."
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -593,6 +626,9 @@
         },
         {
             "$ref": "#/$defs/post_processing"
+        },
+        {
+            "$ref": "#/$defs/epicore_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

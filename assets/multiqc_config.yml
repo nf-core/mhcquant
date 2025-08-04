@@ -113,6 +113,7 @@ custom_data:
       title: "Comet Xcorr Distribution"
       description: "The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality. Higher Xcorr values signify better peptide-spectrum matches. This helps set a threshold to filter out low-confidence identifications."
       xlab: "Xcorr"
+      ylab: "Frequency"
 
   peptide_intensity_plot:
     plot_type: "boxplot"
@@ -123,6 +124,17 @@ custom_data:
       title: "Peptide Intensity Distribution"
       description: "Comparison of log2-transformed peptide intensities across samples. Helps assess data consistency and detect potential outliers or batch effects."
       xlab: "log2(Intensity)"
+
+  epicore_length_distribution:
+    file_format: "html"
+    section_name: "Epicore length distribution"
+    description: "The histogram visualizes the number and length of the input peptides in the evidence file in grey. The red bars correspond to the number of identified consensus epitopes and their length."
+
+  epicore_intensity_histogram:
+    file_format: "html"
+    section_name: "Epicore intensity histogram"
+    description: "The histogram visualizes how many peptides contribute to each identified consensus epitope."
+
 #id: custom_box
 #plot_type: 'box'
 #section_name: 'Custom box plot'
@@ -149,6 +161,11 @@ sp:
     fn: "*_xcorr_scores.csv"
   peptide_intensity_plot:
     fn: "*_peptide_intensity.csv"
+  epicore_length_distribution:
+    fn: "epicore_length_distribution.html"
+  epicore_intensity_histogram:
+    fn: "epicore_intensity_histogram.html"
+
 ### Define the order of sections
 #module_order:
 #  - custom_content

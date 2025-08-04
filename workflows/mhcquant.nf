@@ -12,6 +12,7 @@ include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chrom
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
 include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
+include { EPICORE                        } from '../modules/local/epicore'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
@@ -205,6 +206,22 @@ workflow MHCQUANT {
     SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
     ch_versions = ch_versions.mix(SUMMARIZE_RESULTS.out.versions)
 
+    //
+    // EPICORE
+    //
+
+
+    if (params.epicore) {
+        EPICORE(ch_fasta.map{ it.last()}, SUMMARIZE_RESULTS.out.epicore_input)
+        ch_versions = ch_versions.mix(EPICORE.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(
+            EPICORE.out.length_dist,
+            EPICORE.out.intensity_hist
+        )
+    }
+
+
+
     ch_multiqc_files = ch_multiqc_files.mix(
         SUMMARIZE_RESULTS.out.hist_mz,
         SUMMARIZE_RESULTS.out.hist_rt,
@@ -212,7 +229,7 @@ workflow MHCQUANT {
         SUMMARIZE_RESULTS.out.xcorr,
         SUMMARIZE_RESULTS.out.lengths,
         SUMMARIZE_RESULTS.out.intensities,
-        SUMMARIZE_RESULTS.out.stats
+        params.epicore ? EPICORE.out.stats : SUMMARIZE_RESULTS.out.epicore_input.map { meta, tsv, stats -> stats }
     )
 
     //
@@ -225,7 +242,6 @@ workflow MHCQUANT {
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
-
 
     //
     // MODULE: MultiQC

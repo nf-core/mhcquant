@@ -132,6 +132,7 @@ Helpful contributors:
 - [Sven Fillinger](https://github.com/sven1103)
 - [Kevin Menden](https://github.com/KevinMenden)
 - [Julia Graf](https://github.com/JuliaGraf)
+- [Jana Hoffmann](https://github.com/janaHoffmann1)
 
 ## Contributions and Support
 
