@@ -13,7 +13,7 @@ process EPICORE {
 
     output:
         path "*_general_stats.csv",                 emit: stats
-        path "${meta.id}.tsv",                      emit: final_epicore_tsv
+        path "${result_tsv}",                       emit: final_epicore_tsv
         path "epicore_length_distribution.html",    emit: length_dist
         path "epicore_intensity_histogram.html",    emit: intensity_hist
         path "versions.yml",                        emit: versions
@@ -29,8 +29,8 @@ process EPICORE {
     mv length_distributions.html epicore_length_distribution.html
     mv epitope_intensity_hist.html epicore_intensity_histogram.html
 
+    # Add epicore statistics to MultiQC general stats table
     wc -l < epitopes.csv | awk '{print \$1 - 1}' > epicores.txt
-
     awk 'NR==1 {print \$0 ",# Epicores"; next} NR==2 {getline extra < "epicores.txt"; print \$0 "," extra}' $general_stats > _modified_$general_stats
 
     cat <<-END_VERSIONS > versions.yml
