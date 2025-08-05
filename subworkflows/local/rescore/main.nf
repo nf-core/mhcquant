@@ -73,7 +73,7 @@ workflow RESCORE {
             OPENMS_IDFILTER_GLOBAL(ch_pout.combine(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered.map{ it[1] }))
             ch_filter_q_value = OPENMS_IDFILTER_GLOBAL.out.filtered
             // Save globally merged runs in tsv
-            OPENMS_TEXTEXPORTER_GLOBAL(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.idxml)
+            OPENMS_TEXTEXPORTER_GLOBAL(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered)
 
         } else {
             ch_rescored_runs = ch_pout
