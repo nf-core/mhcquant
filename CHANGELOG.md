@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed an issue with not providing the full process name in conf/base.config [#384](https://github.com/nf-core/mhcquant/pull/384)
 - Template update 3.1.1, migrate to nf-test [#379](https://github.com/nf-core/mhcquant/pull/379)
 - Fixed the binning of the TICs histogram and move the general stats table to the top of the report [#388](https://github.com/nf-core/mhcquant/pull/388)
+- Write out FDR-filtered peptide list in global FDR-mode, instead of 100% FDR list [#398](https://github.com/nf-core/mhcquant/pull/394/)
 
 ### `Dependencies`
 
