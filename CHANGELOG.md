@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | ---------- | ----------- | ----------- |
 | `MultiQC`  | 1.28.0      | 1.30.0      |
 | `Nf-core`  | 3.2.1       | 3.3.2       |
+| `EasyPQP`  | 0.1.51      | 0.1.53      |
 
 ### `Deprecated`
 
