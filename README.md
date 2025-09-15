@@ -64,18 +64,11 @@ nextflow run nf-core/mhcquant \
 Optional parameters for additional functionality:
 
 ```bash
-# Enable quantification
+# Enable quantification, global FDR and spectrum library generation
 nextflow run nf-core/mhcquant \
     --input 'samplesheet.tsv' \
     --fasta 'SWISSPROT_2020.fasta' \
     --quantify \
-    --outdir ./results \
-    -profile docker
-
-# Enable global FDR and spectrum library generation
-nextflow run nf-core/mhcquant \
-    --input 'samplesheet.tsv' \
-    --fasta 'SWISSPROT_2020.fasta' \
     --global_fdr \
     --generate_speclib \
     --outdir ./results \
@@ -136,9 +129,13 @@ When enabled with `--generate_speclib`, the pipeline generates spectrum librarie
 - Generate sample-specific spectrum libraries (`EasyPQP Library`)
 - When combined with global FDR mode, creates global spectrum libraries across all samples
 
-#### Output
+#### Ion Annotation (`IONANNOTATOR` subworkflow)
+
+The pipeline annotates the final list of peptides with their respective ions and charges:
 
 - Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
+
+#### Output
 
 ## Documentation
 

@@ -114,16 +114,7 @@ nextflow run nf-core/mhcquant \
     -profile docker
 ```
 
-When quantification is enabled, the pipeline performs:
-
-### Retention Time Alignment (`MAP_ALIGNMENT` subworkflow)
-- **MapAlignerIdentification**: Corrects retention time distortions between MS runs
-- **MapRTTransformer**: Applies calculated retention time transformations to all runs
-
-### Feature Processing (`PROCESS_FEATURE` subworkflow)
-- **FeatureFinderIdentification**: Detects features in MS1 data based on peptide identifications
-- **FeatureLinkerUnlabeledKD**: Groups corresponding features across label-free experiments
-- **IDConflictResolver**: Resolves ambiguous annotations of features with peptide identifications
+When quantification is enabled, the pipeline performs retention time alignment and feature processing as detailed in the README documentation.
 
 The quantification workflow produces a ConsensusXML file containing integrated peak areas for identified peptides across all samples.
 
@@ -215,6 +206,7 @@ nextflow run nf-core/mhcquant \
   --generate_speclib \
   --annotate_ions \
   --rescoring_engine 'mokapot' \
+  --feature_generators 'deeplc,ms2pip,im2deep' \
   --outdir results \
   -profile docker
 ```
