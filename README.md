@@ -22,7 +22,7 @@
 
 **nfcore/mhcquant** is a best-practice bioinformatics pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).
 
-The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore. FDR rescoring is applied using Percolator based on a competitive target-decoy approach. For label free quantification all input files undergo identification-based retention time alignment, and targeted feature extraction matching ids between runs.
+The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore. FDR rescoring is applied using Percolator or Mokapot based on a competitive target-decoy approach. The pipeline supports both local FDR control (per sample-condition group) and global FDR control (across all samples). For label-free quantification, all input files undergo identification-based retention time alignment and targeted feature extraction matching ids between runs. The pipeline can also generate spectrum libraries suitable for DIA-based searches.
 
 ![overview](assets/mhcquant_subway.png)
 
@@ -54,11 +54,25 @@ Each row represents a mass spectrometry run in one of the formats: raw, RAW, mzM
 Now, you can run the pipeline using:
 
 ```bash
-nextflow run nf-core/mhcquant
+nextflow run nf-core/mhcquant \
     -profile <docker/singularity/.../institute> \
     --input 'samplesheet.tsv' \
     --fasta 'SWISSPROT_2020.fasta' \
     --outdir ./results
+```
+
+Optional parameters for additional functionality:
+
+```bash
+# Enable quantification, global FDR and spectrum library generation
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --quantify \
+    --global_fdr \
+    --generate_speclib \
+    --outdir ./results \
+    -profile docker
 ```
 
 > [!WARNING]
@@ -72,33 +86,56 @@ For more details and further functionality, please refer to the [usage documenta
 
 By default the pipeline currently performs identification of MHC class I peptides with HCD settings:
 
-- Preparing spectra dependent on the input format (`PrepareSpectra`)
-- Creation of reversed decoy database (`DecoyDatabase`)
-- Identification of peptides in the MS/MS spectra (`CometAdapter`)
-- Refreshes the protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
-- Merges identification files with the same `Sample` and `Condition` label (`IDMerger`)
-- Prediction of retention times and MS2 intensities (`MS²Rescore`)
-- Extract PSM features for Percolator (`PSMFeatureExtractor`)
-- Peptide-spectrum-match rescoring using Percolator (`PercolatorAdapter`)
-- Filters peptide identification result according to 1\% FDR (`IDFilter`)
-- Converts identification result to tab-separated files (`TextExporter`)
-- Converts identification result to mzTab files (`MzTabExporter`)
+- **Spectra Preparation**: Preparing spectra dependent on the input format (`PREPARE_SPECTRA` subworkflow)
+- **Database Preparation**: Creation of reversed decoy database (`DecoyDatabase`)
+- **Peptide Identification**: Identification of peptides in the MS/MS spectra (`CometAdapter`)
+- **Database Indexing**: Refreshes protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
+- **Identification Merging**: Merges identification files with the same `Sample` and `Condition` label (`IDMerger`)
+- **Rescoring**: Feature prediction and peptide-spectrum-match rescoring (`RESCORE` subworkflow)
+  - Prediction of retention times and MS2 intensities (`MS²Rescore`)
+  - Extract PSM features for rescoring engines (`PSMFeatureExtractor`)
+  - Peptide-spectrum-match rescoring using Percolator or Mokapot (`PercolatorAdapter`)
+  - Filters peptide identification result according to configurable FDR threshold (`IDFilter`)
+- **Export**: Converts identification result to tab-separated files (`TextExporter`)
+
+### FDR Control Modes
+
+The pipeline supports two FDR control strategies:
+
+- **Local FDR** (default): FDR control applied per `Sample` and `Condition` group
+- **Global FDR**: FDR control applied across all samples in the dataset (enable with `--global_fdr`)
 
 ### Additional Steps
 
 Additional functionality contained by the pipeline currently includes:
 
-#### Quantification
+#### Quantification (`QUANT` subworkflow)
 
-- Corrects retention time distortions between runs (`MapAlignerIdentification`)
-- Applies retention time transformations to runs (`MapRTTransformer`)
-- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
-- Group corresponding features across label-free experiments (`FeatureLinkerUnlabeledKD`)
-- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
+When enabled with `--quantify`, the pipeline performs label-free quantification:
 
-#### Output
+- **Alignment**: Corrects retention time distortions between runs (`MAP_ALIGNMENT` subworkflow)
+  - Corrects retention time distortions between runs (`MapAlignerIdentification`)
+  - Applies retention time transformations to runs (`MapRTTransformer`)
+- **Feature Processing**: Detects and processes features (`PROCESS_FEATURE` subworkflow)
+  - Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
+  - Group corresponding features across label-free experiments (`FeatureLinkerUnlabeledKD`)
+  - Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
+
+#### Spectrum Library Generation (`SPECLIB` subworkflow)
+
+When enabled with `--generate_speclib`, the pipeline generates spectrum libraries suitable for DIA-based searches:
+
+- Convert PSMs and spectra to appropriate formats (`EasyPQP Convert`)
+- Generate sample-specific spectrum libraries (`EasyPQP Library`)
+- When combined with global FDR mode, creates global spectrum libraries across all samples
+
+#### Ion Annotation (`IONANNOTATOR` subworkflow)
+
+The pipeline annotates the final list of peptides with their respective ions and charges:
 
 - Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
+
+#### Output
 
 ## Documentation
 
@@ -108,7 +145,7 @@ For more details about the output files and reports, please refer to the
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
-   - [Pipeline installation](https://nf-co.re/usage/local_installation)
+   - [Pipeline installation](https://nf-co.re/docs/usage/getting_started/offline)
    - [Adding your own system config](https://nf-co.re/usage/adding_own_config)
 3. [Running the pipeline](https://nf-co.re/mhcquant/docs/usage.md)
    - This includes tutorials, FAQs, and troubleshooting instructions
