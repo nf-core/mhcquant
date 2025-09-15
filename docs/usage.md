@@ -205,7 +205,6 @@ nextflow run nf-core/mhcquant \
   --global_fdr \
   --generate_speclib \
   --annotate_ions \
-  --rescoring_engine 'mokapot' \
   --feature_generators 'deeplc,ms2pip,im2deep' \
   --outdir results \
   -profile docker
