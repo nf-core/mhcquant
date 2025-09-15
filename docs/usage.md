@@ -62,7 +62,7 @@ Fine-tuning search settings is important to obtain the most optimal results for 
 | fragment_mass_tolerance  | 0.02     | 0.02     | 0.02                  | 0.02     | 0.02                | 0.02     | 0.50025         | 0.50025  |
 | fragment_bin_offset      | 0        | 0        | 0                     | 0        | 0                   | 0        | 0.4             | 0.4      |
 
-Modifications are specified via `--variable_mods` and `fixed_mods` using the [UNIMOD nomenclature](https://www.unimod.org/unimod_help.html) via OpenMS. Check out [helper page](https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html) of OpenMS for the full list of options. Multiple modifications are specified as `'Oxidation (M),Acetyl (N-term),Phospho (S)'`.
+Modifications are specified via `--variable_mods` and `fixed_mods` using the [UNIMOD nomenclature](https://www.unimod.org/unimod_help.html) via OpenMS. Check out [helper page](https://abibuilder.cs.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html) of OpenMS for the full list of options. Multiple modifications are specified as `'Oxidation (M),Acetyl (N-term),Phospho (S)'`.
 
 Further information about the command line arguments is documented on the [nf-core website](https://nf-co.re/mhcquant/dev/parameters) or by using `--help`.
 
@@ -85,13 +85,17 @@ The pipeline supports two rescoring engines:
 The pipeline offers flexible FDR control strategies:
 
 #### Local FDR (Default)
+
 By default, FDR control is applied per sample-condition group:
+
 - FDR is calculated separately for each `Sample` and `Condition` combination
 - Allows for sample-specific identification thresholds
 - Suitable when samples have varying complexity or quality
 
 #### Global FDR Mode
+
 Enable global FDR control with `--global_fdr`:
+
 - FDR is calculated across all samples in the dataset
 - Provides consistent identification criteria across all samples
 - Particularly useful for comparative studies or when generating spectrum libraries
@@ -131,11 +135,13 @@ nextflow run nf-core/mhcquant \
 ```
 
 ### Library Generation Process (`SPECLIB` subworkflow)
+
 - **Format Conversion**: PSMs and spectra are converted to appropriate formats using EasyPQP
 - **Library Construction**: Sample-specific spectrum libraries are generated for each sample-condition group
 - **Global Libraries**: When combined with `--global_fdr`, creates comprehensive spectrum libraries across all samples
 
 ### Global Spectrum Libraries
+
 For comprehensive library generation across all samples:
 
 ```bash
@@ -149,6 +155,20 @@ nextflow run nf-core/mhcquant \
 
 This approach is particularly useful when creating reference libraries for subsequent DIA analyses, as it maximizes the number of identifiable peptides by combining information from all samples..
 
+## Epicore
+
+Length variants of HLA peptides, especially HLA class II peptides, pose a distinct challenge when performing downstream cohort-wide analyses. [Epicore](https://github.com/AG-Walz/epicore) uses rules-based parameters to aggregate length variants of the same epitope into a `consensus epitope`.
+
+Run epicore in the pipeline:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --epicore \
+    -profile docker
+```
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
@@ -158,53 +178,29 @@ nextflow run nf-core/mhcquant \
   --input 'samplesheet.tsv' \
   --outdir <OUTDIR> \
   --fasta 'SWISSPROT_2020.fasta' \
+  --digest_mass_range 800:2500 \
+  --activation_method CID \
+  --prec_charge 2:3 \
+  --fdr_threshold 0.01 \
+  --fdr_level peptide_level_fdrs \
   --peptide_min_length 8 \
   --peptide_max_length 12 \
   --ms2pip_model 'Immuno-HCD' \
   -profile docker
 ```
 
-### Example workflows
-
-**Basic identification workflow (default)**:
-```console
-nextflow run nf-core/mhcquant \
-  --input 'samplesheet.tsv' \
-  --fasta 'SWISSPROT_2020.fasta' \
-  --outdir results \
-  -profile docker
-```
-
-**Quantification workflow**:
-```console
-nextflow run nf-core/mhcquant \
-  --input 'samplesheet.tsv' \
-  --fasta 'SWISSPROT_2020.fasta' \
-  --quantify \
-  --outdir results \
-  -profile docker
-```
-
-**Global FDR with spectrum library generation**:
-```console
-nextflow run nf-core/mhcquant \
-  --input 'samplesheet.tsv' \
-  --fasta 'SWISSPROT_2020.fasta' \
-  --global_fdr \
-  --generate_speclib \
-  --outdir results \
-  -profile docker
-```
-
 **Complete workflow with all features**:
+
 ```console
 nextflow run nf-core/mhcquant \
   --input 'samplesheet.tsv' \
   --fasta 'SWISSPROT_2020.fasta' \
-  --quantify \
-  --global_fdr \
-  --generate_speclib \
   --annotate_ions \
+  --epicore \
+  --generate_speclib \
+  --global_fdr \
+  --quantify \
+  --outdir ./results \
   --feature_generators 'deeplc,ms2pip,im2deep' \
   --outdir results \
   -profile docker

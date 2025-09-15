@@ -22,7 +22,7 @@
 
 **nfcore/mhcquant** is a best-practice bioinformatics pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).
 
-The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore. FDR rescoring is applied using Percolator or Mokapot based on a competitive target-decoy approach. The pipeline supports both local FDR control (per sample-condition group) and global FDR control (across all samples). For label-free quantification, all input files undergo identification-based retention time alignment and targeted feature extraction matching ids between runs. The pipeline can also generate spectrum libraries suitable for DIA-based searches.
+The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore. FDR rescoring is applied using Percolator or Mokapot based on a competitive target-decoy approach. The pipeline supports both local FDR control (per sample-condition group) and global FDR control (across all samples). For label-free quantification, all input files undergo identification-based retention time alignment and targeted feature extraction matching ids between runs. The pipeline can also generate spectrum libraries suitable for DIA-based searches as well as computing consensus epitopes using epicore.
 
 ![overview](assets/mhcquant_subway.png)
 
@@ -64,13 +64,15 @@ nextflow run nf-core/mhcquant \
 Optional parameters for additional functionality:
 
 ```bash
-# Enable quantification, global FDR and spectrum library generation
+# Enable quantification, global FDR and spectrum library generation, ion annotations, and consenus epitopes
 nextflow run nf-core/mhcquant \
     --input 'samplesheet.tsv' \
     --fasta 'SWISSPROT_2020.fasta' \
-    --quantify \
-    --global_fdr \
+    --annotate_ions \
+    --epicore \
     --generate_speclib \
+    --global_fdr \
+    --quantify \
     --outdir ./results \
     -profile docker
 ```
