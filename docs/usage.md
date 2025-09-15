@@ -68,9 +68,95 @@ Further information about the command line arguments is documented on the [nf-co
 
 ## Rescoring using MS²Rescore
 
-By default the pipline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ms2pip,ionmob,im2deep`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
+The pipeline employs MS²Rescore for comprehensive feature prediction and rescoring of peptide-spectrum matches. By default, the pipeline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ms2pip,ionmob,im2deep`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
 
-MS²Rescore creates a comprehensive QC report of the added features used for rescoring. This report is only available if `--rescoring_engine mokapot` is specified (default: `percolator`). The report can be found in `<OUTDIR>/multiqc/ms2rescore`. Further information on the tool itself can be read up in the published paper [Declerq et al. 2022](<https://www.mcponline.org/article/S1535-9476(22)00074-3/fulltext>)
+### Rescoring Engines
+
+The pipeline supports two rescoring engines:
+
+- **Percolator** (default): Semi-supervised learning tool for rescoring PSMs (`--rescoring_engine percolator`)
+- **Mokapot**: Fast and flexible rescoring tool using gradient boosting (`--rescoring_engine mokapot`)
+
+> [!NOTE]
+> MS²Rescore creates a comprehensive QC report of the added features used for rescoring. This report is only available when `--rescoring_engine mokapot` is specified. The report can be found in `<OUTDIR>/multiqc/ms2rescore`.
+
+### FDR Control Strategies
+
+The pipeline offers flexible FDR control strategies:
+
+#### Local FDR (Default)
+By default, FDR control is applied per sample-condition group:
+- FDR is calculated separately for each `Sample` and `Condition` combination
+- Allows for sample-specific identification thresholds
+- Suitable when samples have varying complexity or quality
+
+#### Global FDR Mode
+Enable global FDR control with `--global_fdr`:
+- FDR is calculated across all samples in the dataset
+- Provides consistent identification criteria across all samples
+- Particularly useful for comparative studies or when generating spectrum libraries
+- Can improve identification rates for low-quality samples by leveraging high-quality samples in the dataset
+
+> [!WARNING]
+> Global FDR is currently not supported by mokapot. If `--global_fdr` is enabled with `--rescoring_engine mokapot`, the global_fdr parameter will be ignored and local FDR will be applied.
+
+Further information on the MS²Rescore tool can be found in the published paper [Declerq et al. 2022](<https://www.mcponline.org/article/S1535-9476(22)00074-3/fulltext>).
+
+## Quantification
+
+By default, the pipeline operates in identification mode. To enable quantification, use the `--quantify` parameter:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --quantify \
+    -profile docker
+```
+
+When quantification is enabled, the pipeline performs:
+
+### Retention Time Alignment (`MAP_ALIGNMENT` subworkflow)
+- **MapAlignerIdentification**: Corrects retention time distortions between MS runs
+- **MapRTTransformer**: Applies calculated retention time transformations to all runs
+
+### Feature Processing (`PROCESS_FEATURE` subworkflow)
+- **FeatureFinderIdentification**: Detects features in MS1 data based on peptide identifications
+- **FeatureLinkerUnlabeledKD**: Groups corresponding features across label-free experiments
+- **IDConflictResolver**: Resolves ambiguous annotations of features with peptide identifications
+
+The quantification workflow produces a ConsensusXML file containing integrated peak areas for identified peptides across all samples.
+
+## Spectrum Library Generation
+
+The pipeline can generate spectrum libraries suitable for DIA-based searches using the `--generate_speclib` parameter:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --generate_speclib \
+    -profile docker
+```
+
+### Library Generation Process (`SPECLIB` subworkflow)
+- **Format Conversion**: PSMs and spectra are converted to appropriate formats using EasyPQP
+- **Library Construction**: Sample-specific spectrum libraries are generated for each sample-condition group
+- **Global Libraries**: When combined with `--global_fdr`, creates comprehensive spectrum libraries across all samples
+
+### Global Spectrum Libraries
+For comprehensive library generation across all samples:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --generate_speclib \
+    --global_fdr \
+    -profile docker
+```
+
+This approach is particularly useful when creating reference libraries for subsequent DIA analyses, as it maximizes the number of identifiable peptides by combining information from all samples..
 
 ## Running the pipeline
 
@@ -81,10 +167,55 @@ nextflow run nf-core/mhcquant \
   --input 'samplesheet.tsv' \
   --outdir <OUTDIR> \
   --fasta 'SWISSPROT_2020.fasta' \
-  <SEARCH PARAMS> \
   --peptide_min_length 8 \
-  --peptide_max_length 14 \
+  --peptide_max_length 12 \
   --ms2pip_model 'Immuno-HCD' \
+  -profile docker
+```
+
+### Example workflows
+
+**Basic identification workflow (default)**:
+```console
+nextflow run nf-core/mhcquant \
+  --input 'samplesheet.tsv' \
+  --fasta 'SWISSPROT_2020.fasta' \
+  --outdir results \
+  -profile docker
+```
+
+**Quantification workflow**:
+```console
+nextflow run nf-core/mhcquant \
+  --input 'samplesheet.tsv' \
+  --fasta 'SWISSPROT_2020.fasta' \
+  --quantify \
+  --outdir results \
+  -profile docker
+```
+
+**Global FDR with spectrum library generation**:
+```console
+nextflow run nf-core/mhcquant \
+  --input 'samplesheet.tsv' \
+  --fasta 'SWISSPROT_2020.fasta' \
+  --global_fdr \
+  --generate_speclib \
+  --outdir results \
+  -profile docker
+```
+
+**Complete workflow with all features**:
+```console
+nextflow run nf-core/mhcquant \
+  --input 'samplesheet.tsv' \
+  --fasta 'SWISSPROT_2020.fasta' \
+  --quantify \
+  --global_fdr \
+  --generate_speclib \
+  --annotate_ions \
+  --rescoring_engine 'mokapot' \
+  --outdir results \
   -profile docker
 ```
 
