@@ -142,7 +142,7 @@ nextflow run nf-core/mhcquant \
 
 ### Global Spectrum Libraries
 
-For comprehensive library generation across all samples:
+For comprehensive library generation across all samples add the `--global_fdr` flag:
 
 ```bash
 nextflow run nf-core/mhcquant \
