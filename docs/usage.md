@@ -126,6 +126,8 @@ The quantification workflow produces a ConsensusXML file containing integrated p
 
 The pipeline can generate spectrum libraries suitable for DIA-based searches using the `--generate_speclib` parameter:
 
+For one spectrum library per sample:
+
 ```bash
 nextflow run nf-core/mhcquant \
     --input 'samplesheet.tsv' \
