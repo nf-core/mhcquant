@@ -125,11 +125,7 @@ When enabled with `--quantify`, the pipeline performs label-free quantification:
 
 #### Spectrum Library Generation (`SPECLIB` subworkflow)
 
-When enabled with `--generate_speclib`, the pipeline generates spectrum libraries suitable for DIA-based searches:
-
-- Convert PSMs and spectra to appropriate formats (`EasyPQP Convert`)
-- Generate sample-specific spectrum libraries (`EasyPQP Library`)
-- When combined with global FDR mode, creates global spectrum libraries across all samples
+When enabled with `--generate_speclib`, the pipeline generates spectrum libraries suitable for DIA-based searches. Outputs one library per sample or a single library across all samples (if global FDR mode is enabled with `--global_fdr`).
 
 #### Ion Annotation (`IONANNOTATOR` subworkflow)
 
