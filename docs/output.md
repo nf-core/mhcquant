@@ -43,7 +43,7 @@ The TSV file in quantification mode (by using `--quantify`) additionally holds t
 
 #### mzTab
 
-The mzTab output file follows the a [HUPO-PSI format](<https://www.mcponline.org/article/S1535-9476(20)32821-8/fulltext>) and combines all information of the sample-condition group extracted from a database search throughout the pipeline. A detailed explanation of the respective entries are elaborately explained [here](https://psidev.info/sites/default/files/2017-07/R2_The_ten_minute_guide_to_mzTab.pdf). MzTab files are compatible with the PRIDE Archive - proteomics data repository and can be uploaded as search files.
+The mzTab output file follows the a [HUPO-PSI format](https://doi.org/10.1074/mcp.O113.036681) and combines all information of the sample-condition group extracted from a database search throughout the pipeline. A detailed explanation of the respective entries are elaborately explained [here](https://github.com/HUPO-PSI/mzTab/blob/master/specification_document-releases/1_0-Proteomics-Release/20minute_guide_mzTab.pdf). MzTab files are compatible with the PRIDE Archive - proteomics data repository and can be uploaded as search files.
 
 MzTab files contain many columns and annotate the most important information - here are a few outpointed:
 
