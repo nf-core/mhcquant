@@ -103,6 +103,8 @@ def process_file(file, prefix, quantify, keep_cols):
         n_psms = np.sum(data["psm"])
     else:
         data = pd.read_csv(file, sep='\t')
+        # Remove the special character '#' from the first column name
+        data.rename(columns={data.columns[0]: data.columns[0].replace('#', '')}, inplace=True)
         n_psms = 0
 
     # Check if all required columns are present in the DataFrame
