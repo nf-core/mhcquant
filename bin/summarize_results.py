@@ -190,6 +190,9 @@ def process_file(file, prefix, quantify, keep_cols):
     float_cols = data.select_dtypes(include=['float']).columns
     data.loc[:, float_cols] = data.loc[:, float_cols].round(5)
 
+    # Add a column with unique protein accessions
+    data['unique_accessions'] = data['accessions'].map(lambda x: ';'.join(dict.fromkeys(x.split(';'))))
+
     data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
 
 
