@@ -139,13 +139,13 @@
                 },
                 "digest_mass_range": {
                     "type": "string",
-                    "default": "'800:2500'",
+                    "default": "800:2500",
                     "fa_icon": "fas fa-line-height",
                     "description": "Specify the mass range in Dalton that peptides should fulfill to be considered for peptide spectrum matching."
                 },
                 "prec_charge": {
                     "type": "string",
-                    "default": "'2:3'",
+                    "default": "2:3",
                     "fa_icon": "fas fa-bolt",
                     "description": "Specify the precursor charge range that peptides should fulfill to be considered for peptide spectrum matching."
                 },
@@ -185,7 +185,6 @@
                 },
                 "fixed_mods": {
                     "type": "string",
-                    "default": "",
                     "fa_icon": "fas fa-cubes-stacked",
                     "description": "Specify which fixed modifications should be applied to the database search",
                     "help_text": "e.g. 'Carbamidomethyl (C)' (see OpenMS modifications; for a list of options, see parameter description on https://abibuilder.informatik.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html).\nMultiple modifications can be specified by separating commas:`Oxidation (M),Carbamidomethyl (C)`"
@@ -248,7 +247,6 @@
                 },
                 "default_params_file_comet": {
                     "type": "string",
-                    "default": " ",
                     "fa_icon": "fas fa-file-code",
                     "hidden": true,
                     "description": "Specify custom Comet params file. All parameters of this take precedence."
