@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Boxplot of intensity distributions to the MulitQC report [#382](https://github.com/nf-core/mhcquant/pull/382)
 - Added a config option to hide outliers in box plots, add plot descriptions [#387](https://github.com/nf-core/mhcquant/pull/387)
 - Added a `Fasta` column to the input samplesheet to enable sample-specific FASTA files [#391](https://github.com/nf-core/mhcquant/pull/391)
+- Added a column for unique accessions to the pipeline output [#403](https://github.com/nf-core/mhcquant/pull/403)
 
 ### `Fixed`
 
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the binning of the TICs histogram and move the general stats table to the top of the report [#388](https://github.com/nf-core/mhcquant/pull/388)
 - Write out FDR-filtered peptide list in global FDR-mode, instead of 100% FDR list [#394](https://github.com/nf-core/mhcquant/pull/394/)
 - Update labels for global FDR process configurations [#397](https://github.com/nf-core/mhcquant/pull/397/)
+- Remove special character '#' from the header of OpenMS TextExporter output [#403](https://github.com/nf-core/mhcquant/pull/403)
 
 ### `Dependencies`
 
