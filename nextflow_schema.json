@@ -139,7 +139,7 @@
                 },
                 "digest_mass_range": {
                     "type": "string",
-                    "default": "800:2500",
+                    "default": "'800:2500'",
                     "fa_icon": "fas fa-line-height",
                     "description": "Specify the mass range in Dalton that peptides should fulfill to be considered for peptide spectrum matching."
                 },
