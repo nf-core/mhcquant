@@ -145,7 +145,7 @@
                 },
                 "prec_charge": {
                     "type": "string",
-                    "default": "2:3",
+                    "default": "'2:3'",
                     "fa_icon": "fas fa-bolt",
                     "description": "Specify the precursor charge range that peptides should fulfill to be considered for peptide spectrum matching."
                 },
