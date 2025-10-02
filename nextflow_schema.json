@@ -621,7 +621,7 @@
                     "hidden": true
                 },
                 "help_full": {
-                    "type": "boolean", 
+                    "type": "boolean",
                     "default": false,
                     "description": "Display complete help text with all parameters.",
                     "fa_icon": "fas fa-question-circle",
