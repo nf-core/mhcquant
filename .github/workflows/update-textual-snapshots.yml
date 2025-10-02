@@ -9,7 +9,7 @@ jobs:
     if: >
       contains(github.event.comment.html_url, '/pull/') &&
       contains(github.event.comment.body, '@nf-core-bot update snapshots') &&
-      github.repository == 'nf-core/tools'
+      github.repository == 'nf-core/mhcquant'
     runs-on: ubuntu-latest
     steps:
       # Use the @nf-core-bot token to check out so we can push later
