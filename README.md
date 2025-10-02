@@ -177,7 +177,13 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
-If you use nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.1569909](https://doi.org/10.5281/zenodo.1569909) and the corresponding manuscript:
+If you use nf-core/mhcquant for your analysis, please cite the corresponding manuscript: [10.1186/s13059-025-03763-8](https://doi.org/10.1186/s13059-025-03763-8)
+
+> **MHCquant2 refines immunopeptidomics tumor antigen discovery**
+>
+> Jonas Scheid, Steffen Lemke, Naomi Hoenisch-Gravel, Anna Dengler, Timo Sachsenberg, Arthur Declerq, Ralf Gabriels, Jens Bauer, Marcel Wacker, Leon Bichmann, Lennart Martens, Marissa L. Dubbelaar, Sven Nahnsen & Juliane S. Walz
+>
+> _Genome Biology_ 2025 26 (1), 290. doi: [10.1021/acs.jproteome.9b00313](https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00313)
 
 > **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**
 >
