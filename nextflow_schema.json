@@ -58,6 +58,7 @@
                 },
                 "skip_decoy_generation": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Add this parameter when you want to skip the generation of the decoy database.",
                     "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'."
@@ -138,11 +139,13 @@
                 },
                 "digest_mass_range": {
                     "type": "string",
+                    "default": "800:2500",
                     "fa_icon": "fas fa-line-height",
                     "description": "Specify the mass range in Dalton that peptides should fulfill to be considered for peptide spectrum matching."
                 },
                 "prec_charge": {
                     "type": "string",
+                    "default": "2:3",
                     "fa_icon": "fas fa-bolt",
                     "description": "Specify the precursor charge range that peptides should fulfill to be considered for peptide spectrum matching."
                 },
@@ -201,34 +204,39 @@
                 },
                 "use_x_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include x ions into the peptide spectrum matching"
                 },
                 "use_z_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include z ions into the peptide spectrum matching"
                 },
                 "use_a_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include a ions into the peptide spectrum matching"
                 },
                 "use_c_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include c ions into the peptide spectrum matching"
                 },
                 "use_NL_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include NL ions into the peptide spectrum matching"
                 },
                 "remove_precursor_peak": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-pipe",
-                    "description": "Include if you want to remove all peaks around precursor m/z",
-                    "default": "false"
+                    "description": "Include if you want to remove all peaks around precursor m/z"
                 },
                 "spectrum_batch_size": {
                     "type": "integer",
@@ -516,6 +524,7 @@
             "properties": {
                 "version": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
@@ -539,6 +548,7 @@
                 },
                 "plaintext_email": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
                     "hidden": true
@@ -553,6 +563,7 @@
                 },
                 "monochrome_logs": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
                     "hidden": true
@@ -600,6 +611,27 @@
                     "type": "string",
                     "fa_icon": "far calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
+                    "hidden": true
+                },
+                "help": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Display help text.",
+                    "fa_icon": "fas fa-question-circle",
+                    "hidden": true
+                },
+                "help_full": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Display complete help text with all parameters.",
+                    "fa_icon": "fas fa-question-circle",
+                    "hidden": true
+                },
+                "show_hidden": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show hidden parameters in help text.",
+                    "fa_icon": "fas fa-eye-slash",
                     "hidden": true
                 }
             }
