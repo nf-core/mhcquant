@@ -1,4 +1,4 @@
-name: Update Textual snapshots from a comment
+name: Update nf-test snapshots from a comment
 on:
   issue_comment:
     types: [created]
