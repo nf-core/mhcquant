@@ -7,27 +7,38 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "ID": {
+                "type": "integer",
+                "errorMessage": "Provide an unique identifier for the replicate, must be a numeric value",
+                "meta": ["id"]
+            },
+            "Sample": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
-                "meta": ["id"]
+                "meta": ["sample"]
             },
-            "fastq_1": {
+            "Condition": {
                 "type": "string",
-                "format": "file-path",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+-?",
+                "errorMessage": "Sample condition must be provided and cannot contain spaces",
+                "meta": ["condition"]
             },
-            "fastq_2": {
+            "ReplicateFileName": {
                 "type": "string",
-                "format": "file-path",
+                "format": "path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+\\.(raw|RAW|mzML|mzML.gz|d|d.tar|d.tar.gz|d.zip)$",
+                "errorMessage": "MS file cannot contain spaces and must have one of the extensions: raw | RAW | mzML | mzML.gz | d | d.tar | d.tar.gz | d.zip"
+            },
+            "Fasta": {
+                "type": "string",
+                "format": "path",
+                "exists": true,
+                "pattern": "^\\S+\\.(fasta|fa|fas|fna|faa|ffn)$",
+                "errorMessage": "FASTA file cannot contain spaces and must have one of the extensions: fasta | fa | fas | fna | faa | ffn"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["ID", "Sample", "Condition", "ReplicateFileName"]
     }
 }

@@ -15,21 +15,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { MHCQUANT  } from './workflows/mhcquant'
+include { MHCQUANT                } from './workflows/mhcquant'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_mhcquant_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_mhcquant_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_mhcquant_pipeline'
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    GENOME PARAMETER VALUES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,6 +32,7 @@ workflow NFCORE_MHCQUANT {
 
     take:
     samplesheet // channel: samplesheet read in from --input
+    fasta       // channel: reference database read in from --fasta
 
     main:
 
@@ -51,7 +40,8 @@ workflow NFCORE_MHCQUANT {
     // WORKFLOW: Run pipeline
     //
     MHCQUANT (
-        samplesheet
+        samplesheet,
+        fasta
     )
     emit:
     multiqc_report = MHCQUANT.out.multiqc_report // channel: /path/to/multiqc_report.html
@@ -84,7 +74,8 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_MHCQUANT (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.fasta
     )
     //
     // SUBWORKFLOW: Run completion tasks

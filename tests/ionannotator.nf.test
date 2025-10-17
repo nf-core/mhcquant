@@ -1,0 +1,57 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+    tag "test_ionannotator"
+    profile "test_ionannotator"
+
+    test("-profile test_ionannotator") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // Extract peptidoform column from all TSV files
+            def peptidoform_data = []
+            new File(params.outdir).eachFileRecurse { file ->
+                if (file.name.endsWith('.tsv')) {
+                    def lines = file.readLines()
+                    if (lines.size() > 0) {
+                        def header = lines[0].split('\t')
+                        def peptidoformIndex = header.findIndexOf { it == 'peptidoform' }
+                        if (peptidoformIndex >= 0) {
+                            def peptidoforms = lines.drop(1).collect { line ->
+                                def fields = line.split('\t')
+                                fields.size() > peptidoformIndex ? fields[peptidoformIndex] : ''
+                            }.findAll { it != '' }.sort()
+                            peptidoform_data.add([file.name, peptidoforms])
+                        }
+                    }
+                }
+            }
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(
+                    // Number of successful tasks
+                    workflow.trace.succeeded().size(),
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_mhcquant_software_mqc_versions.yml"),
+                    // All stable path name, with a relative path
+                    stable_name,
+                    // All files with stable contents
+                    stable_path,
+                    // Peptidoform data from TSV files
+                    peptidoform_data
+                ).match() }
+            )
+        }
+    }
+}

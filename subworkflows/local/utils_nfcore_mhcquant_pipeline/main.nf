@@ -93,37 +93,67 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
-    // Custom validation for pipeline parameters
-    //
-    validateInputParameters()
-
-    //
     // Create channel from input file provided through params.input
     //
 
     Channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
+        .map { meta, file, fasta -> [meta.subMap('sample','condition'), meta, file, fasta] }
+        .tap { ch_input }
         .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_samplesheet }
+        // get number of files per sample-condition
+        .map { group_meta, metas, files, fastas -> [ group_meta, files.size()] }
+        .combine( ch_input, by:0 )
+        .map { group_meta, group_count, meta, file, fasta -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file, fasta] }
+        .set { ch_samplesheet_raw }
+
+    ch_samplesheet = ch_samplesheet_raw.map { meta, file, fasta -> [ meta, file ]}
+
+    //
+    // Create channel from the reference_database through params.fasta or from the samplesheet fasta files
+    //
+
+    if (params.fasta) {
+        Channel.fromPath(params.fasta, checkIfExists: true)
+            .map { fasta -> [[id:fasta.getBaseName()], fasta] }
+            .set { ch_fasta }
+
+        ch_samplesheet_raw
+            .map{ meta, file, fasta -> fasta }
+            .flatten()
+            .first()
+            .subscribe {
+                log.warn """\
+                    Both --fasta and samplesheet FASTA files were provided!
+                    The pipeline will use --fasta (${params.fasta}), ignoring samplesheet FASTA entries.
+                    To use the samplesheet FASTA files instead, remove the --fasta parameter.
+                    """.stripIndent()
+            }
+
+    } else {
+        // Check if the FASTA files were provided in the samplesheet
+        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), fasta] }
+        ch_fasta
+            .map { meta, fasta -> fasta }
+            .flatten()
+            .ifEmpty {
+                error '''\
+                    Error: No FASTA files provided.
+                    Please either:
+                    1. Use --fasta parameter, or
+                    2. Include a 'Fasta' column in your samplesheet
+                    '''.stripIndent()
+            }
+        // Group FASTA files by sample and condition and keep only the first FASTA file per sample-condition
+        ch_fasta
+            .groupTuple()
+            .map { group_meta, fastas -> [group_meta, fastas.first()] }
+            .set { ch_fasta }
+    }
 
     emit:
     samplesheet = ch_samplesheet
-    versions    = ch_versions
+    fasta       = ch_fasta
 }
 
 /*
@@ -180,15 +210,9 @@ workflow PIPELINE_COMPLETION {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 //
-// Check and validate pipeline parameters
-//
-def validateInputParameters() {
-    genomeExistsError()
-}
-
-//
 // Validate channels from input samplesheet
 //
+// Keeping this as an example for future samplesheet checks if additional fields are added (e.g. alleles)
 def validateInputSamplesheet(input) {
     def (metas, fastqs) = input[1..2]
 
@@ -200,41 +224,29 @@ def validateInputSamplesheet(input) {
 
     return [ metas[0], fastqs ]
 }
-//
-// Get attribute from genome config file e.g. fasta
-//
-def getGenomeAttribute(attribute) {
-    if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
-        if (params.genomes[ params.genome ].containsKey(attribute)) {
-            return params.genomes[ params.genome ][ attribute ]
-        }
-    }
-    return null
-}
 
-//
-// Exit pipeline if incorrect --genome key provided
-//
-def genomeExistsError() {
-    if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-            "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-            "  Currently, the available genome keys are:\n" +
-            "  ${params.genomes.keySet().join(", ")}\n" +
-            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        error(error_string)
+def getCustomExtension(file) {
+    def name = file.getName()
+    if (name =~ /.*\.(d\.tar\.gz|d\.tar|d\.zip|mzML\.gz|raw|RAW|mzML|d)$/) {
+        return name.split("\\.").drop(1).join(".").toLowerCase()
+    } else {
+        return file.getExtension().toLowerCase()
     }
 }
 //
 // Generate methods description for MultiQC
 //
 def toolCitationText() {
-    // TODO nf-core: Optionally add in-text citation tools to this list.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
     def citation_text = [
             "Tools used in the workflow included:",
-            "FastQC (Andrews 2010),",
+            "OpenMS (Pfeuffer et al. 2024),",
+            "DeepLC (Bouwmeester et al. 2021)",
+            "MS²PIP (Declercq et al. 2023)",
+            "MS²Rescore (Declercq et al. 2022)",
+            "Percolator (Käll et al. 2007)",
+            "MapAligner (Weisser et al. 2013)",
+            "FeatureFinder (Weisser et al. 2017)",
             "MultiQC (Ewels et al. 2016)",
             "."
         ].join(' ').trim()
@@ -243,11 +255,16 @@ def toolCitationText() {
 }
 
 def toolBibliographyText() {
-    // TODO nf-core: Optionally add bibliographic entries to this list.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
     def reference_text = [
-            "<li>Andrews S, (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).</li>",
+            "<li>Pfeuffer, J., Bielow, C., Wein, S. et al. OpenMS 3 enables reproducible analysis of large-scale mass spectrometry data. Nat Methods (2024). doi: /10.1038/s41592-024-02197-7.</li>",
+            "<li>Eng JK., Hoopman MR., Jahan, TA. et al. A Deeper Look into Comet—Implementation and Features. J. Am. Soc. Mass Spectrom. 2015, 26, 11, 1865–1874 (2015). doi: /10.1007/s13361-015-1179-x.</li>",
+            "<li>Bouwmeester, R., Gabriels, R., Hulstaert, N. et al. DeepLC can predict retention times for peptides that carry as-yet unseen modifications. Nat Methods 18, 1363–1369 (2021). doi: /10.1038/s41592-021-01301-5<li>",
+            "<li>Declercq A, Bouwmeester R, Chiva C, et al. Updated MS²PIP web server supports cutting-edge proteomics applications. Nucleic Acids Res. 2023 Jul 5;51(W1):W338-W342. doi: /10.1093/nar/gkad335<li>",
+            "<li>Declercq A, Bouwmeester R, Hirschler A, Carapito C et al. MS2Rescore: Data-Driven Rescoring Dramatically Boosts Immunopeptide Identification Rates. Mol Cell Proteomics. 2022 Aug;21(8):100266. doi: /10.1016/j.mcpro.2022.100266<li>",
+            "<li>Käll, L., Canterbury, J., Weston, J. et al. Semi-supervised learning for peptide identification from shotgun proteomics datasets. Nat Methods 4, 923–925 (2007). doi: /10.1038/nmeth1113<li>",
+            "<li>Hendrik Weisser, Sven Nahnsen, Jonas Grossmann et al. An Automated Pipeline for High-Throughput Label-Free Quantitative Proteomics. Journal of Proteome Research 2013 12 (4), 1628-1644. doi: 10.1021/pr300992u<li>",
+            "<li>Hendrik Weisser and Jyoti S. Choudhary, Journal of Proteome Research 2017 16 (8), 2964-2974. doi: /10.1021/acs.jproteome.7b00248<li>",
             "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
         ].join(' ').trim()
 
@@ -255,7 +272,7 @@ def toolBibliographyText() {
 }
 
 def methodsDescriptionText(mqc_methods_yaml) {
-    // Convert  to a named map so can be used as with familiar NXF ${workflow} variable syntax in the MultiQC YML file
+    // Convert to a named map so can be used as with familar NXF ${workflow} variable syntax in the MultiQC YML file
     def meta = [:]
     meta.workflow = workflow.toMap()
     meta["manifest_map"] = workflow.manifest.toMap()
@@ -274,13 +291,8 @@ def methodsDescriptionText(mqc_methods_yaml) {
     } else meta["doi_text"] = ""
     meta["nodoi_text"] = meta.manifest_map.doi ? "" : "<li>If available, make sure to update the text to include the Zenodo DOI of version of the pipeline used. </li>"
 
-    // Tool references
-    meta["tool_citations"] = ""
-    meta["tool_bibliography"] = ""
-
-    // TODO nf-core: Only uncomment below if logic in toolCitationText/toolBibliographyText has been filled!
-    // meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
-    // meta["tool_bibliography"] = toolBibliographyText()
+    meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
+    meta["tool_bibliography"] = toolBibliographyText()
 
 
     def methods_text = mqc_methods_yaml.text
