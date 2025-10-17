@@ -108,7 +108,7 @@ def process_file(file, prefix, quantify, keep_cols):
         n_psms = 0
 
     # Check if all required columns are present in the DataFrame
-    required_columns = ['sequence', 'accessions', 'mz', 'observed_retention_time_best', 'score', 'COMET:xcorr']
+    required_columns = ['sequence', 'accessions', 'mz', 'rt', 'score', 'COMET:xcorr']
     missing_columns = set(required_columns) - set(data.columns)
     if data.shape[0] > 0:  # If the DataFrame is not empty
         if missing_columns:
@@ -151,7 +151,7 @@ def process_file(file, prefix, quantify, keep_cols):
     # ---------------------------------
 
     histograms = [[data["mz"].astype(float), f"{prefix}_histogram_mz.csv"],
-                  [data["observed_retention_time_best"].astype(float), f"{prefix}_histogram_rt.csv"],
+                  [data["rt"].astype(float), f"{prefix}_histogram_rt.csv"],
                   [data["score"].astype(float), f"{prefix}_histogram_scores.csv"]]
 
     for values, title in histograms:
