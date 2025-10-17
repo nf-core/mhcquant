@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Write out FDR-filtered peptide list in global FDR-mode, instead of 100% FDR list [#394](https://github.com/nf-core/mhcquant/pull/394/)
 - Update labels for global FDR process configurations [#397](https://github.com/nf-core/mhcquant/pull/397/)
 - Remove special character '#' from the header of OpenMS TextExporter output [#403](https://github.com/nf-core/mhcquant/pull/403)
+- Fixed an issue in the summary process that led the pipeline crash if deeplc was not specified [#411](https://github.com/nf-core/mhcquant/pull/411)
 
 ### `Dependencies`
 
