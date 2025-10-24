@@ -4,11 +4,7 @@
 
     "remoteUser": "root",
     "privileged": true,
-    "runArgs": [
-    "--device=/dev/loop-control",
-    "--device=/dev/loop0",
-    "--device=/dev/loop1"
-  ],
+    "runArgs": ["--device=/dev/loop-control", "--device=/dev/loop0", "--device=/dev/loop1"],
 
     "remoteEnv": {
         // Workspace path on the host for mounting with docker-outside-of-docker
