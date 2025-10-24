@@ -35,12 +35,10 @@
                     "openms": "3.4.0"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
-                    "python": "3.13.1",
-                    "pyopenms": "3.3.0"
+                    "pyopenms": "3.4.1"
                 },
                 "SUMMARIZE_RESULTS": {
-                    "python": "3.13.1",
-                    "pyopenms": "3.3.0"
+                    "pyopenms": "3.4.1"
                 },
                 "Workflow": {
                     "nf-core/mhcquant": "v3.1.0"
@@ -182,6 +180,7 @@
                         "GMAKKVTKA",
                         "GNVAEGETKPD",
                         "GPNKKPRF",
+                        "GRPM(Oxidation)PPSRR",
                         "GRVVEPKR",
                         "GVM(Oxidation)VGM(Oxidation)GQKD",
                         "HAAENPGKY",
@@ -311,6 +310,7 @@
                         "SAM(Oxidation)SNPRAM",
                         "SAQTTSHEL",
                         "SARAGETRF",
+                        "SASEAAKKY",
                         "SASHVSKTV",
                         "SATGHPRKV",
                         "SATNALRSM(Oxidation)",
@@ -319,6 +319,7 @@
                         "SAYANAKKY",
                         "SEVAHRFK",
                         "SIVGRPRH",
+                        "SKEYFSKQ",
                         "SLDKTSHSV",
                         "SLDTQPKKV",
                         "SM(Oxidation)LGSPHKV",
@@ -326,6 +327,7 @@
                         "SPM(Oxidation)EKIKQY",
                         "SPNYHEEKY",
                         "SQRFPKAE",
+                        "SVKNDHSAY",
                         "SVQVFGRKK",
                         "SYVGDEAQSKR",
                         "SYVGDEAQSKRG",
@@ -340,6 +342,7 @@
                         "THQPPAPNS",
                         "THYDPPRK",
                         "TIGEGQQHHLG",
+                        "TISRPKGVA",
                         "TKELPSGKKY",
                         "TLVQTKGT",
                         "TNNLRPKKKVK",
@@ -381,6 +384,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-10-17T11:51:18.172545817"
+        "timestamp": "2025-10-22T16:08:37.685132046"
     }
 }

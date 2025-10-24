@@ -32,12 +32,10 @@
                     "openms": "3.4.0"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
-                    "python": "3.13.1",
-                    "pyopenms": "3.3.0"
+                    "pyopenms": "3.4.1"
                 },
                 "SUMMARIZE_RESULTS": {
-                    "python": "3.13.1",
-                    "pyopenms": "3.3.0"
+                    "pyopenms": "3.4.1"
                 },
                 "Workflow": {
                     "nf-core/mhcquant": "v3.1.0"
@@ -114,6 +112,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-10-17T12:41:12.159451829"
+        "timestamp": "2025-10-22T16:45:02.244970158"
     }
 }
