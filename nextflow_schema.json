@@ -614,25 +614,16 @@
                     "hidden": true
                 },
                 "help": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Display help text.",
-                    "fa_icon": "fas fa-question-circle",
-                    "hidden": true
+                    "type": ["boolean", "string"],
+                    "description": "Display the help message."
                 },
                 "help_full": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "Display complete help text with all parameters.",
-                    "fa_icon": "fas fa-question-circle",
-                    "hidden": true
+                    "description": "Display the full detailed help message."
                 },
                 "show_hidden": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "Show hidden parameters in help text.",
-                    "fa_icon": "fas fa-eye-slash",
-                    "hidden": true
+                    "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
         }

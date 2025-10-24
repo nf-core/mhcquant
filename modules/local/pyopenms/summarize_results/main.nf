@@ -2,8 +2,8 @@ process SUMMARIZE_RESULTS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.3.0--py313h9b5bd11_0' :
-        'biocontainers/pyopenms:3.3.0--py313h9b5bd11_0' }"
+        'https://depot.galaxyproject.org/singularity/pyopenms:3.4.1--py312h6b06db6_2' :
+        'biocontainers/pyopenms:3.4.1--py312h6b06db6_2' }"
 
     input:
     tuple val(meta), path(file)
@@ -32,7 +32,6 @@ process SUMMARIZE_RESULTS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | sed 's/Python //')
         pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
     END_VERSIONS
     """
@@ -52,7 +51,6 @@ process SUMMARIZE_RESULTS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | sed 's/Python //')
         pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
     END_VERSIONS
     """
