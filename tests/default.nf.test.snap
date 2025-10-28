@@ -1,7 +1,6 @@
 {
     "-profile test": {
         "content": [
-            21,
             {
                 "MS2RESCORE": {
                     "MS\u00b2Rescore": "3.1.5)"
@@ -60,9 +59,9 @@
                 "multiqc",
                 "multiqc/ms2rescore",
                 "multiqc/multiqc_data",
-                "multiqc/multiqc_data/BETA-multiqc.parquet",
                 "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
                 "multiqc/multiqc_data/multiqc_chromatogram.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
                 "multiqc/multiqc_data/multiqc_data.json",
