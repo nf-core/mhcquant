@@ -4,5 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python=3.12
   - bioconda::pyopenms=3.4.1

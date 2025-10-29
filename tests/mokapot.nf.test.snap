@@ -7,29 +7,29 @@
                     "MS\u00b2Rescore": "3.1.5)"
                 },
                 "OPENMSTHIRDPARTY_COMETADAPTER": {
-                    "CometAdapter": "3.4.0",
+                    "CometAdapter": "3.4.1",
                     "Comet": "2024.01 rev. 1"
                 },
                 "OPENMS_DECOYDATABASE": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_IDFILTER_Q_VALUE": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_IDMASSACCURACY": {
-                    "OpenMS": "3.4.0"
+                    "OpenMS": "3.4.1"
                 },
                 "OPENMS_IDMERGER": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_IDSCORESWITCHER": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_PEPTIDEINDEXER": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_TEXTEXPORTER": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
@@ -112,6 +112,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-10-22T16:45:02.244970158"
+        "timestamp": "2025-10-28T22:04:22.998726246"
     }
 }

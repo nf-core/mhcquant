@@ -13,33 +13,33 @@
                     "MS\u00b2Rescore": "3.1.5)"
                 },
                 "OPENMSTHIRDPARTY_COMETADAPTER": {
-                    "CometAdapter": "3.4.0",
+                    "CometAdapter": "3.4.1",
                     "Comet": "2024.01 rev. 1"
                 },
                 "OPENMS_DECOYDATABASE": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_IDFILTER_Q_VALUE": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_IDMASSACCURACY": {
-                    "OpenMS": "3.4.0"
+                    "OpenMS": "3.4.1"
                 },
                 "OPENMS_IDMERGER": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_PEPTIDEINDEXER": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_PERCOLATORADAPTER": {
-                    "PercolatorAdapter": "3.4.0-pre-exported-20250510",
+                    "PercolatorAdapter": "3.4.1-pre-exported-20250822",
                     "percolator": "3.07.1, Build Date Mar 13 2025 17:19:27"
                 },
                 "OPENMS_PSMFEATUREEXTRACTOR": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_TEXTEXPORTER": {
-                    "openms": "3.4.0"
+                    "openms": "3.4.1"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
@@ -393,6 +393,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-10-22T17:09:21.471617445"
+        "timestamp": "2025-10-28T22:13:30.098880662"
     }
 }
