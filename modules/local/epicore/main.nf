@@ -4,7 +4,7 @@ process EPICORE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/epicore:0.1.6--pyhdfd78af_0' :
+        'https://depot.galaxyproject.org/singularity/epicore:0.1.7--pyhdfd78af_0' :
         'biocontainers/epicore:0.1.6--pyhdfd78af_0' }"
 
     input:
