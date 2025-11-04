@@ -2,7 +2,7 @@ process EPICORE {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::epicore=0.1.6"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/epicore:0.1.6--pyhdfd78af_0' :
         'biocontainers/epicore:0.1.6--pyhdfd78af_0' }"
