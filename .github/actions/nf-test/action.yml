@@ -52,7 +52,6 @@ runs:
       with:
         auto-update-conda: true
         conda-solver: libmamba
-        channel-priority: strict
         conda-remove-defaults: true
 
     - name: Run nf-test
