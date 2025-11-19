@@ -89,7 +89,7 @@ workflow MHCQUANT {
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
     // Prepare the comet input channel with global fasta or per-sample_condition fasta
-    ch_comet_in = params.fasta ? 
+    ch_comet_in = params.fasta ?
         ch_clean_mzml_file.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }) :
         ch_clean_mzml_file
             .map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta, mzml] }

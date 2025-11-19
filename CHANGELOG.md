@@ -33,7 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `Nf-core`  | 3.2.1       | 3.4.1       |
 | `OpenMS`   | 3.4.0       | 3.4.1       |
 
-
 ## 3.0.0 - Monrepos - 22/05/2025
 
 ### `Added`
