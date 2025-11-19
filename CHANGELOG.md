@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | Dependency | Old version | New version |
 | ---------- | ----------- | ----------- |
 | `EasyPQP`  | 0.1.51      | 0.1.53      |
-| `Epicore`  | 0.1.6       | 0.1.6       |
+| `Epicore`  |             | 0.1.6       |
 | `MultiQC`  | 1.28.0      | 1.31.0      |
 | `Nf-core`  | 3.2.1       | 3.4.1       |
 | `OpenMS`   | 3.4.0       | 3.4.1       |
