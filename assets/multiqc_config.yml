@@ -153,13 +153,6 @@ custom_data:
     section_name: "Epicore intensity histogram"
     description: "The histogram visualizes how many peptides contribute to each identified consensus epitope."
 
-#id: custom_box
-#plot_type: 'box'
-#section_name: 'Custom box plot'
-#description: "Box plot for a sample"
-#pconfig:
-#    title: 'Box plot'
-
 sp:
   chromatogram:
     fn: "*_chrom.csv"

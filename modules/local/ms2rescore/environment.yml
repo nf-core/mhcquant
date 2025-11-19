@@ -1,5 +1,7 @@
 channels:
   - conda-forge
   - bioconda
+  - anaconda
 dependencies:
+  - anaconda::sqlalchemy>=2.0
   - bioconda::ms2rescore=3.1.5
