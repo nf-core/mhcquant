@@ -22,7 +22,7 @@ You will need to create a samplesheet with information about the samples you wou
 | `ReplicateFileName` | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
 | `Fasta`             | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
 
-> [!WARNING]
+> [!NOTE]
 > The `Fasta` column is optional, but you can use it to provide sample-specific FASTA files. If you want to use the same FASTA file for all samples, provide it via the `--fasta` parameter. Please ensure you use one of these options.
 
 The pipeline will auto-detect whether a sample is either in mzML, raw or tdf file format using the information provided in the samplesheet.

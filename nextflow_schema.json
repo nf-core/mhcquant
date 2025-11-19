@@ -448,20 +448,20 @@
                     "description": "Compute core epitopes from overlapping peptides."
                 },
                 "epicore_min_overlap": {
-                    "type": "string",
-                    "default": "11",
+                    "type": "integer",
+                    "default": 11,
                     "fa_icon": "fas fa-filter",
                     "description": "Specify the minimal overlap of two peptides so they are grouped together."
                 },
                 "epicore_max_step_size": {
-                    "type": "string",
-                    "default": "5",
+                    "type": "integer",
+                    "default": 5,
                     "fa_icon": "fas fa-filter",
                     "description": "Specify the maximal difference between the start position of two peptides so they are still grouped together."
                 },
                 "epicore_min_epi_length": {
-                    "type": "string",
-                    "default": "11",
+                    "type": "integer",
+                    "default": 11,
                     "fa_icon": "fas fa-filter",
                     "description": "Specify the minimal length of an core epitope."
                 }

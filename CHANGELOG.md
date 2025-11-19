@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 3.1.0dev - [Release Name] - [Date]
+## 3.1.0 - BlüBa - 17/11/25
 
 ### `Added`
 
@@ -27,12 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Dependency | Old version | New version |
 | ---------- | ----------- | ----------- |
-| `MultiQC`  | 1.28.0      | 1.30.0      |
-| `Nf-core`  | 3.2.1       | 3.3.2       |
 | `EasyPQP`  | 0.1.51      | 0.1.53      |
+| `Epicore`  | 0.1.6       | 0.1.6       |
+| `MultiQC`  | 1.28.0      | 1.31.0      |
+| `Nf-core`  | 3.2.1       | 3.4.1       |
 | `OpenMS`   | 3.4.0       | 3.4.1       |
 
-### `Deprecated`
 
 ## 3.0.0 - Monrepos - 22/05/2025
 
