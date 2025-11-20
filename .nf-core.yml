@@ -2,7 +2,7 @@ lint:
   files_unchanged:
     - .github/CONTRIBUTING.md
     - .vscode/settings.json
-nf_core_version: 3.4.1
+nf_core_version: 3.5.1
 repository_type: pipeline
 template:
   author: Jonas Scheid, Steffen Lemke, Leon Bichmann, Marissa Dubbelaar
@@ -12,4 +12,7 @@ template:
   name: mhcquant
   org: nf-core
   outdir: .
+  skip_features:
+    - fastqc
+    - igenomes
   version: 3.1.0
