@@ -57,6 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template update 3.2.1 [#369](https://github.com/nf-core/mhcquant/pull/369)
 - Bump OpenMS version 3.1.0 -> 3.4.0 [#370](https://github.com/nf-core/mhcquant/pull/358)
 
+### `Changed`
+
+- Temporarily drop conda and epicore testing due to unstable CI tests [#426](https://github.com/nf-core/mhcquant/pull/426)
+
 ### `Dependencies`
 
 | Dependency            | Old version | New version |
