@@ -159,6 +159,9 @@ This approach is particularly useful when creating reference libraries for subse
 
 ## Epicore
 
+> [!NOTE]
+> This tool is still experimental and under active development.
+
 Length variants of HLA peptides, especially HLA class II peptides, pose a distinct challenge when performing downstream cohort-wide analyses. [Epicore](https://github.com/AG-Walz/epicore) uses rules-based parameters to aggregate length variants of the same epitope into a `consensus epitope`.
 
 Run epicore in the pipeline:
