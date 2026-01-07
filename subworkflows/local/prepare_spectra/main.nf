@@ -20,7 +20,7 @@ workflow PREPARE_SPECTRA {
         .branch {
             meta, filename ->
                 raw : meta.ext == 'raw'
-                    return [ meta, filename ]
+                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
                 mzml : meta.ext == 'mzml'
                     return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
                 mzml_gz : meta.ext == 'mzml.gz'

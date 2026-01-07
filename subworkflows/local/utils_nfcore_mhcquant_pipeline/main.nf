@@ -11,6 +11,7 @@
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
 include { samplesheetToList         } from 'plugin/nf-schema'
+include { paramsHelp                } from 'plugin/nf-schema'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
@@ -32,6 +33,9 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
+    help              // boolean: Display help message and exit
+    help_full         // boolean: Show the full help message
+    show_hidden       // boolean: Show hidden parameters in the help message
 
     main:
 
@@ -50,10 +54,35 @@ workflow PIPELINE_INITIALISATION {
     //
     // Validate parameters and generate parameter summary to stdout
     //
+    before_text = """
+-\033[2m----------------------------------------------------\033[0m-
+                                        \033[0;32m,--.\033[0;30m/\033[0;32m,-.\033[0m
+\033[0;34m        ___     __   __   __   ___     \033[0;32m/,-._.--~\'\033[0m
+\033[0;34m  |\\ | |__  __ /  ` /  \\ |__) |__         \033[0;33m}  {\033[0m
+\033[0;34m  | \\| |       \\__, \\__/ |  \\ |___     \033[0;32m\\`-._,-`-,\033[0m
+                                        \033[0;32m`._,._,\'\033[0m
+\033[0;35m  nf-core/mhcquant ${workflow.manifest.version}\033[0m
+-\033[2m----------------------------------------------------\033[0m-
+"""
+    after_text = """${workflow.manifest.doi ? "\n* The pipeline\n" : ""}${workflow.manifest.doi.tokenize(",").collect { "    https://doi.org/${it.trim().replace('https://doi.org/','')}"}.join("\n")}${workflow.manifest.doi ? "\n" : ""}
+* The nf-core framework
+    https://doi.org/10.1038/s41587-020-0439-x
+
+* Software dependencies
+    https://github.com/nf-core/mhcquant/blob/master/CITATIONS.md
+"""
+    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
+
     UTILS_NFSCHEMA_PLUGIN (
         workflow,
         validate_params,
-        null
+        null,
+        help,
+        help_full,
+        show_hidden,
+        before_text,
+        after_text,
+        command
     )
 
     //
@@ -69,21 +98,58 @@ workflow PIPELINE_INITIALISATION {
 
     Channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map { meta, file ->  [meta.subMap('sample','condition'), meta, file] }
+        .map { meta, file, fasta -> [meta.subMap('sample','condition'), meta, file, fasta] }
         .tap { ch_input }
         .groupTuple()
         // get number of files per sample-condition
-        .map { group_meta, metas, files -> [ group_meta, files.size()] }
+        .map { group_meta, metas, files, fastas -> [ group_meta, files.size()] }
         .combine( ch_input, by:0 )
-        .map { group_meta, group_count, meta, file -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file] }
-        .set { ch_samplesheet }
+        .map { group_meta, group_count, meta, file, fasta -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file, fasta] }
+        .set { ch_samplesheet_raw }
+
+    ch_samplesheet = ch_samplesheet_raw.map { meta, file, fasta -> [ meta, file ]}
 
     //
-    // Create channel from the mandatory reference_database through params.fasta
+    // Create channel from the reference_database through params.fasta or from the samplesheet fasta files
     //
-    Channel.fromPath(params.fasta, checkIfExists: true)
-        .map { fasta -> [[id:fasta.getBaseName()], fasta] }
-        .set { ch_fasta }
+
+    if (params.fasta) {
+        Channel.fromPath(params.fasta, checkIfExists: true)
+            .map { fasta -> [[id:fasta.getBaseName()], fasta] }
+            .set { ch_fasta }
+
+        ch_samplesheet_raw
+            .map{ meta, file, fasta -> fasta }
+            .flatten()
+            .first()
+            .subscribe {
+                log.warn """\
+                    Both --fasta and samplesheet FASTA files were provided!
+                    The pipeline will use --fasta (${params.fasta}), ignoring samplesheet FASTA entries.
+                    To use the samplesheet FASTA files instead, remove the --fasta parameter.
+                    """.stripIndent()
+            }
+
+    } else {
+        // Check if the FASTA files were provided in the samplesheet
+        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), fasta] }
+        ch_fasta
+            .map { meta, fasta -> fasta }
+            .flatten()
+            .ifEmpty {
+                error '''\
+                    Error: No FASTA files provided.
+                    Please either:
+                    1. Use --fasta parameter, or
+                    2. Include a 'Fasta' column in your samplesheet
+                    '''.stripIndent()
+            }
+        // Group FASTA files by sample and condition and keep only the first FASTA file per sample-condition
+        ch_fasta
+            .groupTuple()
+            .map { group_meta, fastas -> [group_meta, fastas.first()] }
+            .set { ch_fasta }
+    }
 
     emit:
     samplesheet = ch_samplesheet
@@ -236,4 +302,3 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
-

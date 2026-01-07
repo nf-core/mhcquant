@@ -2,4 +2,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::datamash=1.1.0
+  - bioconda::epicore=0.1.7

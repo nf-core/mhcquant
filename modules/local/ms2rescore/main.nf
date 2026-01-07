@@ -4,8 +4,8 @@ process MS2RESCORE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ms2rescore:3.1.5--pyh7e72e81_0':
-        'biocontainers/ms2rescore:3.1.5--pyh7e72e81_0' }"
+        'https://depot.galaxyproject.org/singularity/ms2rescore:3.1.5--pyhdfd78af_1':
+        'biocontainers/ms2rescore:3.1.5--pyhdfd78af_1' }"
 
     // userEmulation settings when docker is specified
     containerOptions = (workflow.containerEngine == 'docker') ? '-u $(id -u) -e "HOME=${HOME}" -v /etc/passwd:/etc/passwd:ro -v /etc/shadow:/etc/shadow:ro -v /etc/group:/etc/group:ro -v $HOME:$HOME' : ''

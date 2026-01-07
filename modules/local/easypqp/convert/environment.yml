@@ -2,4 +2,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::easypqp=0.1.51
+  - bioconda::easypqp=0.1.53

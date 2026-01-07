@@ -103,10 +103,12 @@ def process_file(file, prefix, quantify, keep_cols):
         n_psms = np.sum(data["psm"])
     else:
         data = pd.read_csv(file, sep='\t')
+        # Remove the special character '#' from the first column name
+        data.rename(columns={data.columns[0]: data.columns[0].replace('#', '')}, inplace=True)
         n_psms = 0
 
     # Check if all required columns are present in the DataFrame
-    required_columns = ['sequence', 'accessions', 'mz', 'observed_retention_time_best', 'score', 'COMET:xcorr']
+    required_columns = ['sequence', 'accessions', 'mz', 'rt', 'score', 'COMET:xcorr']
     missing_columns = set(required_columns) - set(data.columns)
     if data.shape[0] > 0:  # If the DataFrame is not empty
         if missing_columns:
@@ -118,23 +120,26 @@ def process_file(file, prefix, quantify, keep_cols):
         data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
         return
 
+    # Remove modification information from the sequence column
+    data["peptidoform"] = data["sequence"]
+    data["sequence"] = data["sequence"].apply(lambda seq: re.sub(r'\(.*?\)', '', seq))
+
     # ---------------------------------
     # Length distribution plot
     # ---------------------------------
 
-    # Remove everything inside parentheses, including the parentheses.
-    seq_length = data["sequence"].apply(lambda seq: len(re.sub(r'\(.*?\)', '', seq)))
+    seq_length = data["sequence"].apply(lambda seq: len(seq))
     seq_length = dict(Counter(seq_length))
     with open(f"{prefix}_peptide_length.csv", "w") as f:
         for length, count in seq_length.items():
-            f.write(f"{length},{count}\n")
+            f.write(f"{length},{count / len(data.index)}\n")
 
     # ---------------------------------
     # General statistics
     # ---------------------------------
 
     n_peptides = len(set(data["sequence"]))
-    n_modified_peptides = sum(1 for s in set(data["sequence"]) if '(' in s)
+    n_modified_peptides = sum(1 for s in set(data["peptidoform"]) if '(' in s)
     # Split the accession codes and count each protein accession individually
     n_proteins = len(set([protein for entry in data["accessions"] for protein in entry.split(';')]))
     with open(f"{prefix}_general_stats.csv", "w") as f:
@@ -146,9 +151,8 @@ def process_file(file, prefix, quantify, keep_cols):
     # ---------------------------------
 
     histograms = [[data["mz"].astype(float), f"{prefix}_histogram_mz.csv"],
-                  [data["observed_retention_time_best"].astype(float), f"{prefix}_histogram_rt.csv"],
-                  [data["score"].astype(float), f"{prefix}_histogram_scores.csv"],
-                  [data["COMET:xcorr"].astype(float), f"{prefix}_histogram_xcorr_scores.csv"]]
+                  [data["rt"].astype(float), f"{prefix}_histogram_rt.csv"],
+                  [data["score"].astype(float), f"{prefix}_histogram_scores.csv"]]
 
     for values, title in histograms:
         hist, bin_edges = np.histogram(values, bins='auto')
@@ -156,6 +160,19 @@ def process_file(file, prefix, quantify, keep_cols):
             for i in range(len(bin_edges) - 1):
                 bin_midpoint = (bin_edges[i] + bin_edges[i + 1]) / 2
                 f.write(f'{bin_midpoint},{hist[i]}\n')
+
+    # ---------------------------------
+    # Box plots
+    # ---------------------------------
+    data["COMET:xcorr"].astype(float).to_csv(
+        f"{prefix}_xcorr_scores.csv", index=False, header=False
+    )
+    if 'intensity_cf' in data.columns:
+        np.log2(data["intensity_cf"].astype(float)).to_csv(
+            f"{prefix}_peptide_intensity.csv",
+            index=False,
+            header=False
+        )
 
     # Filter the columns down to a user-defined subset of columns
     if keep_cols:
@@ -170,6 +187,13 @@ def process_file(file, prefix, quantify, keep_cols):
         # Remove duplicates while retaining order
         keep_cols = list(dict.fromkeys(keep_cols))
         data = data.loc[:, keep_cols]
+
+    # Round all floating point values to 5 decimal places to ensure nf-test checksum stability is guaranteed
+    float_cols = data.select_dtypes(include=['float']).columns
+    data.loc[:, float_cols] = data.loc[:, float_cols].round(5)
+
+    # Add a column with unique protein accessions
+    data['unique_accessions'] = data['accessions'].map(lambda x: ';'.join(dict.fromkeys(x.split(';'))))
 
     data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
 

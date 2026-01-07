@@ -48,7 +48,6 @@
             "type": "object",
             "fa_icon": "fas fa-database",
             "description": "Decoy Database generation settings",
-            "required": ["fasta"],
             "properties": {
                 "fasta": {
                     "type": "string",
@@ -59,6 +58,7 @@
                 },
                 "skip_decoy_generation": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Add this parameter when you want to skip the generation of the decoy database.",
                     "help_text": "If you want to use your own decoys, you can specify a dataset that includes decoy sequences. However, each database entry should keep the prefix 'DECOY_'."
@@ -139,11 +139,13 @@
                 },
                 "digest_mass_range": {
                     "type": "string",
+                    "default": "800:2500",
                     "fa_icon": "fas fa-line-height",
                     "description": "Specify the mass range in Dalton that peptides should fulfill to be considered for peptide spectrum matching."
                 },
                 "prec_charge": {
                     "type": "string",
+                    "default": "2:3",
                     "fa_icon": "fas fa-bolt",
                     "description": "Specify the precursor charge range that peptides should fulfill to be considered for peptide spectrum matching."
                 },
@@ -202,34 +204,39 @@
                 },
                 "use_x_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include x ions into the peptide spectrum matching"
                 },
                 "use_z_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include z ions into the peptide spectrum matching"
                 },
                 "use_a_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include a ions into the peptide spectrum matching"
                 },
                 "use_c_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include c ions into the peptide spectrum matching"
                 },
                 "use_NL_ions": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-wave-sine",
                     "description": "Include NL ions into the peptide spectrum matching"
                 },
                 "remove_precursor_peak": {
                     "type": "boolean",
+                    "default": false,
                     "fa_icon": "fas fa-pipe",
-                    "description": "Include if you want to remove all peaks around precursor m/z",
-                    "default": "false"
+                    "description": "Include if you want to remove all peaks around precursor m/z"
                 },
                 "spectrum_batch_size": {
                     "type": "integer",
@@ -427,6 +434,39 @@
                 }
             }
         },
+        "epicore_options": {
+            "title": "Epicore Options",
+            "type": "object",
+            "fa_icon": "fa-solid fa-stairs",
+            "description": "",
+            "default": "",
+            "properties": {
+                "epicore": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fa-solid fa-stairs",
+                    "description": "Compute core epitopes from overlapping peptides."
+                },
+                "epicore_min_overlap": {
+                    "type": "integer",
+                    "default": 11,
+                    "fa_icon": "fas fa-filter",
+                    "description": "Specify the minimal overlap of two peptides so they are grouped together."
+                },
+                "epicore_max_step_size": {
+                    "type": "integer",
+                    "default": 5,
+                    "fa_icon": "fas fa-filter",
+                    "description": "Specify the maximal difference between the start position of two peptides so they are still grouped together."
+                },
+                "epicore_min_epi_length": {
+                    "type": "integer",
+                    "default": 11,
+                    "fa_icon": "fas fa-filter",
+                    "description": "Specify the minimal length of an core epitope."
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -484,6 +524,7 @@
             "properties": {
                 "version": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
@@ -507,6 +548,7 @@
                 },
                 "plaintext_email": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Send plain-text email instead of HTML.",
                     "fa_icon": "fas fa-remove-format",
                     "hidden": true
@@ -521,6 +563,7 @@
                 },
                 "monochrome_logs": {
                     "type": "boolean",
+                    "default": false,
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
                     "hidden": true
@@ -569,6 +612,18 @@
                     "fa_icon": "far calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
+                },
+                "help": {
+                    "type": ["boolean", "string"],
+                    "description": "Display the help message."
+                },
+                "help_full": {
+                    "type": "boolean",
+                    "description": "Display the full detailed help message."
+                },
+                "show_hidden": {
+                    "type": "boolean",
+                    "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
         }
@@ -594,6 +649,9 @@
         },
         {
             "$ref": "#/$defs/post_processing"
+        },
+        {
+            "$ref": "#/$defs/epicore_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

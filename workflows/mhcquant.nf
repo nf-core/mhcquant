@@ -9,10 +9,10 @@
 //
 
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chromatogramextractor'
-include { DATAMASH_HISTOGRAM             } from '../modules/local/datamash_histogram'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
 include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
+include { EPICORE                        } from '../modules/local/epicore'
 
 //
 // SUBWORKFLOW: Loaded from subworkflows/local/
@@ -69,9 +69,9 @@ workflow MHCQUANT {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
         ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
-        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta.map{ meta, fasta -> [fasta] }
+        ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
     } else {
-        ch_decoy_db = ch_fasta.map{ meta, fasta -> [fasta] }
+        ch_decoy_db = ch_fasta
     }
 
     // Optionally clean up mzML files
@@ -88,21 +88,33 @@ workflow MHCQUANT {
     ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
-    // Run comet database search
-    OPENMSTHIRDPARTY_COMETADAPTER(ch_clean_mzml_file.combine(ch_decoy_db))
+    // Prepare the comet input channel with global fasta or per-sample_condition fasta
+    ch_comet_in = params.fasta ?
+        ch_clean_mzml_file.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }) :
+        ch_clean_mzml_file
+            .map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta, mzml] }
+            .combine(ch_decoy_db, by: 0)
+            .map { groupKey, meta, mzml, fasta -> [meta, mzml, fasta] }
+
+    // Run comet database search and index decoy and target hits
+    OPENMSTHIRDPARTY_COMETADAPTER(ch_comet_in)
     ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
 
-    // Index decoy and target hits
-    OPENMS_PEPTIDEINDEXER(OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db))
+    // Prepare the peptideindexer channel with global fasta or per-sample_condition fasta
+    ch_peptideindexer_in = params.fasta ?
+        OPENMSTHIRDPARTY_COMETADAPTER.out.idxml.combine(ch_decoy_db.map{ meta, fasta -> [fasta] }) :
+        OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
+            .map { meta, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta, idxml] }
+            .combine(ch_decoy_db, by: 0)
+            .map { groupKey, meta, idxml, fasta -> [meta, idxml, fasta] }
+
+    OPENMS_PEPTIDEINDEXER(ch_peptideindexer_in)
     ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Compute mass errors for multiQC report
     OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.indexed_idxml))
     ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
-    // Bin and count mass errors for multiQC report
-    DATAMASH_HISTOGRAM(OPENMS_IDMASSACCURACY.out.frag_err)
-    ch_versions = ch_versions.mix(DATAMASH_HISTOGRAM.out.versions)
-    ch_multiqc_files = ch_multiqc_files.mix(DATAMASH_HISTOGRAM.out.binned_tsv.map{ meta, frag_err_hist -> frag_err_hist })
+    ch_multiqc_files = ch_multiqc_files.mix(OPENMS_IDMASSACCURACY.out.frag_err.map{ meta, frag_err -> frag_err })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.indexed_idxml
@@ -193,13 +205,29 @@ workflow MHCQUANT {
     SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
     ch_versions = ch_versions.mix(SUMMARIZE_RESULTS.out.versions)
 
+    //
+    // EPICORE
+    //
+    if (params.epicore) {
+        EPICORE(ch_fasta.map{ it.last()}, SUMMARIZE_RESULTS.out.epicore_input)
+        ch_versions = ch_versions.mix(EPICORE.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(
+            EPICORE.out.length_dist,
+            EPICORE.out.intensity_hist
+        )
+    }
+
+    //
+    // Collate MultiQC files
+    //
     ch_multiqc_files = ch_multiqc_files.mix(
         SUMMARIZE_RESULTS.out.hist_mz,
         SUMMARIZE_RESULTS.out.hist_rt,
         SUMMARIZE_RESULTS.out.hist_scores,
-        SUMMARIZE_RESULTS.out.hist_xcorr,
+        SUMMARIZE_RESULTS.out.xcorr,
         SUMMARIZE_RESULTS.out.lengths,
-        SUMMARIZE_RESULTS.out.stats
+        SUMMARIZE_RESULTS.out.intensities,
+        params.epicore ? EPICORE.out.stats : SUMMARIZE_RESULTS.out.epicore_input.map { meta, tsv, stats -> stats }
     )
 
     //
@@ -212,7 +240,6 @@ workflow MHCQUANT {
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
-
 
     //
     // MODULE: MultiQC

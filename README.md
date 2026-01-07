@@ -5,23 +5,25 @@
   </picture>
 </h1>
 
-[![GitHub Actions CI Status](https://github.com/nf-core/mhcquant/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/mhcquant/actions/workflows/ci.yml)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/nf-core/mhcquant)
+[![GitHub Actions CI Status](https://github.com/nf-core/mhcquant/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/mhcquant/actions/workflows/nf-test.yml)
 [![GitHub Actions Linting Status](https://github.com/nf-core/mhcquant/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/mhcquant/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/mhcquant/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.8427707-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.8427707)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A524.04.2-23aa62.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/version-%E2%89%A525.04.0-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
+[![nf-core template version](https://img.shields.io/badge/nf--core_template-3.4.1-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.4.1)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/nf-core/mhcquant)
 
-[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23mhcquant-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/mhcquant)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
+[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23mhcquant-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/mhcquant)[![Follow on Bluesky](https://img.shields.io/badge/bluesky-%40nf__core-1185fe?labelColor=000000&logo=bluesky)](https://bsky.app/profile/nf-co.re)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
 ## Introduction
 
 **nfcore/mhcquant** is a best-practice bioinformatics pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).
 
-The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore. FDR rescoring is applied using Percolator based on a competitive target-decoy approach. For label free quantification all input files undergo identification-based retention time alignment, and targeted feature extraction matching ids between runs.
+The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore. FDR rescoring is applied using Percolator or Mokapot based on a competitive target-decoy approach. The pipeline supports both local FDR control (per sample-condition group) and global FDR control (across all samples). For label-free quantification, all input files undergo identification-based retention time alignment and targeted feature extraction matching ids between runs. The pipeline can also generate spectrum libraries suitable for DIA-based searches as well as computing consensus epitopes using epicore.
 
 ![overview](assets/mhcquant_subway.png)
 
@@ -53,11 +55,27 @@ Each row represents a mass spectrometry run in one of the formats: raw, RAW, mzM
 Now, you can run the pipeline using:
 
 ```bash
-nextflow run nf-core/mhcquant
+nextflow run nf-core/mhcquant \
     -profile <docker/singularity/.../institute> \
     --input 'samplesheet.tsv' \
     --fasta 'SWISSPROT_2020.fasta' \
     --outdir ./results
+```
+
+Optional parameters for additional functionality:
+
+```bash
+# Enable quantification, global FDR and spectrum library generation, ion annotations, and consenus epitopes
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --annotate_ions \
+    --epicore \
+    --generate_speclib \
+    --global_fdr \
+    --quantify \
+    --outdir ./results \
+    -profile docker
 ```
 
 > [!WARNING]
@@ -71,33 +89,52 @@ For more details and further functionality, please refer to the [usage documenta
 
 By default the pipeline currently performs identification of MHC class I peptides with HCD settings:
 
-- Preparing spectra dependent on the input format (`PrepareSpectra`)
-- Creation of reversed decoy database (`DecoyDatabase`)
-- Identification of peptides in the MS/MS spectra (`CometAdapter`)
-- Refreshes the protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
-- Merges identification files with the same `Sample` and `Condition` label (`IDMerger`)
-- Prediction of retention times and MS2 intensities (`MS²Rescore`)
-- Extract PSM features for Percolator (`PSMFeatureExtractor`)
-- Peptide-spectrum-match rescoring using Percolator (`PercolatorAdapter`)
-- Filters peptide identification result according to 1\% FDR (`IDFilter`)
-- Converts identification result to tab-separated files (`TextExporter`)
-- Converts identification result to mzTab files (`MzTabExporter`)
+- **Spectra Preparation**: Preparing spectra dependent on the input format (`PREPARE_SPECTRA` subworkflow)
+- **Database Preparation**: Creation of reversed decoy database (`DecoyDatabase`)
+- **Peptide Identification**: Identification of peptides in the MS/MS spectra (`CometAdapter`)
+- **Database Indexing**: Refreshes protein references for all peptide hits and adds target/decoy information (`PeptideIndexer`)
+- **Identification Merging**: Merges identification files with the same `Sample` and `Condition` label (`IDMerger`)
+- **Rescoring**: Feature prediction and peptide-spectrum-match rescoring (`RESCORE` subworkflow)
+  - Prediction of retention times and MS2 intensities (`MS²Rescore`)
+  - Extract PSM features for rescoring engines (`PSMFeatureExtractor`)
+  - Peptide-spectrum-match rescoring using Percolator or Mokapot (`PercolatorAdapter`)
+  - Filters peptide identification result according to configurable FDR threshold (`IDFilter`)
+- **Export**: Converts identification result to tab-separated files (`TextExporter`)
+
+### FDR Control Modes
+
+The pipeline supports two FDR control strategies:
+
+- **Local FDR** (default): FDR control applied per `Sample` and `Condition` group
+- **Global FDR**: FDR control applied across all samples in the dataset (enable with `--global_fdr`)
 
 ### Additional Steps
 
 Additional functionality contained by the pipeline currently includes:
 
-#### Quantification
+#### Quantification (`QUANT` subworkflow)
 
-- Corrects retention time distortions between runs (`MapAlignerIdentification`)
-- Applies retention time transformations to runs (`MapRTTransformer`)
-- Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
-- Group corresponding features across label-free experiments (`FeatureLinkerUnlabeledKD`)
-- Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
+When enabled with `--quantify`, the pipeline performs label-free quantification:
 
-#### Output
+- **Alignment**: Corrects retention time distortions between runs (`MAP_ALIGNMENT` subworkflow)
+  - Corrects retention time distortions between runs (`MapAlignerIdentification`)
+  - Applies retention time transformations to runs (`MapRTTransformer`)
+- **Feature Processing**: Detects and processes features (`PROCESS_FEATURE` subworkflow)
+  - Detects features in MS1 data based on peptide identifications (`FeatureFinderIdentification`)
+  - Group corresponding features across label-free experiments (`FeatureLinkerUnlabeledKD`)
+  - Resolves ambiguous annotations of features with peptide identifications (`IDConflictResolver`)
+
+#### Spectrum Library Generation (`SPECLIB` subworkflow)
+
+When enabled with `--generate_speclib`, the pipeline generates spectrum libraries suitable for DIA-based searches. Outputs one library per sample or a single library across all samples (if global FDR mode is enabled with `--global_fdr`).
+
+#### Ion Annotation (`IONANNOTATOR` subworkflow)
+
+The pipeline annotates the final list of peptides with their respective ions and charges:
 
 - Annotates final list of peptides with their respective ions and charges (`IonAnnotator`)
+
+#### Output
 
 ## Documentation
 
@@ -107,7 +144,7 @@ For more details about the output files and reports, please refer to the
 
 1. [Nextflow installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
-   - [Pipeline installation](https://nf-co.re/usage/local_installation)
+   - [Pipeline installation](https://nf-co.re/docs/usage/getting_started/offline)
    - [Adding your own system config](https://nf-co.re/usage/adding_own_config)
 3. [Running the pipeline](https://nf-co.re/mhcquant/docs/usage.md)
    - This includes tutorials, FAQs, and troubleshooting instructions
@@ -131,6 +168,7 @@ Helpful contributors:
 - [Sven Fillinger](https://github.com/sven1103)
 - [Kevin Menden](https://github.com/KevinMenden)
 - [Julia Graf](https://github.com/JuliaGraf)
+- [Jana Hoffmann](https://github.com/janaHoffmann1)
 
 ## Contributions and Support
 
@@ -140,7 +178,13 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
-If you use nf-core/mhcquant for your analysis, please cite it using the following doi: [10.5281/zenodo.1569909](https://doi.org/10.5281/zenodo.1569909) and the corresponding manuscript:
+If you use nf-core/mhcquant for your analysis, please cite the corresponding manuscript: [10.1186/s13059-025-03763-8](https://doi.org/10.1186/s13059-025-03763-8)
+
+> **MHCquant2 refines immunopeptidomics tumor antigen discovery**
+>
+> Jonas Scheid, Steffen Lemke, Naomi Hoenisch-Gravel, Anna Dengler, Timo Sachsenberg, Arthur Declerq, Ralf Gabriels, Jens Bauer, Marcel Wacker, Leon Bichmann, Lennart Martens, Marissa L. Dubbelaar, Sven Nahnsen & Juliane S. Walz
+>
+> _Genome Biology_ 2025 26 (1), 290. doi: [10.1021/acs.jproteome.9b00313](https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00313)
 
 > **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**
 >
