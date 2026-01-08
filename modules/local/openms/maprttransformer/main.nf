@@ -18,6 +18,8 @@ process OPENMS_MAPRTTRANSFORMER {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}_aligned"
     def fileExt = alignment_file.collect { it.name.tokenize("\\.")[1] }.join(' ')
 
     """

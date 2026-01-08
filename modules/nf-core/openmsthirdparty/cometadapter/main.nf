@@ -13,7 +13,7 @@ process OPENMSTHIRDPARTY_COMETADAPTER {
     output:
     tuple val(meta), path("*.idXML"), emit: idxml
     tuple val(meta), path("*.tsv")  , emit: pin, optional: true
-    path "versions.yml"             , emit: versions
+    tuple val("${task.process}"), val('CometAdapter'), eval("CometAdapter 2>&1 | grep -E '^Version' | sed 's/Version: //g' | cut -d ' ' -f 1 | cut -d '-' -f 1"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,13 +29,6 @@ process OPENMSTHIRDPARTY_COMETADAPTER {
         -out ${prefix}.idXML \\
         -threads $task.cpus \\
         $args
-
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        CometAdapter: \$(CometAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1 | cut -d '-' -f 1)
-        Comet: \$(comet 2>&1 | grep -E "Comet version.*" | sed 's/Comet version //g' | sed 's/"//g')
-    END_VERSIONS
     """
 
     stub:
@@ -45,11 +38,5 @@ process OPENMSTHIRDPARTY_COMETADAPTER {
     """
     touch ${prefix}.idXML
     touch ${prefix}_pin.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        CometAdapter: \$(CometAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1 | cut -d '-' -f 1)
-        Comet: \$(comet 2>&1 | grep -E "Comet version.*" | sed 's/Comet version //g' | sed 's/"//g')
-    END_VERSIONS
     """
 }

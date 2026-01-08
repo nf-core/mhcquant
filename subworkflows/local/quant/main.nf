@@ -38,12 +38,12 @@ workflow QUANT {
                         .map { meta -> [[spectra:meta.spectra], meta]} )
                 .map { spectra, idxmls, meta -> [meta, idxmls] }
                 .set { ch_ripped_idxml }
-        ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions)
+        // ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions)
 
         // Switch to xcorr for filtering since q-values are set to 1 with peptide-level-fdr
         if (params.fdr_level == 'peptide_level_fdrs'){
             ch_runs_score_switched = OPENMS_IDSCORESWITCHER( ch_ripped_idxml ).idxml
-            ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
+            // ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         } else {
             ch_runs_score_switched = ch_ripped_idxml
         }
@@ -61,7 +61,7 @@ workflow QUANT {
                 .map { meta, idxml -> [ groupKey([id:"${meta.sample}_${meta.condition}"], meta.group_count), idxml] }
                 .groupTuple()
                 .set { ch_runs_to_be_aligned }
-        ch_versions = ch_versions.mix(OPENMS_IDFILTER_QUANT.out.versions)
+        // ch_versions = ch_versions.mix(OPENMS_IDFILTER_QUANT.out.versions)
 
         // Align retention times of runs
         MAP_ALIGNMENT(
@@ -75,7 +75,7 @@ workflow QUANT {
         OPENMS_IDMERGER_QUANT( MAP_ALIGNMENT.out.aligned_idxml
                                     .map { meta, aligned_idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), aligned_idxml] }
                                     .groupTuple())
-        ch_versions = ch_versions.mix(OPENMS_IDMERGER_QUANT.out.versions)
+        // ch_versions = ch_versions.mix(OPENMS_IDMERGER_QUANT.out.versions)
 
         // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
         MAP_ALIGNMENT.out.aligned_mzml

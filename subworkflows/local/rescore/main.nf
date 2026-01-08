@@ -40,12 +40,12 @@ workflow RESCORE {
         }
         // Switch comet e-value to mokapot q-value
         OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
+        // ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
 
         // Filter by mokapot q-value
         OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
-        ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
+        // ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
         ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
 
     } else {
@@ -65,7 +65,7 @@ workflow RESCORE {
             ch_rescored_runs = OPENMS_PERCOLATORADAPTER_GLOBAL.out.idxml
             // Filter by global percolator q-value
             OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map {id, idxml -> [id, idxml, []]})
-            ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.versions)
+            // ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.versions)
             // Backfilter sample_condition runs according to global FDR
             OPENMS_IDFILTER_GLOBAL(ch_pout.combine(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered.map{ it[1] }))
             ch_filter_q_value = OPENMS_IDFILTER_GLOBAL.out.filtered
@@ -76,7 +76,7 @@ workflow RESCORE {
             ch_rescored_runs = ch_pout
             // Filter by percolator q-value
             OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
-            ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
+            // ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
             ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
         }
     }

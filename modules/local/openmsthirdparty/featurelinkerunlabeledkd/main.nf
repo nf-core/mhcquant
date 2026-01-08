@@ -17,11 +17,12 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
     when:
     task.ext.when == null || task.ext.when
 
+    script:
     def prefix = task.ext.prefix ?: "${meta.id}_all_features_merged"
 
     """
     # cache buster
-    FeatureLinkerUnlabeledKD $features \\
+    FeatureLinkerUnlabeledKD -in $features \\
         -out ${prefix}.consensusXML \\
         -threads $task.cpus
     """

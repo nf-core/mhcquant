@@ -18,7 +18,6 @@ workflow PROCESS_FEATURE {
                 .map { meta, featurexml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), featurexml] }
                 .groupTuple()
                 .set { ch_features_grouped }
-                .set { ch_features_grouped }
 
         // Link extracted features
         OPENMS_FEATURELINKERUNLABELEDKD(ch_features_grouped)

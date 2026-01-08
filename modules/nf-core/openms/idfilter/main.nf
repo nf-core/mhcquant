@@ -12,7 +12,7 @@ process OPENMS_IDFILTER {
 
     output:
     tuple val(meta), path("*.{idXML,consensusXML}"), emit: filtered
-    path "versions.yml"                            , emit: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | grep -E '^Version' | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,12 +31,7 @@ process OPENMS_IDFILTER {
         -out ${prefix}.${suffix} \\
         -threads $task.cpus \\
         $filter \\
-        $args \\
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
+        $args
     """
 
     stub:
@@ -50,10 +45,5 @@ process OPENMS_IDFILTER {
 
     """
     touch ${prefix}.${suffix}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 }
