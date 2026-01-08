@@ -40,10 +40,8 @@ workflow PREPARE_SPECTRA {
 
         // Decompress timsTOF archive for data conversion
         UNTAR(branched_ms_files.d_tar)
-        ch_versions = ch_versions.mix(UNTAR.out.versions)
 
         UNZIP(branched_ms_files.d_zip)
-        ch_versions = ch_versions.mix(UNZIP.out.versions)
 
         ch_tdf_files = branched_ms_files.d
                             .mix(UNTAR.out.untar,
@@ -51,7 +49,6 @@ workflow PREPARE_SPECTRA {
 
         // timsTOF data conversion
         TDF2MZML(ch_tdf_files)
-        ch_versions = ch_versions.mix(TDF2MZML.out.versions)
 
         // Gunzip mzML files
         GUNZIP(branched_ms_files.mzml_gz)

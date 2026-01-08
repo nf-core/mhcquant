@@ -14,7 +14,7 @@ process EASYPQP_CONVERT {
     output:
     tuple val(meta), path("*.psmpkl") , emit: psmpkl
     tuple val(meta), path("*.peakpkl"), emit: peakpkl
-    path "versions.yml"               , emit: versions
+    tuple val("${task.process}"), val('easypqp'), eval("easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,11 +32,6 @@ process EASYPQP_CONVERT {
         --spectra $spectra \\
         --unimod $unimod \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        easypqp: \$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+')
-    END_VERSIONS
     """
 
     stub:
@@ -49,10 +44,5 @@ process EASYPQP_CONVERT {
 
     touch "${prefix}.psmpkl"
     touch "${prefix}.peakpkl"
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        easypqp: \$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+')
-    END_VERSIONS
     """
 }

@@ -62,7 +62,6 @@ workflow MHCQUANT {
 
     // Prepare spectra files (Decompress archives, convert to mzML, centroid if specified)
     PREPARE_SPECTRA(ch_samplesheet)
-    ch_versions = ch_versions.mix(PREPARE_SPECTRA.out.versions)
 
     // Decoy Database creation
     if (!params.skip_decoy_generation) {
@@ -85,7 +84,6 @@ workflow MHCQUANT {
 
     // Compute MS1 TICs for QC
     PYOPENMS_CHROMATOGRAMEXTRACTOR(ch_clean_mzml_file)
-    ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
     // Prepare the comet input channel with global fasta or per-sample_condition fasta
@@ -143,7 +141,6 @@ workflow MHCQUANT {
     // SUBWORKFLOW: RESCORE WITH MOKKAPOT OR PERCOLATOR AND FILTER BY Q-VALUE ON LOCAL/GLOBAL FDR
     //
     RESCORE( ch_rescore_in, ch_multiqc_files )
-    ch_versions = ch_versions.mix(RESCORE.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(RESCORE.out.multiqc_files)
 
     // GENERATE SPECTRUM LIBRARY
@@ -164,7 +161,6 @@ workflow MHCQUANT {
         // SUBWORKFLOW: SPECLIB
         //
         SPECLIB(ch_fdrfilter_comet_idxml_filtered, ch_clean_mzml_file)
-        ch_versions = ch_versions.mix(SPECLIB.out.versions)
     }
 
     //
@@ -172,7 +168,6 @@ workflow MHCQUANT {
     //
     if (params.quantify) {
         QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
-        ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
     } else {
         ch_output = RESCORE.out.fdr_filtered
@@ -188,12 +183,10 @@ workflow MHCQUANT {
 
         // Annotate spectra with ion fragmentation information
         PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
-        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions)
     }
 
     // Prepare for check if file is empty
     OPENMS_TEXTEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions)
     // Return an error message when there is only a header present in the document
     OPENMS_TEXTEXPORTER.out.tsv.map {
         meta, tsv -> if (tsv.size() < 130) {
@@ -203,14 +196,12 @@ workflow MHCQUANT {
 
     // Process the tsv file to facilitate visualization with MultiQC
     SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
-    ch_versions = ch_versions.mix(SUMMARIZE_RESULTS.out.versions)
 
     //
     // EPICORE
     //
     if (params.epicore) {
         EPICORE(ch_fasta.map{ it.last()}, SUMMARIZE_RESULTS.out.epicore_input)
-        ch_versions = ch_versions.mix(EPICORE.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(
             EPICORE.out.length_dist,
             EPICORE.out.intensity_hist

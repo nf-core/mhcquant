@@ -12,23 +12,18 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
 
     output:
     tuple val(meta), path("*.consensusXML"), emit: consensusxml
-    path "versions.yml"                    , emit: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | grep -E '^Version' | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
-    script:
     def prefix = task.ext.prefix ?: "${meta.id}_all_features_merged"
 
     """
-    FeatureLinkerUnlabeledKD -in $features \\
+    # cache buster
+    FeatureLinkerUnlabeledKD $features \\
         -out ${prefix}.consensusXML \\
         -threads $task.cpus
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -36,10 +31,5 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
 
     """
     touch ${prefix}.consensusXML
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms-thirdparty: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 }

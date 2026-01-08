@@ -32,7 +32,6 @@ workflow RESCORE {
 
     // Compute features via ms2rescore
     MS2RESCORE(ch_merged_runs)
-    ch_versions = ch_versions.mix(MS2RESCORE.out.versions)
 
     if (params.rescoring_engine == 'mokapot') {
         log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
@@ -52,11 +51,9 @@ workflow RESCORE {
     } else {
         // Extract PSM features for Percolator
         OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
-        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
 
         // Run Percolator with local FDR
         OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(OPENMS_PERCOLATORADAPTER.out.feature_weights.map{ meta, feature_weights -> feature_weights })
         ch_pout = OPENMS_PERCOLATORADAPTER.out.idxml
 

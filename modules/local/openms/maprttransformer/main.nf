@@ -12,28 +12,21 @@ process OPENMS_MAPRTTRANSFORMER {
 
     output:
     tuple val(meta), path("*_aligned.*"), emit: aligned
-    path "versions.yml"                 , emit: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | grep -E '^Version' | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args    = task.ext.args  ?: ''
-    def prefix  = task.ext.prefix ?: "${meta.id}"
     def fileExt = alignment_file.collect { it.name.tokenize("\\.")[1] }.join(' ')
 
     """
-    MapRTTransformer \\
-        -in $alignment_file \\
+    # cache buster
+    MapRTTransformer -in $alignment_file \\
         -trafo_in $trafoxml \\
         -out ${prefix}.${fileExt} \\
         -threads $task.cpus \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -42,10 +35,5 @@ process OPENMS_MAPRTTRANSFORMER {
 
     """
     touch ${prefix}.${fileExt}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 }

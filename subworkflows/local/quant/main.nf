@@ -92,7 +92,6 @@ workflow QUANT {
         ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions)
 
         OPENMS_MZTABEXPORTER(PROCESS_FEATURE.out.consensusxml)
-        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions)
 
     emit:
         consensusxml = PROCESS_FEATURE.out.consensusxml

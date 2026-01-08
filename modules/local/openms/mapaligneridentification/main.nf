@@ -12,7 +12,7 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
 
     output:
     tuple val(meta), path("*.trafoXML"), emit: trafoxml
-    path "versions.yml"                , emit: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | grep -E '^Version' | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -20,17 +20,12 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
     script:
     def args      = task.ext.args  ?: ''
     def out_names = idxmls.collect { it.baseName.replace('_fdr_filtered','')+'.trafoXML' }.join(' ')
-
+    
     """
-    MapAlignerIdentification \\
-        -in $idxmls \\
+    # cache buster
+    MapAlignerIdentification -in $idxmls \\
         -trafo_out ${out_names} \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -38,10 +33,5 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
     """
     touch test1.consensusXML
     touch test2.consensusXML
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 }

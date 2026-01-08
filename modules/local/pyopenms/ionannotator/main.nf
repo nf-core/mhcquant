@@ -12,7 +12,7 @@ process PYOPENMS_IONANNOTATOR {
 
     output:
     tuple val(meta), path("*.tsv")  , emit: tsv
-    path "versions.yml"             , emit: versions
+    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,12 +35,6 @@ process PYOPENMS_IONANNOTATOR {
         $zions \\
         $aions \\
         $cions
-
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
-    END_VERSIONS
     """
 
     stub:
@@ -49,10 +43,5 @@ process PYOPENMS_IONANNOTATOR {
     """
     touch ${prefix}_all_peaks.tsv
     touch ${prefix}_matching_ions.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
-    END_VERSIONS
     """
 }

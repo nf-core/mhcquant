@@ -12,7 +12,7 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
 
     output:
     tuple val(meta), path("*.csv")  , emit: csv
-    path "versions.yml"             , emit: versions
+    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,11 +25,6 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
     chromatogram_extractor.py \\
         -in $mzml \\
         -out ${prefix}_chrom.csv \\
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
-    END_VERSIONS
     """
 
     stub:
@@ -37,10 +32,5 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
 
     """
     touch ${prefix}_chrom.csv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
-    END_VERSIONS
     """
 }

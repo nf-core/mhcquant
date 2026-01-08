@@ -12,7 +12,7 @@ process UNTAR {
 
     output:
     tuple val(meta), path("*.d"), emit: untar
-    path "versions.yml"         , emit: versions
+    tuple val("${task.process}"), val('untar'), eval("echo \$(tar --version 2>&1) | sed 's/^.*(GNU tar) //; s/ Copyright.*\$//'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,11 +33,6 @@ process UNTAR {
         $archive \\
         --strip-components=\$depth \\
         $args2
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        untar: \$(echo \$(tar --version 2>&1) | sed 's/^.*(GNU tar) //; s/ Copyright.*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -46,10 +41,5 @@ process UNTAR {
     """
     mkdir $prefix
     touch ${prefix}/file.txt
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        untar: \$(echo \$(tar --version 2>&1) | sed 's/^.*(GNU tar) //; s/ Copyright.*\$//')
-    END_VERSIONS
     """
 }

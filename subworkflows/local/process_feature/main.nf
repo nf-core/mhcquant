@@ -18,15 +18,13 @@ workflow PROCESS_FEATURE {
                 .map { meta, featurexml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), featurexml] }
                 .groupTuple()
                 .set { ch_features_grouped }
-        ch_versions = ch_versions.mix(OPENMS_FEATUREFINDERIDENTIFICATION.out.versions)
+                .set { ch_features_grouped }
 
         // Link extracted features
         OPENMS_FEATURELINKERUNLABELEDKD(ch_features_grouped)
-        ch_versions = ch_versions.mix(OPENMS_FEATURELINKERUNLABELEDKD.out.versions)
 
         // Resolve conflicting ids matching to the same feature
         OPENMS_IDCONFLICTRESOLVER(OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml)
-        ch_versions = ch_versions.mix(OPENMS_IDCONFLICTRESOLVER.out.versions)
 
     emit:
         // Define the information that is returned by this workflow
