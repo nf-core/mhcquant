@@ -14,7 +14,7 @@ workflow MAP_ALIGNMENT {
         merge_meta_map
 
     main:
-        ch_versions = Channel.empty()
+        ch_versions = channel.empty()
 
         // Compute group-wise alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION( ch_runs_to_be_aligned )
