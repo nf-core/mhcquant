@@ -3,6 +3,19 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.2.0 - [releasename] - [date]
+
+### `Changed`
+
+- Migrate to topic channels  [#431](https://github.com/nf-core/mhcquant/pull/431)
+ 
+### `Dependencies`
+
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `MultiQC`  | 1.31.0      | 1.33.0      |
+| `Nf-core`  | 3.4.1       | 3.5.1       |
+
 ## 3.1.0 - BlüBa - 07/01/26
 
 ### `Added`
