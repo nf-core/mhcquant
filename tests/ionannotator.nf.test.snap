@@ -4,11 +4,11 @@
             22,
             {
                 "MS2RESCORE": {
-                    "MS\u00b2Rescore": "3.1.5)"
+                    "MS2Rescore": "3.1.5"
                 },
                 "OPENMSTHIRDPARTY_COMETADAPTER": {
-                    "CometAdapter": "3.4.1",
-                    "Comet": "2024.01 rev. 1"
+                    "Comet": "2024.01 rev. 1",
+                    "CometAdapter": "3.4.1"
                 },
                 "OPENMS_DECOYDATABASE": {
                     "openms": "3.4.1"
@@ -17,7 +17,7 @@
                     "openms": "3.4.1"
                 },
                 "OPENMS_IDMASSACCURACY": {
-                    "OpenMS": "3.4.1"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_IDMERGER": {
                     "openms": "3.4.1"
@@ -45,7 +45,7 @@
                     "pyopenms": "3.4.1"
                 },
                 "Workflow": {
-                    "nf-core/mhcquant": "v3.1.0"
+                    "nf-core/mhcquant": "v3.2.0dev"
                 }
             },
             [
@@ -405,6 +405,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-10-28T21:53:36.826911285"
+        "timestamp": "2026-01-09T10:04:59.923025945"
     }
 }
