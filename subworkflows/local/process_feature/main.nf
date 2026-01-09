@@ -11,7 +11,7 @@ workflow PROCESS_FEATURE {
         ch_runs_to_be_quantified
 
     main:
-        ch_versions = Channel.empty()
+        ch_versions = channel.empty()
 
         // Quantify identifications using targeted feature extraction
         OPENMS_FEATUREFINDERIDENTIFICATION(ch_runs_to_be_quantified).featurexml

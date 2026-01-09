@@ -14,7 +14,7 @@ workflow PREPARE_SPECTRA {
         ch_samplesheet
 
     main:
-        ch_versions = Channel.empty()
+        ch_versions = channel.empty()
 
         ch_samplesheet
         .branch {

@@ -25,7 +25,7 @@ workflow QUANT {
         mzml
 
     main:
-        ch_versions = Channel.empty()
+        ch_versions = channel.empty()
         // Split post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1] [meta_run2, idxml_run2] ...
         // We need to make sure that the order of the runs is the same as in the mzml files since IDRipper always sorts the runs
         // (and nextflow does not guarantee the order of the maps in merged_meta_map)
