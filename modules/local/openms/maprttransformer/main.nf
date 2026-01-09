@@ -23,7 +23,6 @@ process OPENMS_MAPRTTRANSFORMER {
     def fileExt = alignment_file.collect { it.name.tokenize("\\.")[1] }.join(' ')
 
     """
-    # cache buster
     MapRTTransformer -in $alignment_file \\
         -trafo_in $trafoxml \\
         -out ${prefix}.${fileExt} \\

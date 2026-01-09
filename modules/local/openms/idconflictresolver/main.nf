@@ -21,7 +21,6 @@ process OPENMS_IDCONFLICTRESOLVER {
     def prefix = task.ext.prefix ?: "${meta.id}_resolved"
     
     """
-    # cache buster
     IDConflictResolver -in $consensus \\
         -out ${prefix}.consensusXML \\
         -threads $task.cpus
