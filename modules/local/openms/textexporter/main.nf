@@ -22,7 +22,6 @@ process OPENMS_TEXTEXPORTER {
     def prefix = task.ext.prefix ?: "${meta.id}"
     
     """
-    # cache buster
     TextExporter -in $file \\
         -out ${prefix}_exported.tsv \\
         -threads $task.cpus \\

@@ -22,7 +22,6 @@ process OPENMS_MZTABEXPORTER {
     def prefix = task.ext.prefix ?: "${meta.id}"
     
     """
-    # cache buster
     MzTabExporter -in $in_file \\
         -out ${prefix}.mzTab \\
         -threads $task.cpus \\
