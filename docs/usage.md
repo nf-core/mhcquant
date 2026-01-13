@@ -31,7 +31,12 @@ An [example samplesheet](../assets/samplesheet.tsv) has been provided with the p
 
 ### Multiple runs of the same sample
 
-MS runs are merged on the `Sample` and `Condition` identifier combination before they are rescored with `Percolator`. Typically technical replicates of a sample are merged together to report one peptide list per sample. Below is an example of two runs from a treated and untreated tumor sample.
+MS runs are merged on the `Sample` and `Condition` identifier combination before they are rescored with `Percolator`. Typically technical replicates of a sample are merged together to report one peptide list per sample.
+
+> [!NOTE]
+> If you plan to use quantification mode (`--quantify`), ensure each `<Sample>_<Condition>` combination has at least 2 replicates (MS runs) to enable meaningful quantification.
+
+Below is an example of two runs from a treated and untreated tumor sample.
 
 ```tsv title="samplesheet.tsv
 ID	Sample	Condition	ReplicateFileName
@@ -117,6 +122,9 @@ nextflow run nf-core/mhcquant \
     --quantify \
     -profile docker
 ```
+
+> [!IMPORTANT]
+> When using quantification mode, **at least 2 replicates** (MS runs) per `<Sample>_<Condition>` combination are required for meaningful quantification. The feature linking step needs multiple runs to align and link features across replicates. Single runs per sample-condition group will not produce reliable quantification results.
 
 When quantification is enabled, the pipeline performs retention time alignment and feature processing as detailed in the README documentation.
 
