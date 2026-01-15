@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 3.1.0 - BlüBa - 17/11/25
+## 3.1.0 - BlüBa - 07/01/26
 
 ### `Added`
 
@@ -28,11 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | Dependency | Old version | New version |
 | ---------- | ----------- | ----------- |
 | `EasyPQP`  | 0.1.51      | 0.1.53      |
-| `Epicore`  | 0.1.6       | 0.1.6       |
+| `Epicore`  |             | 0.1.6       |
 | `MultiQC`  | 1.28.0      | 1.31.0      |
 | `Nf-core`  | 3.2.1       | 3.4.1       |
 | `OpenMS`   | 3.4.0       | 3.4.1       |
-
 
 ## 3.0.0 - Monrepos - 22/05/2025
 
@@ -57,6 +56,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template update 3.2.0 [#356](https://github.com/nf-core/mhcquant/pull/356)
 - Template update 3.2.1 [#369](https://github.com/nf-core/mhcquant/pull/369)
 - Bump OpenMS version 3.1.0 -> 3.4.0 [#370](https://github.com/nf-core/mhcquant/pull/358)
+
+### `Changed`
+
+- Temporarily drop conda and epicore testing due to unstable CI tests [#426](https://github.com/nf-core/mhcquant/pull/426)
 
 ### `Dependencies`
 
