@@ -25,7 +25,7 @@ workflow MAP_ALIGNMENT {
             .flatMap { group_meta, metas -> metas }
             .map { meta -> [[spectra:meta.spectra], meta]}
             .join( OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-                    .flatMap { group_meta, trafoxmls -> trafoxmls.collect { trafoxml -> [[spectra: trafoxml.baseName], trafoxml] } })
+                    .flatMap { group_meta, trafoxmls -> [trafoxmls].flatten().collect { trafoxml -> [[spectra: trafoxml.baseName], trafoxml] } })
             .map { spectra, meta, trafoxml -> [meta, trafoxml] }
             .set { ch_trafos }
 
@@ -36,13 +36,13 @@ workflow MAP_ALIGNMENT {
 
         // Align idXMLfiles using trafoXMLs
         ch_runs_to_be_aligned
-                .flatMap { group_meta, idxmls -> idxmls.collect { idxml -> [[spectra: idxml.baseName.replace("_fdr_filtered","")], idxml] } }
-                .join( merge_meta_map
-                        .flatMap { group_meta, metas -> metas }
-                        .map { meta -> [[spectra:meta.spectra], meta]} )
-                .map { group_meta, idxml, meta -> [meta, idxml] }
-                .join( ch_trafos )
-                .set { ch_trafos_idxml }
+            .flatMap { group_meta, idxmls -> [idxmls].flatten().collect { idxml -> [[spectra: idxml.baseName.replace("_fdr_filtered","")], idxml] } }
+            .join( merge_meta_map
+                    .flatMap { group_meta, metas -> metas }
+                    .map { meta -> [[spectra:meta.spectra], meta]} )
+            .map { group_meta, idxml, meta -> [meta, idxml] }
+            .join( ch_trafos )
+            .set { ch_trafos_idxml }
 
         OPENMS_MAPRTTRANSFORMERIDXML(ch_trafos_idxml)
         ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERIDXML.out.versions)
