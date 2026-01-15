@@ -4,6 +4,7 @@
 
 import pandas as pd
 import numpy as np
+from pyopenms import AASequence
 from argparse import ArgumentParser
 import re
 from collections import Counter
@@ -87,6 +88,13 @@ def parse_multiTSV(file_path):
     df["psm"] = df["sequence"].map(psm)
     return df
 
+def strip_modifications(seq_with_mods: str) -> str:
+    try:
+        aa_seq = AASequence.fromString(seq_with_mods)
+        return aa_seq.toUnmodifiedString()
+    except Exception as e:
+        logging.warning(f"Could not parse sequence {seq_with_mods}: {e}")
+        return seq_with_mods
 
 def process_file(file, prefix, quantify, keep_cols):
     """Extract all the relevant information and write it to a TSV file for the MultiQC report
@@ -122,7 +130,7 @@ def process_file(file, prefix, quantify, keep_cols):
 
     # Remove modification information from the sequence column
     data["peptidoform"] = data["sequence"]
-    data["sequence"] = data["sequence"].apply(lambda seq: re.sub(r'\(.*?\)', '', seq))
+    data["sequence"] = data["sequence"].apply(strip_modifications)
 
     # ---------------------------------
     # Length distribution plot
