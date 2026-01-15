@@ -41,7 +41,7 @@
                     "pyopenms": "3.4.1"
                 },
                 "Workflow": {
-                    "nf-core/mhcquant": "v3.1.0"
+                    "nf-core/mhcquant": "v3.2.0dev"
                 }
             },
             [
