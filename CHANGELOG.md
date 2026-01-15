@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 3.2.0dev - [release name] - [date]
 
 ### `Added`
+
 - Added support for single run quantification [#438](https://github.com/nf-core/mhcquant/pull/438)
 
 ## 3.1.0 - BlüBa - 07/01/26
