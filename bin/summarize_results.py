@@ -95,7 +95,7 @@ def strip_modifications(seq_with_mods: str) -> str:
     except Exception as e:
         logging.warning(f"Could not parse sequence {seq_with_mods}: {e}")
         return seq_with_mods
-    
+
 def process_file(file, prefix, quantify, keep_cols):
     """Extract all the relevant information and write it to a TSV file for the MultiQC report
 
