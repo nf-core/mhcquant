@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 3.2.0dev - [release name] - [date]
 
 ### `Fixed`
+
 - Fixed an issue where stripping the sequence in `SUMMARIZE_RESULTS` did not work for complex modifications [#436](https://github.com/nf-core/mhcquant/pull/436)
 
 ## 3.1.0 - BlüBa - 07/01/26
