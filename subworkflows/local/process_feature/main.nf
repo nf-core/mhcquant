@@ -39,7 +39,7 @@ workflow PROCESS_FEATURE {
         // Resolve conflicting ids matching to the same feature
         ch_consensus_input = OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml
             .mix(OPENMS_FILECONVERTER.out.consensusxml)
-        
+
         OPENMS_IDCONFLICTRESOLVER(ch_consensus_input)
         ch_versions = ch_versions.mix(OPENMS_IDCONFLICTRESOLVER.out.versions)
 
