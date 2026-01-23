@@ -28,11 +28,9 @@ workflow RESCORE {
         ch_multiqc_files
 
     main:
-        ch_versions = channel.empty()
 
     // Compute features via ms2rescore
     MS2RESCORE(ch_merged_runs)
-    ch_versions = ch_versions.mix(MS2RESCORE.out.versions)
 
     if (params.rescoring_engine == 'mokapot') {
         log.warn "The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore."
@@ -41,22 +39,18 @@ workflow RESCORE {
         }
         // Switch comet e-value to mokapot q-value
         OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
 
         // Filter by mokapot q-value
         OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
-        ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
         ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
 
     } else {
         // Extract PSM features for Percolator
         OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
-        ch_versions = ch_versions.mix(OPENMS_PSMFEATUREEXTRACTOR.out.versions)
 
         // Run Percolator with local FDR
         OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-        ch_versions = ch_versions.mix(OPENMS_PERCOLATORADAPTER.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(OPENMS_PERCOLATORADAPTER.out.feature_weights.map{ meta, feature_weights -> feature_weights })
         ch_pout = OPENMS_PERCOLATORADAPTER.out.idxml
 
@@ -68,7 +62,6 @@ workflow RESCORE {
             ch_rescored_runs = OPENMS_PERCOLATORADAPTER_GLOBAL.out.idxml
             // Filter by global percolator q-value
             OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map {id, idxml -> [id, idxml, []]})
-            ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.versions)
             // Backfilter sample_condition runs according to global FDR
             OPENMS_IDFILTER_GLOBAL(ch_pout.combine(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered.map{ it[1] }))
             ch_filter_q_value = OPENMS_IDFILTER_GLOBAL.out.filtered
@@ -79,7 +72,6 @@ workflow RESCORE {
             ch_rescored_runs = ch_pout
             // Filter by percolator q-value
             OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
-            ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
             ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
         }
     }
@@ -87,6 +79,5 @@ workflow RESCORE {
     emit:
         rescored_runs = ch_rescored_runs
         fdr_filtered = ch_filter_q_value
-        versions = ch_versions
         multiqc_files = ch_multiqc_files
 }

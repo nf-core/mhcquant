@@ -21,14 +21,12 @@ workflow SPECLIB {
         mzml
 
     main:
-        ch_versions = channel.empty()
 
     // Load unimod tables (Future:)
     unimod = file("$projectDir/assets/250120_unimod_tables.xml", checkIfExists: true)
 
     // Convert psms and spectra to pickle files
     EASYPQP_CONVERT(fdrfiltered_comet_idxml.join(mzml), unimod)
-    ch_versions = ch_versions.mix(EASYPQP_CONVERT.out.versions)
 
     EASYPQP_CONVERT.out.psmpkl
         .map { meta, psmpkl -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), psmpkl] }
@@ -41,7 +39,6 @@ workflow SPECLIB {
 
     // Generate spectrum library for each sample-condition pair
     EASYPQP_LIBRARY(ch_psmpkl.join(ch_peakpkl))
-    ch_versions = ch_versions.mix(EASYPQP_LIBRARY.out.versions)
 
     // Generate spectrum library for all MSruns in the samplesheet
     if (params.global_fdr) {
@@ -57,5 +54,4 @@ workflow SPECLIB {
     }
 
     emit:
-        versions = ch_versions
 }

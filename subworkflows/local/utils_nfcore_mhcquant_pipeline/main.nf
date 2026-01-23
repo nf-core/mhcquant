@@ -39,7 +39,6 @@ workflow PIPELINE_INITIALISATION {
 
     main:
 
-    ch_versions = channel.empty()
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file

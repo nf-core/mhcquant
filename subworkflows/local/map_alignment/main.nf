@@ -14,11 +14,9 @@ workflow MAP_ALIGNMENT {
         merge_meta_map
 
     main:
-        ch_versions = channel.empty()
 
         // Compute group-wise alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION( ch_runs_to_be_aligned )
-        ch_versions = ch_versions.mix(OPENMS_MAPALIGNERIDENTIFICATION.out.versions)
 
         // Join run specific trafoXMLs with meta information
         merge_meta_map
@@ -32,7 +30,6 @@ workflow MAP_ALIGNMENT {
         // Align mzML files using trafoXMLs
         ch_trafos_mzmls = ch_mzml.join(ch_trafos)
         OPENMS_MAPRTTRANSFORMERMZML(ch_trafos_mzmls)
-        ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERMZML.out.versions)
 
         // Align idXMLfiles using trafoXMLs
         ch_runs_to_be_aligned
@@ -45,10 +42,8 @@ workflow MAP_ALIGNMENT {
             .set { ch_trafos_idxml }
 
         OPENMS_MAPRTTRANSFORMERIDXML(ch_trafos_idxml)
-        ch_versions = ch_versions.mix(OPENMS_MAPRTTRANSFORMERIDXML.out.versions)
 
     emit:
-        versions = ch_versions
         aligned_idxml = OPENMS_MAPRTTRANSFORMERIDXML.out.aligned
         aligned_mzml = OPENMS_MAPRTTRANSFORMERMZML.out.aligned
 }
