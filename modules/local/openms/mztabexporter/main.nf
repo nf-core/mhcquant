@@ -12,7 +12,7 @@ process OPENMS_MZTABEXPORTER {
 
     output:
     tuple val(meta), path("*.mzTab"), emit: mztab
-    path "versions.yml"             , emit: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\1/p'"), emit: versions_openms, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -27,11 +27,6 @@ process OPENMS_MZTABEXPORTER {
         -out ${prefix}.mzTab \\
         -threads $task.cpus \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -39,10 +34,5 @@ process OPENMS_MZTABEXPORTER {
 
     """
     touch ${prefix}.mzTab
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 }
