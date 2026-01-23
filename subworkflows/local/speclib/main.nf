@@ -21,7 +21,7 @@ workflow SPECLIB {
         mzml
 
     main:
-        ch_versions = Channel.empty()
+        ch_versions = channel.empty()
 
     // Load unimod tables (Future:)
     unimod = file("$projectDir/assets/250120_unimod_tables.xml", checkIfExists: true)

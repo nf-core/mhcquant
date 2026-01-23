@@ -57,8 +57,8 @@ workflow MHCQUANT {
     ch_fasta       // channel: reference database read in from --fasta
 
     main:
-    ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
+    ch_versions = channel.empty()
+    ch_multiqc_files = channel.empty()
 
     // Prepare spectra files (Decompress archives, convert to mzML, centroid if specified)
     PREPARE_SPECTRA(ch_samplesheet)
@@ -225,7 +225,7 @@ workflow MHCQUANT {
     //
     // Collate and save software versions
     //
-    def topic_versions = Channel.topic("versions")
+    def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
             versions_file: entry instanceof Path
