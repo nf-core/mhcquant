@@ -114,7 +114,7 @@ workflow PIPELINE_INITIALISATION {
     //
 
     if (params.fasta) {
-        Channel.fromPath(params.fasta, checkIfExists: true)
+        channel.fromPath(params.fasta, checkIfExists: true)
             .map { fasta -> [[id:fasta.getBaseName()], fasta] }
             .set { ch_fasta }
 
