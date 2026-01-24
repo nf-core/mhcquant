@@ -14,8 +14,6 @@ workflow PREPARE_SPECTRA {
         ch_samplesheet
 
     main:
-        ch_versions = Channel.empty()
-
         ch_samplesheet
         .branch {
             meta, filename ->
@@ -70,5 +68,4 @@ workflow PREPARE_SPECTRA {
 
     emit:
         mzml = ch_mzml_file
-        versions = ch_versions
 }

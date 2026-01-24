@@ -13,7 +13,6 @@ process OPENMS_IDMASSACCURACY {
     output:
     tuple val(meta), path("*frag_mass_err.tsv") , emit: frag_err
     tuple val(meta), path("*prec_mass_err.tsv") , emit: prec_err, optional: true
-    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | grep -E '^Version' | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

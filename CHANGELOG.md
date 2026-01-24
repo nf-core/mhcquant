@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- Migrate to topic channels  [#431](https://github.com/nf-core/mhcquant/pull/431)
- 
+- Migrate to topic channels [#431](https://github.com/nf-core/mhcquant/pull/431)
+
 ### `Dependencies`
 
 | Dependency | Old version | New version |

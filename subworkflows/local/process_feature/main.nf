@@ -11,8 +11,6 @@ workflow PROCESS_FEATURE {
         ch_runs_to_be_quantified
 
     main:
-        ch_versions = Channel.empty()
-
         // Quantify identifications using targeted feature extraction
         OPENMS_FEATUREFINDERIDENTIFICATION(ch_runs_to_be_quantified).featurexml
                 .map { meta, featurexml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), featurexml] }
@@ -26,7 +24,5 @@ workflow PROCESS_FEATURE {
         OPENMS_IDCONFLICTRESOLVER(OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml)
 
     emit:
-        // Define the information that is returned by this workflow
-        versions = ch_versions
         consensusxml = OPENMS_IDCONFLICTRESOLVER.out.consensusxml
 }

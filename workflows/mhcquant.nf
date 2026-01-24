@@ -57,7 +57,6 @@ workflow MHCQUANT {
     ch_fasta       // channel: reference database read in from --fasta
 
     main:
-    ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
     // Prepare spectra files (Decompress archives, convert to mzML, centroid if specified)
@@ -68,7 +67,6 @@ workflow MHCQUANT {
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
-        // ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
         ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
     } else {
         ch_decoy_db = ch_fasta
@@ -77,7 +75,6 @@ workflow MHCQUANT {
     // Optionally clean up mzML files
     if (params.filter_mzml){
         OPENMS_FILEFILTER(PREPARE_SPECTRA.out.mzml)
-        // ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions)
         ch_clean_mzml_file = OPENMS_FILEFILTER.out.mzml
     } else {
         ch_clean_mzml_file = PREPARE_SPECTRA.out.mzml
@@ -97,7 +94,6 @@ workflow MHCQUANT {
 
     // Run comet database search and index decoy and target hits
     OPENMSTHIRDPARTY_COMETADAPTER(ch_comet_in)
-    // ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
 
     // Prepare the peptideindexer channel with global fasta or per-sample_condition fasta
     ch_peptideindexer_in = params.fasta ?
@@ -108,11 +104,9 @@ workflow MHCQUANT {
             .map { groupKey, meta, idxml, fasta -> [meta, idxml, fasta] }
 
     OPENMS_PEPTIDEINDEXER(ch_peptideindexer_in)
-    // ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Compute mass errors for multiQC report
     OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.indexed_idxml))
-    // ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(OPENMS_IDMASSACCURACY.out.frag_err.map{ meta, frag_err -> frag_err })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
@@ -128,7 +122,6 @@ workflow MHCQUANT {
 
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_runs_to_merge)
-    // ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions)
 
     // Run MS2Rescore
     ch_clean_mzml_file
@@ -242,7 +235,7 @@ workflow MHCQUANT {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+    softwareVersionsToYAML(topic_versions.versions_file)
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
@@ -292,8 +285,6 @@ workflow MHCQUANT {
     )
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
-
 }
 
 /*

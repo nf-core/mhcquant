@@ -28,8 +28,6 @@ workflow RESCORE {
         ch_multiqc_files
 
     main:
-        ch_versions = Channel.empty()
-
     // Compute features via ms2rescore
     MS2RESCORE(ch_merged_runs)
 
@@ -84,6 +82,5 @@ workflow RESCORE {
     emit:
         rescored_runs = ch_rescored_runs
         fdr_filtered = ch_filter_q_value
-        versions = ch_versions
         multiqc_files = ch_multiqc_files
 }

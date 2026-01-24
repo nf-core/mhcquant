@@ -25,7 +25,6 @@ workflow QUANT {
         mzml
 
     main:
-        ch_versions = Channel.empty()
         // Split post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1] [meta_run2, idxml_run2] ...
         // We need to make sure that the order of the runs is the same as in the mzml files since IDRipper always sorts the runs
         // (and nextflow does not guarantee the order of the maps in merged_meta_map)
@@ -69,7 +68,6 @@ workflow QUANT {
             mzml,
             merge_meta_map
         )
-        ch_versions = ch_versions.mix( MAP_ALIGNMENT.out.versions )
 
         // We need to merge groupwise the aligned idxml files together to use them as id_ext in featurefinder
         OPENMS_IDMERGER_QUANT( MAP_ALIGNMENT.out.aligned_idxml
@@ -89,11 +87,9 @@ workflow QUANT {
                 .set { ch_runs_to_be_quantified }
 
         PROCESS_FEATURE ( ch_runs_to_be_quantified )
-        ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions)
 
         OPENMS_MZTABEXPORTER(PROCESS_FEATURE.out.consensusxml)
 
     emit:
         consensusxml = PROCESS_FEATURE.out.consensusxml
-        versions = ch_versions
 }

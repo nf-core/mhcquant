@@ -14,8 +14,6 @@ workflow MAP_ALIGNMENT {
         merge_meta_map
 
     main:
-        ch_versions = Channel.empty()
-
         // Compute group-wise alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION( ch_runs_to_be_aligned )
 
@@ -45,7 +43,6 @@ workflow MAP_ALIGNMENT {
         OPENMS_MAPRTTRANSFORMERIDXML(ch_trafos_idxml)
 
     emit:
-        versions = ch_versions
         aligned_idxml = OPENMS_MAPRTTRANSFORMERIDXML.out.aligned
         aligned_mzml = OPENMS_MAPRTTRANSFORMERMZML.out.aligned
 }

@@ -8,28 +8,25 @@
                 },
                 "OPENMSTHIRDPARTY_COMETADAPTER": {
                     "Comet": "2024.01 rev. 1",
-                    "CometAdapter": "3.4.1"
+                    "CometAdapter": "3.5.0"
                 },
                 "OPENMS_DECOYDATABASE": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_IDFILTER_Q_VALUE": {
-                    "openms": "3.4.1"
-                },
-                "OPENMS_IDMASSACCURACY": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_IDMERGER": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_IDSCORESWITCHER": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_PEPTIDEINDEXER": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_TEXTEXPORTER": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
@@ -112,6 +109,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2026-01-09T10:16:10.560078316"
+        "timestamp": "2026-01-24T12:19:49.496533324"
     }
 }
