@@ -30,11 +30,6 @@
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
-                    "openms/idmassaccuracy": {
-                        "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
-                        "installed_by": ["modules"]
-                    },
                     "openms/idmerger": {
                         "branch": "master",
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
