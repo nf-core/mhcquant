@@ -10,6 +10,7 @@
 
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chromatogramextractor'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
+include { OPENMS_IDMASSACCURACY          } from '../modules/local/openms/idmassaccuracy/main'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
 include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
 include { EPICORE                        } from '../modules/local/epicore'
@@ -33,7 +34,6 @@ include { QUANT           } from '../subworkflows/local/quant'
 //
 include { OPENMS_FILEFILTER                              } from '../modules/nf-core/openms/filefilter/main'
 include { OPENMS_DECOYDATABASE                           } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_IDMASSACCURACY                          } from '../modules/nf-core/openms/idmassaccuracy/main'
 include { OPENMSTHIRDPARTY_COMETADAPTER                  } from '../modules/nf-core/openmsthirdparty/cometadapter/main'
 include { OPENMS_PEPTIDEINDEXER                          } from '../modules/nf-core/openms/peptideindexer/main'
 include { OPENMS_IDMERGER                                } from '../modules/nf-core/openms/idmerger/main'
