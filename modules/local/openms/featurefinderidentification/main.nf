@@ -23,7 +23,7 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
     def quant_fdr = params.quantification_fdr ? "-id $id_int -id_ext $id_ext -svm:min_prob ${params.quantification_min_prob}" : "-id $id_ext"
     def args      = quant_fdr
     args          = args + (task.ext.args ? " ${task.ext.args}" : '')
-    
+
     """
     FeatureFinderIdentification -in $mzml \\
         -out ${prefix}.featureXML \\

@@ -20,7 +20,7 @@ process OPENMS_TEXTEXPORTER {
     script:
     def args   = task.ext.args  ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    
+
     """
     TextExporter -in $file \\
         -out ${prefix}_exported.tsv \\

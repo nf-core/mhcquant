@@ -19,7 +19,7 @@ process OPENMS_IDCONFLICTRESOLVER {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}_resolved"
-    
+
     """
     IDConflictResolver -in $consensus \\
         -out ${prefix}.consensusXML \\

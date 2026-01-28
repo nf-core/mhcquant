@@ -20,7 +20,7 @@ process OPENMS_MZTABEXPORTER {
     script:
     def args   = task.ext.args  ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    
+
     """
     MzTabExporter -in $in_file \\
         -out ${prefix}.mzTab \\

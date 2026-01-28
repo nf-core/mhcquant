@@ -24,7 +24,7 @@ process OPENMS_PSMFEATUREEXTRACTOR {
 
     """
     extra_features=\$(awk 'NR > 1 && \$1 !~ /psm_file/ {printf \"%s \", \$2}' ${feature_file})
-    
+
     PSMFeatureExtractor -in $idxml \\
         -out ${prefix}.idXML \\
         -threads $task.cpus \\
