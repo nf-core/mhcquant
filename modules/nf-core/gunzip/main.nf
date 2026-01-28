@@ -12,7 +12,7 @@ process GUNZIP {
 
     output:
     tuple val(meta), path("${gunzip}"), emit: gunzip
-    tuple val("${task.process}"), val('gunzip'), eval("echo \$(gunzip --version 2>&1) | sed 's/^.*(gzip) //; s/ Copyright.*\$//'"), emit: versions, topic: versions
+    tuple val("${task.process}"), val('gunzip'), eval('gunzip --version 2>&1 | head -1 | sed "s/^.*(gzip) //; s/ Copyright.*//"'), topic: versions, emit: versions_gunzip
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,7 +35,6 @@ process GUNZIP {
     """
 
     stub:
-    def args = task.ext.args ?: ''
     def extension = (archive.toString() - '.gz').tokenize('.')[-1]
     def name = archive.toString() - '.gz' - ".${extension}"
     def prefix = task.ext.prefix ?: name
