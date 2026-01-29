@@ -63,7 +63,6 @@ workflow RESCORE {
             ch_rescored_runs = OPENMS_PERCOLATORADAPTER_GLOBAL.out.idxml
             // Filter by global percolator q-value
             OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map {id, idxml -> [id, idxml, []]})
-            // ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.versions)
             // Backfilter sample_condition runs according to global FDR
             OPENMS_IDFILTER_GLOBAL(ch_pout.combine(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered.map{ it[1] }))
             ch_filter_q_value = OPENMS_IDFILTER_GLOBAL.out.filtered
