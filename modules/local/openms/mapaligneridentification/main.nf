@@ -22,7 +22,8 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
     def out_names = idxmls.collect { it.baseName.replace('_fdr_filtered','')+'.trafoXML' }.join(' ')
 
     """
-    MapAlignerIdentification -in $idxmls \\
+    MapAlignerIdentification \\
+        -in $idxmls \\
         -trafo_out ${out_names} \\
         $args
     """

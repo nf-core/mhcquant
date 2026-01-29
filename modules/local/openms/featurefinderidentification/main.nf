@@ -25,7 +25,8 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
     args          = args + (task.ext.args ? " ${task.ext.args}" : '')
 
     """
-    FeatureFinderIdentification -in $mzml \\
+    FeatureFinderIdentification \\
+        -in $mzml \\
         -out ${prefix}.featureXML \\
         -threads $task.cpus \\
         $args

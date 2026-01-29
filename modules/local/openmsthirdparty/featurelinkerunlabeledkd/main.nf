@@ -21,7 +21,8 @@ process OPENMS_FEATURELINKERUNLABELEDKD {
     def prefix = task.ext.prefix ?: "${meta.id}_all_features_merged"
 
     """
-    FeatureLinkerUnlabeledKD -in $features \\
+    FeatureLinkerUnlabeledKD \\
+        -in $features \\
         -out ${prefix}.consensusXML \\
         -threads $task.cpus
     """

@@ -22,7 +22,8 @@ process OPENMS_TEXTEXPORTER {
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
-    TextExporter -in $file \\
+    TextExporter \\
+        -in $file \\
         -out ${prefix}_exported.tsv \\
         -threads $task.cpus \\
         -id:add_hit_metavalues 0 \\
