@@ -16,6 +16,9 @@
                 "OPENMS_IDFILTER_Q_VALUE": {
                     "openms": "3.5.0"
                 },
+                "OPENMS_IDMASSACCURACY": {
+                    "openms": "3.4.1"
+                },
                 "OPENMS_IDMERGER": {
                     "openms": "3.5.0"
                 },
