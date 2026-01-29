@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | ---------- | ----------- | ----------- |
 | `MultiQC`  | 1.31.0      | 1.33.0      |
 | `Nf-core`  | 3.4.1       | 3.5.1       |
+| `openms`   | 3.4.1       | 3.5.0       |
 
 ## 3.1.0 - BlüBa - 07/01/26
 
