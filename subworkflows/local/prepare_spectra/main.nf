@@ -34,7 +34,6 @@ workflow PREPARE_SPECTRA {
 
         // Raw file conversion
         THERMORAWFILEPARSER(branched_ms_files.raw)
-        // ch_versions = ch_versions.mix(THERMORAWFILEPARSER.out.versions)
 
         // Decompress timsTOF archive for data conversion
         UNTAR(branched_ms_files.d_tar)
