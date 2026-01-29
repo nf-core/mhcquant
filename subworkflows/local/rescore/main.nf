@@ -38,7 +38,6 @@ workflow RESCORE {
         }
         // Switch comet e-value to mokapot q-value
         OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
-        // ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
 
         // Filter by mokapot q-value
