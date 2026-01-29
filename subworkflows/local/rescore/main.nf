@@ -43,7 +43,6 @@ workflow RESCORE {
 
         // Filter by mokapot q-value
         OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map {group_meta, idxml -> [group_meta, idxml, []]})
-        // ch_versions = ch_versions.mix(OPENMS_IDFILTER_Q_VALUE.out.versions)
         ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
 
     } else {
