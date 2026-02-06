@@ -97,13 +97,20 @@ workflow PIPELINE_INITIALISATION {
 
     channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map { meta, file, fasta -> [meta.subMap('sample','condition'), meta, file, fasta] }
+        .map { meta, file, fasta ->
+            def m = meta + [sample: meta.sample.toString(), condition: meta.condition.toString()]
+            [m.subMap('sample','condition'), m, file, fasta]
+        }
         .tap { ch_input }
         .groupTuple()
         // get number of files per sample-condition
         .map { group_meta, metas, files, fastas -> [ group_meta, files.size()] }
         .combine( ch_input, by:0 )
-        .map { group_meta, group_count, meta, file, fasta -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file, fasta] }
+        .map { group_meta, group_count, meta, file, fasta ->
+            def enrichedMeta = meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)]
+            def resolved = resolveSearchParams(enrichedMeta, params.search_presets)
+            [resolved, file, fasta]
+        }
         .set { ch_samplesheet_raw }
 
     ch_samplesheet = ch_samplesheet_raw.map { meta, file, fasta -> [ meta, file ]}
@@ -208,6 +215,42 @@ workflow PIPELINE_COMPLETION {
     FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+//
+// Resolve a search parameter with priority: meta (individual) > preset > global params
+//
+def resolveSearchParams(meta, searchPresets) {
+    def presetName = meta.search_preset
+
+    if (!presetName || !searchPresets) {
+        return meta
+    }
+
+    def presetConfig = searchPresets[presetName]
+    if (!presetConfig) {
+        return meta
+    }
+
+    // Build result map - explicitly copy each search param from preset if not already in meta
+    def result = new LinkedHashMap(meta)
+
+    // Explicitly set each search parameter
+    def searchParamKeys = ['peptide_min_length', 'peptide_max_length', 'digest_mass_range', 'prec_charge',
+                           'precursor_mass_tolerance', 'fragment_mass_tolerance', 'fragment_bin_offset',
+                           'ms2pip_model', 'activation_method', 'instrument', 'number_mods']
+
+    searchParamKeys.each { key ->
+        // Check for null OR empty (nf-schema sets empty columns to empty lists [])
+        def currentValue = result[key]
+        def isEmpty = (currentValue == null) || (currentValue instanceof List && currentValue.size() == 0) || (currentValue == '')
+        if (isEmpty && presetConfig.containsKey(key)) {
+            result.put(key, presetConfig.get(key))
+        }
+    }
+
+    return result
+}
+
 //
 // Validate channels from input samplesheet
 //

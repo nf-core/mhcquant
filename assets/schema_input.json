@@ -13,14 +13,20 @@
                 "meta": ["id"]
             },
             "Sample": {
-                "type": "string",
-                "pattern": "^\\S+$",
+                "type": ["string", "integer"],
+                "anyOf": [
+                    { "type": "string", "pattern": "^\\S+$" },
+                    { "type": "integer" }
+                ],
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["sample"]
             },
             "Condition": {
-                "type": "string",
-                "pattern": "^\\S+-?",
+                "type": ["string", "integer"],
+                "anyOf": [
+                    { "type": "string", "pattern": "^\\S+-?" },
+                    { "type": "integer" }
+                ],
                 "errorMessage": "Sample condition must be provided and cannot contain spaces",
                 "meta": ["condition"]
             },
@@ -37,6 +43,78 @@
                 "exists": true,
                 "pattern": "^\\S+\\.(fasta|fa|fas|fna|faa|ffn)$",
                 "errorMessage": "FASTA file cannot contain spaces and must have one of the extensions: fasta | fa | fas | fna | faa | ffn"
+            },
+            "SearchPreset": {
+                "type": "string",
+                "enum": ["lumos_class1", "lumos_class2", "qe_class1", "qe_class2", "timstof_class1", "timstof_class2", "xl_class1", "xl_class2"],
+                "errorMessage": "SearchPreset must be one of: lumos_class1, lumos_class2, qe_class1, qe_class2, timstof_class1, timstof_class2, xl_class1, xl_class2. Can be extended upon request.",
+                "meta": ["search_preset"]
+            },
+            "PeptideMinLength": {
+                "type": "integer",
+                "minimum": 1,
+                "errorMessage": "PeptideMinLength must be a positive integer",
+                "meta": ["peptide_min_length"]
+            },
+            "PeptideMaxLength": {
+                "type": "integer",
+                "minimum": 1,
+                "errorMessage": "PeptideMaxLength must be a positive integer",
+                "meta": ["peptide_max_length"]
+            },
+            "PrecursorMassRange": {
+                "type": "string",
+                "pattern": "^\\d+:\\d+$",
+                "errorMessage": "PrecursorMassRange must be in format 'min:max' (e.g., '800:2500')",
+                "meta": ["digest_mass_range"]
+            },
+            "PrecursorCharge": {
+                "type": "string",
+                "pattern": "^\\d+:\\d+$",
+                "errorMessage": "PrecursorCharge must be in format 'min:max' (e.g., '2:3')",
+                "meta": ["prec_charge"]
+            },
+            "PrecursorMassTolerance": {
+                "type": "integer",
+                "minimum": 0,
+                "errorMessage": "PrecursorMassTolerance must be a non-negative integer",
+                "meta": ["precursor_mass_tolerance"]
+            },
+            "FragmentMassTolerance": {
+                "type": "number",
+                "minimum": 0,
+                "errorMessage": "FragmentMassTolerance must be a non-negative number",
+                "meta": ["fragment_mass_tolerance"]
+            },
+            "FragmentBinOffset": {
+                "type": "number",
+                "minimum": 0,
+                "errorMessage": "FragmentBinOffset is recommended to be 0 for high res and 0.4 for low res devices.",
+                "meta": ["fragment_bin_offset"]
+            },
+            "MS2PIPModel": {
+                "type": "string",
+                "enum": ["Immuno-HCD", "timsTOF", "CIDch2", "HCD", "CID", "ITMS", "iTRAQ", "iTRAQphospho", "TMT", "HCDch2"],
+                "errorMessage": "MS2PIPModel must be a valid MS2PIP model name",
+                "meta": ["ms2pip_model"]
+            },
+            "ActivationMethod": {
+                "type": "string",
+                "enum": ["ALL", "CID", "HCD", "ETD", "ECD", "EThcD", "ETciD"],
+                "errorMessage": "ActivationMethod must be one of: ALL, CID, HCD, ETD, ECD, EThcD, ETciD",
+                "meta": ["activation_method"]
+            },
+            "Instrument": {
+                "type": "string",
+                "enum": ["high_res", "low_res"],
+                "errorMessage": "Instrument must be either 'high_res' or 'low_res'",
+                "meta": ["instrument"]
+            },
+            "NumberMods": {
+                "type": "integer",
+                "minimum": 0,
+                "errorMessage": "NumberMods must be a non-negative integer",
+                "meta": ["number_mods"]
             }
         },
         "required": ["ID", "Sample", "Condition", "ReplicateFileName"]
