@@ -14,19 +14,13 @@
             },
             "Sample": {
                 "type": ["string", "integer"],
-                "anyOf": [
-                    { "type": "string", "pattern": "^\\S+$" },
-                    { "type": "integer" }
-                ],
+                "anyOf": [{ "type": "string", "pattern": "^\\S+$" }, { "type": "integer" }],
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["sample"]
             },
             "Condition": {
                 "type": ["string", "integer"],
-                "anyOf": [
-                    { "type": "string", "pattern": "^\\S+-?" },
-                    { "type": "integer" }
-                ],
+                "anyOf": [{ "type": "string", "pattern": "^\\S+-?" }, { "type": "integer" }],
                 "errorMessage": "Sample condition must be provided and cannot contain spaces",
                 "meta": ["condition"]
             },
@@ -46,7 +40,16 @@
             },
             "SearchPreset": {
                 "type": "string",
-                "enum": ["lumos_class1", "lumos_class2", "qe_class1", "qe_class2", "timstof_class1", "timstof_class2", "xl_class1", "xl_class2"],
+                "enum": [
+                    "lumos_class1",
+                    "lumos_class2",
+                    "qe_class1",
+                    "qe_class2",
+                    "timstof_class1",
+                    "timstof_class2",
+                    "xl_class1",
+                    "xl_class2"
+                ],
                 "errorMessage": "SearchPreset must be one of: lumos_class1, lumos_class2, qe_class1, qe_class2, timstof_class1, timstof_class2, xl_class1, xl_class2. Can be extended upon request.",
                 "meta": ["search_preset"]
             },
@@ -94,7 +97,18 @@
             },
             "MS2PIPModel": {
                 "type": "string",
-                "enum": ["Immuno-HCD", "timsTOF", "CIDch2", "HCD", "CID", "ITMS", "iTRAQ", "iTRAQphospho", "TMT", "HCDch2"],
+                "enum": [
+                    "Immuno-HCD",
+                    "timsTOF",
+                    "CIDch2",
+                    "HCD",
+                    "CID",
+                    "ITMS",
+                    "iTRAQ",
+                    "iTRAQphospho",
+                    "TMT",
+                    "HCDch2"
+                ],
                 "errorMessage": "MS2PIPModel must be a valid MS2PIP model name",
                 "meta": ["ms2pip_model"]
             },

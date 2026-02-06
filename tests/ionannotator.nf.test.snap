@@ -1,7 +1,7 @@
 {
     "-profile test_ionannotator": {
         "content": [
-            22,
+            21,
             {
                 "MS2RESCORE": {
                     "MS2Rescore": "3.1.5"
@@ -38,9 +38,6 @@
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
                 },
-                "PYOPENMS_IONANNOTATOR": {
-                    "pyopenms": "3.4.1"
-                },
                 "SUMMARIZE_RESULTS": {
                     "pyopenms": "3.4.1"
                 },
@@ -55,9 +52,6 @@
                 "intermediate_results/comet/HepG2_rep1_small_pin.tsv",
                 "intermediate_results/comet/HepG2_rep2_small_pin.tsv",
                 "intermediate_results/comet/HepG2_rep3_small_pin.tsv",
-                "intermediate_results/ion_annotations",
-                "intermediate_results/ion_annotations/HepG2_A_all_peaks.tsv",
-                "intermediate_results/ion_annotations/HepG2_A_matching_ions.tsv",
                 "intermediate_results/rescoring",
                 "intermediate_results/rescoring/HepG2_A_ms2rescore.idXML",
                 "intermediate_results/rescoring/HepG2_A_pout.idXML",
@@ -403,8 +397,8 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2026-01-24T12:14:04.270867859"
+        "timestamp": "2026-02-06T17:06:07.615459843"
     }
 }
