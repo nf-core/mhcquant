@@ -17,7 +17,7 @@ process MS2RESCORE {
     tuple val(meta), path("*ms2rescore.idXML") , emit: idxml
     tuple val(meta), path("*feature_names.tsv"), emit: feature_names
     tuple val(meta), path("*.html" )           , optional:true, emit: html
-    tuple val("${task.process}"), val('MS2Rescore'), eval("echo \"\$(ms2rescore --version 2>&1)\" | grep -oP 'MS²Rescore \\(v\\K[^\\)]+'"), emit: versions, topic: versions
+    tuple val("${task.process}"), val('MS2Rescore'), eval("echo \"\$(ms2rescore --version 2>&1)\" | grep -oP 'MS²Rescore \\(v\\K[^\\)]+'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when

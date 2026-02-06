@@ -13,8 +13,8 @@ process OPENMS_PERCOLATORADAPTER {
     output:
     tuple val(meta), path("*.idXML")                         , emit: idxml
     tuple val(meta), path("*_percolator_feature_weights.tsv"), emit: feature_weights, optional: true
-    tuple val("${task.process}"), val('PercolatorAdapter'), eval("PercolatorAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1"), emit: versions_percolatoradapter, topic: versions
-    tuple val("${task.process}"), val('percolator'), eval("percolator -h 2>&1 | grep -E '^Percolator version(.*)' | sed 's/Percolator version //g'"), emit: versions_percolator, topic: versions
+    tuple val("${task.process}"), val('PercolatorAdapter'), eval("PercolatorAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1"), topic: versions
+    tuple val("${task.process}"), val('percolator'), eval("percolator -h 2>&1 | grep -E '^Percolator version(.*)' | sed 's/Percolator version //g'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when

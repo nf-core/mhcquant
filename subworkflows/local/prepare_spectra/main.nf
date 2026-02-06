@@ -49,7 +49,6 @@ workflow PREPARE_SPECTRA {
 
         // Gunzip mzML files
         GUNZIP(branched_ms_files.mzml_gz)
-        // ch_versions = ch_versions.mix(GUNZIP.out.versions)
         // Initialize channel for ms files that do not need to be converted
         ch_ms_files = branched_ms_files.mzml
                         .mix(GUNZIP.out.gunzip,
@@ -59,7 +58,6 @@ workflow PREPARE_SPECTRA {
         // Optional: Run Peak Picking as Preprocessing
         if (params.run_centroidisation) {
             OPENMS_PEAKPICKERHIRES(ch_ms_files)
-            // ch_versions = ch_versions.mix(OPENMS_PEAKPICKERHIRES.out.versions)
             ch_mzml_file = OPENMS_PEAKPICKERHIRES.out.mzml
         } else {
             ch_mzml_file = ch_ms_files

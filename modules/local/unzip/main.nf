@@ -12,7 +12,7 @@ process UNZIP {
 
     output:
     tuple val(meta), path("*.d"), emit: unzipped_archive
-    tuple val("${task.process}"), val('7za'), eval("echo \$(7za --help) | sed 's/.*p7zip Version //; s/(.*//'"), emit: versions, topic: versions
+    tuple val("${task.process}"), val('7za'), eval("echo \$(7za --help) | sed 's/.*p7zip Version //; s/(.*//'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
