@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - Added support for single run quantification [#438](https://github.com/nf-core/mhcquant/pull/438)
+- Added per-sample search parameter support via samplesheet with SearchPreset column and individual parameter overrides [#439](https://github.com/nf-core/mhcquant/pull/439)
 
 ### `Fixed`
 
