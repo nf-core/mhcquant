@@ -13,20 +13,12 @@ process OPENMS_IDMASSACCURACY {
     output:
     tuple val(meta), path("*frag_mass_err.tsv") , emit: frag_err
     tuple val(meta), path("*prec_mass_err.tsv") , emit: prec_err, optional: true
-    path "versions.yml"                         , emit: versions
+	tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\\1/p'"), emit: versions_openms, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def deprecation_message = """
-    WARNING: This module has been deprecated. Please use nf-core/modules/path/to/new/module
-
-    Reason:
-    This module is no longer fit for purpose because not part of openms 3.5.0 version anymore
-    """
-    assert false: deprecation_message
-
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
 
@@ -37,32 +29,14 @@ process OPENMS_IDMASSACCURACY {
         -out_fragment ${prefix}_frag_mass_err.tsv \\
         -threads $task.cpus \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        OpenMS: \$(FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\\1/p')
-    END_VERSIONS
     """
 
     stub:
-    def deprecation_message = """
-    WARNING: This module has been deprecated. Please use nf-core/modules/path/to/new/module
-
-    Reason:
-    This module is no longer fit for purpose because not part of openms 3.5.0 version anymore
-    """
-    assert false: deprecation_message
-
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
     touch ${prefix}_frag_mass_err.tsv
     touch ${prefix}_prec_mass_err.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        OpenMS: \$(FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\\1/p')
-    END_VERSIONS
     """
 }

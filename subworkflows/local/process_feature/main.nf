@@ -12,7 +12,6 @@ workflow PROCESS_FEATURE {
         ch_runs_to_be_quantified
 
     main:
-
         // Quantify identifications using targeted feature extraction
         OPENMS_FEATUREFINDERIDENTIFICATION(ch_runs_to_be_quantified).featurexml
                 .map { meta, featurexml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), featurexml] }
@@ -31,6 +30,7 @@ workflow PROCESS_FEATURE {
 
         // Single replicate: promote featureXML to consensusXML
         OPENMS_FILECONVERTER(ch_features.single.map { meta, features -> [ meta, features[0], "consensusXML" ] })
+        ch_versions = ch_versions.mix(OPENMS_FILECONVERTER.out.versions)
 
         // Resolve conflicting ids matching to the same feature
         ch_consensus_input = OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml
@@ -39,6 +39,5 @@ workflow PROCESS_FEATURE {
         OPENMS_IDCONFLICTRESOLVER(ch_consensus_input)
 
     emit:
-        // Define the information that is returned by this workflow
         consensusxml = OPENMS_IDCONFLICTRESOLVER.out.consensusxml
 }

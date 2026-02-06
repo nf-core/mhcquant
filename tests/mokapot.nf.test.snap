@@ -4,32 +4,32 @@
             20,
             {
                 "MS2RESCORE": {
-                    "MS\u00b2Rescore": "3.1.5)"
+                    "MS2Rescore": "3.1.5"
                 },
                 "OPENMSTHIRDPARTY_COMETADAPTER": {
-                    "CometAdapter": "3.4.1",
-                    "Comet": "2024.01 rev. 1"
+                    "Comet": "2024.01 rev. 1",
+                    "CometAdapter": "3.5.0"
                 },
                 "OPENMS_DECOYDATABASE": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_IDFILTER_Q_VALUE": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_IDMASSACCURACY": {
-                    "OpenMS": "3.4.1"
+                    "openms": "3.4.1"
                 },
                 "OPENMS_IDMERGER": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_IDSCORESWITCHER": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_PEPTIDEINDEXER": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "OPENMS_TEXTEXPORTER": {
-                    "openms": "3.4.1"
+                    "openms": "3.5.0"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
@@ -112,6 +112,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2025-10-28T22:04:22.998726246"
+        "timestamp": "2026-01-24T12:19:49.496533324"
     }
 }

@@ -13,19 +13,20 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
     output:
     tuple val(meta), path("*.featureXML"), emit: featurexml
-    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\1/p'"), emit: versions_openms, topic: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | grep -E '^Version' | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//'"), emit: versions_featurefinderidentification, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def prefix    = task.ext.prefix ?: "${meta.id}_${meta.sample}_${meta.condition}"
-    def args      = task.ext.args  ?: ''
     def quant_fdr = params.quantification_fdr ? "-id $id_int -id_ext $id_ext -svm:min_prob ${params.quantification_min_prob}" : "-id $id_ext"
-    args = args + " $quant_fdr"
+    def args      = quant_fdr
+    args          = args + (task.ext.args ? " ${task.ext.args}" : '')
 
     """
-    FeatureFinderIdentification -in $mzml \\
+    FeatureFinderIdentification \\
+        -in $mzml \\
         -out ${prefix}.featureXML \\
         -threads $task.cpus \\
         $args

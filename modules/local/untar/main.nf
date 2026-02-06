@@ -12,7 +12,7 @@ process UNTAR {
 
     output:
     tuple val(meta), path("*.d"), emit: untar
-    tuple val("${task.process}"), val('untar'), eval("\$(echo \$(tar --version 2>&1) | sed 's/^.*(GNU tar) //; s/ Copyright.*\$//')"), emit: versions_untar, topic: versions
+    tuple val("${task.process}"), val('untar'), eval("echo \$(tar --version 2>&1) | sed 's/^.*(GNU tar) //; s/ Copyright.*\$//'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

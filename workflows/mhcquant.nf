@@ -10,6 +10,7 @@
 
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chromatogramextractor'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
+include { OPENMS_IDMASSACCURACY          } from '../modules/local/openms/idmassaccuracy/main'
 include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
 include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
 include { EPICORE                        } from '../modules/local/epicore'
@@ -33,7 +34,6 @@ include { QUANT           } from '../subworkflows/local/quant'
 //
 include { OPENMS_FILEFILTER                              } from '../modules/nf-core/openms/filefilter/main'
 include { OPENMS_DECOYDATABASE                           } from '../modules/nf-core/openms/decoydatabase/main'
-include { OPENMS_IDMASSACCURACY                          } from '../modules/nf-core/openms/idmassaccuracy/main'
 include { OPENMSTHIRDPARTY_COMETADAPTER                  } from '../modules/nf-core/openmsthirdparty/cometadapter/main'
 include { OPENMS_PEPTIDEINDEXER                          } from '../modules/nf-core/openms/peptideindexer/main'
 include { OPENMS_IDMERGER                                } from '../modules/nf-core/openms/idmerger/main'
@@ -57,18 +57,16 @@ workflow MHCQUANT {
     ch_fasta       // channel: reference database read in from --fasta
 
     main:
-    ch_versions = channel.empty()
-    ch_multiqc_files = channel.empty()
+    ch_multiqc_files = Channel.empty()
 
     // Prepare spectra files (Decompress archives, convert to mzML, centroid if specified)
     PREPARE_SPECTRA(ch_samplesheet)
-    ch_versions = ch_versions.mix(PREPARE_SPECTRA.out.versions)
 
+    // Decoy Database creation
     // Decoy Database creation
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
-        ch_versions = ch_versions.mix(OPENMS_DECOYDATABASE.out.versions)
         ch_decoy_db = OPENMS_DECOYDATABASE.out.decoy_fasta
     } else {
         ch_decoy_db = ch_fasta
@@ -77,7 +75,6 @@ workflow MHCQUANT {
     // Optionally clean up mzML files
     if (params.filter_mzml){
         OPENMS_FILEFILTER(PREPARE_SPECTRA.out.mzml)
-        ch_versions = ch_versions.mix(OPENMS_FILEFILTER.out.versions)
         ch_clean_mzml_file = OPENMS_FILEFILTER.out.mzml
     } else {
         ch_clean_mzml_file = PREPARE_SPECTRA.out.mzml
@@ -85,7 +82,6 @@ workflow MHCQUANT {
 
     // Compute MS1 TICs for QC
     PYOPENMS_CHROMATOGRAMEXTRACTOR(ch_clean_mzml_file)
-    ch_versions = ch_versions.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(PYOPENMS_CHROMATOGRAMEXTRACTOR.out.csv.map{ meta, mzml -> mzml })
 
     // Prepare the comet input channel with global fasta or per-sample_condition fasta
@@ -98,7 +94,6 @@ workflow MHCQUANT {
 
     // Run comet database search and index decoy and target hits
     OPENMSTHIRDPARTY_COMETADAPTER(ch_comet_in)
-    ch_versions = ch_versions.mix(OPENMSTHIRDPARTY_COMETADAPTER.out.versions)
 
     // Prepare the peptideindexer channel with global fasta or per-sample_condition fasta
     ch_peptideindexer_in = params.fasta ?
@@ -109,11 +104,9 @@ workflow MHCQUANT {
             .map { groupKey, meta, idxml, fasta -> [meta, idxml, fasta] }
 
     OPENMS_PEPTIDEINDEXER(ch_peptideindexer_in)
-    ch_versions = ch_versions.mix(OPENMS_PEPTIDEINDEXER.out.versions)
 
     // Compute mass errors for multiQC report
     OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.indexed_idxml))
-    ch_versions = ch_versions.mix(OPENMS_IDMASSACCURACY.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(OPENMS_IDMASSACCURACY.out.frag_err.map{ meta, frag_err -> frag_err })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
@@ -129,7 +122,6 @@ workflow MHCQUANT {
 
     // Merge aligned idXMLfiles
     OPENMS_IDMERGER(ch_runs_to_merge)
-    ch_versions = ch_versions.mix(OPENMS_IDMERGER.out.versions)
 
     // Run MS2Rescore
     ch_clean_mzml_file
@@ -143,7 +135,6 @@ workflow MHCQUANT {
     // SUBWORKFLOW: RESCORE WITH MOKKAPOT OR PERCOLATOR AND FILTER BY Q-VALUE ON LOCAL/GLOBAL FDR
     //
     RESCORE( ch_rescore_in, ch_multiqc_files )
-    ch_versions = ch_versions.mix(RESCORE.out.versions)
     ch_multiqc_files = ch_multiqc_files.mix(RESCORE.out.multiqc_files)
 
     // GENERATE SPECTRUM LIBRARY
@@ -164,7 +155,6 @@ workflow MHCQUANT {
         // SUBWORKFLOW: SPECLIB
         //
         SPECLIB(ch_fdrfilter_comet_idxml_filtered, ch_clean_mzml_file)
-        ch_versions = ch_versions.mix(SPECLIB.out.versions)
     }
 
     //
@@ -172,7 +162,6 @@ workflow MHCQUANT {
     //
     if (params.quantify) {
         QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
-        ch_versions = ch_versions.mix(QUANT.out.versions)
         ch_output = QUANT.out.consensusxml
     } else {
         ch_output = RESCORE.out.fdr_filtered
@@ -188,12 +177,10 @@ workflow MHCQUANT {
 
         // Annotate spectra with ion fragmentation information
         PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
-        ch_versions = ch_versions.mix(PYOPENMS_IONANNOTATOR.out.versions)
     }
 
     // Prepare for check if file is empty
     OPENMS_TEXTEXPORTER(ch_output)
-    ch_versions = ch_versions.mix(OPENMS_TEXTEXPORTER.out.versions)
     // Return an error message when there is only a header present in the document
     OPENMS_TEXTEXPORTER.out.tsv.map {
         meta, tsv -> if (tsv.size() < 130) {
@@ -203,14 +190,12 @@ workflow MHCQUANT {
 
     // Process the tsv file to facilitate visualization with MultiQC
     SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
-    ch_versions = ch_versions.mix(SUMMARIZE_RESULTS.out.versions)
 
     //
     // EPICORE
     //
     if (params.epicore) {
         EPICORE(ch_fasta.map{ it.last()}, SUMMARIZE_RESULTS.out.epicore_input)
-        ch_versions = ch_versions.mix(EPICORE.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(
             EPICORE.out.length_dist,
             EPICORE.out.intensity_hist
@@ -250,7 +235,7 @@ workflow MHCQUANT {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+    softwareVersionsToYAML(topic_versions.versions_file)
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
@@ -300,8 +285,6 @@ workflow MHCQUANT {
     )
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
-
 }
 
 /*

@@ -21,7 +21,6 @@ workflow SPECLIB {
         mzml
 
     main:
-
     // Load unimod tables (Future:)
     unimod = file("$projectDir/assets/250120_unimod_tables.xml", checkIfExists: true)
 
@@ -52,6 +51,4 @@ workflow SPECLIB {
             .set { ch_global_peakpkl }
         EASYPQP_LIBRARY_GLOBAL(ch_global_psmpkl.join(ch_global_peakpkl))
     }
-
-    emit:
 }

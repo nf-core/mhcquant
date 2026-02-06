@@ -12,7 +12,7 @@ process PYOPENMS_IONANNOTATOR {
 
     output:
     tuple val(meta), path("*.tsv")  , emit: tsv
-    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), emit: versions_pyopenms, topic: versions
+    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

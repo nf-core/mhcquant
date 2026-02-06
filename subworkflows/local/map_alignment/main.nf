@@ -14,7 +14,6 @@ workflow MAP_ALIGNMENT {
         merge_meta_map
 
     main:
-
         // Compute group-wise alignment rt transformation
         OPENMS_MAPALIGNERIDENTIFICATION( ch_runs_to_be_aligned )
 

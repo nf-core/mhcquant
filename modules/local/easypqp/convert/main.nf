@@ -14,7 +14,7 @@ process EASYPQP_CONVERT {
     output:
     tuple val(meta), path("*.psmpkl") , emit: psmpkl
     tuple val(meta), path("*.peakpkl"), emit: peakpkl
-    tuple val("${task.process}"), val('easypqp'), eval("\$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\d+\.\d+\.\d+')"), emit: versions_easypqp, topic: versions
+    tuple val("${task.process}"), val('easypqp'), eval("easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+'"), emit: versions, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
