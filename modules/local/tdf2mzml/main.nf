@@ -8,19 +8,14 @@ process TDF2MZML {
 
     output:
     tuple val(meta), path("*.mzML"), emit: mzml
-    path "versions.yml"            , emit: versions
+    tuple val("${task.process}"), val('python'), eval("python3 --version | cut -d ' ' -f2"), topic: versions
+    tuple val("${task.process}"), val('tdf2mzml'), eval("echo 0.3.0"), topic: versions
 
     script:
     def prefix = task.ext.prefix ?: "${tdf.simpleName}"
 
     """
     tdf2mzml.py -i $tdf -o ${prefix}.mzML
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python3 --version | cut -d ' ' -f2)
-        tdf2mzml: \$(echo 0.3.0)
-    END_VERSIONS
     """
 
     stub:
@@ -28,11 +23,5 @@ process TDF2MZML {
 
     """
     touch ${prefix}.mzML
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        python: \$(python3 --version | cut -d ' ' -f2)
-        tdf2mzml: \$(echo 0.3.0)
-    END_VERSIONS
     """
 }

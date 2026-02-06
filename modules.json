@@ -7,67 +7,62 @@
                 "nf-core": {
                     "gunzip": {
                         "branch": "master",
-                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "git_sha": "96c57dfd98a0641886a67bd449fe33ee2ec0e374",
                         "installed_by": ["modules"]
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
+                        "git_sha": "5bdb098216aaf5df9c3b6343e6204cd932503c16",
                         "installed_by": ["modules"]
                     },
                     "openms/decoydatabase": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "openms/filefilter": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "openms/idfilter": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
-                        "installed_by": ["modules"]
-                    },
-                    "openms/idmassaccuracy": {
-                        "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "openms/idmerger": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "openms/idripper": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "openms/idscoreswitcher": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "openms/peakpickerhires": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "openms/peptideindexer": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "openmsthirdparty/cometadapter": {
                         "branch": "master",
-                        "git_sha": "0c47e4193ddde2c5edbc206b5420cbcbee5c9797",
+                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
                     "thermorawfileparser": {
                         "branch": "master",
-                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "git_sha": "daaecc3478d6f6ad9cb8f48ec7d657ab6c67877f",
                         "installed_by": ["modules"]
                     }
                 }

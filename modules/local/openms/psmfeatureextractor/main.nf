@@ -4,15 +4,15 @@ process OPENMS_PSMFEATUREEXTRACTOR {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:3.4.1--h81ffffe_1' :
-        'biocontainers/openms:3.4.1--h81ffffe_1' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.5.0--h78fb946_0' :
+        'biocontainers/openms:3.5.0--h78fb946_0' }"
 
     input:
     tuple val(meta), path(idxml), path(feature_file)
 
     output:
     tuple val(meta), path("*.idXML"), emit: idxml
-    path "versions.yml"             , emit: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\\1/p'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -31,11 +31,6 @@ process OPENMS_PSMFEATUREEXTRACTOR {
         -threads $task.cpus \\
         -extra \$extra_features \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -43,10 +38,5 @@ process OPENMS_PSMFEATUREEXTRACTOR {
 
     """
     touch ${prefix}.idXML
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 }

@@ -17,7 +17,7 @@ process MS2RESCORE {
     tuple val(meta), path("*ms2rescore.idXML") , emit: idxml
     tuple val(meta), path("*feature_names.tsv"), emit: feature_names
     tuple val(meta), path("*.html" )           , optional:true, emit: html
-    path "versions.yml"                        , emit: versions
+    tuple val("${task.process}"), val('MS2Rescore'), eval("echo \"\$(ms2rescore --version 2>&1)\" | grep -oP 'MS²Rescore \\(v\\K[^\\)]+'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,11 +33,6 @@ process MS2RESCORE {
         --output_path ${prefix}.idXML \\
         --processes $task.cpus \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        MS²Rescore: \$(echo \$(ms2rescore --version 2>&1) | grep -oP 'MS²Rescore \\(v\\K[^\\)]+' ))
-    END_VERSIONS
     """
 
     stub:
@@ -47,10 +42,5 @@ process MS2RESCORE {
     touch ${prefix}.idXML
     touch ${meta.id}_feature_names.tsv
     touch ${meta.id}.html
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        MS²Rescore: \$(echo \$(ms2rescore --version 2>&1) | grep -oP 'MS²Rescore \\(v\\K[^\\)]+' ))
-    END_VERSIONS
     """
 }

@@ -12,7 +12,7 @@ process OPENMS_IDCONFLICTRESOLVER {
 
     output:
     tuple val(meta), path("*.consensusXML"), emit: consensusxml
-    path "versions.yml"                    , emit: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | grep -E '^Version' | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,11 +25,6 @@ process OPENMS_IDCONFLICTRESOLVER {
         -in $consensus \\
         -out ${prefix}.consensusXML \\
         -threads $task.cpus
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 
     stub:
@@ -37,10 +32,5 @@ process OPENMS_IDCONFLICTRESOLVER {
 
     """
     touch ${prefix}.consensusXML
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        openms: \$(echo \$(FileInfo --help 2>&1) | sed 's/^.*Version: //; s/-.*\$//' | sed 's/ -*//; s/ .*\$//')
-    END_VERSIONS
     """
 }

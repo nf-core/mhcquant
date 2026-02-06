@@ -25,7 +25,6 @@ workflow QUANT {
         mzml
 
     main:
-        ch_versions = channel.empty()
         // Split post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1] [meta_run2, idxml_run2] ...
         // We need to make sure that the order of the runs is the same as in the mzml files since IDRipper always sorts the runs
         // (and nextflow does not guarantee the order of the maps in merged_meta_map)
@@ -38,12 +37,10 @@ workflow QUANT {
                     .map { meta -> [[spectra:meta.spectra], meta]} )
             .map { spectra, idxmls, meta -> [meta, idxmls] }
             .set { ch_ripped_idxml }
-        ch_versions = ch_versions.mix(OPENMS_IDRIPPER.out.versions)
 
         // Switch to xcorr for filtering since q-values are set to 1 with peptide-level-fdr
         if (params.fdr_level == 'peptide_level_fdrs'){
             ch_runs_score_switched = OPENMS_IDSCORESWITCHER( ch_ripped_idxml ).idxml
-            ch_versions = ch_versions.mix(OPENMS_IDSCORESWITCHER.out.versions)
         } else {
             ch_runs_score_switched = ch_ripped_idxml
         }
@@ -61,7 +58,6 @@ workflow QUANT {
                 .map { meta, idxml -> [ groupKey([id:"${meta.sample}_${meta.condition}"], meta.group_count), idxml] }
                 .groupTuple()
                 .set { ch_runs_to_be_aligned }
-        ch_versions = ch_versions.mix(OPENMS_IDFILTER_QUANT.out.versions)
 
         // Align retention times of runs
         MAP_ALIGNMENT(
@@ -69,13 +65,11 @@ workflow QUANT {
             mzml,
             merge_meta_map
         )
-        ch_versions = ch_versions.mix( MAP_ALIGNMENT.out.versions )
 
         // We need to merge groupwise the aligned idxml files together to use them as id_ext in featurefinder
         OPENMS_IDMERGER_QUANT( MAP_ALIGNMENT.out.aligned_idxml
                                     .map { meta, aligned_idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), aligned_idxml] }
                                     .groupTuple())
-        ch_versions = ch_versions.mix(OPENMS_IDMERGER_QUANT.out.versions)
 
         // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
         MAP_ALIGNMENT.out.aligned_mzml
@@ -89,12 +83,9 @@ workflow QUANT {
                 .set { ch_runs_to_be_quantified }
 
         PROCESS_FEATURE ( ch_runs_to_be_quantified )
-        ch_versions = ch_versions.mix(PROCESS_FEATURE.out.versions)
 
         OPENMS_MZTABEXPORTER(PROCESS_FEATURE.out.consensusxml)
-        ch_versions = ch_versions.mix(OPENMS_MZTABEXPORTER.out.versions)
 
     emit:
         consensusxml = PROCESS_FEATURE.out.consensusxml
-        versions = ch_versions
 }

@@ -4,8 +4,8 @@ process OPENMS_PERCOLATORADAPTER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms-thirdparty:3.4.1--h9ee0642_1' :
-        'biocontainers/openms-thirdparty:3.4.1--h9ee0642_1' }"
+        'https://depot.galaxyproject.org/singularity/openms-thirdparty:3.5.0--h9ee0642_0' :
+        'biocontainers/openms-thirdparty:3.5.0--h9ee0642_0' }"
 
     input:
     tuple val(meta), path(merged_with_features)
@@ -13,7 +13,8 @@ process OPENMS_PERCOLATORADAPTER {
     output:
     tuple val(meta), path("*.idXML")                         , emit: idxml
     tuple val(meta), path("*_percolator_feature_weights.tsv"), emit: feature_weights, optional: true
-    path "versions.yml"                                      , emit: versions
+    tuple val("${task.process}"), val('PercolatorAdapter'), eval("PercolatorAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1"), topic: versions
+    tuple val("${task.process}"), val('percolator'), eval("percolator -h 2>&1 | grep -E '^Percolator version(.*)' | sed 's/Percolator version //g'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,12 +29,6 @@ process OPENMS_PERCOLATORADAPTER {
         -out ${prefix}.idXML \\
         -threads $task.cpus \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        PercolatorAdapter: \$(PercolatorAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1)
-        percolator: \$(percolator -h 2>&1 | grep -E '^Percolator version(.*)' | sed 's/Percolator version //g')
-    END_VERSIONS
     """
 
     stub:
@@ -41,11 +36,5 @@ process OPENMS_PERCOLATORADAPTER {
 
     """
     touch ${prefix}.idXML
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        PercolatorAdapter: \$(PercolatorAdapter 2>&1 | grep -E '^Version(.*)' | sed 's/Version: //g' | cut -d ' ' -f 1)
-        percolator: \$(percolator -h 2>&1 | grep -E '^Percolator version(.*)' | sed 's/Percolator version //g')
-    END_VERSIONS
     """
 }
