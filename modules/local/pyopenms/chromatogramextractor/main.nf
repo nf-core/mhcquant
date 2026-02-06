@@ -12,7 +12,7 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
 
     output:
     tuple val(meta), path("*.csv")  , emit: csv
-    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), emit: versions, topic: versions
+    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when

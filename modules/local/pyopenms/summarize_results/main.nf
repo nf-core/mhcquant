@@ -16,7 +16,7 @@ process SUMMARIZE_RESULTS {
     path '*_peptide_length.csv'                                 , emit: lengths, optional: true
     path '*_peptide_intensity.csv'                              , emit: intensities, optional: true
     tuple val(meta), path('*.tsv'), path('*_general_stats.csv') , emit: epicore_input
-    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), emit: versions, topic: versions
+    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), topic: versions
 
     script:
     def args = task.ext.args ?: ''
