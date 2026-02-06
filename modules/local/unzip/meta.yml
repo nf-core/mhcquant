@@ -33,17 +33,6 @@ output:
           type: directory
           description: Directory contents of the unzipped archive
           pattern: "${archive.baseName}/"
-  versions_7za:
-    - - ${task.process}:
-          type: string
-          description: The process the versions were collected from
-      - 7za:
-          type: string
-          description: The tool name
-      - "echo $(7za --help) | sed 's/.*p7zip Version //; s/(.*//'":
-          type: eval
-          description: The expression to obtain the version of the tool
-
 topics:
   versions:
     - - ${task.process}:

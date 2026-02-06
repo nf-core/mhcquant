@@ -12,7 +12,7 @@ process OPENMS_FILECONVERTER {
 
     output:
     tuple val(meta), path("*.${suffix}"), emit: consensusxml
-    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\1/p'"), emit: versions_openms, topic: versions
+    tuple val("${task.process}"), val('openms'), eval("FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\1/p'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
