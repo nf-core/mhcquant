@@ -2,8 +2,6 @@ lint:
   files_unchanged:
     - .github/CONTRIBUTING.md
     - .vscode/settings.json
-  schema_params:
-    - search_presets
 nf_core_version: 3.5.1
 repository_type: pipeline
 template:

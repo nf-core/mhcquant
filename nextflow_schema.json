@@ -250,6 +250,11 @@
                     "fa_icon": "fas fa-file-code",
                     "hidden": true,
                     "description": "Specify custom Comet params file. All parameters of this take precedence."
+                },
+                "search_presets": {
+                    "type": "object",
+                    "hidden": true,
+                    "description": "Predefined search parameter presets for different MHC classes and instruments. Referenced via the SearchPreset column in the samplesheet."
                 }
             }
         },
