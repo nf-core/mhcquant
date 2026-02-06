@@ -65,12 +65,12 @@ Available presets:
 
 | Preset           | Instrument            | MHC Class | Peptide Length | Mass Range | Charge | Precursor Tol. | Fragment Tol. | MS2PIP Model |
 | ---------------- | --------------------- | --------- | -------------- | ---------- | ------ | -------------- | ------------- | ------------ |
-| `lumos_class1`   | Orbitrap Fusion Lumos | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
-| `lumos_class2`   | Orbitrap Fusion Lumos | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
-| `qe_class1`      | Q Exactive            | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
-| `qe_class2`      | Q Exactive            | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
-| `timstof_class1` | timsTOF               | I         | 8-14           | 800:2500   | 1:4    | 20 ppm         | 0.01 Da       | timsTOF      |
-| `timstof_class2` | timsTOF               | II        | 8-30           | 800:5000   | 1:5    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `lumos_class1`   | Orbitrap Fusion Lumos | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.02 Da       | Immuno-HCD   |
+| `lumos_class2`   | Orbitrap Fusion Lumos | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.02 Da       | Immuno-HCD   |
+| `qe_class1`      | Q Exactive            | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.02 Da       | Immuno-HCD   |
+| `qe_class2`      | Q Exactive            | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.02 Da       | Immuno-HCD   |
+| `timstof_class1` | timsTOF               | I         | 8-14           | 800:2500   | 1:4    | 20 ppm         | 0.02 Da       | timsTOF      |
+| `timstof_class2` | timsTOF               | II        | 8-30           | 800:5000   | 1:5    | 20 ppm         | 0.02 Da       | timsTOF      |
 | `xl_class1`      | LTQ Orbitrap XL       | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.50025 Da    | CIDch2       |
 | `xl_class2`      | LTQ Orbitrap XL       | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.50025 Da    | CIDch2       |
 
