@@ -57,7 +57,7 @@ workflow MHCQUANT {
     ch_fasta       // channel: reference database read in from --fasta
 
     main:
-    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = channel.empty()
 
     // Prepare spectra files (Decompress archives, convert to mzML, centroid if specified)
     PREPARE_SPECTRA(ch_samplesheet)
@@ -199,7 +199,7 @@ workflow MHCQUANT {
     // EPICORE
     //
     if (params.epicore) {
-        EPICORE(ch_fasta.map{ it.last()}, SUMMARIZE_RESULTS.out.epicore_input)
+        EPICORE(ch_fasta.map{ fasta -> fasta.last()}, SUMMARIZE_RESULTS.out.epicore_input)
         ch_multiqc_files = ch_multiqc_files.mix(
             EPICORE.out.length_dist,
             EPICORE.out.intensity_hist
