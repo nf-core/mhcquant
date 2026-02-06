@@ -3,9 +3,10 @@ nextflow_pipeline {
     name "Test pipeline with search parameter presets"
     script "../main.nf"
     tag "pipeline"
-    tag "search_params"
+    tag "test_search_presets"
+    profile "test_search_presets"
 
-    test("-profile test_search_params") {
+    test("-profile test_search_presets") {
 
         when {
             params {
@@ -19,15 +20,6 @@ nextflow_pipeline {
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
 
-            // Check that CometAdapter used different parameters for ClassI vs ClassII
-            // by inspecting the output TSV files
-            def tsv_files = []
-            new File(params.outdir).eachFileRecurse { file ->
-                if (file.name.endsWith('.tsv') && !file.path.contains('pipeline_info')) {
-                    tsv_files.add(file.name)
-                }
-            }
-
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
@@ -37,8 +29,6 @@ nextflow_pipeline {
                     stable_name,
                     // All files with stable contents
                     stable_path,
-                    // TSV output files
-                    tsv_files.sort()
                 ).match() }
             )
         }

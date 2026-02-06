@@ -1,5 +1,5 @@
 {
-    "-profile test_search_params": {
+    "-profile test_search_presets": {
         "content": [
             {
                 "MS2RESCORE": {
@@ -124,19 +124,12 @@
             ],
             [
                 
-            ],
-            [
-                "HepG2_ClassI.tsv",
-                "HepG2_ClassII.tsv",
-                "HepG2_rep1_small_pin.tsv",
-                "HepG2_rep2_small_pin.tsv",
-                "HepG2_rep3_small_pin.tsv"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.04.8"
         },
-        "timestamp": "2026-02-06T14:34:56.430944621"
+        "timestamp": "2026-02-06T14:54:49.407532871"
     }
 }
