@@ -125,10 +125,14 @@ workflow MHCQUANT {
 
     // Run MS2Rescore
     ch_clean_mzml_file
-            .map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), mzml] }
+            .map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta.search_preset, mzml] }
             .groupTuple()
             .join(OPENMS_IDMERGER.out.idxml)
-            .map { meta, mzml, idxml -> [meta, idxml, mzml, []] }
+            .map { gkey, search_presets, mzml, idxml ->
+                // All replicates in a sample_condition group share the same search_preset
+                def sp = search_presets.find { it && !(it instanceof List && it.size() == 0) }
+                [gkey + (sp ? [search_preset: sp] : [:]), idxml, mzml, []]
+            }
             .set { ch_rescore_in }
 
     //
