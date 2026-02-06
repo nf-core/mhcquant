@@ -14,13 +14,25 @@ You will need to create a samplesheet with information about the samples you wou
 
 ### Samplesheet columns
 
-| Column              | Description                                                                                           |
-| ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ID`                | An incrementing value which acts as a unique number for the given sample                              |
-| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
-| `Condition`         | Additional information of the sample can be defined here.                                             |
-| `ReplicateFileName` | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
-| `Fasta`             | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
+| Column                   | Required | Description                                                                                           |
+| ------------------------ | -------- | ----------------------------------------------------------------------------------------------------- |
+| `ID`                     | Yes      | An incrementing value which acts as a unique number for the given sample                              |
+| `Sample`                 | Yes      | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
+| `Condition`              | Yes      | Additional information of the sample can be defined here.                                             |
+| `ReplicateFileName`      | Yes      | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
+| `Fasta`                  | No       | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
+| `SearchPreset`           | No       | Name of a built-in search parameter preset (see [Search presets](#search-presets))                    |
+| `PeptideMinLength`       | No       | Minimum peptide length for database search                                                            |
+| `PeptideMaxLength`       | No       | Maximum peptide length for database search                                                            |
+| `PrecursorMassRange`     | No       | Precursor mass range in format `min:max` (e.g. `800:2500`)                                            |
+| `PrecursorCharge`        | No       | Precursor charge range in format `min:max` (e.g. `2:3`)                                               |
+| `PrecursorMassTolerance` | No       | Precursor mass tolerance in ppm                                                                       |
+| `FragmentMassTolerance`  | No       | Fragment mass tolerance in Da                                                                         |
+| `FragmentBinOffset`      | No       | Fragment bin offset (0 for high-res, 0.4 for low-res)                                                 |
+| `MS2PIPModel`            | No       | MS2PIP model name for spectral prediction (e.g. `Immuno-HCD`, `timsTOF`, `CIDch2`)                    |
+| `ActivationMethod`       | No       | Fragmentation method (`HCD`, `CID`, `ETD`, etc.)                                                      |
+| `Instrument`             | No       | Instrument resolution type (`high_res` or `low_res`)                                                  |
+| `NumberMods`             | No       | Maximum number of variable modifications per peptide                                                  |
 
 > [!NOTE]
 > The `Fasta` column is optional, but you can use it to provide sample-specific FASTA files. If you want to use the same FASTA file for all samples, provide it via the `--fasta` parameter. Please ensure you use one of these options.
@@ -44,6 +56,58 @@ ID	Sample	Condition	ReplicateFileName
 7	control	untreated	/path/to/msrun7.raw|mzML|d
 8	control	untreated	/path/to/msrun8.raw|mzML|d
 ```
+
+### Search presets
+
+When processing data from different instruments or MHC classes in a single run, you can use the `SearchPreset` column to assign a named set of search parameters to each sample. This avoids having to specify each parameter individually per row.
+
+Available presets:
+
+| Preset           | Instrument            | MHC Class | Peptide Length | Mass Range | Charge | Precursor Tol. | Fragment Tol. | MS2PIP Model |
+| ---------------- | --------------------- | --------- | -------------- | ---------- | ------ | -------------- | ------------- | ------------ |
+| `lumos_class1`   | Orbitrap Fusion Lumos | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `lumos_class2`   | Orbitrap Fusion Lumos | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `qe_class1`      | Q Exactive            | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `qe_class2`      | Q Exactive            | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `timstof_class1` | timsTOF               | I         | 8-14           | 800:2500   | 1:4    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `timstof_class2` | timsTOF               | II        | 8-30           | 800:5000   | 1:5    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `xl_class1`      | LTQ Orbitrap XL       | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.50025 Da    | CIDch2       |
+| `xl_class2`      | LTQ Orbitrap XL       | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.50025 Da    | CIDch2       |
+
+Example samplesheet with presets:
+
+```tsv title="samplesheet.tsv"
+ID	Sample	Condition	ReplicateFileName	SearchPreset
+1	lumos_sample	A	/path/to/lumos_run1.raw	lumos_class1
+2	lumos_sample	A	/path/to/lumos_run2.raw	lumos_class1
+3	timstof_sample	B	/path/to/timstof_run1.d	timstof_class2
+4	timstof_sample	B	/path/to/timstof_run2.d	timstof_class2
+```
+
+### Per-sample search parameter overrides
+
+Individual search parameters can also be specified directly in the samplesheet, either together with a preset or standalone. This is useful when you need fine-grained control over a specific parameter.
+
+```tsv title="samplesheet.tsv"
+ID	Sample	Condition	ReplicateFileName	SearchPreset	PeptideMaxLength
+1	sample1	A	/path/to/run1.raw	lumos_class1	16
+2	sample2	B	/path/to/run2.raw		12
+```
+
+In the example above, `sample1` uses the `lumos_class1` preset but overrides `PeptideMaxLength` to 16 (instead of the preset default 14). `sample2` has no preset but sets `PeptideMaxLength` to 12 directly.
+
+### Parameter precedence
+
+Search parameters are resolved with the following precedence (highest to lowest):
+
+1. **Samplesheet column** (e.g. `PeptideMinLength`) -- per-sample values specified directly in the samplesheet always win
+2. **Search preset** (e.g. `SearchPreset: lumos_class1`) -- preset values fill in any parameters not specified in the samplesheet
+3. **Command-line / global params** (e.g. `--peptide_min_length 8`) -- global defaults are used as a final fallback for any parameter not set by the above
+
+This means you can set sensible defaults globally via the command line, use presets for instrument/class-specific groups, and override individual parameters per sample where needed.
+
+> [!NOTE]
+> When using `--global_fdr`, samples sharing the same `SearchPreset` value are grouped together for global FDR estimation. Samples without a preset are grouped under a common `global` group.
 
 ## Recommended search settings
 
