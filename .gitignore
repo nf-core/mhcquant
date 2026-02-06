@@ -7,3 +7,5 @@ testing/
 testing*
 *.pyc
 null/
+CLAUDE.md
+.claude/
