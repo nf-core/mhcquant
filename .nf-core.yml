@@ -2,6 +2,7 @@ lint:
   files_unchanged:
     - .github/CONTRIBUTING.md
     - .vscode/settings.json
+  pipeline_if_empty_null: false
 nf_core_version: 3.5.1
 repository_type: pipeline
 template:
