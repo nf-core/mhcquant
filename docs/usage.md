@@ -100,11 +100,12 @@ In the example above, `sample1` uses the `lumos_class1` preset but overrides `Pe
 
 Search parameters are resolved with the following precedence (highest to lowest):
 
-1. **Samplesheet column** (e.g. `PeptideMinLength`) -- per-sample values specified directly in the samplesheet always win
-2. **Search preset** (e.g. `SearchPreset: lumos_class1`) -- preset values fill in any parameters not specified in the samplesheet
-3. **Command-line / global params** (e.g. `--peptide_min_length 8`) -- global defaults are used as a final fallback for any parameter not set by the above
+1. **Command-line parameters** (e.g. `--fragment_mass_tolerance 0.05`) -- CLI overrides take highest priority and apply to all samples, regardless of samplesheet or preset values
+2. **Samplesheet column** (e.g. `FragmentMassTolerance`) -- per-sample values specified directly in the samplesheet
+3. **Search preset** (e.g. `SearchPreset: lumos_class1`) -- preset values fill in any parameters not specified in the samplesheet
+4. **Config defaults** (`nextflow.config`) -- built-in defaults are used as a final fallback
 
-This means you can set sensible defaults globally via the command line, use presets for instrument/class-specific groups, and override individual parameters per sample where needed.
+This means a CLI flag like `--fragment_mass_tolerance 0.05` will override all presets and samplesheet values for that parameter. Without CLI overrides, samplesheet values take priority over presets, and presets over config defaults.
 
 > [!NOTE]
 > When using `--global_fdr`, samples sharing the same `SearchPreset` value are grouped together for global FDR estimation. Samples without a preset are grouped under a common `global` group.
