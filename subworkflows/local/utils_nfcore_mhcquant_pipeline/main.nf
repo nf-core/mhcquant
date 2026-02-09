@@ -217,34 +217,37 @@ workflow PIPELINE_COMPLETION {
 */
 
 //
-// Resolve a search parameter with priority: meta (individual) > preset > global params
+// Resolve a search parameter with priority: CLI params > samplesheet (individual) > preset > config default
 //
 def resolveSearchParams(meta, searchPresets) {
+    def defaults = params.search_param_defaults ?: [:]
     def presetName = meta.search_preset
+    def presetConfig = (presetName && searchPresets) ? searchPresets[presetName] : [:]
+    if (!presetConfig) { presetConfig = [:] }
 
-    if (!presetName || !searchPresets) {
-        return meta
-    }
-
-    def presetConfig = searchPresets[presetName]
-    if (!presetConfig) {
-        return meta
-    }
-
-    // Build result map - explicitly copy each search param from preset if not already in meta
     def result = new LinkedHashMap(meta)
 
-    // Explicitly set each search parameter
     def searchParamKeys = ['peptide_min_length', 'peptide_max_length', 'digest_mass_range', 'prec_charge',
                            'precursor_mass_tolerance', 'fragment_mass_tolerance', 'fragment_bin_offset',
                            'ms2pip_model', 'activation_method', 'instrument', 'number_mods']
 
     searchParamKeys.each { key ->
-        // Check for null OR empty (nf-schema sets empty columns to empty lists [])
-        def currentValue = result[key]
-        def isEmpty = (currentValue == null) || (currentValue instanceof List && currentValue.size() == 0) || (currentValue == '')
-        if (isEmpty && presetConfig.containsKey(key)) {
-            result.put(key, presetConfig.get(key))
+        // Detect CLI override: params.X differs from the hardcoded default
+        def cliOverride = defaults.containsKey(key) && params[key] != defaults[key]
+        if (cliOverride) {
+            // CLI has highest priority
+            result.put(key, params[key])
+        } else {
+            // Check samplesheet individual value (nf-schema sets empty columns to [])
+            def currentValue = result[key]
+            def isEmpty = (currentValue == null) || (currentValue instanceof List && currentValue.size() == 0) || (currentValue == '')
+            if (isEmpty && presetConfig.containsKey(key)) {
+                // Use preset value
+                result.put(key, presetConfig.get(key))
+            } else if (isEmpty) {
+                // Fall back to config default (params.X)
+                result.put(key, params[key])
+            }
         }
     }
 

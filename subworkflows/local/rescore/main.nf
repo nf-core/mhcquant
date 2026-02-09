@@ -93,7 +93,7 @@ workflow RESCORE {
     }
 
     emit:
-        rescored_runs = ch_rescored_runs
-        fdr_filtered = ch_filter_q_value
+        rescored_runs = ch_rescored_runs.map { meta, file -> [[id: meta.id], file] }
+        fdr_filtered = ch_filter_q_value.map { meta, file -> [[id: meta.id], file] }
         multiqc_files = ch_multiqc_files
 }

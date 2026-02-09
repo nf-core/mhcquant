@@ -18,17 +18,17 @@ workflow PREPARE_SPECTRA {
         .branch {
             meta, filename ->
                 raw : meta.ext == 'raw'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
+                    return [ meta.subMap(meta.keySet() - ['ext']), filename ]
                 mzml : meta.ext == 'mzml'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
+                    return [ meta.subMap(meta.keySet() - ['ext']), filename ]
                 mzml_gz : meta.ext == 'mzml.gz'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
+                    return [ meta.subMap(meta.keySet() - ['ext']), filename ]
                 d : meta.ext == 'd'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
+                    return [ meta.subMap(meta.keySet() - ['ext']), filename ]
                 d_tar : meta.ext == 'd.tar' | meta.ext == 'd.tar.gz'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
+                    return [ meta.subMap(meta.keySet() - ['ext']), filename ]
                 d_zip : meta.ext == 'd.zip'
-                    return [ meta.subMap('id', 'sample', 'condition', 'group_count', 'spectra'), filename ]
+                    return [ meta.subMap(meta.keySet() - ['ext']), filename ]
                 other : true }
         .set { branched_ms_files }
 
