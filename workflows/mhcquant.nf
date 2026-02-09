@@ -63,7 +63,6 @@ workflow MHCQUANT {
     PREPARE_SPECTRA(ch_samplesheet)
 
     // Decoy Database creation
-    // Decoy Database creation
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
         OPENMS_DECOYDATABASE(ch_fasta)
