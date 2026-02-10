@@ -33,6 +33,8 @@ You will need to create a samplesheet with information about the samples you wou
 | `ActivationMethod`       | No       | Fragmentation method (`HCD`, `CID`, `ETD`, etc.)                                                      |
 | `Instrument`             | No       | Instrument resolution type (`high_res` or `low_res`)                                                  |
 | `NumberMods`             | No       | Maximum number of variable modifications per peptide                                                  |
+| `FixedMods`              | No       | Comma-separated fixed modifications in UNIMOD nomenclature (e.g. `Carbamidomethyl (C)`)               |
+| `VariableMods`           | No       | Comma-separated variable modifications in UNIMOD nomenclature (e.g. `Oxidation (M)`)                  |
 
 > [!NOTE]
 > The `Fasta` column is optional, but you can use it to provide sample-specific FASTA files. If you want to use the same FASTA file for all samples, provide it via the `--fasta` parameter. Please ensure you use one of these options.

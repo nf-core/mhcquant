@@ -129,6 +129,16 @@
                 "minimum": 0,
                 "errorMessage": "NumberMods must be a non-negative integer",
                 "meta": ["number_mods"]
+            },
+            "FixedMods": {
+                "type": "string",
+                "errorMessage": "FixedMods must be a comma-separated list of UNIMOD modification names",
+                "meta": ["fixed_mods"]
+            },
+            "VariableMods": {
+                "type": "string",
+                "errorMessage": "VariableMods must be a comma-separated list of UNIMOD modification names",
+                "meta": ["variable_mods"]
             }
         },
         "required": ["ID", "Sample", "Condition", "ReplicateFileName"]

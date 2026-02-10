@@ -220,26 +220,34 @@ workflow PIPELINE_COMPLETION {
 // Resolve a search parameter with priority: CLI params > samplesheet (individual) > preset > config default
 //
 def resolveSearchParams(meta, searchPresets) {
-    // Hardcoded defaults matching nextflow.config — used to detect CLI overrides
+    // Hardcoded nextflow.config defaults — must be kept in sync manually.
+    // Cannot use params.X references because Nextflow merges CLI overrides
+    // into params before config evaluation, making CLI detection impossible.
     def defaults = [
-        instrument: 'high_res', activation_method: 'ALL', digest_mass_range: '800:2500',
-        prec_charge: '2:3', precursor_mass_tolerance: 5, fragment_mass_tolerance: 0.01,
-        fragment_bin_offset: 0.0, number_mods: 3, ms2pip_model: 'Immuno-HCD',
-        peptide_min_length: 8, peptide_max_length: 12
+        instrument: 'high_res',
+        activation_method: 'ALL',
+        digest_mass_range: '800:2500',
+        prec_charge: '2:3',
+        precursor_mass_tolerance: 5,
+        fragment_mass_tolerance: 0.01,
+        fragment_bin_offset: 0.0,
+        number_mods: 3,
+        ms2pip_model: 'Immuno-HCD',
+        peptide_min_length: 8,
+        peptide_max_length: 12,
+        fixed_mods: ' ',
+        variable_mods: 'Oxidation (M)'
     ]
+
     def presetName = meta.search_preset
     def presetConfig = (presetName && searchPresets) ? searchPresets[presetName] : [:]
     if (!presetConfig) { presetConfig = [:] }
 
     def result = new LinkedHashMap(meta)
 
-    def searchParamKeys = ['peptide_min_length', 'peptide_max_length', 'digest_mass_range', 'prec_charge',
-                           'precursor_mass_tolerance', 'fragment_mass_tolerance', 'fragment_bin_offset',
-                           'ms2pip_model', 'activation_method', 'instrument', 'number_mods']
-
-    searchParamKeys.each { key ->
+    defaults.keySet().each { key ->
         // Detect CLI override: params.X differs from the hardcoded default
-        def cliOverride = defaults.containsKey(key) && params[key] != defaults[key]
+        def cliOverride = params[key] != defaults[key]
         if (cliOverride) {
             // CLI has highest priority
             result.put(key, params[key])
