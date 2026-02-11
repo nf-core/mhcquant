@@ -173,10 +173,15 @@ workflow MHCQUANT {
 
     // Annotate Ions for follow-up spectrum validation
     if (params.annotate_ions) {
-        // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_clean_mzml_file.map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), mzml] }
+        // Join mzml files and fdr-filtered idxml, reconstructing search params from ch_clean_mzml_file
+        ch_clean_mzml_file.map { meta, mzml ->
+                [ [id: "${meta.sample}_${meta.condition}"],
+                  meta.subMap(meta.keySet() - ['id', 'sample', 'condition', 'group_count', 'spectra']),
+                  mzml ]
+            }
             .groupTuple()
             .join(RESCORE.out.fdr_filtered)
+            .map { key, searchMetas, mzmls, idxml -> [key + searchMetas[0], mzmls, idxml] }
             .set{ ch_ion_annotator_input }
 
         // Annotate spectra with ion fragmentation information
