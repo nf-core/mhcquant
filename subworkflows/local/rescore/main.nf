@@ -54,7 +54,8 @@ workflow RESCORE {
         ch_pout = OPENMS_PERCOLATORADAPTER.out.idxml
 
         if (params.global_fdr) {
-            // Group by search_preset (or 'global' if no preset)
+            // Group by search_preset for global FDR. Samples without a preset all share
+            // the same params (CLI or defaults), so they correctly group under 'global'.
             OPENMS_IDMERGER_GLOBAL(
                 OPENMS_PSMFEATUREEXTRACTOR.out.idxml
                     .map { group_meta, idxml -> [[id: group_meta.search_preset ?: 'global'], idxml] }

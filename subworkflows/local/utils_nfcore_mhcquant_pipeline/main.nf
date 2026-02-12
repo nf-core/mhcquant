@@ -92,6 +92,22 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
+    // Parse search parameter presets TSV into a map
+    //
+    def presetsList = samplesheetToList(params.search_presets, "${projectDir}/assets/schema_search_presets.json")
+    def presetsMap = presetsList.collectEntries { row ->
+        def meta = (row instanceof List) ? row[0] : row
+        // nf-schema parses whitespace-only TSV fields as empty list []; convert to empty string
+        ['fixed_mods', 'variable_mods'].each { key ->
+            def val = meta[key]
+            if (val == null || (val instanceof List && val.size() == 0) || val == '') {
+                meta[key] = ''
+            }
+        }
+        [(meta.preset_name): meta]
+    }
+
+    //
     // Create channel from input file provided through params.input
     //
 
@@ -108,7 +124,7 @@ workflow PIPELINE_INITIALISATION {
         .combine( ch_input, by:0 )
         .map { group_meta, group_count, meta, file, fasta ->
             def enrichedMeta = meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)]
-            def resolved = resolveSearchParams(enrichedMeta, params.search_presets)
+            def resolved = resolveSearchParams(enrichedMeta, presetsMap)
             [resolved, file, fasta]
         }
         .set { ch_samplesheet_raw }
@@ -217,15 +233,19 @@ workflow PIPELINE_COMPLETION {
 */
 
 //
-// Resolve a search parameter with priority: CLI params > samplesheet (individual) > preset > config default
+// Resolve a search parameter with priority: CLI params > samplesheet preset > nextflow.config default
 //
-def resolveSearchParams(meta, searchPresets) {
+def resolveSearchParams(meta, presetsMap) {
     def searchParamKeys = ['instrument', 'activation_method', 'digest_mass_range', 'prec_charge',
                            'precursor_mass_tolerance', 'fragment_mass_tolerance', 'fragment_bin_offset',
                            'number_mods', 'ms2pip_model', 'peptide_min_length', 'peptide_max_length',
                            'fixed_mods', 'variable_mods']
     def presetName = meta.search_preset
-    def presetConfig = (presetName && searchPresets) ? searchPresets[presetName] : [:]
+    def hasPreset = presetName && !(presetName instanceof List && presetName.size() == 0) && presetName != ''
+    def presetConfig = hasPreset ? presetsMap[presetName] : [:]
+    if (hasPreset && !presetConfig) {
+        error "Unknown search preset '${presetName}'. Available: ${presetsMap.keySet().join(', ')}"
+    }
     if (!presetConfig) { presetConfig = [:] }
 
     def result = new LinkedHashMap(meta)
@@ -233,19 +253,11 @@ def resolveSearchParams(meta, searchPresets) {
     searchParamKeys.each { key ->
         def cliOverride = (workflow.commandLine =~ /--${key}[\s=]/).find()
         if (cliOverride) {
-            // CLI has highest priority
             result.put(key, params[key])
+        } else if (presetConfig.containsKey(key)) {
+            result.put(key, presetConfig[key])
         } else {
-            // Check samplesheet individual value (nf-schema sets empty columns to [])
-            def currentValue = result[key]
-            def isEmpty = (currentValue == null) || (currentValue instanceof List && currentValue.size() == 0) || (currentValue == '')
-            if (isEmpty && presetConfig.containsKey(key)) {
-                // Use preset value
-                result.put(key, presetConfig.get(key))
-            } else if (isEmpty) {
-                // Fall back to config default (params.X)
-                result.put(key, params[key])
-            }
+            result.put(key, params[key])
         }
     }
 
