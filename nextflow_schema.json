@@ -252,9 +252,13 @@
                     "description": "Specify custom Comet params file. All parameters of this take precedence."
                 },
                 "search_presets": {
-                    "type": "object",
-                    "hidden": true,
-                    "description": "Predefined search parameter presets for different MHC classes and instruments. Referenced via the SearchPreset column in the samplesheet."
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "schema": "assets/schema_search_presets.json",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.tsv$",
+                    "description": "TSV file with search parameter presets. Users can supply a custom file to define their own presets."
                 }
             }
         },
