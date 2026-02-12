@@ -19,10 +19,10 @@ nextflow_pipeline {
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
-            // Extract peptidoform column from all TSV files
+            // Extract peptidoform column from result TSV files (qe and lumos groups)
             def peptidoform_data = []
             new File(params.outdir).eachFileRecurse { file ->
-                if (file.name.endsWith('.tsv')) {
+                if (file.name.endsWith('.tsv') && file.parentFile.path == params.outdir) {
                     def lines = file.readLines()
                     if (lines.size() > 0) {
                         def header = lines[0].split('\t')
@@ -37,6 +37,7 @@ nextflow_pipeline {
                     }
                 }
             }
+            peptidoform_data.sort { it[0] }
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
