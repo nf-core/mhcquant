@@ -237,8 +237,9 @@ workflow PIPELINE_COMPLETION {
 //
 def resolveSearchParams(meta, presetsMap) {
     def searchParamKeys = ['instrument', 'activation_method', 'digest_mass_range', 'prec_charge',
-                           'precursor_mass_tolerance', 'fragment_mass_tolerance', 'fragment_bin_offset',
-                           'number_mods', 'ms2pip_model', 'peptide_min_length', 'peptide_max_length',
+                           'precursor_mass_tolerance', 'precursor_error_units', 'fragment_mass_tolerance',
+                           'fragment_bin_offset', 'number_mods', 'ms2pip_model',
+                           'peptide_min_length', 'peptide_max_length',
                            'fixed_mods', 'variable_mods']
     def presetName = meta.search_preset
     def hasPreset = presetName && !(presetName instanceof List && presetName.size() == 0) && presetName != ''

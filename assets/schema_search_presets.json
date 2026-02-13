@@ -43,6 +43,12 @@
                 "errorMessage": "PrecursorMassTolerance must be a non-negative number",
                 "meta": ["precursor_mass_tolerance"]
             },
+            "PrecursorErrorUnit": {
+                "type": "string",
+                "enum": ["ppm", "Da"],
+                "errorMessage": "PrecursorErrorUnit must be either 'ppm' or 'Da'",
+                "meta": ["precursor_error_units"]
+            },
             "FragmentMassTolerance": {
                 "type": "number",
                 "minimum": 0,
