@@ -19,16 +19,25 @@ nextflow_pipeline {
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
-            // Count peptidoforms from result TSV files (non-deterministic due to MS2Rescore/Percolator FDR)
-            def totalPeptidoforms = 0
+            // Extract peptidoform column from result TSV files (qe and lumos groups)
+            def peptidoform_data = []
             new File(params.outdir).eachFileRecurse { file ->
                 if (file.name.endsWith('.tsv') && file.parentFile.path == params.outdir) {
                     def lines = file.readLines()
-                    if (lines.size() > 1) {
-                        totalPeptidoforms += lines.size() - 1
+                    if (lines.size() > 0) {
+                        def header = lines[0].split('\t')
+                        def peptidoformIndex = header.findIndexOf { it == 'peptidoform' }
+                        if (peptidoformIndex >= 0) {
+                            def peptidoforms = lines.drop(1).collect { line ->
+                                def fields = line.split('\t')
+                                fields.size() > peptidoformIndex ? fields[peptidoformIndex] : ''
+                            }.findAll { it != '' }.sort()
+                            peptidoform_data.add([file.name, peptidoforms])
+                        }
                     }
                 }
             }
+            peptidoform_data.sort { it[0] }
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
@@ -37,11 +46,10 @@ nextflow_pipeline {
                     // All stable path name, with a relative path
                     stable_name,
                     // All files with stable contents
-                    stable_path
-                ).match() },
-                // MS2Rescore is non-deterministic, so exact peptide lists vary between runs.
-                // Check that at least one preset group produced peptides (FDR < 0.01).
-                { assert totalPeptidoforms >= 100 : "Expected at least 100 peptidoforms across all groups, got ${totalPeptidoforms}" }
+                    stable_path,
+                    // Peptidoform data from result TSV files
+                    peptidoform_data
+                ).match() }
             )
         }
     }
