@@ -158,6 +158,10 @@ def process_file(file, prefix, quantify, keep_cols):
     # Histograms
     # ---------------------------------
 
+    # Rename IM column to ion_mobility for readability
+    if "IM" in data.columns:
+        data.rename(columns={"IM": "ion_mobility"}, inplace=True)
+
     histograms = [[data["mz"].astype(float), f"{prefix}_histogram_mz.csv"],
                   [data["rt"].astype(float), f"{prefix}_histogram_rt.csv"],
                   [data["score"].astype(float), f"{prefix}_histogram_scores.csv"]]
@@ -165,6 +169,15 @@ def process_file(file, prefix, quantify, keep_cols):
     for values, title in histograms:
         hist, bin_edges = np.histogram(values, bins='auto')
         with open(title, "w") as f:
+            for i in range(len(bin_edges) - 1):
+                bin_midpoint = (bin_edges[i] + bin_edges[i + 1]) / 2
+                f.write(f'{bin_midpoint},{hist[i]}\n')
+
+    # Generate ion mobility histogram if IM data is available (e.g., timsTOF)
+    if "ion_mobility" in data.columns:
+        im_values = data["ion_mobility"].astype(float)
+        hist, bin_edges = np.histogram(im_values, bins='auto')
+        with open(f"{prefix}_histogram_im.csv", "w") as f:
             for i in range(len(bin_edges) - 1):
                 bin_midpoint = (bin_edges[i] + bin_edges[i + 1]) / 2
                 f.write(f'{bin_midpoint},{hist[i]}\n')
