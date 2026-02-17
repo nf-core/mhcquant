@@ -102,6 +102,19 @@ custom_data:
       xlab: "Retention time"
       ylab: "Frequency"
 
+  im_plot:
+    plot_type: "linegraph"
+    file_format: "csv"
+    section_name: "Ion Mobility"
+    description: |
+      This plot shows the distribution of ion mobility (1/K0) values for identified peptides.
+      Ion mobility data is available when using instruments with ion mobility separation (e.g., timsTOF).
+    pconfig:
+      id: "histogram_im"
+      title: "Ion Mobility Distribution"
+      xlab: "Ion Mobility (1/K0) [V·s/cm²]"
+      ylab: "Frequency"
+
   qvalue_plot:
     plot_type: "linegraph"
     file_format: "csv"
@@ -164,6 +177,8 @@ sp:
     fn: "*_histogram_mz.csv"
   rt_plot:
     fn: "*_histogram_rt.csv"
+  im_plot:
+    fn: "*_histogram_im.csv"
   qvalue_plot:
     fn: "*_histogram_scores.csv"
   scores_plot_xcorr:

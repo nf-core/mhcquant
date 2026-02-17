@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - Added support for single run quantification [#438](https://github.com/nf-core/mhcquant/pull/438)
+- Added ion mobility (IM) export and MultiQC distribution plot for timsTOF data [#441](https://github.com/nf-core/mhcquant/pull/441)
 
 ### `Fixed`
 
