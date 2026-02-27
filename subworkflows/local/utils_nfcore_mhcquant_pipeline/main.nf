@@ -39,7 +39,6 @@ workflow PIPELINE_INITIALISATION {
 
     main:
 
-    ch_versions = channel.empty()
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
@@ -93,18 +92,41 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
+    // Parse search parameter presets TSV into a map
+    //
+    def presetsList = samplesheetToList(params.search_presets, "${projectDir}/assets/schema_search_presets.json")
+    def presetsMap = presetsList.collectEntries { row ->
+        def meta = (row instanceof List) ? row[0] : row
+        // nf-schema parses whitespace-only TSV fields as empty list []; convert to empty string
+        ['fixed_mods', 'variable_mods'].each { key ->
+            def val = meta[key]
+            if (val == null || (val instanceof List && val.size() == 0) || val == '') {
+                meta[key] = ''
+            }
+        }
+        [(meta.preset_name): meta]
+    }
+
+    //
     // Create channel from input file provided through params.input
     //
 
     channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map { meta, file, fasta -> [meta.subMap('sample','condition'), meta, file, fasta] }
+        .map { meta, file, fasta ->
+            def m = meta + [sample: meta.sample.toString(), condition: meta.condition.toString()]
+            [m.subMap('sample','condition'), m, file, fasta]
+        }
         .tap { ch_input }
         .groupTuple()
         // get number of files per sample-condition
         .map { group_meta, metas, files, fastas -> [ group_meta, files.size()] }
         .combine( ch_input, by:0 )
-        .map { group_meta, group_count, meta, file, fasta -> [meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)], file, fasta] }
+        .map { group_meta, group_count, meta, file, fasta ->
+            def enrichedMeta = meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)]
+            def resolved = resolveSearchParams(enrichedMeta, presetsMap)
+            [resolved, file, fasta]
+        }
         .set { ch_samplesheet_raw }
 
     ch_samplesheet = ch_samplesheet_raw.map { meta, file, fasta -> [ meta, file ]}
@@ -209,6 +231,40 @@ workflow PIPELINE_COMPLETION {
     FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+//
+// Resolve a search parameter with priority: CLI params > samplesheet preset > nextflow.config default
+//
+def resolveSearchParams(meta, presetsMap) {
+    def searchParamKeys = ['instrument', 'activation_method', 'digest_mass_range', 'prec_charge',
+                           'precursor_mass_tolerance', 'precursor_error_units', 'fragment_mass_tolerance',
+                           'fragment_bin_offset', 'number_mods', 'ms2pip_model',
+                           'peptide_min_length', 'peptide_max_length',
+                           'fixed_mods', 'variable_mods']
+    def presetName = meta.search_preset
+    def hasPreset = presetName && !(presetName instanceof List && presetName.size() == 0) && presetName != ''
+    def presetConfig = hasPreset ? presetsMap[presetName] : [:]
+    if (hasPreset && !presetConfig) {
+        error "Unknown search preset '${presetName}'. Available: ${presetsMap.keySet().join(', ')}"
+    }
+    if (!presetConfig) { presetConfig = [:] }
+
+    def result = new LinkedHashMap(meta)
+
+    searchParamKeys.each { key ->
+        def cliOverride = (workflow.commandLine =~ /--${key}[\s=]/).find()
+        if (cliOverride) {
+            result.put(key, params[key])
+        } else if (presetConfig.containsKey(key)) {
+            result.put(key, presetConfig[key])
+        } else {
+            result.put(key, params[key])
+        }
+    }
+
+    return result
+}
+
 //
 // Validate channels from input samplesheet
 //

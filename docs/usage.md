@@ -14,13 +14,14 @@ You will need to create a samplesheet with information about the samples you wou
 
 ### Samplesheet columns
 
-| Column              | Description                                                                                           |
-| ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ID`                | An incrementing value which acts as a unique number for the given sample                              |
-| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
-| `Condition`         | Additional information of the sample can be defined here.                                             |
-| `ReplicateFileName` | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
-| `Fasta`             | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
+| Column              | Required | Description                                                                                           |
+| ------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `ID`                | Yes      | An incrementing value which acts as a unique number for the given sample                              |
+| `Sample`            | Yes      | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
+| `Condition`         | Yes      | Additional information of the sample can be defined here.                                             |
+| `ReplicateFileName` | Yes      | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
+| `Fasta`             | No       | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
+| `SearchPreset`      | No       | Name of a search parameter preset (see [Search presets](#search-presets))                             |
 
 > [!NOTE]
 > The `Fasta` column is optional, but you can use it to provide sample-specific FASTA files. If you want to use the same FASTA file for all samples, provide it via the `--fasta` parameter. Please ensure you use one of these options.
@@ -45,6 +46,46 @@ ID	Sample	Condition	ReplicateFileName
 8	control	untreated	/path/to/msrun8.raw|mzML|d
 ```
 
+### Search presets
+
+When processing data from different instruments or MHC classes in a single run, you can use the `SearchPreset` column to assign a named set of search parameters to each sample. This avoids having to specify each parameter individually per row.
+
+Available presets:
+
+| Preset           | Instrument            | MHC Class | Peptide Length | Mass Range | Charge | Precursor Tol. | Fragment Tol. | MS2PIP Model |
+| ---------------- | --------------------- | --------- | -------------- | ---------- | ------ | -------------- | ------------- | ------------ |
+| `lumos_class1`   | Orbitrap Fusion Lumos | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `lumos_class2`   | Orbitrap Fusion Lumos | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `qe_class1`      | Q Exactive            | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `qe_class2`      | Q Exactive            | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `timstof_class1` | timsTOF               | I         | 8-14           | 800:2500   | 1:4    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `timstof_class2` | timsTOF               | II        | 8-30           | 800:5000   | 1:5    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `xl_class1`      | LTQ Orbitrap XL       | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.50025 Da    | CIDch2       |
+| `xl_class2`      | LTQ Orbitrap XL       | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.50025 Da    | CIDch2       |
+
+Example samplesheet with presets:
+
+```tsv title="samplesheet.tsv"
+ID	Sample	Condition	ReplicateFileName	SearchPreset
+1	lumos_sample	A	/path/to/lumos_run1.raw	lumos_class1
+2	lumos_sample	A	/path/to/lumos_run2.raw	lumos_class1
+3	timstof_sample	B	/path/to/timstof_run1.d	timstof_class2
+4	timstof_sample	B	/path/to/timstof_run2.d	timstof_class2
+```
+
+### Parameter precedence
+
+Search parameters are resolved with the following precedence (highest to lowest):
+
+1. **Command-line parameters** (e.g. `--fragment_mass_tolerance 0.05`) -- CLI overrides take highest priority and apply to all samples
+2. **Search preset** (e.g. `SearchPreset: lumos_class1`) -- preset values fill in any parameters not specified via CLI
+3. **Config defaults** (`nextflow.config`) -- built-in defaults are used as a final fallback
+
+This means a CLI flag like `--fragment_mass_tolerance 0.05` will override all presets for that parameter.
+
+> [!NOTE]
+> When using `--global_fdr`, samples sharing the same `SearchPreset` value are grouped together for global FDR estimation. Samples without a preset are grouped under a common `global` group.
+
 ## Recommended search settings
 
 Fine-tuning search settings is important to obtain the most optimal results for your MS data. _These settings heavily depend on the MS instrument settings used to generate the data_. If you want to reprocess public data, make sure you use the settings mentioned in the methods section! The following table acts as an orientation of commonly used search settings for instruments:
@@ -59,7 +100,7 @@ Fine-tuning search settings is important to obtain the most optimal results for 
 | precursor_error_units    | ppm      | ppm      | ppm                   | ppm      | ppm                 | ppm      | ppm             | ppm      |
 | number_mods              | 3        | 5        | 3                     | 5        | 3                   | 5        | 3               | 5        |
 | precursor_mass_tolerance | 20       | 20       | 5                     | 5        | 5                   | 5        | 5               | 5        |
-| fragment_mass_tolerance  | 0.02     | 0.02     | 0.02                  | 0.02     | 0.02                | 0.02     | 0.50025         | 0.50025  |
+| fragment_mass_tolerance  | 0.01     | 0.01     | 0.01                  | 0.01     | 0.01                | 0.01     | 0.50025         | 0.50025  |
 | fragment_bin_offset      | 0        | 0        | 0                     | 0        | 0                   | 0        | 0.4             | 0.4      |
 
 Modifications are specified via `--variable_mods` and `fixed_mods` using the [UNIMOD nomenclature](https://www.unimod.org/unimod_help.html) via OpenMS. Check out [helper page](https://abibuilder.cs.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html) of OpenMS for the full list of options. Multiple modifications are specified as `'Oxidation (M),Acetyl (N-term),Phospho (S)'`.

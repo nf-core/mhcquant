@@ -1,0 +1,11 @@
+PresetName	PeptideMinLength	PeptideMaxLength	PrecursorMassRange	PrecursorCharge	PrecursorMassTolerance	PrecursorErrorUnit	FragmentMassTolerance	FragmentBinOffset	MS2PIPModel	ActivationMethod	Instrument	NumberMods	FixedMods	VariableMods
+lumos_class1	8	14	800:2500	2:3	5	ppm	0.01	0.0	Immuno-HCD	HCD	high_res	3	 	Oxidation (M)
+lumos_class2	8	30	800:5000	2:5	5	ppm	0.01	0.0	Immuno-HCD	HCD	high_res	5	 	Oxidation (M)
+qe_class1	8	14	800:2500	2:3	5	ppm	0.01	0.0	Immuno-HCD	HCD	high_res	3	 	Oxidation (M)
+qe_class2	8	30	800:5000	2:5	5	ppm	0.01	0.0	Immuno-HCD	HCD	high_res	5	 	Oxidation (M)
+timstof_class1	8	14	800:2500	1:4	20	ppm	0.01	0.0	timsTOF	CID	high_res	3	 	Oxidation (M)
+timstof_class2	8	30	800:5000	1:5	20	ppm	0.01	0.0	timsTOF	CID	high_res	5	 	Oxidation (M)
+astral_class1	8	14	800:2500	2:3	5	ppm	0.01	0.0	Immuno-HCD	HCD	high_res	3	 	Oxidation (M)
+astral_class2	8	30	800:5000	2:5	5	ppm	0.01	0.0	Immuno-HCD	HCD	high_res	5	 	Oxidation (M)
+xl_class1	8	14	800:2500	2:3	5	ppm	0.50025	0.4	CIDch2	CID	low_res	3	 	Oxidation (M)
+xl_class2	8	30	800:5000	2:5	5	ppm	0.50025	0.4	CIDch2	CID	low_res	5	 	Oxidation (M)

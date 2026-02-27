@@ -54,17 +54,35 @@ workflow RESCORE {
         ch_pout = OPENMS_PERCOLATORADAPTER.out.idxml
 
         if (params.global_fdr) {
-            // Merge all samples into one group
-            OPENMS_IDMERGER_GLOBAL(OPENMS_PSMFEATUREEXTRACTOR.out.idxml.map {group_meta, idxml -> [[id:'global'], idxml] }.groupTuple())
-            // Run Percolator with global FDR
+            // Group by search_preset for global FDR. Samples without a preset all share
+            // the same params (CLI or defaults), so they correctly group under 'global'.
+            OPENMS_IDMERGER_GLOBAL(
+                OPENMS_PSMFEATUREEXTRACTOR.out.idxml
+                    .map { group_meta, idxml -> [[id: group_meta.search_preset ?: 'global'], idxml] }
+                    .groupTuple()
+            )
+            // Run Percolator with global FDR (one per preset group)
             OPENMS_PERCOLATORADAPTER_GLOBAL(OPENMS_IDMERGER_GLOBAL.out.idxml)
             ch_rescored_runs = OPENMS_PERCOLATORADAPTER_GLOBAL.out.idxml
             // Filter by global percolator q-value
-            OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map {id, idxml -> [id, idxml, []]})
-            // Backfilter sample_condition runs according to global FDR
-            OPENMS_IDFILTER_GLOBAL(ch_pout.combine(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered.map{ it[1] }))
+            OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map { id, idxml -> [id, idxml, []] })
+            // Backfilter: match each local file with its corresponding preset's global FDR file
+            OPENMS_IDFILTER_GLOBAL(
+                ch_pout
+                    .map { group_meta, idxml ->
+                        [group_meta.search_preset ?: 'global', group_meta, idxml]
+                    }
+                    .combine(
+                        OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered
+                            .map { global_meta, idxml -> [global_meta.id, idxml] },
+                        by: 0
+                    )
+                    .map { preset, group_meta, local_idxml, global_filtered_idxml ->
+                        [group_meta, local_idxml, global_filtered_idxml]
+                    }
+            )
             ch_filter_q_value = OPENMS_IDFILTER_GLOBAL.out.filtered
-            // Save globally merged runs in tsv
+            // Save globally merged runs in tsv (one per preset group)
             OPENMS_TEXTEXPORTER_GLOBAL(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered)
 
         } else {
@@ -76,7 +94,7 @@ workflow RESCORE {
     }
 
     emit:
-        rescored_runs = ch_rescored_runs
-        fdr_filtered = ch_filter_q_value
+        rescored_runs = ch_rescored_runs.map { meta, file -> [[id: meta.id], file] }
+        fdr_filtered = ch_filter_q_value.map { meta, file -> [[id: meta.id], file] }
         multiqc_files = ch_multiqc_files
 }

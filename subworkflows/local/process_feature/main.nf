@@ -30,7 +30,6 @@ workflow PROCESS_FEATURE {
 
         // Single replicate: promote featureXML to consensusXML
         OPENMS_FILECONVERTER(ch_features.single.map { meta, features -> [ meta, features[0], "consensusXML" ] })
-        ch_versions = ch_versions.mix(OPENMS_FILECONVERTER.out.versions)
 
         // Resolve conflicting ids matching to the same feature
         ch_consensus_input = OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml

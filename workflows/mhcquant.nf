@@ -57,12 +57,11 @@ workflow MHCQUANT {
     ch_fasta       // channel: reference database read in from --fasta
 
     main:
-    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = channel.empty()
 
     // Prepare spectra files (Decompress archives, convert to mzML, centroid if specified)
     PREPARE_SPECTRA(ch_samplesheet)
 
-    // Decoy Database creation
     // Decoy Database creation
     if (!params.skip_decoy_generation) {
         // Generate reversed decoy database
@@ -125,10 +124,15 @@ workflow MHCQUANT {
 
     // Run MS2Rescore
     ch_clean_mzml_file
-            .map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), mzml] }
+            .map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta, mzml] }
             .groupTuple()
             .join(OPENMS_IDMERGER.out.idxml)
-            .map { meta, mzml, idxml -> [meta, idxml, mzml, []] }
+            .map { gkey, metas, mzmls, idxml ->
+                // All replicates in a group share the same search params
+                def meta = metas[0]
+                def searchMeta = meta.subMap(meta.keySet() - ['id', 'sample', 'condition', 'group_count', 'spectra'])
+                [[id: "${meta.sample}_${meta.condition}"] + searchMeta, idxml, mzmls, []]
+            }
             .set { ch_rescore_in }
 
     //
@@ -169,10 +173,15 @@ workflow MHCQUANT {
 
     // Annotate Ions for follow-up spectrum validation
     if (params.annotate_ions) {
-        // Join the ch_filtered_idxml and the ch_mzml_file
-        ch_clean_mzml_file.map { meta, mzml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), mzml] }
+        // Join mzml files and fdr-filtered idxml, reconstructing search params from ch_clean_mzml_file
+        ch_clean_mzml_file.map { meta, mzml ->
+                [ [id: "${meta.sample}_${meta.condition}"],
+                  meta.subMap(meta.keySet() - ['id', 'sample', 'condition', 'group_count', 'spectra']),
+                  mzml ]
+            }
             .groupTuple()
             .join(RESCORE.out.fdr_filtered)
+            .map { key, searchMetas, mzmls, idxml -> [key + searchMetas[0], mzmls, idxml] }
             .set{ ch_ion_annotator_input }
 
         // Annotate spectra with ion fragmentation information
@@ -195,7 +204,7 @@ workflow MHCQUANT {
     // EPICORE
     //
     if (params.epicore) {
-        EPICORE(ch_fasta.map{ it.last()}, SUMMARIZE_RESULTS.out.epicore_input)
+        EPICORE(ch_fasta.map{ fasta -> fasta.last()}, SUMMARIZE_RESULTS.out.epicore_input)
         ch_multiqc_files = ch_multiqc_files.mix(
             EPICORE.out.length_dist,
             EPICORE.out.intensity_hist

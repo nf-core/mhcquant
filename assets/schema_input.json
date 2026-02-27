@@ -13,14 +13,14 @@
                 "meta": ["id"]
             },
             "Sample": {
-                "type": "string",
-                "pattern": "^\\S+$",
+                "type": ["string", "integer"],
+                "anyOf": [{ "type": "string", "pattern": "^\\S+$" }, { "type": "integer" }],
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["sample"]
             },
             "Condition": {
-                "type": "string",
-                "pattern": "^\\S+-?",
+                "type": ["string", "integer"],
+                "anyOf": [{ "type": "string", "pattern": "^\\S+-?" }, { "type": "integer" }],
                 "errorMessage": "Sample condition must be provided and cannot contain spaces",
                 "meta": ["condition"]
             },
@@ -37,6 +37,12 @@
                 "exists": true,
                 "pattern": "^\\S+\\.(fasta|fa|fas|fna|faa|ffn)$",
                 "errorMessage": "FASTA file cannot contain spaces and must have one of the extensions: fasta | fa | fas | fna | faa | ffn"
+            },
+            "SearchPreset": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_]+$",
+                "errorMessage": "SearchPreset must contain only alphanumeric characters and underscores",
+                "meta": ["search_preset"]
             }
         },
         "required": ["ID", "Sample", "Condition", "ReplicateFileName"]
