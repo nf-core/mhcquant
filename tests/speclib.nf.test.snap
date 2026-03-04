@@ -4,10 +4,10 @@
             28,
             {
                 "EASYPQP_CONVERT": {
-                    "easypqp": "0.1.53"
+                    "easypqp": "0.1.57"
                 },
                 "EASYPQP_LIBRARY": {
-                    "easypqp": "0.1.53"
+                    "easypqp": "0.1.57"
                 },
                 "MS2RESCORE": {
                     "MS2Rescore": "3.1.5"
