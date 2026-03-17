@@ -6,8 +6,8 @@
 // MODULE: Loaded from modules/local/
 //
 
-include { EASYPQP_CONVERT                         } from '../../../modules/local/easypqp/convert'
-include { EASYPQP_LIBRARY                         } from '../../../modules/local/easypqp/library'
+include { EASYPQP_CONVERT                           } from '../../../modules/local/easypqp/convert'
+include { EASYPQP_LIBRARY                           } from '../../../modules/local/easypqp/library'
 include { EASYPQP_LIBRARY as EASYPQP_LIBRARY_GLOBAL } from '../../../modules/local/easypqp/library'
 
 //
@@ -15,14 +15,13 @@ include { EASYPQP_LIBRARY as EASYPQP_LIBRARY_GLOBAL } from '../../../modules/loc
 //
 
 workflow SPECLIB {
-
     take:
-        fdrfiltered_comet_idxml
-        mzml
+    fdrfiltered_comet_idxml
+    mzml
 
     main:
     // Load unimod tables (Future:)
-    unimod = file("$projectDir/assets/250120_unimod_tables.xml", checkIfExists: true)
+    unimod = file("${projectDir}/assets/250120_unimod_tables.xml", checkIfExists: true)
 
     // Convert psms and spectra to pickle files
     EASYPQP_CONVERT(fdrfiltered_comet_idxml.join(mzml), unimod)
@@ -42,11 +41,11 @@ workflow SPECLIB {
     // Generate spectrum library for all MSruns in the samplesheet
     if (params.global_fdr) {
         EASYPQP_CONVERT.out.psmpkl
-            .map { meta, psmpkl -> [[id: "global"], psmpkl] }
+            .map { meta, psmpkl -> [meta + [id: "global"], psmpkl] }
             .groupTuple()
             .set { ch_global_psmpkl }
         EASYPQP_CONVERT.out.peakpkl
-            .map { meta, peakpkl -> [[id: "global"], peakpkl] }
+            .map { meta, peakpkl -> [meta + [id: "global"], peakpkl] }
             .groupTuple()
             .set { ch_global_peakpkl }
         EASYPQP_LIBRARY_GLOBAL(ch_global_psmpkl.join(ch_global_peakpkl))
