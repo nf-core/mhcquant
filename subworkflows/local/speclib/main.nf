@@ -41,11 +41,11 @@ workflow SPECLIB {
     // Generate spectrum library for all MSruns in the samplesheet
     if (params.global_fdr) {
         EASYPQP_CONVERT.out.psmpkl
-            .map { meta, psmpkl -> [meta + [id: meta.search_preset ?: 'global'], psmpkl] }
+            .map { meta, psmpkl -> [[id: meta.search_preset ?: 'global'], psmpkl] }
             .groupTuple()
             .set { ch_global_psmpkl }
         EASYPQP_CONVERT.out.peakpkl
-            .map { meta, peakpkl -> [meta + [id: meta.search_preset ?: 'global'], peakpkl] }
+            .map { meta, peakpkl -> [[id: meta.search_preset ?: 'global'], peakpkl] }
             .groupTuple()
             .set { ch_global_peakpkl }
         EASYPQP_LIBRARY_GLOBAL(ch_global_psmpkl.join(ch_global_peakpkl))
