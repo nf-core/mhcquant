@@ -1,0 +1,54 @@
+name: pride_download_file
+description: Download a single file from the PRIDE Archive by name using pridepy.
+keywords:
+  - pride
+  - download
+  - proteomics
+  - mass spectrometry
+tools:
+  - pridepy:
+      description: |
+        Python client library and command line tool for the PRIDE Archive REST API.
+        Supports downloading files from PRIDE datasets by accession and file name.
+      homepage: https://github.com/PRIDE-Utilities/pridepy
+      documentation: https://github.com/PRIDE-Utilities/pridepy
+      licence: ["Apache-2.0"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information.
+          e.g. [ id:'test', sample:'sample1', condition:'A', search_preset:'default' ]
+    - file_name:
+        type: string
+        description: Name of the file to download from the PRIDE Archive dataset.
+    - pride_accession:
+        type: string
+        description: PRIDE Archive accession number (e.g. PXD000001) identifying the dataset.
+output:
+  downloaded_file:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information.
+            e.g. [ id:'test', sample:'sample1', condition:'A', search_preset:'default' ]
+      - "${file_name}":
+          type: file
+          description: The file downloaded from the PRIDE Archive.
+          pattern: "*"
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The process the versions were collected from
+      - pridepy:
+          type: string
+          description: The tool name
+      - "pip show pridepy 2>/dev/null | grep Version | cut -d' ' -f2":
+          type: eval
+          description: The expression to obtain the version of pridepy
+
+authors:
+  - "@jonasscheid"
+maintainers:
+  - "@jonasscheid"

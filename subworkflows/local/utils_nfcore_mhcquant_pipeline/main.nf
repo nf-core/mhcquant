@@ -17,6 +17,7 @@ include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
+include { SDRF_TO_SAMPLESHEET       } from '../sdrf_to_samplesheet'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,69 +93,96 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
-    // Parse search parameter presets TSV into a map
+    // Detect input type and build samplesheet channels
     //
-    def presetsList = samplesheetToList(params.search_presets, "${projectDir}/assets/schema_search_presets.json")
-    def presetsMap = presetsList.collectEntries { row ->
-        def meta = (row instanceof List) ? row[0] : row
-        // nf-schema parses whitespace-only TSV fields as empty list []; convert to empty string
-        ['fixed_mods', 'variable_mods'].each { key ->
-            def val = meta[key]
-            if (val == null || (val instanceof List && val.size() == 0) || val == '') {
-                meta[key] = ''
-            }
+    def inputType = detectInputType(params.input)
+
+    if (inputType == 'sdrf' || inputType == 'pride_id') {
+        //
+        // SDRF / PRIDE input mode: fetch SDRF, convert, download files
+        //
+        def sdrf_path  = (inputType == 'sdrf') ? params.input : null
+        def pride_id   = (inputType == 'pride_id') ? params.input : null
+
+        if (inputType == 'sdrf' && !pride_id) {
+            def matcher = (file(params.input).name =~ /PXD\d{6,}/)
+            pride_id = matcher.find() ? matcher.group() : null
         }
-        [(meta.preset_name): meta]
+
+        SDRF_TO_SAMPLESHEET(sdrf_path, pride_id)
+
+        ch_samplesheet_file = SDRF_TO_SAMPLESHEET.out.samplesheet
+        ch_presets_file = SDRF_TO_SAMPLESHEET.out.search_presets
+
+    } else {
+        //
+        // Standard samplesheet input mode
+        //
+        ch_samplesheet_file = channel.value(params.input)
+        ch_presets_file = channel.fromPath(params.search_presets, checkIfExists: true)
     }
 
     //
-    // Create channel from input file provided through params.input
+    // Build presets map (shared)
     //
+    ch_presets_map = ch_presets_file
+        .map { presets_file ->
+            def presetsList = samplesheetToList(presets_file.toString(), "${projectDir}/assets/schema_search_presets.json")
+            presetsList.collectEntries { row ->
+                def meta = (row instanceof List) ? row[0] : row
+                ['fixed_mods', 'variable_mods'].each { key ->
+                    def val = meta[key]
+                    if (val == null || (val instanceof List && val.size() == 0) || val == '') {
+                        meta[key] = ''
+                    }
+                }
+                [(meta.preset_name): meta]
+            }
+        }
 
-    channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
+    //
+    // Parse samplesheet with nf-schema validation, enrich, resolve search params (shared)
+    //
+    ch_samplesheet_file
+        .flatMap { samplesheet_path ->
+            samplesheetToList(samplesheet_path.toString(), "${projectDir}/assets/schema_input.json")
+        }
         .map { meta, file, fasta ->
             def m = meta + [sample: meta.sample.toString(), condition: meta.condition.toString()]
-            [m.subMap('sample','condition'), m, file, fasta]
+            [m.subMap('sample', 'condition'), m, file, fasta]
         }
         .tap { ch_input }
         .groupTuple()
-        // get number of files per sample-condition
-        .map { group_meta, metas, files, fastas -> [ group_meta, files.size()] }
-        .combine( ch_input, by:0 )
+        .map { group_meta, metas, files, fastas -> [group_meta, files.size()] }
+        .combine(ch_input, by: 0)
         .map { group_meta, group_count, meta, file, fasta ->
-            def enrichedMeta = meta + ['group_count':group_count, 'spectra':file.baseName.tokenize('.')[0], 'ext':getCustomExtension(file)]
-            def resolved = resolveSearchParams(enrichedMeta, presetsMap)
-            [resolved, file, fasta]
+            def enrichedMeta = meta + [group_count: group_count, spectra: file.baseName.tokenize('.')[0], ext: getCustomExtension(file)]
+            [enrichedMeta, file, fasta]
         }
         .set { ch_samplesheet_raw }
 
-    ch_samplesheet = ch_samplesheet_raw.map { meta, file, fasta -> [ meta, file ]}
+    ch_samplesheet = ch_samplesheet_raw
+        .combine(ch_presets_map)
+        .map { meta, file, fasta, presetsMap ->
+            [resolveSearchParams(meta, presetsMap), file]
+        }
 
     //
-    // Create channel from the reference_database through params.fasta or from the samplesheet fasta files
+    // Create channel from the reference_database through params.fasta
     //
-
     if (params.fasta) {
         channel.fromPath(params.fasta, checkIfExists: true)
             .map { fasta -> [[id:fasta.getBaseName()], fasta] }
             .set { ch_fasta }
-
-        ch_samplesheet_raw
-            .map{ meta, file, fasta -> fasta }
-            .flatten()
-            .first()
-            .subscribe {
-                log.warn """\
-                    Both --fasta and samplesheet FASTA files were provided!
-                    The pipeline will use --fasta (${params.fasta}), ignoring samplesheet FASTA entries.
-                    To use the samplesheet FASTA files instead, remove the --fasta parameter.
-                    """.stripIndent()
-            }
-
     } else {
-        // Check if the FASTA files were provided in the samplesheet
-        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), fasta] }
+        if (inputType == 'sdrf' || inputType == 'pride_id') {
+            error '''\
+                Error: No FASTA file provided.
+                When using SDRF or PRIDE input, please provide a FASTA database using --fasta.
+                '''.stripIndent()
+        }
+        // Fasta from samplesheet column
+        ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), fasta] }
         ch_fasta
             .map { meta, fasta -> fasta }
             .flatten()
@@ -166,7 +194,6 @@ workflow PIPELINE_INITIALISATION {
                     2. Include a 'Fasta' column in your samplesheet
                     '''.stripIndent()
             }
-        // Group FASTA files by sample and condition and keep only the first FASTA file per sample-condition
         ch_fasta
             .groupTuple()
             .map { group_meta, fastas -> [group_meta, fastas.first()] }
@@ -231,6 +258,20 @@ workflow PIPELINE_COMPLETION {
     FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+//
+// Detect input type from the --input parameter value
+//
+def detectInputType(input) {
+    def inputStr = input.toString()
+    if (inputStr =~ /^PXD\d{6,}$/) {
+        return 'pride_id'
+    }
+    if (inputStr.endsWith('.sdrf.tsv')) {
+        return 'sdrf'
+    }
+    return 'samplesheet'
+}
 
 //
 // Resolve a search parameter with priority: CLI params > samplesheet preset > nextflow.config default
