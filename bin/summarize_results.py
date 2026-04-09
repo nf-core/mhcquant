@@ -78,6 +78,15 @@ def parse_multiTSV(file_path):
             elif line.startswith("#UNASSIGNEDPEPTIDE"):
                 unassigned_peptide_cols = line.strip().split('\t')[1:]
 
+    # Workaround for OpenMS 3.5.0 TextExporter bug (https://github.com/OpenMS/OpenMS/issues/9120):
+    # consensusXML export writes a phantom column in data rows between 'end' and 'FFId_category'
+    # that is missing from the header. Remove it to realign columns.
+    for rows, cols in [(peptide_rows, peptide_cols), (unassigned_peptide_rows, unassigned_peptide_cols)]:
+        if rows and len(rows[0]) > len(cols) and 'end' in cols:
+            extra_idx = cols.index('end') + 1
+            for i, row in enumerate(rows):
+                rows[i] = row[:extra_idx] + row[extra_idx + 1:]
+
     peptide_df = pd.DataFrame(peptide_rows, columns=peptide_cols)
     consensus_df = pd.DataFrame(consensus_rows, columns=consensus_cols)
     # Concatenate CONSENSUS and PEPTIDE columns
@@ -195,6 +204,10 @@ def process_file(file, prefix, quantify, keep_cols):
             header=False
         )
 
+    # Add a column with unique protein accessions next to accessions
+    data.insert(data.columns.get_loc('accessions') + 1, 'unique_accessions',
+                data['accessions'].map(lambda x: ';'.join(dict.fromkeys(x.split(';')))))
+
     # Filter the columns down to a user-defined subset of columns
     if keep_cols:
         missing_columns = set(keep_cols) - set(data.columns)
@@ -205,6 +218,10 @@ def process_file(file, prefix, quantify, keep_cols):
         regex_patterns = [r'^rt_', r'^mz_', r'^intensity_', r'^charge_']
         for pattern in regex_patterns:
             keep_cols.extend([col for col in data.columns if re.match(pattern, col)])
+        # Always include unique_accessions next to accessions
+        if 'accessions' in keep_cols and 'unique_accessions' not in keep_cols:
+            idx = keep_cols.index('accessions') + 1
+            keep_cols.insert(idx, 'unique_accessions')
         # Remove duplicates while retaining order
         keep_cols = list(dict.fromkeys(keep_cols))
         data = data.loc[:, keep_cols]
@@ -212,9 +229,6 @@ def process_file(file, prefix, quantify, keep_cols):
     # Round all floating point values to 5 decimal places to ensure nf-test checksum stability is guaranteed
     float_cols = data.select_dtypes(include=['float']).columns
     data.loc[:, float_cols] = data.loc[:, float_cols].round(5)
-
-    # Add a column with unique protein accessions
-    data['unique_accessions'] = data['accessions'].map(lambda x: ';'.join(dict.fromkeys(x.split(';'))))
 
     data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
 

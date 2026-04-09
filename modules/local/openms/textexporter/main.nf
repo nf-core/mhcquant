@@ -26,9 +26,6 @@ process OPENMS_TEXTEXPORTER {
         -in $file \\
         -out ${prefix}_exported.tsv \\
         -threads $task.cpus \\
-        -id:add_hit_metavalues 0 \\
-        -id:add_metavalues 0 \\
-        -id:peptides_only \\
         $args
     """
 
