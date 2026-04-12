@@ -18,12 +18,13 @@ process PRIDEPY_DOWNLOAD_FILE {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
     """
     pridepy download-file-by-name \\
         -a "${pride_accession}" \\
         -f "${file_name}" \\
         -o . \\
-        -p ftp
+        ${args}
 
     # pridepy exits 0 even on download failure — validate file is non-empty
     [ -s "${file_name}" ] || { echo "ERROR: Downloaded file ${file_name} is empty"; exit 1; }

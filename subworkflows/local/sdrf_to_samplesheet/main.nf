@@ -54,7 +54,7 @@ workflow SDRF_TO_SAMPLESHEET {
         .map { meta, downloaded_file ->
             [meta.id, meta.sample, meta.condition, downloaded_file, meta.search_preset].join('\t')
         }
-        .collectFile(name: 'sdrf_samplesheet.tsv', seed: 'ID\tSample\tCondition\tReplicateFileName\tSearchPreset', newLine: true)
+        .collectFile(name: 'sdrf_samplesheet.tsv', seed: ['ID', 'Sample', 'Condition', 'ReplicateFileName', 'SearchPreset'].join('\t'), newLine: true)
 
     emit:
     samplesheet    = ch_samplesheet_file                         // path: samplesheet.tsv with local file paths
