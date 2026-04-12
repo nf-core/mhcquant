@@ -4,9 +4,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PARSE_SDRF    } from '../../../modules/local/parse_sdrf/main'
-include { PRIDE_FETCH_SDRF     } from '../../../modules/local/pride_fetch_sdrf/main'
-include { PRIDE_DOWNLOAD_FILE  } from '../../../modules/local/pride_download_file/main'
+include { SDRF_PIPELINES_PARSE_SDRF } from '../../../modules/local/sdrf_pipelines/parse_sdrf/main'
+include { PRIDEPY_FETCH_SDRF        } from '../../../modules/local/pridepy/fetch_sdrf/main'
+include { PRIDEPY_DOWNLOAD_FILE     } from '../../../modules/local/pridepy/download_file/main'
 
 workflow SDRF_TO_SAMPLESHEET {
 
@@ -16,61 +16,49 @@ workflow SDRF_TO_SAMPLESHEET {
 
     main:
 
-    //
     // If pride_id given but no local SDRF, fetch from PRIDE
-    //
     if (pride_id && !sdrf) {
-        PRIDE_FETCH_SDRF(pride_id)
-        ch_sdrf = PRIDE_FETCH_SDRF.out.sdrf
+        PRIDEPY_FETCH_SDRF(pride_id)
+        ch_sdrf = PRIDEPY_FETCH_SDRF.out.sdrf
     } else {
         ch_sdrf = channel.fromPath(sdrf, checkIfExists: true)
     }
 
-    //
     // Convert SDRF to mhcquant samplesheet + search presets
-    //
-    PARSE_SDRF(ch_sdrf)
+    SDRF_PIPELINES_PARSE_SDRF(ch_sdrf)
 
-    //
     // Resolve PRIDE accession for file downloads
-    //
     def resolved_accession = pride_id ?: inferPrideAccession(sdrf)
 
-    //
     // Parse samplesheet to get file names for downloading
-    //
-    ch_samplesheet_rows = PARSE_SDRF.out.samplesheet
+    ch_samplesheet_rows = SDRF_PIPELINES_PARSE_SDRF.out.samplesheet
         .splitCsv(header: true, sep: '\t')
         .map { row ->
             def meta = [
                 id: row.ID as int,
                 sample: row.Sample.toString(),
                 condition: row.Condition.toString(),
-                search_preset: row.SearchPreset ?: ''
+                search_preset: row.SearchPreset
             ]
             [meta, row.ReplicateFileName]
         }
 
-    //
     // Download each file from PRIDE
-    //
     ch_to_download = ch_samplesheet_rows
         .map { meta, filename -> [meta, filename, resolved_accession] }
 
-    PRIDE_DOWNLOAD_FILE(ch_to_download)
+    PRIDEPY_DOWNLOAD_FILE(ch_to_download)
 
-    //
     // Write a validated samplesheet with local file paths
-    //
-    ch_samplesheet_file = PRIDE_DOWNLOAD_FILE.out.downloaded_file
+    ch_samplesheet_file = PRIDEPY_DOWNLOAD_FILE.out.downloaded_file
         .map { meta, downloaded_file ->
-            "${meta.id}\t${meta.sample}\t${meta.condition}\t${downloaded_file}\t${meta.search_preset}"
+            [meta.id, meta.sample, meta.condition, downloaded_file, meta.search_preset].join('\t')
         }
         .collectFile(name: 'sdrf_samplesheet.tsv', seed: 'ID\tSample\tCondition\tReplicateFileName\tSearchPreset', newLine: true)
 
     emit:
-    samplesheet    = ch_samplesheet_file                    // path: samplesheet.tsv with local file paths
-    search_presets = PARSE_SDRF.out.search_presets    // path: search_presets.tsv
+    samplesheet    = ch_samplesheet_file                         // path: samplesheet.tsv with local file paths
+    search_presets = SDRF_PIPELINES_PARSE_SDRF.out.search_presets // path: search_presets.tsv
 }
 
 /*

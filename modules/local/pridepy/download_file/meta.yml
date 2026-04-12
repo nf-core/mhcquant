@@ -1,4 +1,4 @@
-name: pride_download_file
+name: pridepy_download_file
 description: Download a single file from the PRIDE Archive by name using pridepy.
 keywords:
   - pride

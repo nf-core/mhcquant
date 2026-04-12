@@ -1,8 +1,8 @@
-process PRIDE_DOWNLOAD_FILE {
+process PRIDEPY_DOWNLOAD_FILE {
     label 'process_single'
     tag "${file_name}"
 
-    conda "bioconda::pridepy=0.0.12"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pridepy:0.0.12--pyhdfd78af_0' :
         'quay.io/biocontainers/pridepy:0.0.12--pyhdfd78af_0' }"

@@ -1,4 +1,4 @@
-name: parse_sdrf
+name: sdrf_pipelines_parse_sdrf
 description: Converts an SDRF (Sample and Data Relationship Format) file into an
   mhcquant-compatible samplesheet and search presets TSV files using sdrf-pipelines.
 keywords:

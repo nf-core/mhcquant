@@ -127,17 +127,14 @@ workflow PIPELINE_INITIALISATION {
     //
     ch_presets_map = ch_presets_file
         .map { presets_file ->
-            def presetsList = samplesheetToList(presets_file.toString(), "${projectDir}/assets/schema_search_presets.json")
-            presetsList.collectEntries { row ->
-                def meta = (row instanceof List) ? row[0] : row
-                ['fixed_mods', 'variable_mods'].each { key ->
-                    def val = meta[key]
-                    if (val == null || (val instanceof List && val.size() == 0) || val == '') {
-                        meta[key] = ''
-                    }
+            samplesheetToList(presets_file.toString(), "${projectDir}/assets/schema_search_presets.json")
+                .collectEntries { item ->
+                    // samplesheetToList wraps all-meta rows in a list
+                    def row = (item instanceof List) ? item[0] : item
+                    // nf-schema parses empty TSV cells as [] instead of ''; normalize for string operations
+                    ['fixed_mods', 'variable_mods'].each { key -> if (!row[key]) row[key] = '' }
+                    [(row.preset_name): row]
                 }
-                [(meta.preset_name): meta]
-            }
         }
 
     //
@@ -174,13 +171,19 @@ workflow PIPELINE_INITIALISATION {
         channel.fromPath(params.fasta, checkIfExists: true)
             .map { fasta -> [[id:fasta.getBaseName()], fasta] }
             .set { ch_fasta }
+
+        ch_samplesheet_raw
+            .map{ meta, file, fasta -> fasta }
+            .flatten()
+            .first()
+            .subscribe {
+                log.warn """\
+                    Both --fasta and samplesheet FASTA files were provided!
+                    The pipeline will use --fasta (${params.fasta}), ignoring samplesheet FASTA entries.
+                    To use the samplesheet FASTA files instead, remove the --fasta parameter.
+                    """.stripIndent()
+            }
     } else {
-        if (inputType == 'sdrf' || inputType == 'pride_id') {
-            error '''\
-                Error: No FASTA file provided.
-                When using SDRF or PRIDE input, please provide a FASTA database using --fasta.
-                '''.stripIndent()
-        }
         // Fasta from samplesheet column
         ch_fasta = ch_samplesheet_raw.map { meta, file, fasta -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), fasta] }
         ch_fasta

@@ -1,8 +1,8 @@
-process PARSE_SDRF {
+process SDRF_PIPELINES_PARSE_SDRF {
     label 'process_single'
     tag "${sdrf.baseName}"
 
-    conda "bioconda::sdrf-pipelines=0.1.2"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/sdrf-pipelines:0.1.2--pyhdfd78af_0' :
         'quay.io/biocontainers/sdrf-pipelines:0.1.2--pyhdfd78af_0' }"

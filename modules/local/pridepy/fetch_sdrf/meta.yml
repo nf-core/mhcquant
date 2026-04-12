@@ -1,4 +1,4 @@
-name: pride_fetch_sdrf
+name: pridepy_fetch_sdrf
 description: Fetch an SDRF file from the PRIDE Archive for a given project accession.
 keywords:
   - pride
