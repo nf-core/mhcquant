@@ -4,6 +4,21 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
+## Input modes
+
+The `--input` parameter accepts three formats:
+
+| Mode                | Example                       | Description                                                                                                         |
+| ------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Samplesheet TSV** | `--input samplesheet.tsv`     | A local TSV file listing your MS runs (see [Samplesheet input](#samplesheet-input)).                                |
+| **SDRF file**       | `--input experiment.sdrf.tsv` | A local [SDRF-Proteomics](https://github.com/bigbio/proteomics-sample-metadata) file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates). Raw files are fetched from PRIDE, search settings and sample metadata are parsed from the SDRF. Requires `--fasta`. |
+| **PRIDE accession** | `--input PXD009752`           | A PRIDE project accession. The project must include an SDRF file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates); both the SDRF and raw files are fetched from PRIDE. Requires `--fasta`. |
+
+For the SDRF and PRIDE accession modes, the pipeline uses [sdrf-pipelines](https://github.com/bigbio/sdrf-pipelines) to translate the SDRF into an mhcquant samplesheet and a search-preset table, then downloads the raw files with [pridepy](https://github.com/bigbio/py-pride-archive-client). The generated samplesheet and presets are published under `<outdir>/sdrf/` for transparency.
+
+> [!NOTE]
+> SDRF files must follow the immunopeptidomics template from [bigbio/proteomics-sample-metadata](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates), and PRIDE accessions must point to a project that contains such an SDRF file — otherwise sample metadata and search parameters cannot be derived. When providing a local `.sdrf.tsv`, the PRIDE accession is inferred from the filename (e.g. `PXD009752.sdrf.tsv`); if your SDRF is named differently, pass the accession via `--input PXD...` instead.
+
 ## Samplesheet input
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-separated file with at least four columns, and a header row as shown in the examples below.
