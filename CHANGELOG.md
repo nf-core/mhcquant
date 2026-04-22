@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- Fixed `EPICORE` running only once instead of per sample when `--fasta` is used, by broadcasting `ch_fasta` to `EPICORE` via `.first()` [#PR](https://github.com/nf-core/mhcquant/pull/PR)
 - Fixed `SUMMARIZE_RESULTS` crash with `--quantify` caused by OpenMS 3.5.0 TextExporter phantom column bug ([OpenMS/OpenMS#9120](https://github.com/OpenMS/OpenMS/issues/9120)) [#444](https://github.com/nf-core/mhcquant/pull/444)
 - Fixed an issue where stripping the sequence in `SUMMARIZE_RESULTS` did not work for complex modifications [#436](https://github.com/nf-core/mhcquant/pull/436)
 

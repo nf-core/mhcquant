@@ -204,7 +204,7 @@ workflow MHCQUANT {
     // EPICORE
     //
     if (params.epicore) {
-        EPICORE(ch_fasta.map{ fasta -> fasta.last()}, SUMMARIZE_RESULTS.out.epicore_input)
+        EPICORE(ch_fasta.map{ fasta -> fasta.last()}.first(), SUMMARIZE_RESULTS.out.epicore_input)
         ch_multiqc_files = ch_multiqc_files.mix(
             EPICORE.out.length_dist,
             EPICORE.out.intensity_hist
