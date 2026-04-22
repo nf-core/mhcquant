@@ -8,11 +8,11 @@
 
 The `--input` parameter accepts three formats:
 
-| Mode                | Example                       | Description                                                                                                         |
-| ------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Samplesheet TSV** | `--input samplesheet.tsv`     | A local TSV file listing your MS runs (see [Samplesheet input](#samplesheet-input)).                                |
+| Mode                | Example                       | Description                                                                                                                                                                                                                                                                                                                      |
+| ------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Samplesheet TSV** | `--input samplesheet.tsv`     | A local TSV file listing your MS runs (see [Samplesheet input](#samplesheet-input)).                                                                                                                                                                                                                                             |
 | **SDRF file**       | `--input experiment.sdrf.tsv` | A local [SDRF-Proteomics](https://github.com/bigbio/proteomics-sample-metadata) file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates). Raw files are fetched from PRIDE, search settings and sample metadata are parsed from the SDRF. Requires `--fasta`. |
-| **PRIDE accession** | `--input PXD009752`           | A PRIDE project accession. The project must include an SDRF file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates); both the SDRF and raw files are fetched from PRIDE. Requires `--fasta`. |
+| **PRIDE accession** | `--input PXD009752`           | A PRIDE project accession. The project must include an SDRF file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates); both the SDRF and raw files are fetched from PRIDE. Requires `--fasta`.                                                                 |
 
 For the SDRF and PRIDE accession modes, the pipeline uses [sdrf-pipelines](https://github.com/bigbio/sdrf-pipelines) to translate the SDRF into an mhcquant samplesheet and a search-preset table, then downloads the raw files with [pridepy](https://github.com/bigbio/py-pride-archive-client). The generated samplesheet and presets are published under `<outdir>/sdrf/` for transparency.
 
