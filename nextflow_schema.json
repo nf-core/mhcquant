@@ -14,13 +14,9 @@
             "properties": {
                 "input": {
                     "type": "string",
-                    "description": "Input raw / mzML files listed in a tsv file (see help for details)",
-                    "help_text": "Use this to specify a sample sheet table including your input raw or mzml files as well as their meta information such as SampleID and Condition. For example:\n\n| ID   | Sample      | Condition  |   ReplicateFileName                       |\n| -----|:------------:| ----------:|------------------------------------------:|\n| 1    | MM15_Melanom |      A     |   data/MM15_Melanom_W_1_A_standard.raw    |\n| 2    | MM15_Melanom |      B     |   data/MM15_Melanom_W_1_B_standard.raw    |\n| 3    | MM17_Melanom |      B     |   data/MM17_Melanom_W_1_B_standard.raw    |\n\n```bash\n--input 'path/samples.tsv'\n```",
-                    "format": "file-path",
-                    "exists": true,
-                    "schema": "assets/schema_input.json",
-                    "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.tsv$",
+                    "pattern": "^(PXD\\d{6,}|\\S+\\.sdrf\\.tsv|\\S+\\.tsv)$",
+                    "description": "Input: samplesheet TSV, SDRF file (.sdrf.tsv), or PRIDE accession (PXD...)",
+                    "help_text": "Accepts three input modes:\n\n1. **Samplesheet TSV** (default): Tab-separated file with columns ID, Sample, Condition, ReplicateFileName.\n2. **SDRF file** (`.sdrf.tsv`): Files are downloaded from PRIDE automatically. Requires `--fasta`.\n3. **PRIDE accession** (e.g., `PXD009752`): SDRF and raw files are fetched from PRIDE. Requires `--fasta`.",
                     "fa_icon": "fas fa-file"
                 },
                 "outdir": {

@@ -1,0 +1,57 @@
+name: sdrf_pipelines_parse_sdrf
+description: Converts an SDRF (Sample and Data Relationship Format) file into an
+  mhcquant-compatible samplesheet and search presets TSV files using sdrf-pipelines.
+keywords:
+  - sdrf
+  - samplesheet
+  - proteomics
+  - immunopeptidomics
+  - mhcquant
+tools:
+  - "sdrf-pipelines":
+      description: "A set of tools to validate and convert SDRF files for proteomics
+        pipelines."
+      homepage: "https://github.com/bigbio/sdrf-pipelines"
+      documentation: "https://github.com/bigbio/sdrf-pipelines"
+      tool_dev_url: "https://github.com/bigbio/sdrf-pipelines"
+      doi: "10.1021/acs.jproteome.1c00505"
+      licence: ["Apache-2.0"]
+      identifier: ""
+
+input:
+  - - sdrf:
+        type: file
+        description: SDRF file describing the experimental design and sample metadata.
+        pattern: "*.{tsv,sdrf.tsv}"
+        ontologies: []
+
+output:
+  samplesheet:
+    - - "samplesheet.tsv":
+          type: file
+          description: mhcquant-compatible samplesheet derived from the SDRF file.
+          pattern: "samplesheet.tsv"
+          ontologies: []
+  search_presets:
+    - - "search_presets.tsv":
+          type: file
+          description: Search parameter presets derived from the SDRF file, one row
+            per unique search configuration.
+          pattern: "search_presets.tsv"
+          ontologies: []
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - sdrf-pipelines:
+          type: string
+          description: The name of the tool
+      - "parse_sdrf --version | cut -d ' ' -f 2":
+          type: eval
+          description: The expression to obtain the version of the tool
+
+authors:
+  - "@jonasscheid"
+maintainers:
+  - "@jonasscheid"

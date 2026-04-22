@@ -36,7 +36,7 @@
                 },
                 "OPENMS_PERCOLATORADAPTER": {
                     "PercolatorAdapter": "3.5.0-pre-exported-20251212",
-                    "percolator": "3.07.1, Build Date Mar 13 2025 17:19:27"
+                    "percolator": "3.07.1"
                 },
                 "OPENMS_PSMFEATUREEXTRACTOR": {
                     "openms": "3.5.0"
