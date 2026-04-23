@@ -55,6 +55,11 @@
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
+                    "openms/textexporter": {
+                        "branch": "master",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"]
+                    },
                     "openmsthirdparty/cometadapter": {
                         "branch": "master",
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",

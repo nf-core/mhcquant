@@ -12,7 +12,7 @@ include {
     OPENMS_PERCOLATORADAPTER ;
     OPENMS_PERCOLATORADAPTER as OPENMS_PERCOLATORADAPTER_GLOBAL
 } from '../../../modules/local/openmsthirdparty/percolatoradapter'
-include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_GLOBAL           } from '../../../modules/local/openms/textexporter'
+include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_GLOBAL           } from '../../../modules/nf-core/openms/textexporter/main'
 //
 // MODULE: Installed directly from nf-core/modules
 //

@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rewrote `openms/idmassaccuracy` meta.yml to reflect the actual process I/O [#447](https://github.com/nf-core/mhcquant/pull/447)
 - Tightened preset normalization so empty/whitespace `FixedMods` and `VariableMods` cells are treated as empty (preserves the existing `-fixed_modifications` CLI call) [#447](https://github.com/nf-core/mhcquant/pull/447)
 - Migrated `conf/test_single_quant.config` from deprecated `max_cpus`/`max_memory`/`max_time` to `process.resourceLimits` [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Replaced local `openms/textexporter` module with the `nf-core/modules` equivalent; preserved the `_exported` output suffix via `ext.prefix` to keep SUMMARIZE_RESULTS input/output filenames distinct [#447](https://github.com/nf-core/mhcquant/pull/447)
 
 ### `Dependencies`
 
