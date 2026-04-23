@@ -132,7 +132,7 @@ workflow PIPELINE_INITIALISATION {
                     // samplesheetToList wraps all-meta rows in a list
                     def row = (item instanceof List) ? item[0] : item
                     // nf-schema parses empty TSV cells as [] instead of ''; normalize for string operations
-                    ['fixed_mods', 'variable_mods'].each { key -> if (!row[key]) row[key] = '' }
+                    ['fixed_mods', 'variable_mods'].each { key -> if (!row[key]?.trim()) row[key] = '' }
                     [(row.preset_name): row]
                 }
         }
@@ -307,22 +307,6 @@ def resolveSearchParams(meta, presetsMap) {
     }
 
     return result
-}
-
-//
-// Validate channels from input samplesheet
-//
-// Keeping this as an example for future samplesheet checks if additional fields are added (e.g. alleles)
-def validateInputSamplesheet(input) {
-    def (metas, fastqs) = input[1..2]
-
-    // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
-    def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
-    if (!endedness_ok) {
-        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
-    }
-
-    return [ metas[0], fastqs ]
 }
 
 def getCustomExtension(file) {

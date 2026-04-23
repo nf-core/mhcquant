@@ -1,9 +1,10 @@
-name: "openms_idfilter"
-description: Filters peptide/protein identification results by different
-  criteria.
+name: "openms_idmassaccuracy"
+description: Computes the fragment and/or precursor mass accuracy of identified
+  peptides against the original spectra.
 keywords:
-  - filter
+  - mass accuracy
   - idXML
+  - mzML
   - openms
   - proteomics
 tools:
@@ -22,28 +23,39 @@ input:
         type: map
         description: |
           Groovy Map containing sample information
-          e.g. `[ id:'test', single_end:false ]`
-    - id_file:
+          e.g. `[ id:'test' ]`
+    - mzmls:
         type: file
-        description: Peptide-spectrum matches.
-        pattern: "*.{idXML,consensusXML}"
+        description: Spectra files used for identification.
+        pattern: "*.{mzML}"
         ontologies: []
-    - filter_file:
+    - idxmls:
         type: file
-        description: Optional idXML file to filter on/out peptides or proteins
-        patter: "*.{idXML,fasta}"
+        description: Peptide identification results matching the spectra.
+        pattern: "*.{idXML}"
         ontologies: []
 output:
-  filtered:
+  frag_err:
     - - meta:
           type: map
           description: |
             Groovy Map containing sample information
-            e.g. `[ id:'test', single_end:false ]`
-      - "*.{idXML,consensusXML}":
+            e.g. `[ id:'test' ]`
+      - "*frag_mass_err.tsv":
           type: file
-          description: Filtered peptide-spectrum matches.
-          pattern: "*.{idXML,consensusXML}"
+          description: TSV with fragment mass error measurements per PSM.
+          pattern: "*frag_mass_err.tsv"
+          ontologies: []
+  prec_err:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. `[ id:'test' ]`
+      - "*prec_mass_err.tsv":
+          type: file
+          description: Optional TSV with precursor mass error measurements per PSM.
+          pattern: "*prec_mass_err.tsv"
           ontologies: []
 topics:
   versions:

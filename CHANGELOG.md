@@ -3,12 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 3.2.0dev - [release name] - [date]
+## 3.2.0 - [release name] - 23/04/26
 
 ### `Added`
 
 - Added support for single run quantification [#438](https://github.com/nf-core/mhcquant/pull/438)
 - Added per-sample search parameter support via samplesheet with SearchPreset column and individual parameter overrides [#439](https://github.com/nf-core/mhcquant/pull/439)
+- Added PRIDE ID and SDRF sheet support [#445](https://github.com/nf-core/mhcquant/pull/445)
 - Added ion mobility export and MultiQC distribution plot for timsTOF data [#441](https://github.com/nf-core/mhcquant/pull/441)
 
 ### `Fixed`
@@ -16,10 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `EPICORE` running only once instead of per sample when `--fasta` is used, by broadcasting `ch_fasta` to `EPICORE` via `.first()` [#446](https://github.com/nf-core/mhcquant/pull/446)
 - Fixed `SUMMARIZE_RESULTS` crash with `--quantify` caused by OpenMS 3.5.0 TextExporter phantom column bug ([OpenMS/OpenMS#9120](https://github.com/OpenMS/OpenMS/issues/9120)) [#444](https://github.com/nf-core/mhcquant/pull/444)
 - Fixed an issue where stripping the sequence in `SUMMARIZE_RESULTS` did not work for complex modifications [#436](https://github.com/nf-core/mhcquant/pull/436)
+- Fixed `tdf2mzml` container entrypoint issue by pinning to `0.4_noentry` and invoking the CLI explicitly [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Fixed `OPENMS_FILECONVERTER` version extraction emitting a SOH byte due to a single-backslash sed backreference [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Fixed `OPENMS_IDMASSACCURACY` process argument to use `meta.precursor_error_units` so per-sample preset overrides apply [#447](https://github.com/nf-core/mhcquant/pull/447)
 
 ### `Changed`
 
 - Migrate to topic channels [#431](https://github.com/nf-core/mhcquant/pull/431)
+- Bumped `openms/fileconverter`, `openms/featurefinderidentification` and `openms/idconflictresolver` local modules to OpenMS 3.5.0 [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Rewrote `openms/idmassaccuracy` meta.yml to reflect the actual process I/O [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Tightened preset normalization so empty/whitespace `FixedMods` and `VariableMods` cells are treated as empty and the `-fixed_modifications` CLI flag is omitted when empty [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Migrated `conf/test_single_quant.config` from deprecated `max_cpus`/`max_memory`/`max_time` to `process.resourceLimits` [#447](https://github.com/nf-core/mhcquant/pull/447)
 
 ### `Dependencies`
 
@@ -29,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `MultiQC`  | 1.31.0      | 1.33.0      |
 | `Nf-core`  | 3.4.1       | 3.5.1       |
 | `openms`   | 3.4.1       | 3.5.0       |
+| `tdf2mzml` | 0.3.0       | 0.4.0       |
 
 ## 3.1.0 - BlüBa - 07/01/26
 

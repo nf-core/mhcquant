@@ -4,8 +4,8 @@ process OPENMS_FEATUREFINDERIDENTIFICATION  {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/openms:3.4.1--h81ffffe_1' :
-        'biocontainers/openms:3.4.1--h81ffffe_1' }"
+        'https://depot.galaxyproject.org/singularity/openms:3.5.0--h78fb946_0' :
+        'biocontainers/openms:3.5.0--h78fb946_0' }"
 
 
     input:
