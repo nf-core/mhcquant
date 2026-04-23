@@ -132,7 +132,10 @@ workflow PIPELINE_INITIALISATION {
                     // samplesheetToList wraps all-meta rows in a list
                     def row = (item instanceof List) ? item[0] : item
                     // nf-schema parses empty TSV cells as [] instead of ''; normalize for string operations
-                    ['fixed_mods', 'variable_mods'].each { key -> if (!row[key]?.trim()) row[key] = '' }
+                    ['fixed_mods', 'variable_mods'].each { key ->
+                        def v = row[key]
+                        if (!v || (v instanceof String && !v.trim())) row[key] = ''
+                    }
                     [(row.preset_name): row]
                 }
         }

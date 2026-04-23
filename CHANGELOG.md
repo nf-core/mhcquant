@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrate to topic channels [#431](https://github.com/nf-core/mhcquant/pull/431)
 - Bumped `openms/fileconverter`, `openms/featurefinderidentification` and `openms/idconflictresolver` local modules to OpenMS 3.5.0 [#447](https://github.com/nf-core/mhcquant/pull/447)
 - Rewrote `openms/idmassaccuracy` meta.yml to reflect the actual process I/O [#447](https://github.com/nf-core/mhcquant/pull/447)
-- Tightened preset normalization so empty/whitespace `FixedMods` and `VariableMods` cells are treated as empty and the `-fixed_modifications` CLI flag is omitted when empty [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Tightened preset normalization so empty/whitespace `FixedMods` and `VariableMods` cells are treated as empty (preserves the existing `-fixed_modifications` CLI call) [#447](https://github.com/nf-core/mhcquant/pull/447)
 - Migrated `conf/test_single_quant.config` from deprecated `max_cpus`/`max_memory`/`max_time` to `process.resourceLimits` [#447](https://github.com/nf-core/mhcquant/pull/447)
 
 ### `Dependencies`

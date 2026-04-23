@@ -50,7 +50,7 @@
                     "thermorawfileparser": "1.4.5"
                 },
                 "Workflow": {
-                    "nf-core/mhcquant": "v3.2.0dev"
+                    "nf-core/mhcquant": "v3.2.0"
                 }
             },
             [
