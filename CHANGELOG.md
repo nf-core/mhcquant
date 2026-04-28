@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `EPICORE` running only once instead of per sample when `--fasta` is used, by broadcasting `ch_fasta` to `EPICORE` via `.first()` [#446](https://github.com/nf-core/mhcquant/pull/446)
 - Fixed `SUMMARIZE_RESULTS` crash with `--quantify` caused by OpenMS 3.5.0 TextExporter phantom column bug ([OpenMS/OpenMS#9120](https://github.com/OpenMS/OpenMS/issues/9120)) [#444](https://github.com/nf-core/mhcquant/pull/444)
 - Fixed an issue where stripping the sequence in `SUMMARIZE_RESULTS` did not work for complex modifications [#436](https://github.com/nf-core/mhcquant/pull/436)
-- Fixed `tdf2mzml` container entrypoint issue by pinning to `0.4_noentry` and invoking the CLI explicitly [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Fixed `tdf2mzml` container entrypoint issue by pinning to `0.5_noentry` and invoking the CLI explicitly [#447](https://github.com/nf-core/mhcquant/pull/447)
 - Fixed `OPENMS_FILECONVERTER` version extraction emitting a SOH byte due to a single-backslash sed backreference [#447](https://github.com/nf-core/mhcquant/pull/447)
 - Fixed `OPENMS_IDMASSACCURACY` process argument to use `meta.precursor_error_units` so per-sample preset overrides apply [#447](https://github.com/nf-core/mhcquant/pull/447)
 
@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `MultiQC`  | 1.31.0      | 1.33.0      |
 | `Nf-core`  | 3.4.1       | 3.5.1       |
 | `openms`   | 3.4.1       | 3.5.0       |
-| `tdf2mzml` | 0.3.0       | 0.4.0       |
+| `tdf2mzml` | 0.3.0       | 0.5.0       |
 
 ## 3.1.0 - BlüBa - 07/01/26
 
