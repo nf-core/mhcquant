@@ -164,7 +164,7 @@ workflow PIPELINE_INITIALISATION {
     ch_samplesheet = ch_samplesheet_raw
         .combine(ch_presets_map)
         .map { meta, file, fasta, presetsMap ->
-            [resolveSearchParams(meta, presetsMap), file]
+            [resolvePresetParams(meta, presetsMap), file]
         }
 
     //
@@ -280,9 +280,13 @@ def detectInputType(input) {
 }
 
 //
-// Resolve a search parameter with priority: CLI params > samplesheet preset > nextflow.config default
+// Resolve search parameters for a row. When the row sets a preset, the preset's values
+// win for every key the preset defines (the preset is sealed and cannot be overridden
+// via --<param>, -params-file, or -c). Keys not defined by the preset (or rows without
+// a preset) fall through to params[key], which Nextflow resolves through its native
+// precedence (CLI > -params-file > config defaults).
 //
-def resolveSearchParams(meta, presetsMap) {
+def resolvePresetParams(meta, presetsMap) {
     def searchParamKeys = ['instrument', 'activation_method', 'digest_mass_range', 'prec_charge',
                            'precursor_mass_tolerance', 'precursor_error_units', 'fragment_mass_tolerance',
                            'fragment_bin_offset', 'number_mods', 'ms2pip_model',
@@ -297,18 +301,9 @@ def resolveSearchParams(meta, presetsMap) {
     if (!presetConfig) { presetConfig = [:] }
 
     def result = new LinkedHashMap(meta)
-
     searchParamKeys.each { key ->
-        def cliOverride = (workflow.commandLine =~ /--${key}[\s=]/).find()
-        if (cliOverride) {
-            result.put(key, params[key])
-        } else if (presetConfig.containsKey(key)) {
-            result.put(key, presetConfig[key])
-        } else {
-            result.put(key, params[key])
-        }
+        result.put(key, presetConfig.containsKey(key) ? presetConfig[key] : params[key])
     }
-
     return result
 }
 

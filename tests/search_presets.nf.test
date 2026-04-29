@@ -53,4 +53,43 @@ nextflow_pipeline {
             )
         }
     }
+
+    test("-profile test_search_presets with --precursor_mass_tolerance override is ignored") {
+
+        // Sealed-preset contract: when a samplesheet row sets SearchPreset, the preset
+        // values win for every key the preset defines. Overriding via params (here a
+        // wildly wrong precursor_mass_tolerance) must NOT change identifications,
+        // because the preset's value (5 ppm for qe/lumos_class1) is sealed in.
+        when {
+            params {
+                outdir                    = "$outputDir"
+                precursor_mass_tolerance  = 999
+            }
+        }
+
+        then {
+            def peptidoform_data = []
+            new File(params.outdir).eachFileRecurse { file ->
+                if (file.name.endsWith('.tsv') && file.parentFile.path == params.outdir) {
+                    def lines = file.readLines()
+                    if (lines.size() > 0) {
+                        def header = lines[0].split('\t')
+                        def peptidoformIndex = header.findIndexOf { it == 'peptidoform' }
+                        if (peptidoformIndex >= 0) {
+                            def peptidoforms = lines.drop(1).collect { line ->
+                                def fields = line.split('\t')
+                                fields.size() > peptidoformIndex ? fields[peptidoformIndex] : ''
+                            }.findAll { it != '' }.sort()
+                            peptidoform_data.add([file.name, peptidoforms])
+                        }
+                    }
+                }
+            }
+            peptidoform_data.sort { it[0] }
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(peptidoform_data).match() }
+            )
+        }
+    }
 }
