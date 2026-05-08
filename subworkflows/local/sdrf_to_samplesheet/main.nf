@@ -5,7 +5,7 @@
 */
 
 include { SDRF_PIPELINES_PARSE_SDRF } from '../../../modules/local/sdrf_pipelines/parse_sdrf/main'
-include { PRIDEPY_FETCH_SDRF        } from '../../../modules/local/pridepy/fetch_sdrf/main'
+include { PRIDEPY_FETCHSDRF         } from '../../../modules/nf-core/pridepy/fetchsdrf/main'
 include { PRIDEPY_DOWNLOAD_FILE     } from '../../../modules/local/pridepy/download_file/main'
 
 workflow SDRF_TO_SAMPLESHEET {
@@ -18,8 +18,8 @@ workflow SDRF_TO_SAMPLESHEET {
 
     // If pride_id given but no local SDRF, fetch from PRIDE
     if (pride_id && !sdrf) {
-        PRIDEPY_FETCH_SDRF(pride_id)
-        ch_sdrf = PRIDEPY_FETCH_SDRF.out.sdrf
+        PRIDEPY_FETCHSDRF(channel.of([[id: pride_id], pride_id]))
+        ch_sdrf = PRIDEPY_FETCHSDRF.out.sdrf.map { _meta, sdrf_file -> sdrf_file }
     } else {
         ch_sdrf = channel.fromPath(sdrf, checkIfExists: true)
     }

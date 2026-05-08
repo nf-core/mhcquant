@@ -4,8 +4,8 @@ process PRIDEPY_DOWNLOAD_FILE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pridepy:0.0.12--pyhdfd78af_0' :
-        'quay.io/biocontainers/pridepy:0.0.12--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/pridepy:0.0.15--pyhdfd78af_0' :
+        'quay.io/biocontainers/pridepy:0.0.15--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), val(file_name), val(pride_accession)

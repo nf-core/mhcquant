@@ -70,6 +70,11 @@
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
+                    "pridepy/fetchsdrf": {
+                        "branch": "master",
+                        "git_sha": "8fd246251924e27b78ef8e06fc2eb47531ed4ae1",
+                        "installed_by": ["modules"]
+                    },
                     "thermorawfileparser": {
                         "branch": "master",
                         "git_sha": "daaecc3478d6f6ad9cb8f48ec7d657ab6c67877f",
