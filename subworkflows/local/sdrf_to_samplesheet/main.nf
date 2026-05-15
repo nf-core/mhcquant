@@ -4,9 +4,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SDRF_PIPELINES_PARSE_SDRF } from '../../../modules/local/sdrf_pipelines/parse_sdrf/main'
-include { PRIDEPY_FETCHSDRF         } from '../../../modules/nf-core/pridepy/fetchsdrf/main'
-include { PRIDEPY_DOWNLOAD_FILE     } from '../../../modules/local/pridepy/download_file/main'
+include { PARSESDRF_CONVERT     } from '../../../modules/nf-core/parsesdrf/convert/main'
+include { PRIDEPY_FETCHSDRF     } from '../../../modules/nf-core/pridepy/fetchsdrf/main'
+include { PRIDEPY_DOWNLOAD_FILE } from '../../../modules/local/pridepy/download_file/main'
 
 workflow SDRF_TO_SAMPLESHEET {
 
@@ -16,22 +16,26 @@ workflow SDRF_TO_SAMPLESHEET {
 
     main:
 
-    // If pride_id given but no local SDRF, fetch from PRIDE
-    if (pride_id && !sdrf) {
-        PRIDEPY_FETCHSDRF(channel.of([[id: pride_id], pride_id]))
-        ch_sdrf = PRIDEPY_FETCHSDRF.out.sdrf.map { _meta, sdrf_file -> sdrf_file }
-    } else {
-        ch_sdrf = channel.fromPath(sdrf, checkIfExists: true)
-    }
-
-    // Convert SDRF to mhcquant samplesheet + search presets
-    SDRF_PIPELINES_PARSE_SDRF(ch_sdrf)
-
     // Resolve PRIDE accession for file downloads
     def resolved_accession = pride_id ?: inferPrideAccession(sdrf)
 
+    // If pride_id given but no local SDRF, fetch from PRIDE
+    if (pride_id && !sdrf) {
+        PRIDEPY_FETCHSDRF(channel.of([[id: pride_id], pride_id]))
+        ch_sdrf = PRIDEPY_FETCHSDRF.out.sdrf
+    } else {
+        ch_sdrf = channel.fromPath(sdrf, checkIfExists: true).map { f -> [[id: resolved_accession], f] }
+    }
+
+    // Convert SDRF to mhcquant samplesheet + search presets
+    PARSESDRF_CONVERT(
+        ch_sdrf.map { meta, sdrf_file -> [meta, sdrf_file, [], ''] },
+        'mhcquant'
+    )
+
     // Parse samplesheet to get file names for downloading
-    ch_samplesheet_rows = SDRF_PIPELINES_PARSE_SDRF.out.samplesheet
+    ch_samplesheet_rows = PARSESDRF_CONVERT.out.mhcquant
+        .map { _meta, samplesheet, _presets -> samplesheet }
         .splitCsv(header: true, sep: '\t')
         .map { row ->
             def meta = [
@@ -57,8 +61,8 @@ workflow SDRF_TO_SAMPLESHEET {
         .collectFile(name: 'sdrf_samplesheet.tsv', seed: ['ID', 'Sample', 'Condition', 'ReplicateFileName', 'SearchPreset'].join('\t'), newLine: true)
 
     emit:
-    samplesheet    = ch_samplesheet_file                         // path: samplesheet.tsv with local file paths
-    search_presets = SDRF_PIPELINES_PARSE_SDRF.out.search_presets // path: search_presets.tsv
+    samplesheet    = ch_samplesheet_file                                                       // path: samplesheet.tsv with local file paths
+    search_presets = PARSESDRF_CONVERT.out.mhcquant.map { _meta, _samplesheet, presets -> presets }  // path: search_presets.tsv
 }
 
 /*
