@@ -123,7 +123,6 @@ def process_file(file, prefix, quantify, keep_cols):
            quantify (bool): Retained for CLI back-compat only; format is auto-detected.
            keep_cols (list): Set of columns to keep from the original set of columns
        """
-    # Auto-detect format: multi-TSV (quant consensusXML) vs flat TSV (idXML / empty bypass)
     if is_multi_tsv(file):
         data = parse_multiTSV(file)
         n_psms = np.sum(data["psm"])

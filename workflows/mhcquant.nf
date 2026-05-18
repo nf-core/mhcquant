@@ -165,10 +165,7 @@ workflow MHCQUANT {
     // SUBWORKFLOW: QUANT
     //
     if (params.quantify) {
-        // Branch out samples with empty FDR-filtered idXMLs (zero peptides past FDR).
-        // Re-uses the same countLines() > 130 heuristic as the SPECLIB path above.
-        // Use `it[1]` (matches subworkflows/local/process_feature/main.nf:23) — destructuring
-        // inside .branch can swallow the labels.
+        // Empty FDR-filtered idXML (no peptides) is ~26 lines of OpenMS scaffolding.
         RESCORE.out.fdr_filtered
             .branch {
                 non_empty: it[1].countLines() > 130
@@ -176,8 +173,6 @@ workflow MHCQUANT {
             }
             .set { ch_fdr_branched }
 
-        // Warn per empty sample; .subscribe matches the nf-core idiom used at
-        // subworkflows/local/utils_nfcore_mhcquant_pipeline/main.nf:180
         ch_fdr_branched.empty.subscribe { item ->
             log.warn """\
                 No peptides passed FDR filtering for sample '${item[0].id}'.
@@ -209,8 +204,6 @@ workflow MHCQUANT {
         PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
     }
 
-    // Export ID/quant result to TSV (handles both idXML and consensusXML inputs).
-    // Per-sample emptiness warnings are emitted earlier (see QUANT branch above).
     OPENMS_TEXTEXPORTER(ch_output)
 
     // Process the tsv file to facilitate visualization with MultiQC
