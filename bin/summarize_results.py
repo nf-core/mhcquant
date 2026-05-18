@@ -105,17 +105,26 @@ def strip_modifications(seq_with_mods: str) -> str:
         logging.warning(f"Could not parse sequence {seq_with_mods}: {e}")
         return seq_with_mods
 
+def is_multi_tsv(file_path):
+    """A multi-TSV (quant) export has lines starting with #PEPTIDE / #CONSENSUS."""
+    with open(file_path) as f:
+        for line in f:
+            if line.startswith('#PEPTIDE') or line.startswith('#CONSENSUS'):
+                return True
+    return False
+
+
 def process_file(file, prefix, quantify, keep_cols):
     """Extract all the relevant information and write it to a TSV file for the MultiQC report
 
        Args:
            file (str): The file location of the TSV file
            prefix (str): The prefix for all the output files
-           quantify (bool): Whether quantification mode is enabled
+           quantify (bool): Retained for CLI back-compat only; format is auto-detected.
            keep_cols (list): Set of columns to keep from the original set of columns
        """
-    # If quantification is enabled, parse multiTSV output, otherwise the TSV file already has the correct format
-    if quantify:
+    # Auto-detect format: multi-TSV (quant consensusXML) vs flat TSV (idXML / empty bypass)
+    if is_multi_tsv(file):
         data = parse_multiTSV(file)
         n_psms = np.sum(data["psm"])
     else:

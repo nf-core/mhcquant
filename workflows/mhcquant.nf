@@ -165,8 +165,29 @@ workflow MHCQUANT {
     // SUBWORKFLOW: QUANT
     //
     if (params.quantify) {
-        QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
-        ch_output = QUANT.out.consensusxml
+        // Branch out samples with empty FDR-filtered idXMLs (zero peptides past FDR).
+        // Re-uses the same countLines() > 130 heuristic as the SPECLIB path above.
+        // Use `it[1]` (matches subworkflows/local/process_feature/main.nf:23) — destructuring
+        // inside .branch can swallow the labels.
+        RESCORE.out.fdr_filtered
+            .branch {
+                non_empty: it[1].countLines() > 130
+                empty:     true
+            }
+            .set { ch_fdr_branched }
+
+        // Warn per empty sample; .subscribe matches the nf-core idiom used at
+        // subworkflows/local/utils_nfcore_mhcquant_pipeline/main.nf:180
+        ch_fdr_branched.empty.subscribe { item ->
+            log.warn """\
+                No peptides passed FDR filtering for sample '${item[0].id}'.
+                Skipping quantification for this sample; an empty TSV will be written.
+                Consider raising '--fdr_threshold' or excluding this sample.
+                """.stripIndent()
+        }
+
+        QUANT(merge_meta_map, RESCORE.out.rescored_runs, ch_fdr_branched.non_empty, ch_clean_mzml_file)
+        ch_output = QUANT.out.consensusxml.mix(ch_fdr_branched.empty)
     } else {
         ch_output = RESCORE.out.fdr_filtered
     }
@@ -188,14 +209,9 @@ workflow MHCQUANT {
         PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
     }
 
-    // Prepare for check if file is empty
+    // Export ID/quant result to TSV (handles both idXML and consensusXML inputs).
+    // Per-sample emptiness warnings are emitted earlier (see QUANT branch above).
     OPENMS_TEXTEXPORTER(ch_output)
-    // Return an error message when there is only a header present in the document
-    OPENMS_TEXTEXPORTER.out.tsv.map {
-        meta, tsv -> if (tsv.size() < 130) {
-        log.warn "It seems that there were no significant hits found for this sample: " + meta.sample + "\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample. "
-        }
-    }
 
     // Process the tsv file to facilitate visualization with MultiQC
     SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
