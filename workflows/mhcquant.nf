@@ -141,6 +141,14 @@ workflow MHCQUANT {
     RESCORE( ch_rescore_in, ch_multiqc_files )
     ch_multiqc_files = ch_multiqc_files.mix(RESCORE.out.multiqc_files)
 
+    RESCORE.out.fdr_filtered_empty.subscribe { item ->
+        log.warn """\
+            No peptides passed FDR filtering for sample '${item[0].id}'.
+            An empty TSV will be written.
+            Consider raising '--fdr_threshold' or excluding this sample.
+            """.stripIndent()
+    }
+
     // GENERATE SPECTRUM LIBRARY
     if (params.generate_speclib) {
         OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
@@ -151,14 +159,11 @@ workflow MHCQUANT {
 
         // Backfilter Comet identifications with FDR threshold
         OPENMS_IDFILTER_FOR_SPECLIB(ch_fdrfilter_comet_idxml)
-            .filtered
-            .filter { meta, idxml -> idxml.countLines() > 130 }
-            .set { ch_fdrfilter_comet_idxml_filtered }
 
         //
         // SUBWORKFLOW: SPECLIB
         //
-        SPECLIB(ch_fdrfilter_comet_idxml_filtered, ch_clean_mzml_file)
+        SPECLIB(OPENMS_IDFILTER_FOR_SPECLIB.out.filtered, ch_clean_mzml_file)
     }
 
     //
@@ -166,9 +171,9 @@ workflow MHCQUANT {
     //
     if (params.quantify) {
         QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
-        ch_output = QUANT.out.consensusxml
+        ch_output = QUANT.out.consensusxml.mix(RESCORE.out.fdr_filtered_empty)
     } else {
-        ch_output = RESCORE.out.fdr_filtered
+        ch_output = RESCORE.out.fdr_filtered.mix(RESCORE.out.fdr_filtered_empty)
     }
 
     // Annotate Ions for follow-up spectrum validation
@@ -188,14 +193,7 @@ workflow MHCQUANT {
         PYOPENMS_IONANNOTATOR( ch_ion_annotator_input )
     }
 
-    // Prepare for check if file is empty
     OPENMS_TEXTEXPORTER(ch_output)
-    // Return an error message when there is only a header present in the document
-    OPENMS_TEXTEXPORTER.out.tsv.map {
-        meta, tsv -> if (tsv.size() < 130) {
-        log.warn "It seems that there were no significant hits found for this sample: " + meta.sample + "\nPlease consider incrementing the '--fdr_threshold' after removing the work directory or to exclude this sample. "
-        }
-    }
 
     // Process the tsv file to facilitate visualization with MultiQC
     SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)

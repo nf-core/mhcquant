@@ -90,8 +90,18 @@ workflow RESCORE {
         }
     }
 
+    ch_filter_q_value
+        .map { meta, file -> [[id: meta.id], file] }
+        .branch {
+            // Empty FDR-filtered idXML (no peptides) is ~120 lines of OpenMS scaffolding.
+            non_empty: it[1].countLines() > 130
+            empty:     true
+        }
+        .set { ch_fdr_branched }
+
     emit:
-    rescored_runs = ch_rescored_runs.map { meta, file -> [[id: meta.id], file] }
-    fdr_filtered  = ch_filter_q_value.map { meta, file -> [[id: meta.id], file] }
-    multiqc_files = ch_multiqc_files
+    rescored_runs      = ch_rescored_runs.map { meta, file -> [[id: meta.id], file] }
+    fdr_filtered       = ch_fdr_branched.non_empty
+    fdr_filtered_empty = ch_fdr_branched.empty
+    multiqc_files      = ch_multiqc_files
 }
