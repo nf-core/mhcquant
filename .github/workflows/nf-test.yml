@@ -90,18 +90,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Disk inventory (probe, remove after)
-        run: |
-          echo "=== root df ==="; df -h /
-          echo ""
-          echo "=== top 30 largest dirs under /opt, /usr/share, /usr/local ==="
-          sudo du -sh /opt/* /usr/share/* /usr/local/* 2>/dev/null | sort -h | tail -30
-          echo ""
-          echo "=== specifically asked ==="
-          ls -ld /opt/az /usr/share/swift /usr/local/julia* /opt/google /opt/microsoft /opt/pipx /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache 2>&1 || true
-
       - name: Disk space cleanup
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+
+      - name: Remove unused RunsOn AMI tooling
+        run: |
+          sudo rm -rf \
+            /opt/az \
+            /opt/google \
+            /opt/microsoft \
+            /usr/share/miniconda \
+            /usr/local/aws-cli \
+            /opt/aws \
+            /usr/local/aws-sam-cli \
+            /usr/share/gradle-9.5.1 || true
+          df -h /
 
       - name: Run nf-test
         id: run_nf_test
