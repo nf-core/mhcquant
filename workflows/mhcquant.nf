@@ -141,6 +141,14 @@ workflow MHCQUANT {
     RESCORE( ch_rescore_in, ch_multiqc_files )
     ch_multiqc_files = ch_multiqc_files.mix(RESCORE.out.multiqc_files)
 
+    RESCORE.out.fdr_filtered_empty.subscribe { item ->
+        log.warn """\
+            No peptides passed FDR filtering for sample '${item[0].id}'.
+            An empty TSV will be written.
+            Consider raising '--fdr_threshold' or excluding this sample.
+            """.stripIndent()
+    }
+
     // GENERATE SPECTRUM LIBRARY
     if (params.generate_speclib) {
         OPENMSTHIRDPARTY_COMETADAPTER.out.idxml
@@ -151,40 +159,21 @@ workflow MHCQUANT {
 
         // Backfilter Comet identifications with FDR threshold
         OPENMS_IDFILTER_FOR_SPECLIB(ch_fdrfilter_comet_idxml)
-            .filtered
-            .filter { meta, idxml -> idxml.countLines() > 130 }
-            .set { ch_fdrfilter_comet_idxml_filtered }
 
         //
         // SUBWORKFLOW: SPECLIB
         //
-        SPECLIB(ch_fdrfilter_comet_idxml_filtered, ch_clean_mzml_file)
+        SPECLIB(OPENMS_IDFILTER_FOR_SPECLIB.out.filtered, ch_clean_mzml_file)
     }
 
     //
     // SUBWORKFLOW: QUANT
     //
     if (params.quantify) {
-        // Empty FDR-filtered idXML (no peptides) is ~26 lines of OpenMS scaffolding.
-        RESCORE.out.fdr_filtered
-            .branch {
-                non_empty: it[1].countLines() > 130
-                empty:     true
-            }
-            .set { ch_fdr_branched }
-
-        ch_fdr_branched.empty.subscribe { item ->
-            log.warn """\
-                No peptides passed FDR filtering for sample '${item[0].id}'.
-                Skipping quantification for this sample; an empty TSV will be written.
-                Consider raising '--fdr_threshold' or excluding this sample.
-                """.stripIndent()
-        }
-
-        QUANT(merge_meta_map, RESCORE.out.rescored_runs, ch_fdr_branched.non_empty, ch_clean_mzml_file)
-        ch_output = QUANT.out.consensusxml.mix(ch_fdr_branched.empty)
+        QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
+        ch_output = QUANT.out.consensusxml.mix(RESCORE.out.fdr_filtered_empty)
     } else {
-        ch_output = RESCORE.out.fdr_filtered
+        ch_output = RESCORE.out.fdr_filtered.mix(RESCORE.out.fdr_filtered_empty)
     }
 
     // Annotate Ions for follow-up spectrum validation
