@@ -14,9 +14,6 @@ include { OPENMS_MZTABEXPORTER                     } from '../../../modules/loca
 include { MAP_ALIGNMENT                            } from '../map_alignment'
 include { PROCESS_FEATURE                          } from '../process_feature'
 
-// Sort closure for merging and splitting files
-def sortById = { a, b -> a.id <=> b.id }
-
 workflow QUANT {
     take:
         merge_meta_map
@@ -74,11 +71,11 @@ workflow QUANT {
         // Manipulate channels such that we end up with : [meta, mzml, run_idxml, merged_runs_idxml]
         MAP_ALIGNMENT.out.aligned_mzml
                 .join( MAP_ALIGNMENT.out.aligned_idxml )
-                .map { meta, mzml, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta, mzml, idxml] }
+                .map { meta, aligned_mzml, idxml -> [ groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), meta, aligned_mzml, idxml] }
                 .groupTuple()
-                .map { group_meta, meta, mzml, idxml -> [group_meta, meta, mzml, idxml] }
+                .map { group_meta, meta, aligned_mzml, idxml -> [group_meta, meta, aligned_mzml, idxml] }
                 .join( OPENMS_IDMERGER_QUANT.out.idxml )
-                .map { group_meta, meta, mzml, idxml, merged_idxml -> [meta, mzml, idxml, merged_idxml] }
+                .map { group_meta, meta, aligned_mzml, idxml, merged_idxml -> [meta, aligned_mzml, idxml, merged_idxml] }
                 .transpose()
                 .set { ch_runs_to_be_quantified }
 
