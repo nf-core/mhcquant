@@ -90,13 +90,16 @@ ID	Sample	Condition	ReplicateFileName	SearchPreset
 
 ### Parameter precedence
 
-Search parameters are resolved with the following precedence (highest to lowest):
+When a samplesheet row sets `SearchPreset`, the preset's values are sealed in for that row's search — they cannot be overridden by `--<param>` on the CLI, by `-params-file`, or by `-c`. The following keys are sealed by the preset:
 
-1. **Command-line parameters** (e.g. `--fragment_mass_tolerance 0.05`) -- CLI overrides take highest priority and apply to all samples
-2. **Search preset** (e.g. `SearchPreset: lumos_class1`) -- preset values fill in any parameters not specified via CLI
-3. **Config defaults** (`nextflow.config`) -- built-in defaults are used as a final fallback
+`instrument`, `activation_method`, `digest_mass_range`, `prec_charge`, `precursor_mass_tolerance`, `precursor_error_units`, `fragment_mass_tolerance`, `fragment_bin_offset`, `number_mods`, `ms2pip_model`, `peptide_min_length`, `peptide_max_length`, `fixed_mods`, `variable_mods`.
 
-This means a CLI flag like `--fragment_mass_tolerance 0.05` will override all presets for that parameter.
+Rows that do **not** set `SearchPreset` resolve every key from the global Nextflow parameters (CLI > `-params-file` > `nextflow.config` defaults), exactly as in earlier releases.
+
+If you want to deviate from a built-in preset for a one-off run, either:
+
+1. Leave `SearchPreset` empty on the relevant rows and pass the values via `--<param>` / `-params-file` / a custom config; or
+2. Add a custom row to your own search-presets TSV (see `--search_presets`) and reference it by name from `SearchPreset`.
 
 > [!NOTE]
 > When using `--global_fdr`, samples sharing the same `SearchPreset` value are grouped together for global FDR estimation. Samples without a preset are grouped under a common `global` group.

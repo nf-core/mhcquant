@@ -2,4 +2,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::pridepy=0.0.12
+  - bioconda::pridepy=0.0.15

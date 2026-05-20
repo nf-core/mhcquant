@@ -34,14 +34,14 @@
                 "OPENMS_TEXTEXPORTER": {
                     "openms": "3.5.0"
                 },
+                "PARSESDRF_CONVERT": {
+                    "sdrf-pipelines": "0.1.4"
+                },
                 "PRIDEPY_DOWNLOAD_FILE": {
-                    "pridepy": "0.0.12"
+                    "pridepy": "0.0.15"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
-                },
-                "SDRF_PIPELINES_PARSE_SDRF": {
-                    "sdrf-pipelines": "0.1.2"
                 },
                 "SUMMARIZE_RESULTS": {
                     "pyopenms": "3.4.1"
@@ -50,7 +50,7 @@
                     "thermorawfileparser": "1.4.5"
                 },
                 "Workflow": {
-                    "nf-core/mhcquant": "v3.2.0dev"
+                    "nf-core/mhcquant": "v3.2.0"
                 }
             },
             [
@@ -124,12 +124,12 @@
                 "pipeline_info",
                 "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml",
                 "sdrf",
-                "sdrf/samplesheet.tsv",
-                "sdrf/search_presets.tsv"
+                "sdrf/PXD009752_presets.tsv",
+                "sdrf/PXD009752_samplesheet.tsv"
             ],
             [
-                "samplesheet.tsv:md5,4d7d2f1ca8d3def75b05ae8c01c481d8",
-                "search_presets.tsv:md5,3ba3b5c24f71025bfc1799ea87cd0a12"
+                "PXD009752_presets.tsv:md5,3ba3b5c24f71025bfc1799ea87cd0a12",
+                "PXD009752_samplesheet.tsv:md5,4d7d2f1ca8d3def75b05ae8c01c481d8"
             ],
             [
                 [
@@ -279,10 +279,10 @@
                 ]
             ]
         ],
+        "timestamp": "2026-05-15T15:01:01.780309019",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.10.3"
-        },
-        "timestamp": "2026-04-22T13:14:10.634291398"
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
     }
 }

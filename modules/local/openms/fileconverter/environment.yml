@@ -1,7 +1,0 @@
-name: openms_fileconverter
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - bioconda::openms=3.4.1

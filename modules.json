@@ -20,6 +20,11 @@
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
+                    "openms/fileconverter": {
+                        "branch": "master",
+                        "git_sha": "924841ecdeb9b2aea108eda13cacf45a2452d35f",
+                        "installed_by": ["modules"]
+                    },
                     "openms/filefilter": {
                         "branch": "master",
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
@@ -55,9 +60,24 @@
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
                         "installed_by": ["modules"]
                     },
+                    "openms/textexporter": {
+                        "branch": "master",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"]
+                    },
                     "openmsthirdparty/cometadapter": {
                         "branch": "master",
                         "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "installed_by": ["modules"]
+                    },
+                    "parsesdrf/convert": {
+                        "branch": "master",
+                        "git_sha": "978985a5e3285076fc86fb2b3b3593792872d789",
+                        "installed_by": ["modules"]
+                    },
+                    "pridepy/fetchsdrf": {
+                        "branch": "master",
+                        "git_sha": "8fd246251924e27b78ef8e06fc2eb47531ed4ae1",
                         "installed_by": ["modules"]
                     },
                     "thermorawfileparser": {

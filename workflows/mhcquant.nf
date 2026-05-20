@@ -11,7 +11,7 @@
 include { PYOPENMS_CHROMATOGRAMEXTRACTOR } from '../modules/local/pyopenms/chromatogramextractor'
 include { PYOPENMS_IONANNOTATOR          } from '../modules/local/pyopenms/ionannotator'
 include { OPENMS_IDMASSACCURACY          } from '../modules/local/openms/idmassaccuracy/main'
-include { OPENMS_TEXTEXPORTER            } from '../modules/local/openms/textexporter'
+include { OPENMS_TEXTEXPORTER            } from '../modules/nf-core/openms/textexporter/main'
 include { SUMMARIZE_RESULTS              } from '../modules/local/pyopenms/summarize_results'
 include { EPICORE                        } from '../modules/local/epicore'
 

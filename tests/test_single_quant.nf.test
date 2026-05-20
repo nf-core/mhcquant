@@ -3,7 +3,7 @@ nextflow_pipeline {
     name "Test pipeline for single replicate"
     script "../main.nf"
     tag "pipeline"
-    tag "single_replicate"
+    tag "test_single_quant"
 
     test("-profile test_single_quant") {
 
