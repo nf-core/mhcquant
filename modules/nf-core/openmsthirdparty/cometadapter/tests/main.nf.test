@@ -18,7 +18,7 @@ nextflow_process {
             script "../../../thermorawfileparser/main.nf"
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test'],
                     file(params.modules_testdata_base_path + 'proteomics/msspectra/PXD012083_e005640_II.raw', checkIfExists: true)
                 ])
@@ -30,7 +30,7 @@ nextflow_process {
             script "../../../openms/decoydatabase/main.nf"
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     [ id:'test'],
                     file(params.modules_testdata_base_path + 'proteomics/database/UP000005640_9606.fasta', checkIfExists: true)
                 ])
@@ -59,7 +59,7 @@ nextflow_process {
             // Make sure the file is not empty
             assert file(process.out.idxml[0][1]).readLines().any { it.contains('ProteinHit') }
             assert file(process.out.idxml[0][1]).readLines().any { it.contains('PeptideHit') }
-            assert snapshot(path(process.out.versions.get(0)).yaml).match("versions")
+            assert snapshot(process.out.versions_cometadapter, process.out.versions_comet).match("versions")
         }
     }
 

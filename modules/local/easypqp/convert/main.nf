@@ -4,8 +4,8 @@ process EASYPQP_CONVERT {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/easypqp:0.1.53--pyhdfd78af_0' :
-        'biocontainers/easypqp:0.1.53--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/easypqp:0.1.57--pyhdfd78af_1' :
+        'biocontainers/easypqp:0.1.57--pyhdfd78af_1' }"
 
     input:
     tuple val(meta), path(pepxml), path(spectra)
@@ -14,7 +14,7 @@ process EASYPQP_CONVERT {
     output:
     tuple val(meta), path("*.psmpkl") , emit: psmpkl
     tuple val(meta), path("*.peakpkl"), emit: peakpkl
-    path "versions.yml"               , emit: versions
+    tuple val("${task.process}"), val('easypqp'), eval("easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,11 +32,6 @@ process EASYPQP_CONVERT {
         --spectra $spectra \\
         --unimod $unimod \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        easypqp: \$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+')
-    END_VERSIONS
     """
 
     stub:
@@ -49,10 +44,5 @@ process EASYPQP_CONVERT {
 
     touch "${prefix}.psmpkl"
     touch "${prefix}.peakpkl"
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        easypqp: \$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+')
-    END_VERSIONS
     """
 }

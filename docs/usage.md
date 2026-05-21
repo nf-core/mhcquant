@@ -4,6 +4,21 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
+## Input modes
+
+The `--input` parameter accepts three formats:
+
+| Mode                | Example                       | Description                                                                                                                                                                                                                                                                                                                      |
+| ------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Samplesheet TSV** | `--input samplesheet.tsv`     | A local TSV file listing your MS runs (see [Samplesheet input](#samplesheet-input)).                                                                                                                                                                                                                                             |
+| **SDRF file**       | `--input experiment.sdrf.tsv` | A local [SDRF-Proteomics](https://github.com/bigbio/proteomics-sample-metadata) file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates). Raw files are fetched from PRIDE, search settings and sample metadata are parsed from the SDRF. Requires `--fasta`. |
+| **PRIDE accession** | `--input PXD009752`           | A PRIDE project accession. The project must include an SDRF file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates); both the SDRF and raw files are fetched from PRIDE. Requires `--fasta`.                                                                 |
+
+For the SDRF and PRIDE accession modes, the pipeline uses [sdrf-pipelines](https://github.com/bigbio/sdrf-pipelines) to translate the SDRF into an mhcquant samplesheet and a search-preset table, then downloads the raw files with [pridepy](https://github.com/bigbio/py-pride-archive-client). The generated samplesheet and presets are published under `<outdir>/sdrf/` for transparency.
+
+> [!NOTE]
+> SDRF files must follow the immunopeptidomics template from [bigbio/proteomics-sample-metadata](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates), and PRIDE accessions must point to a project that contains such an SDRF file — otherwise sample metadata and search parameters cannot be derived. When providing a local `.sdrf.tsv`, the PRIDE accession is inferred from the filename (e.g. `PXD009752.sdrf.tsv`); if your SDRF is named differently, pass the accession via `--input PXD...` instead.
+
 ## Samplesheet input
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-separated file with at least four columns, and a header row as shown in the examples below.
@@ -14,13 +29,14 @@ You will need to create a samplesheet with information about the samples you wou
 
 ### Samplesheet columns
 
-| Column              | Description                                                                                           |
-| ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ID`                | An incrementing value which acts as a unique number for the given sample                              |
-| `Sample`            | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
-| `Condition`         | Additional information of the sample can be defined here.                                             |
-| `ReplicateFileName` | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
-| `Fasta`             | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
+| Column              | Required | Description                                                                                           |
+| ------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `ID`                | Yes      | An incrementing value which acts as a unique number for the given sample                              |
+| `Sample`            | Yes      | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
+| `Condition`         | Yes      | Additional information of the sample can be defined here.                                             |
+| `ReplicateFileName` | Yes      | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
+| `Fasta`             | No       | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
+| `SearchPreset`      | No       | Name of a search parameter preset (see [Search presets](#search-presets))                             |
 
 > [!NOTE]
 > The `Fasta` column is optional, but you can use it to provide sample-specific FASTA files. If you want to use the same FASTA file for all samples, provide it via the `--fasta` parameter. Please ensure you use one of these options.
@@ -45,6 +61,49 @@ ID	Sample	Condition	ReplicateFileName
 8	control	untreated	/path/to/msrun8.raw|mzML|d
 ```
 
+### Search presets
+
+When processing data from different instruments or MHC classes in a single run, you can use the `SearchPreset` column to assign a named set of search parameters to each sample. This avoids having to specify each parameter individually per row.
+
+Available presets:
+
+| Preset           | Instrument            | MHC Class | Peptide Length | Mass Range | Charge | Precursor Tol. | Fragment Tol. | MS2PIP Model |
+| ---------------- | --------------------- | --------- | -------------- | ---------- | ------ | -------------- | ------------- | ------------ |
+| `lumos_class1`   | Orbitrap Fusion Lumos | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `lumos_class2`   | Orbitrap Fusion Lumos | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `qe_class1`      | Q Exactive            | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `qe_class2`      | Q Exactive            | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `timstof_class1` | timsTOF               | I         | 8-14           | 800:2500   | 1:4    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `timstof_class2` | timsTOF               | II        | 8-30           | 800:5000   | 1:5    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `xl_class1`      | LTQ Orbitrap XL       | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.50025 Da    | CIDch2       |
+| `xl_class2`      | LTQ Orbitrap XL       | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.50025 Da    | CIDch2       |
+
+Example samplesheet with presets:
+
+```tsv title="samplesheet.tsv"
+ID	Sample	Condition	ReplicateFileName	SearchPreset
+1	lumos_sample	A	/path/to/lumos_run1.raw	lumos_class1
+2	lumos_sample	A	/path/to/lumos_run2.raw	lumos_class1
+3	timstof_sample	B	/path/to/timstof_run1.d	timstof_class2
+4	timstof_sample	B	/path/to/timstof_run2.d	timstof_class2
+```
+
+### Parameter precedence
+
+When a samplesheet row sets `SearchPreset`, the preset's values are sealed in for that row's search — they cannot be overridden by `--<param>` on the CLI, by `-params-file`, or by `-c`. The following keys are sealed by the preset:
+
+`instrument`, `activation_method`, `digest_mass_range`, `prec_charge`, `precursor_mass_tolerance`, `precursor_error_units`, `fragment_mass_tolerance`, `fragment_bin_offset`, `number_mods`, `ms2pip_model`, `peptide_min_length`, `peptide_max_length`, `fixed_mods`, `variable_mods`.
+
+Rows that do **not** set `SearchPreset` resolve every key from the global Nextflow parameters (CLI > `-params-file` > `nextflow.config` defaults), exactly as in earlier releases.
+
+If you want to deviate from a built-in preset for a one-off run, either:
+
+1. Leave `SearchPreset` empty on the relevant rows and pass the values via `--<param>` / `-params-file` / a custom config; or
+2. Add a custom row to your own search-presets TSV (see `--search_presets`) and reference it by name from `SearchPreset`.
+
+> [!NOTE]
+> When using `--global_fdr`, samples sharing the same `SearchPreset` value are grouped together for global FDR estimation. Samples without a preset are grouped under a common `global` group.
+
 ## Recommended search settings
 
 Fine-tuning search settings is important to obtain the most optimal results for your MS data. _These settings heavily depend on the MS instrument settings used to generate the data_. If you want to reprocess public data, make sure you use the settings mentioned in the methods section! The following table acts as an orientation of commonly used search settings for instruments:
@@ -59,7 +118,7 @@ Fine-tuning search settings is important to obtain the most optimal results for 
 | precursor_error_units    | ppm      | ppm      | ppm                   | ppm      | ppm                 | ppm      | ppm             | ppm      |
 | number_mods              | 3        | 5        | 3                     | 5        | 3                   | 5        | 3               | 5        |
 | precursor_mass_tolerance | 20       | 20       | 5                     | 5        | 5                   | 5        | 5               | 5        |
-| fragment_mass_tolerance  | 0.02     | 0.02     | 0.02                  | 0.02     | 0.02                | 0.02     | 0.50025         | 0.50025  |
+| fragment_mass_tolerance  | 0.01     | 0.01     | 0.01                  | 0.01     | 0.01                | 0.01     | 0.50025         | 0.50025  |
 | fragment_bin_offset      | 0        | 0        | 0                     | 0        | 0                   | 0        | 0.4             | 0.4      |
 
 Modifications are specified via `--variable_mods` and `fixed_mods` using the [UNIMOD nomenclature](https://www.unimod.org/unimod_help.html) via OpenMS. Check out [helper page](https://abibuilder.cs.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html) of OpenMS for the full list of options. Multiple modifications are specified as `'Oxidation (M),Acetyl (N-term),Phospho (S)'`.

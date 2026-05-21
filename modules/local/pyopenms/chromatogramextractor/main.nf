@@ -1,6 +1,6 @@
 process PYOPENMS_CHROMATOGRAMEXTRACTOR {
     tag "$meta.id"
-    label 'process_single'
+    label 'process_low'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -12,7 +12,7 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
 
     output:
     tuple val(meta), path("*.csv")  , emit: csv
-    path "versions.yml"             , emit: versions
+    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,11 +25,6 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
     chromatogram_extractor.py \\
         -in $mzml \\
         -out ${prefix}_chrom.csv \\
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
-    END_VERSIONS
     """
 
     stub:
@@ -37,10 +32,5 @@ process PYOPENMS_CHROMATOGRAMEXTRACTOR {
 
     """
     touch ${prefix}_chrom.csv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
-    END_VERSIONS
     """
 }

@@ -1,8 +1,10 @@
 name: "openms_idmassaccuracy"
-description: Calculates a distribution of the mass error from given mass spectra and
-  IDs.
+description: Computes the fragment and/or precursor mass accuracy of identified
+  peptides against the original spectra.
 keywords:
-  - mass_error
+  - mass accuracy
+  - idXML
+  - mzML
   - openms
   - proteomics
 tools:
@@ -24,16 +26,12 @@ input:
           e.g. `[ id:'test' ]`
     - mzmls:
         type: file
-        description: |
-          List containing one or more mzML files
-          e.g. `[ 'file1.mzML', 'file2.mzML' ]`
+        description: Spectra files used for identification.
         pattern: "*.{mzML}"
         ontologies: []
     - idxmls:
         type: file
-        description: |
-          List containing one or more idXML files
-          e.g. `[ 'file1.idXML', 'file2.idXML' ]`
+        description: Peptide identification results matching the spectra.
         pattern: "*.{idXML}"
         ontologies: []
 output:
@@ -45,10 +43,9 @@ output:
             e.g. `[ id:'test' ]`
       - "*frag_mass_err.tsv":
           type: file
-          description: TSV file containing the fragment mass errors
-          pattern: "*frag_mass_err.{tsv}"
-          ontologies:
-            - edam: http://edamontology.org/format_3475 # TSV
+          description: TSV with fragment mass error measurements per PSM.
+          pattern: "*frag_mass_err.tsv"
+          ontologies: []
   prec_err:
     - - meta:
           type: map
@@ -57,16 +54,22 @@ output:
             e.g. `[ id:'test' ]`
       - "*prec_mass_err.tsv":
           type: file
-          description: Optional TSV file containing the precursor mass errors
-          pattern: "*prec_mass_err.{tsv}"
-          ontologies:
-            - edam: http://edamontology.org/format_3475 # TSV
+          description: Optional TSV with precursor mass error measurements per PSM.
+          pattern: "*prec_mass_err.tsv"
+          ontologies: []
+topics:
   versions:
-    - versions.yml:
-        type: file
-        description: File containing software versions
-        pattern: "versions.yml"
-        ontologies:
-          - edam: http://edamontology.org/format_3750 # YAML
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - openms:
+          type: string
+          description: The name of the tool
+      - "FileInfo --help 2>&1 | sed -nE 's/^Version: ([0-9.]+).*/\\1/p'":
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
+  - "@jonasscheid"
+maintainers:
   - "@jonasscheid"

@@ -11,29 +11,38 @@ tools:
       documentation: https://www.gnu.org/software/tar/manual/
       licence: ["GPL-3.0-or-later"]
 input:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [ id:'test', single_end:false ]
-  - archive:
-      type: file
-      description: File to be untar
-      pattern: "*.{tar}.{gz}"
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - archive:
+        type: file
+        description: File to be untar
+        pattern: "*.{tar}.{gz}"
 output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [ id:'test', single_end:false ]
-  - untar:
-      type: directory
-      description: Directory containing contents of archive
-      pattern: "*/"
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  untar:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.d":
+          type: directory
+          description: Directory containing contents of archive
+          pattern: "*/"
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The process the versions were collected from
+      - untar:
+          type: string
+          description: The tool name
+      - "echo $(tar --version 2>&1) | sed 's/^.*(GNU tar) //; s/ Copyright.*$//'":
+          type: eval
+          description: The expression to obtain the version of the tool
+
 authors:
   - "@joseespinosa"
   - "@drpatelh"

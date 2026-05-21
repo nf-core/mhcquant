@@ -3,6 +3,49 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.2.0 - Solitude - 20/05/26
+
+### `Added`
+
+- Added support for single run quantification [#438](https://github.com/nf-core/mhcquant/pull/438)
+- Added per-sample search parameter support via samplesheet with SearchPreset column [#439](https://github.com/nf-core/mhcquant/pull/439)
+- Added PRIDE ID and SDRF sheet support [#445](https://github.com/nf-core/mhcquant/pull/445)
+- Added ion mobility export and MultiQC distribution plot for timsTOF data [#441](https://github.com/nf-core/mhcquant/pull/441)
+
+### `Fixed`
+
+- Fixed crashes in `FeatureLinkerUnlabeledKD` and `PYOPENMS_IONANNOTATOR` for samples with zero peptides past FDR; empty samples now emit an empty TSV [#451](https://github.com/nf-core/mhcquant/pull/451)
+- Fixed `OPENMS_FILECONVERTER` version eval emitting a `\x01` control character into the MultiQC versions YAML due to an unescaped sed backreference [#451](https://github.com/nf-core/mhcquant/pull/451)
+- Fixed nf-test CI failures caused by Docker layer extraction running out of disk space when pulling `ms2rescore` and OpenMS 3.5.0 containers; added `jlumbroso/free-disk-space` cleanup step and bumped the RunsOn disk to `volume=40gb` [#451](https://github.com/nf-core/mhcquant/pull/451)
+- Fixed `EPICORE` running only once instead of per sample when `--fasta` is used, by broadcasting `ch_fasta` to `EPICORE` via `.first()` [#446](https://github.com/nf-core/mhcquant/pull/446)
+- Fixed `SUMMARIZE_RESULTS` crash with `--quantify` caused by OpenMS 3.5.0 TextExporter phantom column bug ([OpenMS/OpenMS#9120](https://github.com/OpenMS/OpenMS/issues/9120)) [#444](https://github.com/nf-core/mhcquant/pull/444)
+- Fixed an issue where stripping the sequence in `SUMMARIZE_RESULTS` did not work for complex modifications [#436](https://github.com/nf-core/mhcquant/pull/436)
+- Fixed `tdf2mzml` container entrypoint issue by pinning to `0.5_noentry` and invoking the CLI explicitly [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Fixed `OPENMS_FILECONVERTER` version extraction emitting a SOH byte due to a single-backslash sed backreference [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Fixed `OPENMS_IDMASSACCURACY` process argument to use `meta.precursor_error_units` so per-sample preset overrides apply [#447](https://github.com/nf-core/mhcquant/pull/447)
+
+### `Changed`
+
+- Migrate to topic channels [#431](https://github.com/nf-core/mhcquant/pull/431)
+- Bumped `openms/fileconverter`, `openms/featurefinderidentification` and `openms/idconflictresolver` local modules to OpenMS 3.5.0 [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Rewrote `openms/idmassaccuracy` meta.yml to reflect the actual process I/O [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Tightened preset normalization so empty/whitespace `FixedMods` and `VariableMods` cells are treated as empty (preserves the existing `-fixed_modifications` CLI call) [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Migrated `conf/test_single_quant.config` from deprecated `max_cpus`/`max_memory`/`max_time` to `process.resourceLimits` [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Replaced local `openms/textexporter` module with the `nf-core/modules` equivalent; preserved the `_exported` output suffix via `ext.prefix` to keep SUMMARIZE_RESULTS input/output filenames distinct [#447](https://github.com/nf-core/mhcquant/pull/447)
+- Replaced local `openms/fileconverter` module with the `nf-core/modules` equivalent; updated `PROCESS_FEATURE` to consume the renamed `converted` output channel [#449](https://github.com/nf-core/mhcquant/pull/449)
+- Replaced local `pridepy/fetch_sdrf` module with the `nf-core/modules` `pridepy/fetchsdrf` equivalent (now meta-aware); bumped local `pridepy/download_file` to pridepy 0.0.15 to match [#449](https://github.com/nf-core/mhcquant/pull/449)
+- Sealed search-preset values: when a samplesheet row sets `SearchPreset`, preset values are no longer overridable via `--<param>`, `-params-file`, or `-c` for that row; rows without a preset resolve from `params` as before. Removed the fragile `workflow.commandLine` regex from `resolveSearchParams` (renamed to `resolvePresetParams`). Documented the new precedence in `docs/usage.md`. [#449](https://github.com/nf-core/mhcquant/pull/449)
+
+### `Dependencies`
+
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `easypqp`  | 0.1.53      | 0.1.57      |
+| `MultiQC`  | 1.31.0      | 1.33.0      |
+| `Nf-core`  | 3.4.1       | 3.5.1       |
+| `openms`   | 3.4.1       | 3.5.0       |
+| `tdf2mzml` | 0.3.0       | 0.5.0       |
+
 ## 3.1.0 - BlüBa - 07/01/26
 
 ### `Added`

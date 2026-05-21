@@ -16,7 +16,7 @@ process EPICORE {
         path "${result_tsv}",                       emit: final_epicore_tsv
         path "epicore_length_distribution.html",    emit: length_dist
         path "epicore_intensity_histogram.html",    emit: intensity_hist
-        path "versions.yml",                        emit: versions
+        tuple val("${task.process}"), val('epicore'), eval("echo \$(epicore --version) | grep 'epicore' | cut -d ' ' -f3 | cut -c2-"), topic: versions
 
     script:
     def args = task.ext.args ?: ''
@@ -32,11 +32,6 @@ process EPICORE {
     # Add epicore statistics to MultiQC general stats table
     wc -l < epitopes.csv | awk '{print \$1 - 1}' > epicores.txt
     awk 'NR==1 {print \$0 ",# Epicores"; next} NR==2 {getline extra < "epicores.txt"; print \$0 "," extra}' $general_stats > _modified_$general_stats
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        epicore: \$(echo \$(epicore --version) | grep 'epicore' | cut -d ' ' -f3 | cut -c2-)
-    END_VERSIONS
     """
 
     stub:
@@ -47,10 +42,5 @@ process EPICORE {
     touch ${prefix}.tsv
     touch epicore_length_distribution.html
     touch epicore_intensity_hist.html
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        epicore: \$(echo \$(epicore --version) | grep 'epicore' | cut -d ' ' -f3 | cut -c2-)
-    END_VERSIONS
     """
 }

@@ -4,15 +4,15 @@ process EASYPQP_LIBRARY {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/easypqp:0.1.53--pyhdfd78af_0' :
-        'biocontainers/easypqp:0.1.53--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/easypqp:0.1.57--pyhdfd78af_1' :
+        'biocontainers/easypqp:0.1.57--pyhdfd78af_1' }"
 
     input:
     tuple val(meta), path(psmpkl), path(peakpkl)
 
     output:
     tuple val(meta), path("*.tsv") , emit: tsv
-    path "versions.yml"            , emit: versions
+    tuple val("${task.process}"), val('easypqp'), eval("easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+'"), topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,11 +30,6 @@ process EASYPQP_LIBRARY {
         --out ${prefix}_speclib.tsv \
         $args \
         $psmpkl $peakpkl
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        easypqp: \$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+')
-    END_VERSIONS
     """
 
     stub:
@@ -46,10 +41,5 @@ process EASYPQP_LIBRARY {
     mkdir -p \$MPLCONFIGDIR \$XDG_CACHE_HOME
 
     touch "${prefix}_speclib.tsv"
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        easypqp: \$(easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+')
-    END_VERSIONS
     """
 }

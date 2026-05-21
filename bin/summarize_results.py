@@ -4,6 +4,7 @@
 
 import pandas as pd
 import numpy as np
+from pyopenms import AASequence
 from argparse import ArgumentParser
 import re
 from collections import Counter
@@ -77,6 +78,15 @@ def parse_multiTSV(file_path):
             elif line.startswith("#UNASSIGNEDPEPTIDE"):
                 unassigned_peptide_cols = line.strip().split('\t')[1:]
 
+    # Workaround for OpenMS 3.5.0 TextExporter bug (https://github.com/OpenMS/OpenMS/issues/9120):
+    # consensusXML export writes a phantom column in data rows between 'end' and 'FFId_category'
+    # that is missing from the header. Remove it to realign columns.
+    for rows, cols in [(peptide_rows, peptide_cols), (unassigned_peptide_rows, unassigned_peptide_cols)]:
+        if rows and len(rows[0]) > len(cols) and 'end' in cols:
+            extra_idx = cols.index('end') + 1
+            for i, row in enumerate(rows):
+                rows[i] = row[:extra_idx] + row[extra_idx + 1:]
+
     peptide_df = pd.DataFrame(peptide_rows, columns=peptide_cols)
     consensus_df = pd.DataFrame(consensus_rows, columns=consensus_cols)
     # Concatenate CONSENSUS and PEPTIDE columns
@@ -86,6 +96,22 @@ def parse_multiTSV(file_path):
     psm = unassigned_peptide_df.loc[:, "sequence"].value_counts()
     df["psm"] = df["sequence"].map(psm)
     return df
+
+def strip_modifications(seq_with_mods: str) -> str:
+    try:
+        aa_seq = AASequence.fromString(seq_with_mods)
+        return aa_seq.toUnmodifiedString()
+    except Exception as e:
+        logging.warning(f"Could not parse sequence {seq_with_mods}: {e}")
+        return seq_with_mods
+
+def multi_tsv_not_empty(file_path):
+    """A populated multi-TSV (quant) export has PEPTIDE/CONSENSUS data rows (no leading #)."""
+    with open(file_path) as f:
+        for line in f:
+            if line.startswith('PEPTIDE\t') or line.startswith('CONSENSUS\t'):
+                return True
+    return False
 
 
 def process_file(file, prefix, quantify, keep_cols):
@@ -97,8 +123,7 @@ def process_file(file, prefix, quantify, keep_cols):
            quantify (bool): Whether quantification mode is enabled
            keep_cols (list): Set of columns to keep from the original set of columns
        """
-    # If quantification is enabled, parse multiTSV output, otherwise the TSV file already has the correct format
-    if quantify:
+    if quantify and multi_tsv_not_empty(file):
         data = parse_multiTSV(file)
         n_psms = np.sum(data["psm"])
     else:
@@ -122,7 +147,7 @@ def process_file(file, prefix, quantify, keep_cols):
 
     # Remove modification information from the sequence column
     data["peptidoform"] = data["sequence"]
-    data["sequence"] = data["sequence"].apply(lambda seq: re.sub(r'\(.*?\)', '', seq))
+    data["sequence"] = data["sequence"].apply(strip_modifications)
 
     # ---------------------------------
     # Length distribution plot
@@ -150,6 +175,10 @@ def process_file(file, prefix, quantify, keep_cols):
     # Histograms
     # ---------------------------------
 
+    # Rename IM column to ion_mobility for readability
+    if "IM" in data.columns:
+        data.rename(columns={"IM": "ion_mobility"}, inplace=True)
+
     histograms = [[data["mz"].astype(float), f"{prefix}_histogram_mz.csv"],
                   [data["rt"].astype(float), f"{prefix}_histogram_rt.csv"],
                   [data["score"].astype(float), f"{prefix}_histogram_scores.csv"]]
@@ -157,6 +186,15 @@ def process_file(file, prefix, quantify, keep_cols):
     for values, title in histograms:
         hist, bin_edges = np.histogram(values, bins='auto')
         with open(title, "w") as f:
+            for i in range(len(bin_edges) - 1):
+                bin_midpoint = (bin_edges[i] + bin_edges[i + 1]) / 2
+                f.write(f'{bin_midpoint},{hist[i]}\n')
+
+    # Generate ion mobility histogram if IM data is available (e.g., timsTOF)
+    if "ion_mobility" in data.columns:
+        im_values = data["ion_mobility"].astype(float)
+        hist, bin_edges = np.histogram(im_values, bins='auto')
+        with open(f"{prefix}_histogram_im.csv", "w") as f:
             for i in range(len(bin_edges) - 1):
                 bin_midpoint = (bin_edges[i] + bin_edges[i + 1]) / 2
                 f.write(f'{bin_midpoint},{hist[i]}\n')
@@ -174,6 +212,10 @@ def process_file(file, prefix, quantify, keep_cols):
             header=False
         )
 
+    # Add a column with unique protein accessions next to accessions
+    data.insert(data.columns.get_loc('accessions') + 1, 'unique_accessions',
+                data['accessions'].map(lambda x: ';'.join(dict.fromkeys(x.split(';')))))
+
     # Filter the columns down to a user-defined subset of columns
     if keep_cols:
         missing_columns = set(keep_cols) - set(data.columns)
@@ -184,6 +226,10 @@ def process_file(file, prefix, quantify, keep_cols):
         regex_patterns = [r'^rt_', r'^mz_', r'^intensity_', r'^charge_']
         for pattern in regex_patterns:
             keep_cols.extend([col for col in data.columns if re.match(pattern, col)])
+        # Always include unique_accessions next to accessions
+        if 'accessions' in keep_cols and 'unique_accessions' not in keep_cols:
+            idx = keep_cols.index('accessions') + 1
+            keep_cols.insert(idx, 'unique_accessions')
         # Remove duplicates while retaining order
         keep_cols = list(dict.fromkeys(keep_cols))
         data = data.loc[:, keep_cols]
@@ -191,9 +237,6 @@ def process_file(file, prefix, quantify, keep_cols):
     # Round all floating point values to 5 decimal places to ensure nf-test checksum stability is guaranteed
     float_cols = data.select_dtypes(include=['float']).columns
     data.loc[:, float_cols] = data.loc[:, float_cols].round(5)
-
-    # Add a column with unique protein accessions
-    data['unique_accessions'] = data['accessions'].map(lambda x: ';'.join(dict.fromkeys(x.split(';'))))
 
     data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
 

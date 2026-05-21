@@ -15,8 +15,9 @@ process SUMMARIZE_RESULTS {
     path '*_xcorr_scores.csv'                                   , emit: xcorr, optional: true
     path '*_peptide_length.csv'                                 , emit: lengths, optional: true
     path '*_peptide_intensity.csv'                              , emit: intensities, optional: true
+    path '*_histogram_im.csv'                                   , emit: hist_im, optional: true
     tuple val(meta), path('*.tsv'), path('*_general_stats.csv') , emit: epicore_input
-    path 'versions.yml'                                         , emit: versions
+    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), topic: versions
 
     script:
     def args = task.ext.args ?: ''
@@ -29,11 +30,6 @@ process SUMMARIZE_RESULTS {
         --out_prefix $prefix \\
         $quantify \\
         $args
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
-    END_VERSIONS
     """
 
     stub:
@@ -46,12 +42,8 @@ process SUMMARIZE_RESULTS {
     touch ${prefix}_xcorr_scores.csv
     touch ${prefix}_peptide_length.csv
     touch ${prefix}_peptide_intensity.csv
+    touch ${prefix}_histogram_im.csv
     touch ${prefix}_general_stats.csv
     touch ${prefix}.tsv
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        pyopenms: \$(pip show pyopenms | grep Version | sed 's/Version: //')
-    END_VERSIONS
     """
 }
