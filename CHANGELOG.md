@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 
 - Updated to nf-core template 4.0.2 [#454](https://github.com/nf-core/mhcquant/pull/454)
+- Updated all nf-core modules to their latest versions [#454](https://github.com/nf-core/mhcquant/pull/454)
 
 ### `Dependencies`
 
 | Dependency | Old version | New version |
 | ---------- | ----------- | ----------- |
-| `MultiQC`  | 1.33.0      | 1.34.0      |
+| `MultiQC`  | 1.33.0      | 1.35.0      |
 | `Nf-core`  | 3.5.1       | 4.0.2       |
 
 ## 3.2.0 - Solitude - 20/05/26
