@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
-- Fixed `UNTAR`, `UNZIP` and `EPICORE` version capture aborting the process: the `echo $(...)` `eval` form spliced parenthesis-containing version banners into the `bash -c` command, breaking every compressed Bruker `.d` input [#455](https://github.com/nf-core/mhcquant/pull/455)
+- Fixed `UNTAR`, `UNZIP` and `EPICORE` version `eval` crashing on parenthesis-containing tool banners [#455](https://github.com/nf-core/mhcquant/pull/455)
 
 ### `Changed`
 
