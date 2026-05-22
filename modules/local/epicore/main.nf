@@ -16,7 +16,7 @@ process EPICORE {
         path "${result_tsv}",                       emit: final_epicore_tsv
         path "epicore_length_distribution.html",    emit: length_dist
         path "epicore_intensity_histogram.html",    emit: intensity_hist
-        tuple val("${task.process}"), val('epicore'), eval("epicore --version | grep 'epicore' | cut -d ' ' -f3 | cut -c2-"), topic: versions
+        tuple val("${task.process}"), val('epicore'), eval("epicore --version 2>&1 | grep -oE -m1 '[0-9]+\\.[0-9.]+'"), topic: versions
 
     script:
     def args = task.ext.args ?: ''
