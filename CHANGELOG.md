@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 3.3.0dev
 
+### `Fixed`
+
+- Fixed `UNTAR`, `UNZIP` and `EPICORE` version `eval` crashing on parenthesis-containing tool banners [#455](https://github.com/nf-core/mhcquant/pull/455)
+
 ### `Changed`
 
 - Updated to nf-core template 4.0.2 [#454](https://github.com/nf-core/mhcquant/pull/454)
