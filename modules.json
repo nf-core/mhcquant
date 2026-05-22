@@ -7,17 +7,17 @@
                 "nf-core": {
                     "gunzip": {
                         "branch": "master",
-                        "git_sha": "96c57dfd98a0641886a67bd449fe33ee2ec0e374",
+                        "git_sha": "0902eac3012baaf4f9ab6513c8c55acc9353c96c",
                         "installed_by": ["modules"]
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "5bdb098216aaf5df9c3b6343e6204cd932503c16",
+                        "git_sha": "cd0ad387832473916b1f1c80c2ca673a7883bf94",
                         "installed_by": ["modules"]
                     },
                     "openms/decoydatabase": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/fileconverter": {
@@ -27,37 +27,37 @@
                     },
                     "openms/filefilter": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/idfilter": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/idmerger": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/idripper": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/idscoreswitcher": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/peakpickerhires": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/peptideindexer": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/textexporter": {
@@ -67,7 +67,7 @@
                     },
                     "openmsthirdparty/cometadapter": {
                         "branch": "master",
-                        "git_sha": "ca1cd2456f36c913fb3cfb6bdfbf9d1794fd493b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "parsesdrf/convert": {
@@ -82,7 +82,7 @@
                     },
                     "thermorawfileparser": {
                         "branch": "master",
-                        "git_sha": "daaecc3478d6f6ad9cb8f48ec7d657ab6c67877f",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     }
                 }
@@ -96,12 +96,12 @@
                     },
                     "utils_nfcore_pipeline": {
                         "branch": "master",
-                        "git_sha": "271e7fc14eb1320364416d996fb077421f3faed2",
+                        "git_sha": "a3fb7351b1fdb2b1de282b765816bbea190e86a8",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfschema_plugin": {
                         "branch": "master",
-                        "git_sha": "4b406a74dc0449c0401ed87d5bfff4252fd277fd",
+                        "git_sha": "fdc08b8b1ae74f56686ce21f7ea11ad11990ce57",
                         "installed_by": ["subworkflows"]
                     }
                 }

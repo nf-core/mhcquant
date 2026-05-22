@@ -7,5 +7,6 @@ testing/
 testing*
 *.pyc
 null/
+.lineage/
 CLAUDE.md
 .claude/
