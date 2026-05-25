@@ -75,6 +75,11 @@
                         "git_sha": "978985a5e3285076fc86fb2b3b3593792872d789",
                         "installed_by": ["modules"]
                     },
+                    "pridepy/downloadfile": {
+                        "branch": "master",
+                        "git_sha": "e49c41bed2a652f2859a3309e6609160408c321e",
+                        "installed_by": ["modules"]
+                    },
                     "pridepy/fetchsdrf": {
                         "branch": "master",
                         "git_sha": "8fd246251924e27b78ef8e06fc2eb47531ed4ae1",
