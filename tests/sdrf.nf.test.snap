@@ -37,7 +37,7 @@
                 "PARSESDRF_CONVERT": {
                     "sdrf-pipelines": "0.1.4"
                 },
-                "PRIDEPY_DOWNLOAD_FILE": {
+                "PRIDEPY_DOWNLOADFILE": {
                     "pridepy": "0.0.15"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
@@ -279,7 +279,7 @@
                 ]
             ]
         ],
-        "timestamp": "2026-05-15T15:01:01.780309019",
+        "timestamp": "2026-05-25T07:48:26.899859963",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
