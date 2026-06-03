@@ -44,8 +44,13 @@ workflow QUANT {
 
         // Manipulate such that [meta_run1, idxml_run1, pout_group1], [meta_run2, idxml_run2, pout_group1] ...
         ch_runs_score_switched
-            // Nextflow can only combine/join on the exact groupKey object, merge_id is not sufficient
             .map { meta, idxml -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count) , meta, idxml] }
+            // Combine on the unwrapped key.target ([id] map), NOT the groupKey object: GroupKey.equals()
+            // is asymmetric (groupKey.equals(map)==true but map.equals(groupKey)==false), so a
+            // groupKey-vs-map combine silently drops pairs depending on operand arrival order on AWS Batch
+            // (nextflow-io/nextflow#4104). filter_q_value carries the same [id] map, so map-vs-map equals
+            // is symmetric and order-independent.
+            .map { key, meta, idxml -> [key.target, meta, idxml] }
             .combine(filter_q_value, by:0)
             .map { group_meta, meta, idxml, q_value -> [meta, idxml, q_value] }
             .set { ch_runs_to_filter}
