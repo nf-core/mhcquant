@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added MultiQC plot for DeepLC retention time calibration per sample [#461](https://github.com/nf-core/mhcquant/pull/461)
 
+### `Fixed`
+
+- Fixed `UNTAR`, `UNZIP` and `EPICORE` version `eval` crashing on parenthesis-containing tool banners [#455](https://github.com/nf-core/mhcquant/pull/455)
+
 ### `Changed`
 
 - Updated to nf-core template 4.0.2 [#454](https://github.com/nf-core/mhcquant/pull/454)
 - Updated all nf-core modules to their latest versions [#454](https://github.com/nf-core/mhcquant/pull/454)
+- Replaced local `pridepy/download_file` with upstream nf-core `pridepy/downloadfile` [#457](https://github.com/nf-core/mhcquant/pull/457)
 
 ### `Dependencies`
 
