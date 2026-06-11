@@ -154,10 +154,10 @@ custom_data:
       title: "Peptide Intensity Distribution"
       xlab: "log2(Intensity)"
 
-  alignment_residuals:
+  aligned_residuals:
     plot_type: "boxplot"
     file_format: "csv"
-    section_name: "RT alignment residuals"
+    section_name: "Aligned residuals"
     description: |
       Distribution of retention time alignment residuals (reference RT − fitted RT), normalized
       to percent of the gradient, for the landmark peptides of each run; one box per run within a
@@ -168,8 +168,8 @@ custom_data:
       approaching ~1% (the match-between-runs tolerance) warrant investigation; a non-zero median
       suggests the linear alignment model is too simple for that run.
     pconfig:
-      id: "alignment_residuals"
-      title: "RT alignment residuals"
+      id: "aligned_residuals"
+      title: "Aligned residuals"
       xlab: "Residual [% of gradient]"
 
   epicore_length_distribution:
@@ -203,8 +203,8 @@ sp:
     fn: "*_xcorr_scores.csv"
   peptide_intensity_plot:
     fn: "*_peptide_intensity.csv"
-  alignment_residuals:
-    fn: "*_alignment_residuals.csv"
+  aligned_residuals:
+    fn: "*_aligned_residuals.csv"
   epicore_length_distribution:
     fn: "epicore_length_distribution.html"
   epicore_intensity_histogram:

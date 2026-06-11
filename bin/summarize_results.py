@@ -40,7 +40,7 @@ parser.add_argument(
     "--trafoxml",
     nargs='*',
     default=[],
-    help="Optional per-run trafoXML files from RT alignment, used to plot alignment residuals."
+    help="Optional per-run trafoXML files from RT alignment, used to plot aligned residuals."
 )
 
 
@@ -249,8 +249,8 @@ def process_file(file, prefix, quantify, keep_cols):
     data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
 
 
-def write_alignment_residuals(trafoxml_paths):
-    """Write per-run RT alignment residuals for the MultiQC box plot.
+def write_aligned_residuals(trafoxml_paths):
+    """Write per-run aligned residuals for the MultiQC box plot.
 
     For each trafoXML, the residual of a landmark pair is `to - apply(from)`: the deviation
     of the reference RT from the fitted transformation, normalized to percent of the gradient
@@ -265,7 +265,7 @@ def write_alignment_residuals(trafoxml_paths):
         if gradient <= 0:
             continue
         run = os.path.splitext(os.path.basename(path))[0]
-        with open(f"{run}_alignment_residuals.csv", "w") as f:
+        with open(f"{run}_aligned_residuals.csv", "w") as f:
             for pt in points:
                 f.write(f"{round((pt.second - td.apply(pt.first)) / gradient * 100, 5)}\n")
 
@@ -281,7 +281,7 @@ def main():
                  args.quantify,
                  cols)
     if args.trafoxml:
-        write_alignment_residuals(args.trafoxml)
+        write_aligned_residuals(args.trafoxml)
 
 
 if __name__ == '__main__':
