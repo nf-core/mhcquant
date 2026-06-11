@@ -200,8 +200,17 @@ workflow MHCQUANT {
 
     OPENMS_TEXTEXPORTER(ch_output)
 
-    // Process the tsv file to facilitate visualization with MultiQC
-    SUMMARIZE_RESULTS(OPENMS_TEXTEXPORTER.out.tsv)
+    // Process the tsv file to facilitate visualization with MultiQC.
+    // Under --quantify, attach each group's per-run trafoXMLs so alignment residuals can be plotted.
+    if (params.quantify) {
+        ch_summarize_input = OPENMS_TEXTEXPORTER.out.tsv
+            .map { meta, tsv -> [meta.id, meta, tsv] }
+            .join( QUANT.out.trafoxml.map { meta, trafoxml -> [meta.id, trafoxml] }, remainder: true )
+            .map { _id, meta, tsv, trafoxml -> [meta, tsv, trafoxml ?: []] }
+    } else {
+        ch_summarize_input = OPENMS_TEXTEXPORTER.out.tsv.map { meta, tsv -> [meta, tsv, []] }
+    }
+    SUMMARIZE_RESULTS(ch_summarize_input)
 
     //
     // EPICORE
@@ -225,6 +234,7 @@ workflow MHCQUANT {
         SUMMARIZE_RESULTS.out.xcorr,
         SUMMARIZE_RESULTS.out.lengths,
         SUMMARIZE_RESULTS.out.intensities,
+        SUMMARIZE_RESULTS.out.alignment_residuals,
         params.epicore ? EPICORE.out.stats : SUMMARIZE_RESULTS.out.epicore_input.map { meta, tsv, stats -> stats }
     )
 

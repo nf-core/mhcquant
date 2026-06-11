@@ -6,7 +6,7 @@ process SUMMARIZE_RESULTS {
         'biocontainers/pyopenms:3.4.1--py312h6b06db6_2' }"
 
     input:
-    tuple val(meta), path(file)
+    tuple val(meta), path(file), path(trafoxmls)
 
     output:
     path '*_histogram_mz.csv'                                   , emit: hist_mz, optional: true
@@ -16,6 +16,7 @@ process SUMMARIZE_RESULTS {
     path '*_peptide_length.csv'                                 , emit: lengths, optional: true
     path '*_peptide_intensity.csv'                              , emit: intensities, optional: true
     path '*_histogram_im.csv'                                   , emit: hist_im, optional: true
+    path '*_alignment_residuals.csv'                            , emit: alignment_residuals, optional: true
     tuple val(meta), path('*.tsv'), path('*_general_stats.csv') , emit: epicore_input
     tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), topic: versions
 
@@ -23,12 +24,14 @@ process SUMMARIZE_RESULTS {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def quantify = params.quantify ? '--quantify' : ''
+    def trafo = trafoxmls ? "--trafoxml ${trafoxmls.join(' ')}" : ''
 
     """
     summarize_results.py \\
         --input $file \\
         --out_prefix $prefix \\
         $quantify \\
+        $trafo \\
         $args
     """
 
@@ -43,6 +46,7 @@ process SUMMARIZE_RESULTS {
     touch ${prefix}_peptide_length.csv
     touch ${prefix}_peptide_intensity.csv
     touch ${prefix}_histogram_im.csv
+    touch ${prefix}_alignment_residuals.csv
     touch ${prefix}_general_stats.csv
     touch ${prefix}.tsv
     """

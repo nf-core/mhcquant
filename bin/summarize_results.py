@@ -2,9 +2,10 @@
 
 # Written by Julia Graf and released under MIT license.
 
+import os
 import pandas as pd
 import numpy as np
-from pyopenms import AASequence
+from pyopenms import AASequence, TransformationXMLFile, TransformationDescription
 from argparse import ArgumentParser
 import re
 from collections import Counter
@@ -33,6 +34,13 @@ parser.add_argument(
     "--quantify",
     action='store_true',
     help="Whether quantification is enabled or not."
+)
+
+parser.add_argument(
+    "--trafoxml",
+    nargs='*',
+    default=[],
+    help="Optional per-run trafoXML files from RT alignment, used to plot alignment residuals."
 )
 
 
@@ -241,6 +249,27 @@ def process_file(file, prefix, quantify, keep_cols):
     data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
 
 
+def write_alignment_residuals(trafoxml_paths):
+    """Write per-run RT alignment residuals for the MultiQC box plot.
+
+    For each trafoXML, the residual of a landmark pair is `to - apply(from)`: the deviation
+    of the reference RT from the fitted transformation, normalized to percent of the gradient
+    (max reference RT) so boxes are comparable across runs and LC setups. One headerless CSV
+    per run is written, so MultiQC renders one box per run.
+    """
+    for path in trafoxml_paths:
+        td = TransformationDescription()
+        TransformationXMLFile().load(path, td, True)
+        points = td.getDataPoints()
+        gradient = max((pt.second for pt in points), default=0)
+        if gradient <= 0:
+            continue
+        run = os.path.splitext(os.path.basename(path))[0]
+        with open(f"{run}_alignment_residuals.csv", "w") as f:
+            for pt in points:
+                f.write(f"{round((pt.second - td.apply(pt.first)) / gradient * 100, 5)}\n")
+
+
 def main():
     args = parser.parse_args()
     if args.columns:
@@ -251,6 +280,8 @@ def main():
                  args.out_prefix[0],
                  args.quantify,
                  cols)
+    if args.trafoxml:
+        write_alignment_residuals(args.trafoxml)
 
 
 if __name__ == '__main__':

@@ -154,6 +154,24 @@ custom_data:
       title: "Peptide Intensity Distribution"
       xlab: "log2(Intensity)"
 
+  alignment_residuals:
+    plot_type: "boxplot"
+    file_format: "csv"
+    section_name: "RT alignment residuals"
+    description: |
+      Distribution of retention time alignment residuals (reference RT − fitted RT), normalized
+      to percent of the gradient, for the landmark peptides of each run; one box per run within a
+      sample+condition group. A box centered near zero with tight whiskers indicates a run that
+      aligned well; a wide or shifted box flags a run whose retention times could not be mapped
+      cleanly onto the group reference, which can degrade downstream quantification. As a rule of
+      thumb: spread (SD/IQR) below ~0.5% of gradient is good, 0.5–1% is acceptable, and whiskers
+      approaching ~1% (the match-between-runs tolerance) warrant investigation; a non-zero median
+      suggests the linear alignment model is too simple for that run.
+    pconfig:
+      id: "alignment_residuals"
+      title: "RT alignment residuals"
+      xlab: "Residual [% of gradient]"
+
   epicore_length_distribution:
     file_format: "html"
     section_name: "Epicore length distribution"
@@ -185,6 +203,8 @@ sp:
     fn: "*_xcorr_scores.csv"
   peptide_intensity_plot:
     fn: "*_peptide_intensity.csv"
+  alignment_residuals:
+    fn: "*_alignment_residuals.csv"
   epicore_length_distribution:
     fn: "epicore_length_distribution.html"
   epicore_intensity_histogram:
