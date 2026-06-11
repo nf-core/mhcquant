@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 3.3.0dev
 
+### `Added`
+
+- Added MultiQC box plot of RT alignment residuals in the quant workflow [#462](https://github.com/nf-core/mhcquant/pull/462)
+
 ### `Fixed`
 
 - Fixed `UNTAR`, `UNZIP` and `EPICORE` version `eval` crashing on parenthesis-containing tool banners [#455](https://github.com/nf-core/mhcquant/pull/455)
