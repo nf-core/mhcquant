@@ -154,6 +154,23 @@ custom_data:
       title: "Peptide Intensity Distribution"
       xlab: "log2(Intensity)"
 
+  deeplc_rt_calibration:
+    plot_type: "boxplot"
+    file_format: "csv"
+    section_name: "DeepLC RT calibration"
+    description: |
+      Distribution of the DeepLC retention time prediction error (observed − predicted RT,
+      best model), normalized to percent of the gradient (rt_diff_best ÷ max observed RT × 100),
+      for FDR-filtered target PSMs, one box per sample+condition group. A box centered near zero
+      with tight whiskers indicates good calibration; a shifted or wide box flags groups where
+      DeepLC predictions are less reliable. As orientation, DeepLC is considered well calibrated
+      when the mean absolute error is below ~2% of the gradient (3–5% acceptable, >5% poor);
+      normalization makes these boxes directly comparable across runs and LC setups.
+    pconfig:
+      id: "deeplc_rt_calibration"
+      title: "DeepLC RT calibration"
+      xlab: "RT prediction error [% of gradient]"
+
   epicore_length_distribution:
     file_format: "html"
     section_name: "Epicore length distribution"
@@ -185,6 +202,8 @@ sp:
     fn: "*_xcorr_scores.csv"
   peptide_intensity_plot:
     fn: "*_peptide_intensity.csv"
+  deeplc_rt_calibration:
+    fn: "*_deeplc_rt_diff.csv"
   epicore_length_distribution:
     fn: "epicore_length_distribution.html"
   epicore_intensity_histogram:
