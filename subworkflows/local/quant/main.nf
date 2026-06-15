@@ -85,4 +85,5 @@ workflow QUANT {
 
     emit:
         consensusxml = PROCESS_FEATURE.out.consensusxml
+        trafoxml = MAP_ALIGNMENT.out.trafoxml
 }

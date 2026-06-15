@@ -45,4 +45,5 @@ workflow MAP_ALIGNMENT {
     emit:
         aligned_idxml = OPENMS_MAPRTTRANSFORMERIDXML.out.aligned
         aligned_mzml = OPENMS_MAPRTTRANSFORMERMZML.out.aligned
+        trafoxml = OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
 }
