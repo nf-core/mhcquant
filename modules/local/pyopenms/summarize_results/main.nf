@@ -16,6 +16,7 @@ process SUMMARIZE_RESULTS {
     path '*_peptide_length.csv'                                 , emit: lengths, optional: true
     path '*_peptide_intensity.csv'                              , emit: intensities, optional: true
     path '*_histogram_im.csv'                                   , emit: hist_im, optional: true
+    path '*_deeplc_rt_diff.csv'                                 , emit: rt_calibration, optional: true
     path '*_aligned_residuals.csv'                              , emit: aligned_residuals, optional: true
     tuple val(meta), path('*.tsv'), path('*_general_stats.csv') , emit: epicore_input
     tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), topic: versions
@@ -46,6 +47,7 @@ process SUMMARIZE_RESULTS {
     touch ${prefix}_peptide_length.csv
     touch ${prefix}_peptide_intensity.csv
     touch ${prefix}_histogram_im.csv
+    touch ${prefix}_deeplc_rt_diff.csv
     touch ${prefix}_aligned_residuals.csv
     touch ${prefix}_general_stats.csv
     touch ${prefix}.tsv

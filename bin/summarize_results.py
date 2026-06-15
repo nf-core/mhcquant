@@ -220,6 +220,16 @@ def process_file(file, prefix, quantify, keep_cols):
             header=False
         )
 
+    # DeepLC RT calibration: prediction error (observed - predicted RT, best model) as
+    # percent of the gradient (rt_diff_best / max observed RT * 100). Normalizing makes the
+    # box comparable across gradients/LC setups. Only emitted when deeplc was run.
+    if 'rt_diff_best' in data.columns and 'observed_retention_time_best' in data.columns:
+        gradient = data["observed_retention_time_best"].astype(float).max()
+        if gradient > 0:
+            (data["rt_diff_best"].astype(float) / gradient * 100).round(5).to_csv(
+                f"{prefix}_deeplc_rt_diff.csv", index=False, header=False
+            )
+
     # Add a column with unique protein accessions next to accessions
     data.insert(data.columns.get_loc('accessions') + 1, 'unique_accessions',
                 data['accessions'].map(lambda x: ';'.join(dict.fromkeys(x.split(';')))))

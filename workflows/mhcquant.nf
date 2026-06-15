@@ -234,6 +234,7 @@ workflow MHCQUANT {
         SUMMARIZE_RESULTS.out.xcorr,
         SUMMARIZE_RESULTS.out.lengths,
         SUMMARIZE_RESULTS.out.intensities,
+        SUMMARIZE_RESULTS.out.rt_calibration,
         SUMMARIZE_RESULTS.out.aligned_residuals,
         params.epicore ? EPICORE.out.stats : SUMMARIZE_RESULTS.out.epicore_input.map { meta, tsv, stats -> stats }
     )
