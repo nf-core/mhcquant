@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated to nf-core template 4.0.2 [#454](https://github.com/nf-core/mhcquant/pull/454)
 - Updated all nf-core modules to their latest versions [#454](https://github.com/nf-core/mhcquant/pull/454)
 
+### `Fixed`
+
+- Restored documented samplesheet validation errors for malformed input [#463](https://github.com/nf-core/mhcquant/pull/463)
+
 ### `Dependencies`
 
 | Dependency | Old version | New version |
