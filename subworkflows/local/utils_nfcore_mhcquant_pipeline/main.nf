@@ -103,7 +103,9 @@ workflow PIPELINE_INITIALISATION {
 
     if (inputType == 'sdrf' || inputType == 'pride_id') {
         //
-        // SDRF / PRIDE input mode: fetch SDRF, convert, download files
+        // SDRF / PRIDE input mode: fetch SDRF, convert, download files.
+        // The samplesheet is produced by a process, so it is only available as a
+        // channel and must be validated lazily inside an operator.
         //
         def sdrf_path  = (inputType == 'sdrf') ? params.input : null
         def pride_id   = (inputType == 'pride_id') ? params.input : null
@@ -115,15 +117,24 @@ workflow PIPELINE_INITIALISATION {
 
         SDRF_TO_SAMPLESHEET(sdrf_path, pride_id)
 
-        ch_samplesheet_file = SDRF_TO_SAMPLESHEET.out.samplesheet
         ch_presets_file = SDRF_TO_SAMPLESHEET.out.search_presets
+        ch_samplesheet_rows = SDRF_TO_SAMPLESHEET.out.samplesheet
+            .flatMap { samplesheet_path ->
+                samplesheetToList(samplesheet_path.toString(), "${projectDir}/assets/schema_input.json")
+            }
 
     } else {
         //
-        // Standard samplesheet input mode
+        // Standard samplesheet input mode. Content is validated up front by
+        // validateParameters() via the conditional `schema` on the input param
+        // (nextflow_schema.json), which prints the documented per-field error. Parse
+        // eagerly here too so failures abort before any process is launched, rather than
+        // surfacing as a wrapped InvocationTargetException from inside a channel operator.
         //
-        ch_samplesheet_file = channel.value(params.input)
         ch_presets_file = channel.fromPath(params.search_presets, checkIfExists: true)
+        ch_samplesheet_rows = channel.fromList(
+            samplesheetToList(params.input, "${projectDir}/assets/schema_input.json")
+        )
     }
 
     //
@@ -145,12 +156,9 @@ workflow PIPELINE_INITIALISATION {
         }
 
     //
-    // Parse samplesheet with nf-schema validation, enrich, resolve search params (shared)
+    // Enrich rows and resolve search params (shared)
     //
-    ch_samplesheet_file
-        .flatMap { samplesheet_path ->
-            samplesheetToList(samplesheet_path.toString(), "${projectDir}/assets/schema_input.json")
-        }
+    ch_samplesheet_rows
         .map { meta, file, fasta ->
             def m = meta + [sample: meta.sample.toString(), condition: meta.condition.toString()]
             [m.subMap('sample', 'condition'), m, file, fasta]
