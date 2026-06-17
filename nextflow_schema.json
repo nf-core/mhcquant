@@ -18,18 +18,8 @@
                     "description": "Input: samplesheet TSV, SDRF file (.sdrf.tsv), or PRIDE accession (PXD...)",
                     "help_text": "Accepts three input modes:\n\n1. **Samplesheet TSV** (default): Tab-separated file with columns ID, Sample, Condition, ReplicateFileName.\n2. **SDRF file** (`.sdrf.tsv`): Files are downloaded from PRIDE automatically. Requires `--fasta`.\n3. **PRIDE accession** (e.g., `PXD009752`): SDRF and raw files are fetched from PRIDE. Requires `--fasta`.",
                     "fa_icon": "fas fa-file",
-                    "allOf": [
-                        {
-                            "if": {
-                                "allOf": [{ "pattern": "\\.tsv$" }, { "not": { "pattern": "\\.sdrf\\.tsv$" } }]
-                            },
-                            "then": {
-                                "format": "file-path",
-                                "exists": true,
-                                "schema": "assets/schema_input.json"
-                            }
-                        }
-                    ]
+                    "if": { "pattern": "\\.tsv$", "not": { "pattern": "\\.sdrf\\.tsv$" } },
+                    "then": { "format": "file-path", "exists": true, "schema": "assets/schema_input.json" }
                 },
                 "outdir": {
                     "type": "string",

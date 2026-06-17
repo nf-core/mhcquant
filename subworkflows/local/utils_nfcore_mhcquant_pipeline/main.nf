@@ -103,9 +103,7 @@ workflow PIPELINE_INITIALISATION {
 
     if (inputType == 'sdrf' || inputType == 'pride_id') {
         //
-        // SDRF / PRIDE input mode: fetch SDRF, convert, download files.
-        // The samplesheet is produced by a process, so it is only available as a
-        // channel and must be validated lazily inside an operator.
+        // SDRF / PRIDE input: samplesheet is produced by a process, so validate lazily.
         //
         def sdrf_path  = (inputType == 'sdrf') ? params.input : null
         def pride_id   = (inputType == 'pride_id') ? params.input : null
@@ -125,11 +123,7 @@ workflow PIPELINE_INITIALISATION {
 
     } else {
         //
-        // Standard samplesheet input mode. Content is validated up front by
-        // validateParameters() via the conditional `schema` on the input param
-        // (nextflow_schema.json), which prints the documented per-field error. Parse
-        // eagerly here too so failures abort before any process is launched, rather than
-        // surfacing as a wrapped InvocationTargetException from inside a channel operator.
+        // Standard samplesheet: parse eagerly so validation fails fast with a documented error.
         //
         ch_presets_file = channel.fromPath(params.search_presets, checkIfExists: true)
         ch_samplesheet_rows = channel.fromList(
