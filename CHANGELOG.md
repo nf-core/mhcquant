@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - Fixed silent per-sample drop from order-dependent `combine(by:)` in QUANT [#460](https://github.com/nf-core/mhcquant/pull/460)
+- Fixed non-reproducible per-replicate column order in quantification output from unsorted `groupTuple()` [#460](https://github.com/nf-core/mhcquant/pull/460)
 
 ### `Dependencies`
 
