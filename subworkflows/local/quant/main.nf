@@ -45,9 +45,7 @@ workflow QUANT {
         // Manipulate such that [meta_run1, idxml_run1, pout_group1], [meta_run2, idxml_run2, pout_group1] ...
         ch_runs_score_switched
             .map { meta, idxml -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count) , meta, idxml] }
-            // Unwrap to the plain [id] map before combining: GroupKey.equals() is asymmetric
-            // (groupKey.equals(map)==true but map.equals(groupKey)==false), so a groupKey-vs-map combine
-            // silently drops pairs depending on operand arrival order (nextflow-io/nextflow#4104).
+            // Unwrap to plain [id] map: asymmetric GroupKey.equals() makes combine() drop pairs by arrival order (nextflow-io/nextflow#4104)
             .map { key, meta, idxml -> [key.getGroupTarget(), meta, idxml] }
             .combine(filter_q_value, by:0)
             .map { group_meta, meta, idxml, q_value -> [meta, idxml, q_value] }

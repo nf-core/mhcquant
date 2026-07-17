@@ -16,8 +16,7 @@ workflow PROCESS_FEATURE {
     OPENMS_FEATUREFINDERIDENTIFICATION(ch_runs_to_be_quantified).featurexml
         .map { meta, featurexml -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), featurexml] }
         .groupTuple()
-        // groupTuple() emits in task-arrival order, which sets the consensus map (rt_N/mz_N/intensity_N)
-        // column order. Sort by the leading run ID so per-replicate columns are reproducible across runs.
+        // Sort by run ID so consensus map column order is reproducible
         .map { key, featurexmls -> [key, featurexmls.sort { it.name.tokenize('_')[0] as int }] }
         .set { ch_featuresxmls }
 
