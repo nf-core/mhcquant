@@ -32,10 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
-| Dependency | Old version | New version |
-| ---------- | ----------- | ----------- |
-| `MultiQC`  | 1.33.0      | 1.35.0      |
-| `Nf-core`  | 3.5.1       | 4.0.2       |
+| Dependency    | Old version | New version |
+| ------------- | ----------- | ----------- |
+| `MultiQC`     | 1.33.0      | 1.35.0      |
+| `Nf-core`     | 3.5.1       | 4.0.2       |
+| `MS²Rescore`  | 3.1.5       | 3.2.1       |
 
 ## 3.2.0 - Solitude - 20/05/26
 

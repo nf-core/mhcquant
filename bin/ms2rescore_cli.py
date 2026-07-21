@@ -87,7 +87,7 @@ def rescore_idxml(input_file, output_file, config) -> None:
     peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids)
 
     # Write
-    writer = IdXMLWriter(output_file, reader.protein_ids, peptide_ids_filtered)
+    writer = IdXMLWriter(output_file, protein_ids=reader.protein_ids, peptide_ids=peptide_ids_filtered)
     writer.write_file(psm_list)
 
 
