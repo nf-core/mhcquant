@@ -89,12 +89,13 @@ workflow QUANT {
 
         // Project-level fan-in: one qpx/quantms.io dataset across all Sample+Condition groups, not per-group
         if (params.qpx_out) {
-            ch_cxml = PROCESS_FEATURE.out.consensusxml.map { _meta, cxml -> cxml }.collect()
-            // ch_accession is a value channel (DataflowVariable), not a String - combine it, never string-interpolate it
-            ch_qpx_in = ch_cxml
+            // ch_accession is a value channel (DataflowVariable), not a String - combine it, never string-interpolate it.
+            // .collect() emits one list of every group's consensusXML, and .combine() flattens that list into the
+            // tuple, so each row is [cxml1, .., cxmlN, sdrf, accession] - slice by position to stay N-group safe.
+            ch_qpx_in = PROCESS_FEATURE.out.consensusxml.map { _meta, cxml -> cxml }.collect()
                 .combine( ch_sdrf.map { _m, f -> f } )
                 .combine( ch_accession )
-                .map { cxmls, sdrf_file, acc -> [ [id: acc], cxmls, sdrf_file, acc ] }
+                .map { row -> [ [id: row[-1]], row[0..-3], row[-2], row[-1] ] }
             QPX_EXPORT( ch_qpx_in )
         }
 
