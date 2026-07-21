@@ -63,6 +63,8 @@ workflow SDRF_TO_SAMPLESHEET {
     emit:
     samplesheet    = ch_samplesheet_file                                                       // path: samplesheet.tsv with local file paths
     search_presets = PARSESDRF_CONVERT.out.mhcquant.map { _meta, _samplesheet, presets -> presets }  // path: search_presets.tsv
+    sdrf           = ch_sdrf                                                                    // channel: [ meta, sdrf_file ]
+    accession      = resolved_accession                                                         //    val: resolved PRIDE accession
 }
 
 /*

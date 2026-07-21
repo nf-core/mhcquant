@@ -55,6 +55,8 @@ workflow MHCQUANT {
     take:
     ch_samplesheet // channel: samplesheet read in from --input
     ch_fasta       // channel: reference database read in from --fasta
+    ch_sdrf        // channel: raw SDRF file, empty for plain samplesheet input
+    ch_accession   //    val: resolved PRIDE accession, '' for plain samplesheet input
     multiqc_config
     multiqc_logo
     multiqc_methods_description
