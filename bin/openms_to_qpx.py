@@ -112,7 +112,7 @@ def rows_from_consensusxml(path: str) -> tuple:
             scan=scan_numbers(pid),
             rt=float(pid.getRT()),
             additional_scores=[
-                {"score_name": pid.getScoreType(), "score_value": float(hit.getScore()), "higher_better": False}
+                {"score_name": pid.getScoreType(), "score_value": float(hit.getScore()), "higher_better": pid.isHigherScoreBetter()}
             ],
         )
 

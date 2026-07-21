@@ -1,4 +1,6 @@
 process QPX_EXPORT {
+    tag "${meta.id}"
+    label 'process_single'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -11,6 +13,9 @@ process QPX_EXPORT {
     output:
     path 'qpx/**'                                                    , emit: qpx
     tuple val("${task.process}"), val('qpx'), eval("qpxc --version | cut -d' ' -f2"), topic: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     """
