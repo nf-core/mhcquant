@@ -101,6 +101,10 @@ workflow PIPELINE_INITIALISATION {
     //
     def inputType = detectInputType(params.input)
 
+    if (params.qpx_out && (!params.quantify || !(inputType in ['sdrf', 'pride_id']))) {
+        error("--qpx_out requires both --quantify and an SDRF/PRIDE input (--input <SDRF file> or PXD accession).")
+    }
+
     if (inputType == 'sdrf' || inputType == 'pride_id') {
         //
         // SDRF / PRIDE input: samplesheet is produced by a process, so validate lazily.
