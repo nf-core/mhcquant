@@ -177,7 +177,7 @@ workflow MHCQUANT {
     // SUBWORKFLOW: QUANT
     //
     if (params.quantify) {
-        QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
+        QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file, ch_sdrf, ch_accession)
         ch_output = QUANT.out.consensusxml.mix(RESCORE.out.fdr_filtered_empty)
     } else {
         ch_output = RESCORE.out.fdr_filtered.mix(RESCORE.out.fdr_filtered_empty)

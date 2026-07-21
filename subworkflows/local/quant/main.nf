@@ -10,6 +10,7 @@ include { OPENMS_IDSCORESWITCHER                   } from '../../../modules/nf-c
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_QUANT } from '../../../modules/nf-core/openms/idfilter/main'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../../modules/nf-core/openms/idmerger/main'
 include { OPENMS_MZTABEXPORTER                     } from '../../../modules/local/openms/mztabexporter'
+include { QPX_EXPORT                               } from '../../../modules/local/qpx/export'
 
 include { MAP_ALIGNMENT                            } from '../map_alignment'
 include { PROCESS_FEATURE                          } from '../process_feature'
@@ -20,6 +21,8 @@ workflow QUANT {
         merged_pout
         filter_q_value
         mzml
+        ch_sdrf
+        ch_accession
 
     main:
         // Split post-percolator idXML files and manipulate such that we end up with [meta_run1, idxml_run1] [meta_run2, idxml_run2] ...
@@ -83,6 +86,17 @@ workflow QUANT {
         PROCESS_FEATURE ( ch_runs_to_be_quantified )
 
         OPENMS_MZTABEXPORTER(PROCESS_FEATURE.out.consensusxml)
+
+        // Project-level fan-in: one qpx/quantms.io dataset across all Sample+Condition groups, not per-group
+        if (params.qpx_out) {
+            ch_cxml = PROCESS_FEATURE.out.consensusxml.map { _meta, cxml -> cxml }.collect()
+            // ch_accession is a value channel (DataflowVariable), not a String - combine it, never string-interpolate it
+            ch_qpx_in = ch_cxml
+                .combine( ch_sdrf.map { _m, f -> f } )
+                .combine( ch_accession )
+                .map { cxmls, sdrf_file, acc -> [ [id: acc], cxmls, sdrf_file, acc ] }
+            QPX_EXPORT( ch_qpx_in )
+        }
 
     emit:
         consensusxml = PROCESS_FEATURE.out.consensusxml
