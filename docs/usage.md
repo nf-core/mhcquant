@@ -181,6 +181,21 @@ When quantification is enabled, the pipeline performs retention time alignment a
 
 The quantification workflow produces a ConsensusXML file containing integrated peak areas for identified peptides across all samples.
 
+### qpx / quantms.io export
+
+With `--qpx_out`, the pipeline emits a validated [qpx / quantms.io](https://quantms.org) dataset (peptide-level `psm` and `feature` parquet tables plus SDRF-derived metadata) so results plug into the bigbio/quantms ecosystem. It requires `--quantify` and an [SDRF](#input-modes) input, which supplies the per-run sample metadata:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'PXD000000.sdrf.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --quantify \
+    --qpx_out \
+    -profile docker
+```
+
+A single project-level dataset is written to `qpx/<accession>.{psm,feature,sample,run,ontology,provenance,dataset}.parquet`.
+
 ## Spectrum Library Generation
 
 The pipeline can generate spectrum libraries suitable for DIA-based searches using the `--generate_speclib` parameter:
