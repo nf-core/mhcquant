@@ -12,6 +12,18 @@
                 "OPENMS_DECOYDATABASE": {
                     "openms": "3.5.0"
                 },
+                "OPENMS_FEATUREFINDERIDENTIFICATION": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_FILECONVERTER": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_IDCONFLICTRESOLVER": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_IDFILTER_QUANT": {
+                    "openms": "3.5.0"
+                },
                 "OPENMS_IDFILTER_Q_VALUE": {
                     "openms": "3.5.0"
                 },
@@ -19,6 +31,27 @@
                     "openms": "3.4.1"
                 },
                 "OPENMS_IDMERGER": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_IDMERGER_QUANT": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_IDRIPPER": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_IDSCORESWITCHER": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_MAPALIGNERIDENTIFICATION": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_MAPRTTRANSFORMERIDXML": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_MAPRTTRANSFORMERMZML": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_MZTABEXPORTER": {
                     "openms": "3.5.0"
                 },
                 "OPENMS_PEPTIDEINDEXER": {
@@ -43,6 +76,9 @@
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
                 },
+                "QPX_EXPORT": {
+                    "qpx": "1.0.2"
+                },
                 "SUMMARIZE_RESULTS": {
                     "pyopenms": "3.4.1"
                 },
@@ -55,13 +91,18 @@
             },
             [
                 "intermediate_results",
+                "intermediate_results/alignment",
+                "intermediate_results/alignment/IP_lung_1T_060317_1.trafoXML",
                 "intermediate_results/comet",
                 "intermediate_results/comet/IP_lung_1T_060317_1_pin.tsv",
+                "intermediate_results/features",
+                "intermediate_results/features/1_lc2_1.featureXML",
                 "intermediate_results/rescoring",
                 "intermediate_results/rescoring/lc2_1_ms2rescore.idXML",
                 "intermediate_results/rescoring/lc2_1_pout.idXML",
                 "intermediate_results/rescoring/lc2_1_pout_filtered.idXML",
                 "intermediate_results/rescoring/lc2_1_psm.idXML",
+                "lc2_1.mzTab",
                 "lc2_1.tsv",
                 "multiqc",
                 "multiqc/ms2rescore",
@@ -69,6 +110,7 @@
                 "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_aligned_residuals.txt",
                 "multiqc/multiqc_data/multiqc_chromatogram.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
                 "multiqc/multiqc_data/multiqc_data.json",
@@ -79,6 +121,7 @@
                 "multiqc/multiqc_data/multiqc_histogram_scores.txt",
                 "multiqc/multiqc_data/multiqc_length_dist.txt",
                 "multiqc/multiqc_data/multiqc_mass_error.txt",
+                "multiqc/multiqc_data/multiqc_peptide_intensity.txt",
                 "multiqc/multiqc_data/multiqc_percolator_barplot.txt",
                 "multiqc/multiqc_data/multiqc_scores_xcorr.txt",
                 "multiqc/multiqc_data/multiqc_software_versions.txt",
@@ -86,6 +129,7 @@
                 "multiqc/multiqc_data/percolator_plot.txt",
                 "multiqc/multiqc_plots",
                 "multiqc/multiqc_plots/pdf",
+                "multiqc/multiqc_plots/pdf/aligned_residuals.pdf",
                 "multiqc/multiqc_plots/pdf/chromatogram-cnt.pdf",
                 "multiqc/multiqc_plots/pdf/chromatogram-log.pdf",
                 "multiqc/multiqc_plots/pdf/deeplc_rt_calibration.pdf",
@@ -95,10 +139,12 @@
                 "multiqc/multiqc_plots/pdf/histogram_scores.pdf",
                 "multiqc/multiqc_plots/pdf/length_dist.pdf",
                 "multiqc/multiqc_plots/pdf/mass_error.pdf",
+                "multiqc/multiqc_plots/pdf/peptide_intensity.pdf",
                 "multiqc/multiqc_plots/pdf/percolator_plot-cnt.pdf",
                 "multiqc/multiqc_plots/pdf/percolator_plot-pct.pdf",
                 "multiqc/multiqc_plots/pdf/scores_xcorr.pdf",
                 "multiqc/multiqc_plots/png",
+                "multiqc/multiqc_plots/png/aligned_residuals.png",
                 "multiqc/multiqc_plots/png/chromatogram-cnt.png",
                 "multiqc/multiqc_plots/png/chromatogram-log.png",
                 "multiqc/multiqc_plots/png/deeplc_rt_calibration.png",
@@ -108,10 +154,12 @@
                 "multiqc/multiqc_plots/png/histogram_scores.png",
                 "multiqc/multiqc_plots/png/length_dist.png",
                 "multiqc/multiqc_plots/png/mass_error.png",
+                "multiqc/multiqc_plots/png/peptide_intensity.png",
                 "multiqc/multiqc_plots/png/percolator_plot-cnt.png",
                 "multiqc/multiqc_plots/png/percolator_plot-pct.png",
                 "multiqc/multiqc_plots/png/scores_xcorr.png",
                 "multiqc/multiqc_plots/svg",
+                "multiqc/multiqc_plots/svg/aligned_residuals.svg",
                 "multiqc/multiqc_plots/svg/chromatogram-cnt.svg",
                 "multiqc/multiqc_plots/svg/chromatogram-log.svg",
                 "multiqc/multiqc_plots/svg/deeplc_rt_calibration.svg",
@@ -121,17 +169,29 @@
                 "multiqc/multiqc_plots/svg/histogram_scores.svg",
                 "multiqc/multiqc_plots/svg/length_dist.svg",
                 "multiqc/multiqc_plots/svg/mass_error.svg",
+                "multiqc/multiqc_plots/svg/peptide_intensity.svg",
                 "multiqc/multiqc_plots/svg/percolator_plot-cnt.svg",
                 "multiqc/multiqc_plots/svg/percolator_plot-pct.svg",
                 "multiqc/multiqc_plots/svg/scores_xcorr.svg",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml",
+                "qpx",
+                "qpx/PXD009752.dataset.parquet",
+                "qpx/PXD009752.feature.parquet",
+                "qpx/PXD009752.ontology.parquet",
+                "qpx/PXD009752.provenance.parquet",
+                "qpx/PXD009752.psm.parquet",
+                "qpx/PXD009752.run.parquet",
+                "qpx/PXD009752.sample.parquet",
                 "sdrf",
                 "sdrf/PXD009752_presets.tsv",
                 "sdrf/PXD009752_samplesheet.tsv"
             ],
             [
+                "IP_lung_1T_060317_1.trafoXML:md5,e9d83810baeb6e78d6c80c60b998efaa",
+                "1_lc2_1.featureXML:md5,9e1f49a53f3d7f6abdcaebdd8899eb96",
+                "lc2_1.mzTab:md5,98a76f6e59def39221e545be94e17d1a",
                 "PXD009752_presets.tsv:md5,3ba3b5c24f71025bfc1799ea87cd0a12",
                 "PXD009752_samplesheet.tsv:md5,4d7d2f1ca8d3def75b05ae8c01c481d8"
             ],
@@ -140,12 +200,17 @@
                     "lc2_1.tsv",
                     [
                         "AEDGLKHEY",
+                        "AEDGLKHEY",
                         "AEDKENYKKF",
+                        "AEDKENYKKF",
+                        "AEDKENYKKFY",
                         "AEDKENYKKFY",
                         "AEGTLSKKL",
                         "AEKELHEKF",
                         "ATAQFKINKK",
+                        "ATAQFKINKK",
                         "ATEQPLTAK",
+                        "ATEQPLTAKK",
                         "ATEQPLTAKK",
                         "ATFPGMWER",
                         "ATNKITIIFK",
@@ -154,6 +219,8 @@
                         "AVIQVSQIVAR",
                         "AVQEFGLAR",
                         "AVQEFGLARFK",
+                        "AVQEFGLARFK",
+                        "AVSEGTKAVTK",
                         "AVSEGTKAVTK",
                         "AVTDQTVSK",
                         "AVTKYTSSK",
@@ -163,8 +230,10 @@
                         "EEDPNTHILY",
                         "EEIEILLRY",
                         "EELQKIYKTY",
+                        "EELQKIYKTY",
                         "EERVINEEY",
                         "EETPVVLQL",
+                        "EEVPKRKW",
                         "EEVPKRKW",
                         "EILKWYLNK",
                         "FPAGKVPAF",
@@ -175,11 +244,15 @@
                         "GSLGFTVTK",
                         "GSQAGGSQTLK",
                         "GSSPEQVVRPK",
+                        "GSSPEQVVRPK",
+                        "GSYNKVFLAK",
                         "GSYNKVFLAK",
                         "GTFLEGVAK",
                         "GTIHAGQPVK",
                         "GTNVNMPVSK",
                         "GTVDKKMVEK",
+                        "GTVDKKMVEK",
+                        "GTVTPPPRLVK",
                         "GTVTPPPRLVK",
                         "HFDPEVVQI",
                         "HPDTGISSKAM",
@@ -191,12 +264,14 @@
                         "IVADHVASY",
                         "IYLPYLHEW",
                         "KAFNQGKIFK",
+                        "KAFNQGKIFK",
                         "KEIFLRELI",
                         "KEIPN(Deamidated)FPTL",
                         "KPITTGGVTY",
                         "KSFDTSLIRK",
                         "KVLHFFNVK",
                         "KYLADLPTL",
+                        "KYVKVFHKF",
                         "KYVKVFHKF",
                         "LPAKDIQTNVY",
                         "LPALLEKNAM",
@@ -221,7 +296,10 @@
                         "QPFREAIAL",
                         "QPWEEIKTSY",
                         "RILFFNTPK",
+                        "RILFFNTPK",
                         "RTLQQMLLK",
+                        "RTLQQMLLK",
+                        "RVLDVTKKK",
                         "RVLDVTKKK",
                         "RYGPQFTL",
                         "RYIRDAHTF",
@@ -234,6 +312,8 @@
                         "SEIAQKQKL",
                         "SELAEDKENY",
                         "SEN(Deamidated)ELKKAY",
+                        "SEN(Deamidated)ELKKAY",
+                        "SENELKKAY",
                         "SENELKKAY",
                         "SFSPKTYSF",
                         "SGSSYLNTVQK",
@@ -243,19 +323,23 @@
                         "SSADGSQPPK",
                         "SSIQGQWPK",
                         "SSLYIILKK",
+                        "SSLYIILKK",
                         "STDERAYQR",
                         "STEKIYIRK",
                         "STLAVTSQK",
                         "STMGYMMAK",
                         "STMGYMMAKK",
+                        "STMGYMMAKK",
                         "SVAELRSQK",
                         "SVIVQPFSK",
+                        "SVPREPIDRK",
                         "SVPREPIDRK",
                         "SVSQPVAQK",
                         "SYGSVFKAI",
                         "SYIAAISARF",
                         "SYQRAFNEF",
                         "TAADTAVYY",
+                        "TEHYDIPKVSW",
                         "TEHYDIPKVSW",
                         "TENKERKSF",
                         "TFMDRGFVF",
@@ -265,16 +349,20 @@
                         "TVSETFMSK",
                         "TYIDKSTQL",
                         "TYNKVLHFF",
+                        "TYNKVLHFF",
                         "VPPVFVVSY",
                         "VPSPAQIMY",
                         "VPVEEQEEF",
                         "VSEGTKAVTK",
                         "VTQSEIAQK",
                         "VTQSEIAQKQK",
+                        "VTQSEIAQKQK",
                         "VVQEPGQVFK",
                         "VWSDVTPLTF",
                         "VYEGPELNHAF",
                         "VYIKHPVSL",
+                        "VYIKHPVSL",
+                        "VYNKVHITL",
                         "VYNKVHITL",
                         "YIKHPVSL",
                         "YYDVAKQLL",
@@ -283,7 +371,7 @@
                 ]
             ]
         ],
-        "timestamp": "2026-06-11T12:35:15.842389067",
+        "timestamp": "2026-07-21T19:57:52.750597051",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
