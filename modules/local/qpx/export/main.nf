@@ -10,7 +10,7 @@ process QPX_EXPORT {
 
     output:
     path 'qpx/**'                                                    , emit: qpx
-    tuple val("${task.process}"), val('qpx'), eval("qpxc --version"), topic: versions
+    tuple val("${task.process}"), val('qpx'), eval("qpxc --version | cut -d' ' -f2"), topic: versions
 
     script:
     """
@@ -23,6 +23,7 @@ process QPX_EXPORT {
         --qpx-dir core/ \\
         --sdrf-file ${sdrf} \\
         --project-accession ${accession} \\
+        --output-prefix ${accession} \\
         --output-folder qpx/
 
     qpxc validate --dataset-path qpx/
