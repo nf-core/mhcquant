@@ -37,9 +37,6 @@ process QPX_EXPORT {
     stub:
     """
     mkdir -p qpx
-    touch qpx/${accession}.psm.parquet
-    touch qpx/${accession}.feature.parquet
-    touch qpx/${accession}.sdrf.tsv
-    touch qpx/${accession}-project.json
+    touch qpx/${accession}.{psm,feature,sample,run,ontology,provenance,dataset}.parquet
     """
 }

@@ -15,7 +15,8 @@ from qpx.writers import FeatureWriter, PsmWriter
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-RAW_FILE_EXTENSIONS = (".mzML", ".mzml", ".raw", ".RAW")
+# Longest/most-specific suffixes first so e.g. ".d.tar.gz" strips fully instead of stopping at ".d".
+RUN_FILE_EXTENSIONS = (".mzML.gz", ".d.tar.gz", ".d.zip", ".d.tar", ".featureXML", ".mzML", ".mzml", ".raw", ".RAW", ".d")
 PSM_DEDUP_KEYS = ["sequence", "charge", "run_file_name"]
 
 
@@ -45,7 +46,7 @@ def parse_arguments() -> argparse.Namespace:
 def normalize_run_name(filename: str) -> str:
     """qpx run_file_name is the raw data file stem; strip mhcquant's _cleaned/_aligned preprocessing suffixes to match the SDRF."""
     name = filename.rsplit("/", 1)[-1]
-    for ext in RAW_FILE_EXTENSIONS:
+    for ext in RUN_FILE_EXTENSIONS:
         if name.endswith(ext):
             name = name[: -len(ext)]
             break
@@ -161,6 +162,12 @@ def dedup_psm(rows: list) -> pd.DataFrame:
     return df.assign(_scan=scan_key).drop_duplicates(subset=[*PSM_DEDUP_KEYS, "_scan"]).drop(columns="_scan")
 
 
+def count_empty_run_names(df: pd.DataFrame) -> int:
+    if df.empty or "run_file_name" not in df.columns:
+        return 0
+    return int((df["run_file_name"] == "").sum())
+
+
 def reindex_and_write(df: pd.DataFrame, writer) -> int:
     """qpx writers do pa.Table.from_pandas(df, schema=...): every schema column must be present, so fill missing optional ones with None."""
     for column in writer.arrow_schema.names:
@@ -184,6 +191,13 @@ def main():
 
     psm_df = pd.concat(psm_frames, ignore_index=True) if psm_frames else pd.DataFrame()
     feature_df = pd.DataFrame(feature_rows)
+
+    n_empty = count_empty_run_names(psm_df) + count_empty_run_names(feature_df)
+    if n_empty:
+        raise SystemExit(
+            f"could not resolve run_file_name for {n_empty} rows; column headers empty and primaryMSRunPath "
+            "unavailable -- the qpx run/sample join would silently break"
+        )
 
     if psm_df.empty:
         logger.warning("No identified PSMs in any input consensusXML; writing empty psm/feature parquet.")

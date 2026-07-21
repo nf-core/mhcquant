@@ -11,4 +11,5 @@ intermediate_results/rescoring/*
 intermediate_results/ion_annotations/*
 global_fdr/global.tsv
 spectrum_library/*_speclib.tsv
+qpx/*.parquet
 *.tsv
