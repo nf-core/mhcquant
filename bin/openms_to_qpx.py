@@ -85,6 +85,18 @@ def rows_from_consensusxml(path: str) -> tuple:
     cm = oms.ConsensusMap()
     oms.ConsensusXMLFile().load(path, cm)
     run_by_map_index = {idx: normalize_run_name(header.filename) for idx, header in cm.getColumnHeaders().items()}
+    if any(not name for name in run_by_map_index.values()):
+        # mhcquant single-run consensus leaves the column header filename empty; the run name is in primaryMSRunPath
+        primary_runs = []
+        for protein_id in cm.getProteinIdentifications():
+            paths = []
+            protein_id.getPrimaryMSRunPath(paths)
+            primary_runs = [normalize_run_name(p.decode() if isinstance(p, bytes) else p) for p in paths]
+            if primary_runs:
+                break
+        for idx in sorted(run_by_map_index):
+            if not run_by_map_index[idx]:
+                run_by_map_index[idx] = primary_runs[idx] if idx < len(primary_runs) else (primary_runs[0] if primary_runs else "")
 
     psm_rows, feature_rows = [], []
     for cf in cm:
@@ -102,6 +114,14 @@ def rows_from_consensusxml(path: str) -> tuple:
         feature_handles = cf.getFeatureList()
         id_run = run_by_map_index.get(feature_handles[0].getMapIndex(), "NA") if feature_handles else "NA"
 
+        additional_scores = [
+            {"score_name": pid.getScoreType(), "score_value": float(hit.getScore()), "higher_better": pid.isHigherScoreBetter()}
+        ]
+        if hit.metaValueExists("q-value"):
+            additional_scores.append(
+                {"score_name": "q-value", "score_value": float(hit.getMetaValue("q-value")), "higher_better": False}
+            )
+
         base = dict(
             sequence=sequence.toUnmodifiedString(),
             peptidoform=to_proforma(sequence),
@@ -111,10 +131,10 @@ def rows_from_consensusxml(path: str) -> tuple:
             observed_mz=float(pid.getMZ()),
             scan=scan_numbers(pid),
             rt=float(pid.getRT()),
-            additional_scores=[
-                {"score_name": pid.getScoreType(), "score_value": float(hit.getScore()), "higher_better": pid.isHigherScoreBetter()}
-            ],
+            additional_scores=additional_scores,
         )
+        if hit.metaValueExists("MS:1001493"):
+            base["posterior_error_probability"] = float(hit.getMetaValue("MS:1001493"))
 
         psm_rows.append({**base, "run_file_name": id_run, "protein_accessions": protein_accessions or [anchor_protein]})
 
