@@ -1,8 +1,7 @@
 lint:
   files_unchanged:
-    - .github/CONTRIBUTING.md
     - .vscode/settings.json
-nf_core_version: 4.0.2
+nf_core_version: 4.0.3
 repository_type: pipeline
 template:
   author: Jonas Scheid, Steffen Lemke, Leon Bichmann, Marissa Dubbelaar
@@ -15,4 +14,4 @@ template:
   skip_features:
     - fastqc
     - igenomes
-  version: 3.2.0dev
+  version: 3.2.0
