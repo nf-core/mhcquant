@@ -18,6 +18,24 @@ nextflow_pipeline {
             // stable_content: All files in ${params.outdir}/ with stable content
             def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             assert workflow.success
+            // Extract peptidoform column from all TSV files
+            def peptidoform_data = []
+            new File(params.outdir).eachFileRecurse { file ->
+                if (file.name.endsWith('.tsv')) {
+                    def lines = file.readLines()
+                    if (lines.size() > 0) {
+                        def header = lines[0].split('\t')
+                        def peptidoformIndex = header.findIndexOf { it == 'peptidoform' }
+                        if (peptidoformIndex >= 0) {
+                            def peptidoforms = lines.drop(1).collect { line ->
+                                def fields = line.split('\t')
+                                fields.size() > peptidoformIndex ? fields[peptidoformIndex] : ''
+                            }.findAll { it != '' }.sort()
+                            peptidoform_data.add([file.name, peptidoforms])
+                        }
+                    }
+                }
+            }
             assertAll(
                 { assert snapshot(
                     // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
@@ -25,7 +43,9 @@ nextflow_pipeline {
                     // All stable path name, with a relative path
                     stable_path,
                     // All files with stable contents
-                    stable_content
+                    stable_content,
+                    // Peptidoform data from TSV files
+                    peptidoform_data
                 ).match() }
             )
         }

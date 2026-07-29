@@ -1,0 +1,45 @@
+process EASYPQP_LIBRARY {
+    tag "$meta.id"
+    label 'process_single'
+
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/easypqp:0.1.57--pyhdfd78af_1' :
+        'biocontainers/easypqp:0.1.57--pyhdfd78af_1' }"
+
+    input:
+    tuple val(meta), path(psmpkl), path(peakpkl)
+
+    output:
+    tuple val(meta), path("*.tsv") , emit: tsv
+    tuple val("${task.process}"), val('easypqp'), eval("easypqp --version 2>&1 | grep -oP '(?<=easypqp, version )\\d+\\.\\d+\\.\\d+'"), topic: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
+    """
+    export MPLCONFIGDIR=/tmp/matplotlib
+    export XDG_CACHE_HOME=/tmp/fontconfig-cache
+    mkdir -p \$MPLCONFIGDIR \$XDG_CACHE_HOME
+
+    easypqp library \
+        --out ${prefix}_speclib.tsv \
+        $args \
+        $psmpkl $peakpkl
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
+    """
+    export MPLCONFIGDIR=/tmp/matplotlib
+    export XDG_CACHE_HOME=/tmp/fontconfig-cache
+    mkdir -p \$MPLCONFIGDIR \$XDG_CACHE_HOME
+
+    touch "${prefix}_speclib.tsv"
+    """
+}

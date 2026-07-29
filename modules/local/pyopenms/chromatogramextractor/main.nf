@@ -1,0 +1,36 @@
+process PYOPENMS_CHROMATOGRAMEXTRACTOR {
+    tag "$meta.id"
+    label 'process_low'
+
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/pyopenms:3.4.1--py312h6b06db6_2' :
+        'biocontainers/pyopenms:3.4.1--py312h6b06db6_2' }"
+
+    input:
+    tuple val(meta), path(mzml)
+
+    output:
+    tuple val(meta), path("*.csv")  , emit: csv
+    tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), topic: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args   = task.ext.args  ?: ''
+    def prefix = task.ext.prefix ?: "${mzml.baseName}"
+
+    """
+    chromatogram_extractor.py \\
+        -in $mzml \\
+        -out ${prefix}_chrom.csv \\
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${mzml.baseName}"
+
+    """
+    touch ${prefix}_chrom.csv
+    """
+}

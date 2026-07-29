@@ -15,7 +15,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { MHCQUANT  } from './workflows/mhcquant'
+include { MHCQUANT                } from './workflows/mhcquant'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_mhcquant_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_mhcquant_pipeline'
 /*
@@ -31,6 +31,7 @@ workflow NFCORE_MHCQUANT {
 
     take:
     samplesheet // channel: samplesheet read in from --input
+    fasta       // channel: reference database read in from --fasta
 
     main:
 
@@ -39,6 +40,7 @@ workflow NFCORE_MHCQUANT {
     //
     MHCQUANT (
         samplesheet,
+        fasta,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,
@@ -75,7 +77,8 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_MHCQUANT (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.fasta
     )
     //
     // SUBWORKFLOW: Run completion tasks

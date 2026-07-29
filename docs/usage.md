@@ -4,60 +4,270 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
-## Introduction
+## Input modes
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+The `--input` parameter accepts three formats:
+
+| Mode                | Example                       | Description                                                                                                                                                                                                                                                                                                                      |
+| ------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Samplesheet TSV** | `--input samplesheet.tsv`     | A local TSV file listing your MS runs (see [Samplesheet input](#samplesheet-input)).                                                                                                                                                                                                                                             |
+| **SDRF file**       | `--input experiment.sdrf.tsv` | A local [SDRF-Proteomics](https://github.com/bigbio/proteomics-sample-metadata) file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates). Raw files are fetched from PRIDE, search settings and sample metadata are parsed from the SDRF. Requires `--fasta`. |
+| **PRIDE accession** | `--input PXD009752`           | A PRIDE project accession. The project must include an SDRF file following the [immunopeptidomics template](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates); both the SDRF and raw files are fetched from PRIDE. Requires `--fasta`.                                                                 |
+
+For the SDRF and PRIDE accession modes, the pipeline uses [sdrf-pipelines](https://github.com/bigbio/sdrf-pipelines) to translate the SDRF into an mhcquant samplesheet and a search-preset table, then downloads the raw files with [pridepy](https://github.com/bigbio/py-pride-archive-client). The generated samplesheet and presets are published under `<outdir>/sdrf/` for transparency.
+
+> [!NOTE]
+> SDRF files must follow the immunopeptidomics template from [bigbio/proteomics-sample-metadata](https://github.com/bigbio/proteomics-sample-metadata/tree/master/templates), and PRIDE accessions must point to a project that contains such an SDRF file — otherwise sample metadata and search parameters cannot be derived. When providing a local `.sdrf.tsv`, the PRIDE accession is inferred from the filename (e.g. `PXD009752.sdrf.tsv`); if your SDRF is named differently, pass the accession via `--input PXD...` instead.
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a tab-separated file with at least four columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
+### Samplesheet columns
+
+| Column              | Required | Description                                                                                           |
+| ------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `ID`                | Yes      | An incrementing value which acts as a unique number for the given sample                              |
+| `Sample`            | Yes      | Custom sample name. This entry will be identical for multiple MS runs from the same sample.           |
+| `Condition`         | Yes      | Additional information of the sample can be defined here.                                             |
+| `ReplicateFileName` | Yes      | Full path to the MS file. These files have the extensions .raw, .mzML, mzML.gz, .d, .d.tar.gz, .d.zip |
+| `Fasta`             | No       | Full path to the FASTA file. These files have the extensions .fasta, .fa, .fas, .fna, .faa, .ffn      |
+| `SearchPreset`      | No       | Name of a search parameter preset (see [Search presets](#search-presets))                             |
+
+> [!NOTE]
+> The `Fasta` column is optional, but you can use it to provide sample-specific FASTA files. If you want to use the same FASTA file for all samples, provide it via the `--fasta` parameter. Please ensure you use one of these options.
+
+The pipeline will auto-detect whether a sample is either in mzML, raw or tdf file format using the information provided in the samplesheet.
+
+An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
+
 ### Multiple runs of the same sample
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+MS runs are merged on the `Sample` and `Condition` identifier combination before they are rescored with `Percolator`. Typically technical replicates of a sample are merged together to report one peptide list per sample. Below is an example of two runs from a treated and untreated tumor sample.
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+```tsv title="samplesheet.tsv
+ID	Sample	Condition	ReplicateFileName
+1	tumor	treated	/path/to/msrun1.raw|mzML|d
+2	tumor	treated	/path/to/msrun2.raw|mzML|d
+3	tumor	untreated	/path/to/msrun3.raw|mzML|d
+4	tumor	untreated	/path/to/msrun4.raw|mzML|d
+5	control	treated	/path/to/msrun5.raw|mzML|d
+6	control	treated	/path/to/msrun6.raw|mzML|d
+7	control	untreated	/path/to/msrun7.raw|mzML|d
+8	control	untreated	/path/to/msrun8.raw|mzML|d
 ```
 
-### Full samplesheet
+### Search presets
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+When processing data from different instruments or MHC classes in a single run, you can use the `SearchPreset` column to assign a named set of search parameters to each sample. This avoids having to specify each parameter individually per row.
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+Available presets:
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+| Preset           | Instrument            | MHC Class | Peptide Length | Mass Range | Charge | Precursor Tol. | Fragment Tol. | MS2PIP Model |
+| ---------------- | --------------------- | --------- | -------------- | ---------- | ------ | -------------- | ------------- | ------------ |
+| `lumos_class1`   | Orbitrap Fusion Lumos | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `lumos_class2`   | Orbitrap Fusion Lumos | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `qe_class1`      | Q Exactive            | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `qe_class2`      | Q Exactive            | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.01 Da       | Immuno-HCD   |
+| `timstof_class1` | timsTOF               | I         | 8-14           | 800:2500   | 1:4    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `timstof_class2` | timsTOF               | II        | 8-30           | 800:5000   | 1:5    | 20 ppm         | 0.01 Da       | timsTOF      |
+| `xl_class1`      | LTQ Orbitrap XL       | I         | 8-14           | 800:2500   | 2:3    | 5 ppm          | 0.50025 Da    | CIDch2       |
+| `xl_class2`      | LTQ Orbitrap XL       | II        | 8-30           | 800:5000   | 2:5    | 5 ppm          | 0.50025 Da    | CIDch2       |
+
+Example samplesheet with presets:
+
+```tsv title="samplesheet.tsv"
+ID	Sample	Condition	ReplicateFileName	SearchPreset
+1	lumos_sample	A	/path/to/lumos_run1.raw	lumos_class1
+2	lumos_sample	A	/path/to/lumos_run2.raw	lumos_class1
+3	timstof_sample	B	/path/to/timstof_run1.d	timstof_class2
+4	timstof_sample	B	/path/to/timstof_run2.d	timstof_class2
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+### Parameter precedence
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+When a samplesheet row sets `SearchPreset`, the preset's values are sealed in for that row's search — they cannot be overridden by `--<param>` on the CLI, by `-params-file`, or by `-c`. The following keys are sealed by the preset:
+
+`instrument`, `activation_method`, `digest_mass_range`, `prec_charge`, `precursor_mass_tolerance`, `precursor_error_units`, `fragment_mass_tolerance`, `fragment_bin_offset`, `number_mods`, `ms2pip_model`, `peptide_min_length`, `peptide_max_length`, `fixed_mods`, `variable_mods`.
+
+Rows that do **not** set `SearchPreset` resolve every key from the global Nextflow parameters (CLI > `-params-file` > `nextflow.config` defaults), exactly as in earlier releases.
+
+If you want to deviate from a built-in preset for a one-off run, either:
+
+1. Leave `SearchPreset` empty on the relevant rows and pass the values via `--<param>` / `-params-file` / a custom config; or
+2. Add a custom row to your own search-presets TSV (see `--search_presets`) and reference it by name from `SearchPreset`.
+
+> [!NOTE]
+> When using `--global_fdr`, samples sharing the same `SearchPreset` value are grouped together for global FDR estimation. Samples without a preset are grouped under a common `global` group.
+
+## Recommended search settings
+
+Fine-tuning search settings is important to obtain the most optimal results for your MS data. _These settings heavily depend on the MS instrument settings used to generate the data_. If you want to reprocess public data, make sure you use the settings mentioned in the methods section! The following table acts as an orientation of commonly used search settings for instruments:
+
+| MS-Device                | timsTOF  |          | Orbitrap Fusion Lumos |          | Q Exactive Orbitrap |          | LTQ Orbitrap XL |          |
+| ------------------------ | -------- | -------- | --------------------- | -------- | ------------------- | -------- | --------------- | -------- |
+|                          | class I  | class II | class I               | class II | class I             | class II | class I         | class II |
+| instrument               | high_res | high_res | high_res              | high_res | high_res            | high_res | low_res         | low_res  |
+| digest_mass_range        | 800:2500 | 800:5000 | 800:2500              | 800:5000 | 800:2500            | 800:5000 | 800:2500        | 800:5000 |
+| activation_method        | CID      | CID      | HCD                   | HCD      | HCD                 | HCD      | CID             | CID      |
+| prec_charge              | 1:4      | 1:5      | 2:3                   | 2:5      | 2:3                 | 2:5      | 2:3             | 2:5      |
+| precursor_error_units    | ppm      | ppm      | ppm                   | ppm      | ppm                 | ppm      | ppm             | ppm      |
+| number_mods              | 3        | 5        | 3                     | 5        | 3                   | 5        | 3               | 5        |
+| precursor_mass_tolerance | 20       | 20       | 5                     | 5        | 5                   | 5        | 5               | 5        |
+| fragment_mass_tolerance  | 0.01     | 0.01     | 0.01                  | 0.01     | 0.01                | 0.01     | 0.50025         | 0.50025  |
+| fragment_bin_offset      | 0        | 0        | 0                     | 0        | 0                   | 0        | 0.4             | 0.4      |
+
+Modifications are specified via `--variable_mods` and `fixed_mods` using the [UNIMOD nomenclature](https://www.unimod.org/unimod_help.html) via OpenMS. Check out [helper page](https://abibuilder.cs.uni-tuebingen.de/archive/openms/Documentation/nightly/html/TOPP_CometAdapter.html) of OpenMS for the full list of options. Multiple modifications are specified as `'Oxidation (M),Acetyl (N-term),Phospho (S)'`.
+
+Further information about the command line arguments is documented on the [nf-core website](https://nf-co.re/mhcquant/dev/parameters) or by using `--help`.
+
+## Rescoring using MS²Rescore
+
+The pipeline employs MS²Rescore for comprehensive feature prediction and rescoring of peptide-spectrum matches. By default, the pipeline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ms2pip,ionmob,im2deep`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
+
+### Rescoring Engines
+
+The pipeline supports two rescoring engines:
+
+- **Percolator** (default): Semi-supervised learning tool for rescoring PSMs (`--rescoring_engine percolator`)
+- **Mokapot**: Fast and flexible rescoring tool using gradient boosting (`--rescoring_engine mokapot`)
+
+> [!NOTE]
+> MS²Rescore creates a comprehensive QC report of the added features used for rescoring. This report is only available when `--rescoring_engine mokapot` is specified. The report can be found in `<OUTDIR>/multiqc/ms2rescore`.
+
+### FDR Control Strategies
+
+The pipeline offers flexible FDR control strategies:
+
+#### Local FDR (Default)
+
+By default, FDR control is applied per sample-condition group:
+
+- FDR is calculated separately for each `Sample` and `Condition` combination
+- Allows for sample-specific identification thresholds
+- Suitable when samples have varying complexity or quality
+
+#### Global FDR Mode
+
+Enable global FDR control with `--global_fdr`:
+
+- FDR is calculated across all samples in the dataset
+- Provides consistent identification criteria across all samples
+- Particularly useful for comparative studies or when generating spectrum libraries
+- Can improve identification rates for low-quality samples by leveraging high-quality samples in the dataset
+
+> [!WARNING]
+> Global FDR is currently not supported by mokapot. If `--global_fdr` is enabled with `--rescoring_engine mokapot`, the global_fdr parameter will be ignored and local FDR will be applied.
+
+Further information on the MS²Rescore tool can be found in the published paper [Declerq et al. 2022](<https://www.mcponline.org/article/S1535-9476(22)00074-3/fulltext>).
+
+## Quantification
+
+By default, the pipeline operates in identification mode. To enable quantification, use the `--quantify` parameter:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --quantify \
+    -profile docker
+```
+
+When quantification is enabled, the pipeline performs retention time alignment and feature processing as detailed in the README documentation.
+
+The quantification workflow produces a ConsensusXML file containing integrated peak areas for identified peptides across all samples.
+
+## Spectrum Library Generation
+
+The pipeline can generate spectrum libraries suitable for DIA-based searches using the `--generate_speclib` parameter:
+
+For one spectrum library per sample:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --generate_speclib \
+    -profile docker
+```
+
+### Library Generation Process (`SPECLIB` subworkflow)
+
+- **Format Conversion**: PSMs and spectra are converted to appropriate formats using EasyPQP
+- **Library Construction**: Sample-specific spectrum libraries are generated for each sample-condition group
+- **Global Libraries**: When combined with `--global_fdr`, creates comprehensive spectrum libraries across all samples
+
+### Global Spectrum Libraries
+
+For comprehensive library generation across all samples add the `--global_fdr` flag:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --generate_speclib \
+    --global_fdr \
+    -profile docker
+```
+
+This approach is particularly useful when creating reference libraries for subsequent DIA analyses, as it maximizes the number of identifiable peptides by combining information from all samples..
+
+## Epicore
+
+> [!NOTE]
+> This tool is still experimental and under active development.
+
+Length variants of HLA peptides, especially HLA class II peptides, pose a distinct challenge when performing downstream cohort-wide analyses. [Epicore](https://github.com/AG-Walz/epicore) uses rules-based parameters to aggregate length variants of the same epitope into a `consensus epitope`.
+
+Run epicore in the pipeline:
+
+```bash
+nextflow run nf-core/mhcquant \
+    --input 'samplesheet.tsv' \
+    --fasta 'SWISSPROT_2020.fasta' \
+    --epicore \
+    -profile docker
+```
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
-```bash
-nextflow run nf-core/mhcquant --input ./samplesheet.csv --outdir ./results  -profile docker
+```console
+nextflow run nf-core/mhcquant \
+  --input 'samplesheet.tsv' \
+  --outdir <OUTDIR> \
+  --fasta 'SWISSPROT_2020.fasta' \
+  --digest_mass_range 800:2500 \
+  --activation_method CID \
+  --prec_charge 2:3 \
+  --fdr_threshold 0.01 \
+  --fdr_level peptide_level_fdrs \
+  --peptide_min_length 8 \
+  --peptide_max_length 12 \
+  --ms2pip_model 'Immuno-HCD' \
+  -profile docker
+```
+
+**Complete workflow with all features**:
+
+```console
+nextflow run nf-core/mhcquant \
+  --input 'samplesheet.tsv' \
+  --fasta 'SWISSPROT_2020.fasta' \
+  --annotate_ions \
+  --epicore \
+  --generate_speclib \
+  --global_fdr \
+  --quantify \
+  --outdir ./results \
+  --feature_generators 'deeplc,ms2pip,im2deep' \
+  --outdir results \
+  -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -162,9 +372,7 @@ Specify this when restarting a pipeline. Nextflow will use cached results from a
 
 You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
 
-### `-c`
-
-Specify the path to a specific config file (this is a core Nextflow command). See the [nf-core website documentation](https://nf-co.re/usage/configuration) for more information.
+**NB:** Single hyphen (core Nextflow option)
 
 ## Custom configuration
 
