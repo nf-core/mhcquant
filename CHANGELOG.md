@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 
 - Updated to nf-core template 4.0.2 [#454](https://github.com/nf-core/mhcquant/pull/454)
+- Updated to nf-core template 4.0.3 [#468](https://github.com/nf-core/mhcquant/pull/468)
 - Updated all nf-core modules to their latest versions [#454](https://github.com/nf-core/mhcquant/pull/454)
 - Replaced local `pridepy/download_file` with upstream nf-core `pridepy/downloadfile` [#457](https://github.com/nf-core/mhcquant/pull/457)
 - Bumped `nf-schema` plugin to 2.7.2 [#465](https://github.com/nf-core/mhcquant/pull/465)
@@ -35,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | Dependency | Old version | New version |
 | ---------- | ----------- | ----------- |
 | `MultiQC`  | 1.33.0      | 1.35.0      |
-| `Nf-core`  | 3.5.1       | 4.0.2       |
+| `Nf-core`  | 3.5.1       | 4.0.3       |
 
 ## 3.2.0 - Solitude - 20/05/26
 
