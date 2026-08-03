@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated all nf-core modules to their latest versions [#454](https://github.com/nf-core/mhcquant/pull/454)
 - Replaced local `pridepy/download_file` with upstream nf-core `pridepy/downloadfile` [#457](https://github.com/nf-core/mhcquant/pull/457)
 - Bumped `nf-schema` plugin to 2.7.2 [#465](https://github.com/nf-core/mhcquant/pull/465)
+- Stopped publishing the intermediate `_psm.idXML` and `_ms2rescore.idXML` files to `intermediate_results/rescoring` [#470](https://github.com/nf-core/mhcquant/pull/470)
 
 ### `Fixed`
 
