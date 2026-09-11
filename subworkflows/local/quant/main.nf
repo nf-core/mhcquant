@@ -85,6 +85,7 @@ workflow QUANT {
         OPENMS_MZTABEXPORTER(PROCESS_FEATURE.out.consensusxml)
 
     emit:
-        consensusxml = PROCESS_FEATURE.out.consensusxml
-        trafoxml = MAP_ALIGNMENT.out.trafoxml
+        consensusxml  = PROCESS_FEATURE.out.consensusxml
+        trafoxml      = MAP_ALIGNMENT.out.trafoxml
+        failed_groups = MAP_ALIGNMENT.out.failed_groups
 }

@@ -179,6 +179,8 @@ nextflow run nf-core/mhcquant \
 
 When quantification is enabled, the pipeline performs retention time alignment and feature processing as detailed in the README documentation.
 
+If the retention times of a sample/condition group cannot be aligned because one of its runs shares no peptide identifications with the others within `--max_rt_alignment_shift`, the pipeline prints a warning, excludes the whole group from quantification and exports it with identifications only. Check the alignment log of that group and consider splitting runs acquired with different LC gradients or instruments into separate conditions.
+
 The quantification workflow produces a ConsensusXML file containing integrated peak areas for identified peptides across all samples.
 
 ## Spectrum Library Generation

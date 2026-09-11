@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - Fixed `UNTAR`, `UNZIP` and `EPICORE` version `eval` crashing on parenthesis-containing tool banners [#455](https://github.com/nf-core/mhcquant/pull/455)
+- Fixed `FeatureFinderIdentification` (OpenMS 3.5.0) losing all peptide identifications on FAIMS data, which crashed `SUMMARIZE_RESULTS`, by disabling `faims:merge_features` [#474](https://github.com/nf-core/mhcquant/pull/474)
+- Fixed `MapAlignerIdentification` aborting with `no data points for 'linear' model` when a run shares no RT landmarks with its group; the whole sample/condition group is now excluded from quantification, exported with identifications only, and a warning is emitted [#474](https://github.com/nf-core/mhcquant/pull/474)
 
 ### `Changed`
 

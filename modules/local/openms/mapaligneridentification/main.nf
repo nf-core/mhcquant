@@ -29,9 +29,9 @@ process OPENMS_MAPALIGNERIDENTIFICATION {
     """
 
     stub:
+    def out_names = idxmls.collect { it.baseName.replace('_fdr_filtered','')+'.trafoXML' }.join(' ')
 
     """
-    touch test1.consensusXML
-    touch test2.consensusXML
+    touch ${out_names}
     """
 }
