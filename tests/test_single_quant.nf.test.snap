@@ -87,8 +87,8 @@
                 "PBMC009_A.tsv",
                 "intermediate_results",
                 "intermediate_results/alignment",
-                "intermediate_results/alignment/PBMC007_msms29.trafoXML",
-                "intermediate_results/alignment/PBMC009_msms37.trafoXML",
+                "intermediate_results/alignment/PBMC007_msms29_fdr_filtered.trafoXML",
+                "intermediate_results/alignment/PBMC009_msms37_fdr_filtered.trafoXML",
                 "intermediate_results/comet",
                 "intermediate_results/comet/PBMC007_msms29_pin.tsv",
                 "intermediate_results/comet/PBMC009_msms37_pin.tsv",
@@ -174,8 +174,8 @@
                 "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml"
             ],
             [
-                "PBMC007_msms29.trafoXML:md5,bc85f3bbfba232ad9154cd5bb8267b1a",
-                "PBMC009_msms37.trafoXML:md5,3087e500735c5e5e98fd05342df94353"
+                "PBMC007_msms29_fdr_filtered.trafoXML:md5,bc85f3bbfba232ad9154cd5bb8267b1a",
+                "PBMC009_msms37_fdr_filtered.trafoXML:md5,3087e500735c5e5e98fd05342df94353"
             ],
             [
                 [
@@ -8234,7 +8234,7 @@
                 ]
             ]
         ],
-        "timestamp": "2026-09-08T12:52:48.304273339",
+        "timestamp": "2026-09-16T17:22:24.573099189",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

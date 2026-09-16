@@ -2,9 +2,9 @@
  * Perform the quantification by extracting the feature intensities and group runs corresponding to the same sample and condition.
  */
 
-include { OPENMS_FEATUREFINDERIDENTIFICATION } from '../../../modules/local/openms/featurefinderidentification'
+include { OPENMS_FEATUREFINDERIDENTIFICATION } from '../../../modules/nf-core/openms/featurefinderidentification/main'
 include { OPENMS_FEATURELINKERUNLABELEDKD    } from '../../../modules/local/openmsthirdparty/featurelinkerunlabeledkd'
-include { OPENMS_IDCONFLICTRESOLVER          } from '../../../modules/local/openms/idconflictresolver/main'
+include { OPENMS_IDCONFLICTRESOLVER          } from '../../../modules/nf-core/openms/idconflictresolver/main'
 include { OPENMS_FILECONVERTER               } from '../../../modules/nf-core/openms/fileconverter/main'
 
 workflow PROCESS_FEATURE {
@@ -12,8 +12,15 @@ workflow PROCESS_FEATURE {
     ch_runs_to_be_quantified
 
     main:
-    // Quantify identifications using targeted feature extraction
-    OPENMS_FEATUREFINDERIDENTIFICATION(ch_runs_to_be_quantified).featurexml
+    // Quantify identifications using targeted feature extraction.
+    // With --quantification_fdr the run's own IDs are targets and the group-wide IDs are external, otherwise only group-wide IDs are used.
+    ch_runs_to_be_quantified
+        .map { meta, mzml, id_int, id_ext ->
+            params.quantification_fdr ? [meta, mzml, id_int, id_ext, 'featureXML'] : [meta, mzml, id_ext, [], 'featureXML']
+        }
+        .set { ch_ffid_input }
+
+    OPENMS_FEATUREFINDERIDENTIFICATION(ch_ffid_input).features
         .map { meta, featurexml -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), featurexml] }
         .groupTuple()
         // Sort by run ID so consensus map column order is reproducible
@@ -39,5 +46,5 @@ workflow PROCESS_FEATURE {
     OPENMS_IDCONFLICTRESOLVER(ch_consensus_input)
 
     emit:
-    consensusxml = OPENMS_IDCONFLICTRESOLVER.out.consensusxml
+    consensusxml = OPENMS_IDCONFLICTRESOLVER.out.resolved
 }

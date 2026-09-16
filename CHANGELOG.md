@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped `nf-schema` plugin to 2.7.2 [#465](https://github.com/nf-core/mhcquant/pull/465)
 - Stopped publishing the intermediate `_psm.idXML` and `_ms2rescore.idXML` files to `intermediate_results/rescoring` [#470](https://github.com/nf-core/mhcquant/pull/470)
 - Replaced local `easypqp/convert` and `easypqp/library` modules with the nf-core/modules equivalents [#473](https://github.com/nf-core/mhcquant/pull/473)
+- Replaced local OpenMS modules (`MzTabExporter`, `MapAlignerIdentification`, `MapRTTransformer`, `FeatureFinderIdentification`, `IDConflictResolver`, `PSMFeatureExtractor`) with the nf-core/modules equivalents [#477](https://github.com/nf-core/mhcquant/pull/477)
 
 ### `Fixed`
 
