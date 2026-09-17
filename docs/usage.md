@@ -127,17 +127,17 @@ Further information about the command line arguments is documented on the [nf-co
 
 ## Rescoring using MS²Rescore
 
-The pipeline employs MS²Rescore for comprehensive feature prediction and rescoring of peptide-spectrum matches. By default, the pipeline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ms2pip,ionmob,im2deep`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
+The pipeline employs MS²Rescore for comprehensive feature prediction and rescoring of peptide-spectrum matches. By default, the pipeline generates additional features using MS²PIP and DeepLC via the MS²Rescore framework (`--feature_generators deeplc,ms2pip`). Additional feature generators can be added (`basic,deeplc,ms2pip,ms2,im2deep`) to boost identification rates and quality. Please make sure you provide the correct `--ms2pip_model` (default: `Immuno-HCD`). All available MS²PIP models can be found on [GitHub](https://github.com/compomics/ms2pip).
 
 ### Rescoring Engines
 
 The pipeline supports two rescoring engines:
 
 - **Percolator** (default): Semi-supervised learning tool for rescoring PSMs (`--rescoring_engine percolator`)
-- **Mokapot**: Fast and flexible rescoring tool using gradient boosting (`--rescoring_engine mokapot`)
+- **Ristretto**: MS²Rescore's built-in lightweight semi-supervised rescoring engine (`--rescoring_engine ristretto`)
 
 > [!NOTE]
-> MS²Rescore creates a comprehensive QC report of the added features used for rescoring. This report is only available when `--rescoring_engine mokapot` is specified. The report can be found in `<OUTDIR>/multiqc/ms2rescore`.
+> MS²Rescore creates a comprehensive QC report of the added features used for rescoring. The report can be found in `<OUTDIR>/multiqc/ms2rescore`.
 
 ### FDR Control Strategies
 
@@ -161,7 +161,7 @@ Enable global FDR control with `--global_fdr`:
 - Can improve identification rates for low-quality samples by leveraging high-quality samples in the dataset
 
 > [!WARNING]
-> Global FDR is currently not supported by mokapot. If `--global_fdr` is enabled with `--rescoring_engine mokapot`, the global_fdr parameter will be ignored and local FDR will be applied.
+> Global FDR is currently not supported by ristretto. If `--global_fdr` is enabled with `--rescoring_engine ristretto`, the global_fdr parameter will be ignored and local FDR will be applied.
 
 Further information on the MS²Rescore tool can be found in the published paper [Declerq et al. 2022](<https://www.mcponline.org/article/S1535-9476(22)00074-3/fulltext>).
 

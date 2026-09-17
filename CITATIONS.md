@@ -26,10 +26,6 @@
 
   > Gabriels R, Martens L, Degroeve S. Updated MS²PIP web server delivers fast and accurate MS² peak intensity prediction for multiple fragmentation methods, instruments and labeling techniques. Nucleic Acids Res. 2019 Jul 2;47(W1):W295-W299. doi: 10.1093/nar/gkz299. PMID: 31028400; PMCID: PMC6602496.
 
-- [Ionmob](https://pubmed.ncbi.nlm.nih.gov/37540201/)
-
-  > Teschner D, Gomez-Zepeda D, Declercq A, Łącki MK, Avci S, Bob K, Distler U, Michna T, Martens L, Tenzer S, Hildebrandt A. Ionmob: a Python package for prediction of peptide collisional cross-section values. Bioinformatics. 2023 Sep 2;39(9):btad486. doi: 10.1093/bioinformatics/btad486. PMID: 37540201; PMCID: PMC10521631.
-
 - [MS²Rescore](https://pubmed.ncbi.nlm.nih.gov/35803561/)
 
   > Declercq A, Bouwmeester R, Hirschler A, Carapito C, Degroeve S, Martens L, Gabriels R. MS²Rescore: Data-Driven Rescoring Dramatically Boosts Immunopeptide Identification Rates. Mol Cell Proteomics. 2022 Aug;21(8):100266. doi: 10.1016/j.mcpro.2022.100266. Epub 2022 Jul 6. PMID: 35803561; PMCID: PMC9411678.
@@ -37,10 +33,6 @@
 - [Percolator](https://pubmed.ncbi.nlm.nih.gov/31407580/)
 
   > Halloran JT, Zhang H, Kara K, Renggli C, The M, Zhang C, Rocke DM, Käll L, Noble WS. Speeding Up Percolator. J Proteome Res. 2019 Sep 6;18(9):3353-3359. doi: 10.1021/acs.jproteome.9b00288. Epub 2019 Aug 23. PMID: 31407580; PMCID: PMC6884961.
-
-- [Mokapot](https://pubmed.ncbi.nlm.nih.gov/33596079/)
-
-  > Fondrie WE, Noble WS. mokapot: Fast and Flexible Semisupervised Learning for Peptide Detection. J Proteome Res. 2021 Apr 2;20(4):1966-1971. doi: 10.1021/acs.jproteome.0c01010. Epub 2021 Feb 17. PMID: 33596079; PMCID: PMC8022319.
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 

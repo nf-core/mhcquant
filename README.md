@@ -23,7 +23,7 @@
 
 **nfcore/mhcquant** is a best-practice bioinformatics pipeline to process data-dependent acquisition (DDA) immunopeptidomics data. This involves mass spectrometry-based identification and quantification of immunopeptides presented on major histocompatibility complex (MHC) molecules which mediate T cell immunosurveillance. Immunopeptidomics has central implications for clinical research, in the context of [T cell-centric immunotherapies](https://www.sciencedirect.com/science/article/pii/S1044532323000180).
 
-The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore. FDR rescoring is applied using Percolator or Mokapot based on a competitive target-decoy approach. The pipeline supports both local FDR control (per sample-condition group) and global FDR control (across all samples). For label-free quantification, all input files undergo identification-based retention time alignment and targeted feature extraction matching ids between runs. The pipeline can also generate spectrum libraries suitable for DIA-based searches as well as computing consensus epitopes using epicore.
+The pipeline is based on the OpenMS C++ framework for computational mass spectrometry. Spectrum files (mzML/Thermo raw/Bruker tdf) serve as inputs and a database search (Comet) is performed based on a given input protein database. Peptide properties are predicted by MS²Rescore. FDR rescoring is applied using Percolator or ristretto based on a competitive target-decoy approach. The pipeline supports both local FDR control (per sample-condition group) and global FDR control (across all samples). For label-free quantification, all input files undergo identification-based retention time alignment and targeted feature extraction matching ids between runs. The pipeline can also generate spectrum libraries suitable for DIA-based searches as well as computing consensus epitopes using epicore.
 
 ![overview](assets/mhcquant_subway.png)
 
@@ -95,7 +95,7 @@ By default the pipeline currently performs identification of MHC class I peptide
 - **Rescoring**: Feature prediction and peptide-spectrum-match rescoring (`RESCORE` subworkflow)
   - Prediction of retention times and MS2 intensities (`MS²Rescore`)
   - Extract PSM features for rescoring engines (`PSMFeatureExtractor`)
-  - Peptide-spectrum-match rescoring using Percolator or Mokapot (`PercolatorAdapter`)
+  - Peptide-spectrum-match rescoring using Percolator (`PercolatorAdapter`) or ristretto (`MS²Rescore`)
   - Filters peptide identification result according to configurable FDR threshold (`IDFilter`)
 - **Export**: Converts identification result to tab-separated files (`TextExporter`)
 

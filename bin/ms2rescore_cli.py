@@ -6,9 +6,8 @@ import click
 import importlib.resources
 import json
 import logging
+from pathlib import Path
 from typing import List
-
-import pandas as pd
 
 from ms2rescore import rescore, package_data
 from psm_utils.io.idxml import IdXMLReader, IdXMLWriter
@@ -17,59 +16,76 @@ import pyopenms as oms
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
+# MS²Rescore >=4 always rescores with ristretto. Percolator is run downstream by the pipeline on
+# the feature-annotated idXML, so in that mode the ristretto scores are only written as metavalues.
+RESCORING_ENGINES = ("percolator", "ristretto")
+FEATURE_GENERATORS = ("basic", "ms2pip", "deeplc", "ms2", "im2deep")
+# CLI options that are consumed while building nested config sections and must not be copied
+# verbatim into the top-level MS²Rescore config.
+NESTED_OPTIONS = {
+    "ms2pip_model",
+    "ms2pip_model_dir",
+    "ms2_tolerance",
+    "calibration_set_size",
+    "train_fdr",
+    "rescoring_engine",
+}
+
 
 def parse_cli_arguments_to_config(**kwargs):
     """Update default MS²Rescore config with CLI arguments"""
     config = json.load(importlib.resources.open_text(package_data, "config_default.json"))
+    ms2rescore_config = config["ms2rescore"]
 
     for key, value in kwargs.items():
-        # Skip these arguments since they need to set in a nested dict of feature_generators
-        if key in ["ms2pip_model", "ms2_tolerance", "test_fdr", "calibration_set_size"]:
+        if key in NESTED_OPTIONS:
             continue
 
         elif key == "feature_generators":
-            feature_generators = value.split(",")
+            feature_generators = [fgen.strip() for fgen in value.split(",") if fgen.strip()]
+            unknown = set(feature_generators) - set(FEATURE_GENERATORS)
+            if unknown:
+                raise click.BadParameter(
+                    f"Unknown feature generator(s) {sorted(unknown)}. Choose from {', '.join(FEATURE_GENERATORS)}.",
+                    param_hint="--feature_generators",
+                )
             # Reset feature generator dict since there might be default generators we don't want
-            config["ms2rescore"]["feature_generators"] = {}
+            ms2rescore_config["feature_generators"] = {}
             if "basic" in feature_generators:
-                config["ms2rescore"]["feature_generators"]["basic"] = {}
+                ms2rescore_config["feature_generators"]["basic"] = {}
             if "ms2pip" in feature_generators:
-                config["ms2rescore"]["feature_generators"]["ms2pip"] = {
+                ms2rescore_config["feature_generators"]["ms2pip"] = {
                     "model": kwargs["ms2pip_model"],
-                    "ms2_tolerance": kwargs["ms2_tolerance"],
                     "model_dir": kwargs["ms2pip_model_dir"],
                 }
             if "deeplc" in feature_generators:
-                config["ms2rescore"]["feature_generators"]["deeplc"] = {
-                    "deeplc_retrain": False,
+                ms2rescore_config["feature_generators"]["deeplc"] = {
+                    "finetune": False,
                     "calibration_set_size": kwargs["calibration_set_size"],
                 }
-            if "maxquant" in feature_generators:
-                config["ms2rescore"]["feature_generators"]["maxquant"] = {}
-            if "ionmob" in feature_generators:
-                config["ms2rescore"]["feature_generators"]["ionmob"] = {}
+            if "ms2" in feature_generators:
+                ms2rescore_config["feature_generators"]["ms2"] = {}
             if "im2deep" in feature_generators:
-                config["ms2rescore"]["feature_generators"]["im2deep"] = {}
+                ms2rescore_config["feature_generators"]["im2deep"] = {}
 
-        elif key == "rescoring_engine":
-            # Reset rescoring engine dict we want to allow only computing features
-            config["ms2rescore"]["rescoring_engine"] = {}
-            if value == "mokapot":
-                config["ms2rescore"]["rescoring_engine"]["mokapot"] = {
-                    "write_weights": True,
-                    "write_txt": False,
-                    "write_flashlfq": False,
-                    "max_workers": kwargs["processes"],
-                    "test_fdr" : kwargs["test_fdr"]
-                }
-            if value == "percolator":
-                logging.info(
-                    "Percolator rescoring engine has been specified. Use the idXML containing rescoring features and run Percolator in a separate step."
-                )
-                continue
+        elif key == "output_path":
+            # MS²Rescore derives all its side outputs (feature names, report, tables) from this stem
+            ms2rescore_config[key] = str(Path(value).with_suffix(""))
 
         else:
-            config["ms2rescore"][key] = value
+            ms2rescore_config[key] = value
+
+    # Fragment mass tolerance is a global setting in MS²Rescore >=4 (shared by all generators)
+    ms2rescore_config["tolerance_value"] = kwargs["ms2_tolerance"]
+    ms2rescore_config["tolerance_mode"] = "Da"
+
+    # Ristretto (the only rescoring engine in MS²Rescore >=4)
+    ms2rescore_config["rescoring"] = {"train_fdr": kwargs["train_fdr"], "model": "svm"}
+    if kwargs["rescoring_engine"] == "percolator":
+        logging.info(
+            "Percolator rescoring engine has been specified. Ristretto q-values/PEPs are written as "
+            "metavalues only; the idXML containing rescoring features is passed on to Percolator in a separate step."
+        )
 
     return config
 
@@ -80,23 +96,37 @@ def rescore_idxml(input_file, output_file, config) -> None:
     reader = IdXMLReader(input_file)
     psm_list = reader.read_file()
 
-    # Rescore
-    rescore(config, psm_list, )
+    # Ristretto overwrites the search engine score in place. Remember it so the idXML keeps the
+    # original main score (and its orientation) while ristretto q-value/PEP become metavalues.
+    original_scores = {id(psm): psm.score for psm in psm_list}
 
-    # Filter out PeptideHits within PeptideIdentification(s) that could not be processed by all feature generators
+    # Rescore
+    rescore(config, psm_list)
+
+    for psm in psm_list:
+        psm.score = original_scores[id(psm)]
+
+    # Keep only PSMs that were processed by all feature generators and survived ristretto
     peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids)
 
     # Write
-    writer = IdXMLWriter(output_file, reader.protein_ids, peptide_ids_filtered)
+    writer = IdXMLWriter(output_file, protein_ids=reader.protein_ids, peptide_ids=peptide_ids_filtered)
     writer.write_file(psm_list)
 
 
 def filter_out_artifact_psms(
     psm_list: PSMList, peptide_ids: List[oms.PeptideIdentification]
 ) -> List[oms.PeptideIdentification]:
-    """Filter out PeptideHits that could not be processed by all feature generators"""
+    """Filter out PeptideHits that could not be processed by all feature generators or were dropped by ristretto"""
     num_mandatory_features = max([len(psm.rescoring_features) for psm in psm_list])
-    new_psm_list = PSMList(psm_list=[psm for psm in psm_list if len(psm.rescoring_features) == num_mandatory_features])
+    # PEP is only set by ristretto, so PSMs without it were dropped during rescoring (e.g. rank filter)
+    new_psm_list = PSMList(
+        psm_list=[
+            psm
+            for psm in psm_list
+            if len(psm.rescoring_features) == num_mandatory_features and psm.pep is not None
+        ]
+    )
 
     # get differing peptidoforms of both psm lists
     psm_list_peptides = set([next(iter(psm.provenance_data.items()))[1] for psm in psm_list])
@@ -139,12 +169,11 @@ def filter_out_artifact_psms(
 )
 @click.option("-l", "--log_level", help="Logging level (default: `info`)", default="info")
 @click.option("-n", "--processes", help="Number of parallel processes available to MS²Rescore", type=int, default=16)
-@click.option("-f", "--fasta_file", help="Path to FASTA file")
 @click.option(
     "-fg",
     "--feature_generators",
-    help="Comma-separated list of feature generators to use (default: `ms2pip,deeplc`). See ms2rescore doc for further information",
-    default="",
+    help=f"Comma-separated list of feature generators to use (default: `ms2pip,deeplc`). Choose from {','.join(FEATURE_GENERATORS)}",
+    default="ms2pip,deeplc",
 )
 @click.option("-pipm", "--ms2pip_model", help="MS²PIP model (default: `Immuno-HCD`)", type=str, default="Immuno-HCD")
 @click.option("-pipmdir", "--ms2pip_model_dir", help="Path to directory, which holds pre-downloaded MS²PIP models", type=str, default=None)
@@ -157,15 +186,15 @@ def filter_out_artifact_psms(
     help="Percentage of number of calibration set for DeepLC (default: `0.15`)",
     default=0.15,
 )
-@click.option("-re", "--rescoring_engine", help="Either mokapot or percolator (default: `mokapot`)", default="mokapot")
-@click.option("--test_fdr", help="Test FDR for Mokapot (default: `0.05`)", type=float, default=0.05)
-@click.option("-d", "--id_decoy_pattern", help="Regex decoy pattern (default: `DECOY_`)", default="^DECOY_")
 @click.option(
-    "-lsb",
-    "--lower_score_is_better",
-    help="Interpretation of primary search engine score (default: True)",
-    default=True,
+    "-re",
+    "--rescoring_engine",
+    help="Either ristretto (MS²Rescore built-in) or percolator (run downstream) (default: `ristretto`)",
+    type=click.Choice(RESCORING_ENGINES),
+    default="ristretto",
 )
+@click.option("--train_fdr", help="FDR threshold for ristretto's semi-supervised training (default: `0.01`)", type=float, default=0.01)
+@click.option("-d", "--id_decoy_pattern", help="Regex decoy pattern (default: `DECOY_`)", default="^DECOY_")
 def main(**kwargs):
     config = parse_cli_arguments_to_config(**kwargs)
     logging.info("MS²Rescore config:")
