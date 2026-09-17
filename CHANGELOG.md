@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stopped publishing the intermediate `_psm.idXML` and `_ms2rescore.idXML` files to `intermediate_results/rescoring` [#470](https://github.com/nf-core/mhcquant/pull/470)
 - Replaced local `easypqp/convert` and `easypqp/library` modules with the nf-core/modules equivalents [#473](https://github.com/nf-core/mhcquant/pull/473)
 - Replaced local OpenMS modules (`MzTabExporter`, `MapAlignerIdentification`, `MapRTTransformer`, `FeatureFinderIdentification`, `IDConflictResolver`, `PSMFeatureExtractor`) with the nf-core/modules equivalents [#477](https://github.com/nf-core/mhcquant/pull/477)
+- Bumped MS²Rescore to 4.0.2 and replaced the `mokapot` rescoring engine with MS²Rescore's built-in `ristretto` engine (`--rescoring_engine ristretto`, `test_mokapot` profile renamed to `test_ristretto`); Percolator remains the default. `--deeplc_calibration_set_size` is now passed to MS²Rescore and the `ionmob` feature generator was removed upstream [#478](https://github.com/nf-core/mhcquant/pull/478)
 
 ### `Fixed`
 
@@ -39,11 +40,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
-| Dependency | Old version | New version |
-| ---------- | ----------- | ----------- |
-| `easypqp`  | 0.1.57      | 0.1.59      |
-| `MultiQC`  | 1.33.0      | 1.35.0      |
-| `Nf-core`  | 3.5.1       | 4.1.0       |
+| Dependency   | Old version | New version |
+| ------------ | ----------- | ----------- |
+| `easypqp`    | 0.1.57      | 0.1.59      |
+| `MS²Rescore` | 3.1.5       | 4.0.2       |
+| `MultiQC`    | 1.33.0      | 1.35.0      |
+| `Nf-core`    | 3.5.1       | 4.1.0       |
 
 ## 3.2.0 - Solitude - 20/05/26
 
