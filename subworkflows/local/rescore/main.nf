@@ -34,16 +34,18 @@ workflow RESCORE {
     // Compute features via ms2rescore
     MS2RESCORE(ch_merged_runs)
 
-    if (params.rescoring_engine == 'mokapot') {
-        log.warn("The rescoring engine is set to mokapot. This rescoring engine currently only supports psm-level-fdr via ms2rescore.")
-        if (params.global_fdr) {
-            log.warn("Global FDR is currently not supported by mokapot. The global_fdr parameter will be ignored.")
+    if (params.rescoring_engine == 'ristretto') {
+        if (params.fdr_level == 'protein_level_fdrs') {
+            log.warn("Protein-level FDR is not supported by ristretto. Peptide-level q-values will be used instead.")
         }
-        // Switch comet e-value to mokapot q-value
+        if (params.global_fdr) {
+            log.warn("Global FDR is currently not supported by ristretto. The global_fdr parameter will be ignored.")
+        }
+        // Switch comet e-value to ristretto q-value
         OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
         ch_rescored_runs = OPENMS_IDSCORESWITCHER.out.idxml
 
-        // Filter by mokapot q-value
+        // Filter by ristretto q-value
         OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map { group_meta, idxml -> [group_meta, idxml, []] })
         ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
     }

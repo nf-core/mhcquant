@@ -271,14 +271,14 @@
                     "type": "string",
                     "fa_icon": "fas fa-wrench",
                     "default": "percolator",
-                    "description": "Specify the rescoring engine that should be used for rescoring. Either percolator or mokapot",
-                    "enum": ["percolator", "mokapot"]
+                    "description": "Specify the rescoring engine that should be used for rescoring. Either percolator (run downstream on the MS²Rescore features) or ristretto (MS²Rescore's built-in engine)",
+                    "enum": ["percolator", "ristretto"]
                 },
                 "feature_generators": {
                     "type": "string",
                     "fa_icon": "fas fa-head-side-gear",
                     "default": "deeplc,ms2pip",
-                    "description": "Specify the feature generator that should be used for rescoring. One or multiple of basic,ms2pip,deeplc,ionmob"
+                    "description": "Specify the feature generator that should be used for rescoring. One or multiple of basic,ms2pip,deeplc,ms2,im2deep"
                 },
                 "ms2pip_model": {
                     "type": "string",
@@ -288,11 +288,14 @@
                         "Immuno-HCD",
                         "timsTOF",
                         "timsTOF2023",
+                        "timsTOF2024",
                         "CID",
                         "CIDch2",
                         "CID-TMT",
                         "TMT",
                         "HCD",
+                        "HCD2019",
+                        "HCD2021",
                         "HCDch2",
                         "TTOF5600",
                         "iTRAQ",
