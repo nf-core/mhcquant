@@ -30,6 +30,11 @@
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
+                    "openms/featurefinderidentification": {
+                        "branch": "master",
+                        "git_sha": "d32895bb4b4be064a93fcb7c60f5ba0e94443b73",
+                        "installed_by": ["modules"]
+                    },
                     "openms/fileconverter": {
                         "branch": "master",
                         "git_sha": "924841ecdeb9b2aea108eda13cacf45a2452d35f",
@@ -38,6 +43,11 @@
                     "openms/filefilter": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/idconflictresolver": {
+                        "branch": "master",
+                        "git_sha": "4a071f825fcfa127954a1bcc210e0ea3678f9753",
                         "installed_by": ["modules"]
                     },
                     "openms/idfilter": {
@@ -60,12 +70,32 @@
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
+                    "openms/mapaligneridentification": {
+                        "branch": "master",
+                        "git_sha": "4349b6916716e48f1bdf8590fd416fa2c59a70dd",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/maprttransformer": {
+                        "branch": "master",
+                        "git_sha": "c1a970a6ad9cbb0b7209a927feb21e1f39c1841a",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/mztabexporter": {
+                        "branch": "master",
+                        "git_sha": "d8c8c4cb1c4e1a38c7619cf905e8701ff00a8580",
+                        "installed_by": ["modules"]
+                    },
                     "openms/peakpickerhires": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "openms/peptideindexer": {
+                        "branch": "master",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/psmfeatureextractor": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]

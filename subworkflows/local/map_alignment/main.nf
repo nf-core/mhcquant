@@ -1,10 +1,10 @@
 /*
  * Align retention times of runs to be able to quantify them.
  */
-include { OPENMS_MAPALIGNERIDENTIFICATION }                                 from '../../../modules/local/openms/mapaligneridentification'
+include { OPENMS_MAPALIGNERIDENTIFICATION }                                 from '../../../modules/nf-core/openms/mapaligneridentification/main'
 include {
     OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERMZML
-    OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERIDXML }               from '../../../modules/local/openms/maprttransformer'
+    OPENMS_MAPRTTRANSFORMER as OPENMS_MAPRTTRANSFORMERIDXML }               from '../../../modules/nf-core/openms/maprttransformer/main'
 
 
 workflow MAP_ALIGNMENT {
@@ -19,7 +19,7 @@ workflow MAP_ALIGNMENT {
 
         // Run-specific trafoXMLs: [[spectra], trafoxml]
         OPENMS_MAPALIGNERIDENTIFICATION.out.trafoxml
-            .flatMap { group_meta, trafoxmls -> [trafoxmls].flatten().collect { trafoxml -> [[spectra: trafoxml.baseName], trafoxml] } }
+            .flatMap { group_meta, trafoxmls -> [trafoxmls].flatten().collect { trafoxml -> [[spectra: trafoxml.baseName.replace("_fdr_filtered", "")], trafoxml] } }
             .set { ch_trafos }
 
         // Runs with their meta, idXML and mzML: [[spectra], meta, idxml, mzml]

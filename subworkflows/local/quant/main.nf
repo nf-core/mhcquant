@@ -9,7 +9,7 @@ include { OPENMS_IDRIPPER                          } from '../../../modules/nf-c
 include { OPENMS_IDSCORESWITCHER                   } from '../../../modules/nf-core/openms/idscoreswitcher/main'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_QUANT } from '../../../modules/nf-core/openms/idfilter/main'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../../modules/nf-core/openms/idmerger/main'
-include { OPENMS_MZTABEXPORTER                     } from '../../../modules/local/openms/mztabexporter'
+include { OPENMS_MZTABEXPORTER                     } from '../../../modules/nf-core/openms/mztabexporter/main'
 
 include { MAP_ALIGNMENT                            } from '../map_alignment'
 include { PROCESS_FEATURE                          } from '../process_feature'
