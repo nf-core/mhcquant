@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List
 
 from ms2rescore import rescore, package_data
+from ms2rescore.exceptions import RescoringError
 from psm_utils.io.idxml import IdXMLReader, IdXMLWriter
 from psm_utils import PSMList
 import pyopenms as oms
@@ -90,7 +91,7 @@ def parse_cli_arguments_to_config(**kwargs):
     return config
 
 
-def rescore_idxml(input_file, output_file, config) -> None:
+def rescore_idxml(input_file, output_file, config, rescoring_engine: str) -> None:
     """Rescore PSMs in an idXML file and keep other information unchanged."""
     # Read PSMs
     reader = IdXMLReader(input_file)
@@ -101,13 +102,25 @@ def rescore_idxml(input_file, output_file, config) -> None:
     original_scores = {id(psm): psm.score for psm in psm_list}
 
     # Rescore
-    rescore(config, psm_list)
+    try:
+        rescore(config, psm_list)
+        rescored = True
+    except RescoringError:
+        # Ristretto needs targets passing train_fdr to train. Features are already attached to the
+        # PSMs at this point, so with Percolator downstream we can still hand over the features.
+        if rescoring_engine != "percolator":
+            raise
+        logging.warning(
+            "Ristretto could not be trained on this input (too few confident targets). "
+            "Writing MS²Rescore features without ristretto scores; Percolator will rescore downstream."
+        )
+        rescored = False
 
     for psm in psm_list:
         psm.score = original_scores[id(psm)]
 
-    # Keep only PSMs that were processed by all feature generators and survived ristretto
-    peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids)
+    # Keep only PSMs that were processed by all feature generators (and survived ristretto)
+    peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids, require_pep=rescored)
 
     # Write
     writer = IdXMLWriter(output_file, protein_ids=reader.protein_ids, peptide_ids=peptide_ids_filtered)
@@ -115,7 +128,7 @@ def rescore_idxml(input_file, output_file, config) -> None:
 
 
 def filter_out_artifact_psms(
-    psm_list: PSMList, peptide_ids: List[oms.PeptideIdentification]
+    psm_list: PSMList, peptide_ids: List[oms.PeptideIdentification], require_pep: bool = True
 ) -> List[oms.PeptideIdentification]:
     """Filter out PeptideHits that could not be processed by all feature generators or were dropped by ristretto"""
     num_mandatory_features = max([len(psm.rescoring_features) for psm in psm_list])
@@ -124,7 +137,7 @@ def filter_out_artifact_psms(
         psm_list=[
             psm
             for psm in psm_list
-            if len(psm.rescoring_features) == num_mandatory_features and psm.pep is not None
+            if len(psm.rescoring_features) == num_mandatory_features and (psm.pep is not None or not require_pep)
         ]
     )
 
@@ -199,7 +212,7 @@ def main(**kwargs):
     config = parse_cli_arguments_to_config(**kwargs)
     logging.info("MS²Rescore config:")
     logging.info(config)
-    rescore_idxml(kwargs["psm_file"], kwargs["output_path"], config)
+    rescore_idxml(kwargs["psm_file"], kwargs["output_path"], config, kwargs["rescoring_engine"])
 
 
 if __name__ == "__main__":
