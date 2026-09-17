@@ -35,7 +35,9 @@ workflow RESCORE {
     MS2RESCORE(ch_merged_runs)
 
     if (params.rescoring_engine == 'ristretto') {
-        log.warn("The rescoring engine is set to ristretto. This rescoring engine currently only supports psm-level-fdr via ms2rescore.")
+        if (params.fdr_level == 'protein_level_fdrs') {
+            log.warn("Protein-level FDR is not supported by ristretto. Peptide-level q-values will be used instead.")
+        }
         if (params.global_fdr) {
             log.warn("Global FDR is currently not supported by ristretto. The global_fdr parameter will be ignored.")
         }

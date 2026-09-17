@@ -20,6 +20,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 # MS²Rescore >=4 always rescores with ristretto. Percolator is run downstream by the pipeline on
 # the feature-annotated idXML, so in that mode the ristretto scores are only written as metavalues.
 RESCORING_ENGINES = ("percolator", "ristretto")
+# Pipeline FDR levels mapped onto ristretto rollups. Percolator's "peptide" level is the modified
+# sequence, which corresponds to ristretto's peptidoform rollup. Protein-level FDR is not exposed by
+# MS²Rescore's PSM metadata, so it falls back to the peptidoform level.
+FDR_LEVELS = {"psm_level_fdrs": None, "peptide_level_fdrs": "peptidoform", "protein_level_fdrs": "peptidoform"}
 FEATURE_GENERATORS = ("basic", "ms2pip", "deeplc", "ms2", "im2deep")
 # CLI options that are consumed while building nested config sections and must not be copied
 # verbatim into the top-level MS²Rescore config.
@@ -30,6 +34,7 @@ NESTED_OPTIONS = {
     "calibration_set_size",
     "train_fdr",
     "rescoring_engine",
+    "fdr_level",
 }
 
 
@@ -91,7 +96,7 @@ def parse_cli_arguments_to_config(**kwargs):
     return config
 
 
-def rescore_idxml(input_file, output_file, config, rescoring_engine: str) -> None:
+def rescore_idxml(input_file, output_file, config, rescoring_engine: str, fdr_level: str) -> None:
     """Rescore PSMs in an idXML file and keep other information unchanged."""
     # Read PSMs
     reader = IdXMLReader(input_file)
@@ -119,12 +124,36 @@ def rescore_idxml(input_file, output_file, config, rescoring_engine: str) -> Non
     for psm in psm_list:
         psm.score = original_scores[id(psm)]
 
+    if rescored:
+        apply_fdr_level(psm_list, fdr_level)
+
     # Keep only PSMs that were processed by all feature generators (and survived ristretto)
     peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids, require_pep=rescored)
 
     # Write
     writer = IdXMLWriter(output_file, protein_ids=reader.protein_ids, peptide_ids=peptide_ids_filtered)
     writer.write_file(psm_list)
+
+
+def apply_fdr_level(psm_list: PSMList, fdr_level: str) -> None:
+    """Expose ristretto's rollup q-values/PEPs and select the level written as `q-value`/`PEP`."""
+    rollup = FDR_LEVELS[fdr_level]
+    if fdr_level == "protein_level_fdrs":
+        logging.warning("Protein-level FDR is not available from ristretto; using peptidoform-level q-values instead.")
+    for psm in psm_list:
+        if psm.pep is None:  # dropped by ristretto
+            continue
+        # Keep all levels as metavalues (written alongside the rescoring features)
+        for level in ("peptidoform", "peptide"):
+            for kind in ("qvalue", "pep"):
+                value = psm.metadata.get(f"{level}_{kind}")
+                if value is not None:
+                    psm.rescoring_features[f"ristretto_{level}_{kind}"] = float(value)
+        psm.rescoring_features["ristretto_psm_qvalue"] = float(psm.qvalue)
+        psm.rescoring_features["ristretto_psm_pep"] = float(psm.pep)
+        if rollup is not None:
+            psm.qvalue = float(psm.metadata[f"{rollup}_qvalue"])
+            psm.pep = float(psm.metadata[f"{rollup}_pep"])
 
 
 def filter_out_artifact_psms(
@@ -208,11 +237,17 @@ def filter_out_artifact_psms(
 )
 @click.option("--train_fdr", help="FDR threshold for ristretto's semi-supervised training (default: `0.01`)", type=float, default=0.01)
 @click.option("-d", "--id_decoy_pattern", help="Regex decoy pattern (default: `DECOY_`)", default="^DECOY_")
+@click.option(
+    "--fdr_level",
+    help="FDR level written as `q-value` metavalue when rescoring with ristretto (default: `psm_level_fdrs`)",
+    type=click.Choice(sorted(FDR_LEVELS)),
+    default="psm_level_fdrs",
+)
 def main(**kwargs):
     config = parse_cli_arguments_to_config(**kwargs)
     logging.info("MS²Rescore config:")
     logging.info(config)
-    rescore_idxml(kwargs["psm_file"], kwargs["output_path"], config, kwargs["rescoring_engine"])
+    rescore_idxml(kwargs["psm_file"], kwargs["output_path"], config, kwargs["rescoring_engine"], kwargs["fdr_level"])
 
 
 if __name__ == "__main__":
