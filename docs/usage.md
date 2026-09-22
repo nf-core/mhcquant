@@ -134,7 +134,7 @@ The pipeline employs MS²Rescore for comprehensive feature prediction and rescor
 The pipeline supports two rescoring engines:
 
 - **Percolator** (default): Semi-supervised learning tool for rescoring PSMs (`--rescoring_engine percolator`)
-- **Ristretto**: MS²Rescore's built-in lightweight semi-supervised rescoring engine (`--rescoring_engine ristretto`). Supports `--fdr_level psm_level_fdrs` and `peptide_level_fdrs` (protein-level falls back to peptide-level)
+- **Ristretto**: MS²Rescore's built-in lightweight semi-supervised rescoring engine (`--rescoring_engine ristretto`). Supports `--fdr_level psm_level_fdrs` and `peptide_level_fdrs` (protein-level falls back to peptide-level) as well as `--global_fdr`. Like Percolator, only the best PSM per peptidoform is kept in the identification table; all PSMs are reported in `psms/`
 
 > [!NOTE]
 > MS²Rescore creates a comprehensive QC report of the added features used for rescoring. The report can be found in `<OUTDIR>/multiqc/ms2rescore`.
@@ -160,8 +160,8 @@ Enable global FDR control with `--global_fdr`:
 - Particularly useful for comparative studies or when generating spectrum libraries
 - Can improve identification rates for low-quality samples by leveraging high-quality samples in the dataset
 
-> [!WARNING]
-> Global FDR is currently not supported by ristretto. If `--global_fdr` is enabled with `--rescoring_engine ristretto`, the global_fdr parameter will be ignored and local FDR will be applied.
+> [!NOTE]
+> Runs are merged per search preset with OpenMS `IDMerger`, which requires identical search settings (including the FASTA database and modifications) for all runs of a preset. Samples searched with different databases cannot share a global FDR estimate; assign them different search presets or run them separately.
 
 Further information on the MS²Rescore tool can be found in the published paper [Declerq et al. 2022](<https://www.mcponline.org/article/S1535-9476(22)00074-3/fulltext>).
 

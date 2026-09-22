@@ -204,13 +204,19 @@ workflow MHCQUANT {
 
     // Process the tsv file to facilitate visualization with MultiQC.
     // Under --quantify, attach each group's per-run trafoXMLs so alignment residuals can be plotted.
+    // PSM-level tables (all PSMs of FDR-passing peptidoforms); empty groups have none
+    ch_psms_tsv = RESCORE.out.psms_tsv.map { meta, tsv -> [meta.id, tsv] }
     if (params.quantify) {
         ch_summarize_input = OPENMS_TEXTEXPORTER.out.tsv
             .map { meta, tsv -> [meta.id, meta, tsv] }
             .join( QUANT.out.trafoxml.map { meta, trafoxml -> [meta.id, trafoxml] }, remainder: true )
-            .map { _id, meta, tsv, trafoxml -> [meta, tsv, trafoxml ?: []] }
+            .join( ch_psms_tsv, remainder: true )
+            .map { _id, meta, tsv, trafoxml, psms -> [meta, tsv, trafoxml ?: [], psms ?: []] }
     } else {
-        ch_summarize_input = OPENMS_TEXTEXPORTER.out.tsv.map { meta, tsv -> [meta, tsv, []] }
+        ch_summarize_input = OPENMS_TEXTEXPORTER.out.tsv
+            .map { meta, tsv -> [meta.id, meta, tsv] }
+            .join( ch_psms_tsv, remainder: true )
+            .map { _id, meta, tsv, psms -> [meta, tsv, [], psms ?: []] }
     }
     SUMMARIZE_RESULTS(ch_summarize_input)
 

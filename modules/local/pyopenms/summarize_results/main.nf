@@ -6,7 +6,7 @@ process SUMMARIZE_RESULTS {
         'biocontainers/pyopenms:3.4.1--py312h6b06db6_2' }"
 
     input:
-    tuple val(meta), path(file), path(trafoxmls)
+    tuple val(meta), path(file), path(trafoxmls), path(psms)
 
     output:
     path '*_histogram_mz.csv'                                   , emit: hist_mz, optional: true
@@ -18,14 +18,16 @@ process SUMMARIZE_RESULTS {
     path '*_histogram_im.csv'                                   , emit: hist_im, optional: true
     path '*_deeplc_rt_diff.csv'                                 , emit: rt_calibration, optional: true
     path '*_aligned_residuals.csv'                              , emit: aligned_residuals, optional: true
-    tuple val(meta), path('*.tsv'), path('*_general_stats.csv') , emit: epicore_input
+    tuple val(meta), path('*_psms.tsv')                         , optional: true, emit: psms
+    tuple val(meta), path("${prefix}.tsv"), path('*_general_stats.csv') , emit: epicore_input
     tuple val("${task.process}"), val('pyopenms'), eval("pip show pyopenms | grep Version | sed 's/Version: //'"), topic: versions
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    prefix = task.ext.prefix ?: "${meta.id}"
     def quantify = params.quantify ? '--quantify' : ''
     def trafo = trafoxmls ? "--trafoxml ${trafoxmls.join(' ')}" : ''
+    def psm_arg = psms ? "--psms $psms" : ''
 
     """
     summarize_results.py \\
@@ -33,11 +35,12 @@ process SUMMARIZE_RESULTS {
         --out_prefix $prefix \\
         $quantify \\
         $trafo \\
+        $psm_arg \\
         $args
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    prefix = task.ext.prefix ?: "${meta.id}"
 
     """
     touch ${prefix}_histogram_mz.csv
@@ -51,5 +54,6 @@ process SUMMARIZE_RESULTS {
     touch ${prefix}_aligned_residuals.csv
     touch ${prefix}_general_stats.csv
     touch ${prefix}.tsv
+    touch ${prefix}_psms.tsv
     """
 }

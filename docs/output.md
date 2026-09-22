@@ -13,6 +13,8 @@ The directories listed below will be created in the results directory after the 
 - `*.tsv`
 - `*.mzTab` (if `--quantify` is specified)
 - `global_fdr/global.tsv` (if `--global_fdr` is specified)
+- `psms/*_psms.tsv`
+- `global_fdr/*_psms.tsv` (if `--global_fdr` is specified)
 - `spectrum_library/*_speclib.tsv` (if `--generate_speclib` is specified)
 
 #### TSV
@@ -52,6 +54,10 @@ PEP  sequence  accession  best_search_engine_score[1]  retention_time  charge  m
 ```
 
 By default (only identification) the `best_search_engine_score[1]` holds the percolator q-value. If `--quantify` is specified the Comet XCorr of each peptide identification is annotated in the `best_search_engine_score[1]` column and peptide quantities in the `peptide_abundance_study_variable` columns.
+
+#### PSM tables
+
+`psms/{Sample}_{Condition}_psms.tsv` lists every peptide-spectrum match of every peptidoform that passed the FDR filter, with the same columns as the peptide-level TSV. Use it to see all spectra, charge states and replicate runs behind a reported peptide. The `score` column is the rescoring engine's q-value: with `--rescoring_engine percolator` and peptide-level FDR only the best PSM per peptide carries a q-value and all other PSMs of that peptide are set to `1.0` by `PercolatorAdapter`; with `--rescoring_engine ristretto` every PSM additionally carries `ristretto_psm_qvalue`, `ristretto_psm_pep` and the ristretto SVM score `ristretto_score`, so the PSM that defined a peptidoform's q-value is the one with the highest `ristretto_score`. With `--global_fdr`, `global_fdr/<preset>_psms.tsv` holds the same table for the globally merged runs.
 
 #### Global FDR
 

@@ -25,6 +25,18 @@ RESCORING_ENGINES = ("percolator", "ristretto")
 # MS²Rescore's PSM metadata, so it falls back to the peptidoform level.
 FDR_LEVELS = {"psm_level_fdrs": None, "peptide_level_fdrs": "peptidoform", "protein_level_fdrs": "peptidoform"}
 FEATURE_GENERATORS = ("basic", "ms2pip", "deeplc", "ms2", "im2deep")
+# q-value/PEP are the idXML keys psm_utils writes for psm.qvalue/psm.pep
+LEAKING_METAVALUES = {"q-value", "PEP"}
+RISTRETTO_METAVALUES = {
+    "ristretto_score",
+    "ristretto_psm_qvalue",
+    "ristretto_psm_pep",
+    "ristretto_peptidoform_qvalue",
+    "ristretto_peptidoform_pep",
+    "ristretto_peptide_qvalue",
+    "ristretto_peptide_pep",
+}
+LEAKING_METAVALUES |= RISTRETTO_METAVALUES
 # CLI options that are consumed while building nested config sections and must not be copied
 # verbatim into the top-level MS²Rescore config.
 NESTED_OPTIONS = {
@@ -35,6 +47,7 @@ NESTED_OPTIONS = {
     "train_fdr",
     "rescoring_engine",
     "fdr_level",
+    "require_precomputed_features",
 }
 
 
@@ -87,6 +100,10 @@ def parse_cli_arguments_to_config(**kwargs):
 
     # Ristretto (the only rescoring engine in MS²Rescore >=4)
     ms2rescore_config["rescoring"] = {"train_fdr": kwargs["train_fdr"], "model": "svm"}
+    if kwargs["require_precomputed_features"]:
+        # MS²Rescore 4.0.2 mis-assigns skipped generators' features to the "psm_file" group as well, which
+        # makes the HTML report fail on duplicate columns. The per-group reports already exist, so skip it.
+        ms2rescore_config["write_report"] = False
     if kwargs["rescoring_engine"] == "percolator":
         logging.info(
             "Percolator rescoring engine has been specified. Ristretto q-values/PEPs are written as "
@@ -96,15 +113,24 @@ def parse_cli_arguments_to_config(**kwargs):
     return config
 
 
-def rescore_idxml(input_file, output_file, config, rescoring_engine: str, fdr_level: str) -> None:
+def rescore_idxml(
+    input_file, output_file, config, rescoring_engine: str, fdr_level: str, require_precomputed_features: bool
+) -> None:
     """Rescore PSMs in an idXML file and keep other information unchanged."""
     # Read PSMs
     reader = IdXMLReader(input_file)
     psm_list = reader.read_file()
 
+    # psm_utils treats every numeric metavalue as a rescoring feature. Scores written by a previous
+    # MS²Rescore pass (e.g. per-group output merged for global FDR) must not leak back in as features.
+    for psm in psm_list:
+        for key in LEAKING_METAVALUES & set(psm.rescoring_features):
+            del psm.rescoring_features[key]
+
     # Ristretto overwrites the search engine score in place. Remember it so the idXML keeps the
     # original main score (and its orientation) while ristretto q-value/PEP become metavalues.
     original_scores = {id(psm): psm.score for psm in psm_list}
+    features_before = {id(psm): set(psm.rescoring_features) for psm in psm_list}
 
     # Rescore
     try:
@@ -113,19 +139,44 @@ def rescore_idxml(input_file, output_file, config, rescoring_engine: str, fdr_le
     except RescoringError:
         # Ristretto needs targets passing train_fdr to train. Features are already attached to the
         # PSMs at this point, so with Percolator downstream we can still hand over the features.
-        if rescoring_engine != "percolator":
-            raise
-        logging.warning(
-            "Ristretto could not be trained on this input (too few confident targets). "
-            "Writing MS²Rescore features without ristretto scores; Percolator will rescore downstream."
-        )
         rescored = False
+        if rescoring_engine == "percolator":
+            logging.warning(
+                "Ristretto could not be trained on this input (too few confident targets). "
+                "Writing MS²Rescore features without ristretto scores; Percolator will rescore downstream."
+            )
+        else:
+            # Mirror a group in which nothing passes FDR: q-value 1 for every PSM lets the pipeline's
+            # empty-group handling report and skip it instead of aborting the whole run.
+            logging.warning(
+                "Ristretto could not be trained on this input (too few confident targets). "
+                "All PSMs are written with q-value 1, so this group will be reported as empty after FDR filtering."
+            )
+            for psm in psm_list:
+                psm.qvalue = 1.0
+                psm.pep = 1.0
+
+    if require_precomputed_features:
+        generated = [
+            sorted(set(psm.rescoring_features) - features_before[id(psm)]) for psm in psm_list
+        ]
+        newly_generated = sorted({f for fs in generated for f in fs} - RISTRETTO_METAVALUES)
+        if newly_generated:
+            raise click.ClickException(
+                "Expected all rescoring features to be present in the input idXML (e.g. merged per-group "
+                f"MS²Rescore output for global FDR), but generators added {newly_generated[:5]}... "
+                "Check that --feature_generators matches the per-group run."
+            )
 
     for psm in psm_list:
+        if rescored and psm.pep is not None:
+            psm.rescoring_features["ristretto_score"] = float(psm.score)
         psm.score = original_scores[id(psm)]
 
     if rescored:
         apply_fdr_level(psm_list, fdr_level)
+        if rescoring_engine == "ristretto" and FDR_LEVELS[fdr_level] is not None:
+            collapse_to_best_psm(psm_list)
 
     # Keep only PSMs that were processed by all feature generators (and survived ristretto)
     peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids, require_pep=rescored)
@@ -133,6 +184,29 @@ def rescore_idxml(input_file, output_file, config, rescoring_engine: str, fdr_le
     # Write
     writer = IdXMLWriter(output_file, protein_ids=reader.protein_ids, peptide_ids=peptide_ids_filtered)
     writer.write_file(psm_list)
+
+
+def collapse_to_best_psm(psm_list: PSMList) -> None:
+    """Keep the rollup q-value/PEP only on the best-scoring PSM per peptidoform (charge-independent).
+
+    Mirrors PercolatorAdapter's peptide-level output, where all but the best PSM of a peptide are set
+    to q-value 1 and removed by the downstream IDFilter. PSM-level ristretto values stay available as
+    `ristretto_psm_*` metavalues, and quantification re-expands PSMs from the pre-filter file.
+    """
+    best = {}
+    for psm in psm_list:
+        if psm.pep is None:
+            continue
+        key = psm.peptidoform.modified_sequence
+        score = psm.rescoring_features["ristretto_score"]
+        if key not in best or score > best[key][0]:
+            best[key] = (score, id(psm))
+    for psm in psm_list:
+        if psm.pep is None:
+            continue
+        if best[psm.peptidoform.modified_sequence][1] != id(psm):
+            psm.qvalue = 1.0
+            psm.pep = 1.0
 
 
 def apply_fdr_level(psm_list: PSMList, fdr_level: str) -> None:
@@ -243,11 +317,25 @@ def filter_out_artifact_psms(
     type=click.Choice(sorted(FDR_LEVELS)),
     default="psm_level_fdrs",
 )
+@click.option(
+    "--require_precomputed_features",
+    is_flag=True,
+    default=False,
+    help="Fail if any feature generator has to run, i.e. the input must already carry all MS²Rescore features "
+    "(used for the dataset-wide ristretto pass on merged per-group output).",
+)
 def main(**kwargs):
     config = parse_cli_arguments_to_config(**kwargs)
     logging.info("MS²Rescore config:")
     logging.info(config)
-    rescore_idxml(kwargs["psm_file"], kwargs["output_path"], config, kwargs["rescoring_engine"], kwargs["fdr_level"])
+    rescore_idxml(
+        kwargs["psm_file"],
+        kwargs["output_path"],
+        config,
+        kwargs["rescoring_engine"],
+        kwargs["fdr_level"],
+        kwargs["require_precomputed_features"],
+    )
 
 
 if __name__ == "__main__":

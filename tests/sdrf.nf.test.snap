@@ -12,6 +12,9 @@
                 "OPENMS_DECOYDATABASE": {
                     "openms": "3.5.0"
                 },
+                "OPENMS_IDFILTER_PSMS": {
+                    "openms": "3.5.0"
+                },
                 "OPENMS_IDFILTER_Q_VALUE": {
                     "openms": "3.5.0"
                 },
@@ -32,6 +35,9 @@
                     "openms": "3.5.0"
                 },
                 "OPENMS_TEXTEXPORTER": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_TEXTEXPORTER_PSMS": {
                     "openms": "3.5.0"
                 },
                 "PARSESDRF_CONVERT": {
@@ -101,11 +107,14 @@
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
                 "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml",
+                "psms",
+                "psms/lc2_1_psms.tsv",
                 "sdrf",
                 "sdrf/PXD009752_presets.tsv",
                 "sdrf/PXD009752_samplesheet.tsv"
             ],
             [
+                "lc2_1_psms.tsv:md5,96019f36fd47f5c7702cbb5a1f9cafe6",
                 "PXD009752_presets.tsv:md5,3ba3b5c24f71025bfc1799ea87cd0a12",
                 "PXD009752_samplesheet.tsv:md5,4d7d2f1ca8d3def75b05ae8c01c481d8"
             ],
@@ -113,7 +122,7 @@
                 
             ]
         ],
-        "timestamp": "2026-09-17T18:15:48.64967599",
+        "timestamp": "2026-09-22T20:55:17.092241142",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

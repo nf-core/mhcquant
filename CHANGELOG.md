@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added MultiQC plot for DeepLC retention time calibration per sample [#461](https://github.com/nf-core/mhcquant/pull/461)
 - Added MultiQC box plot of aligned residuals in the quant workflow [#462](https://github.com/nf-core/mhcquant/pull/462)
+- Added PSM-level result tables `psms/*_psms.tsv` (all PSMs of FDR-passing peptidoforms, both rescoring engines) and the real PSM count in the MultiQC general statistics [#478](https://github.com/nf-core/mhcquant/pull/478)
 
 ### `Fixed`
 
@@ -27,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stopped publishing the intermediate `_psm.idXML` and `_ms2rescore.idXML` files to `intermediate_results/rescoring` [#470](https://github.com/nf-core/mhcquant/pull/470)
 - Replaced local `easypqp/convert` and `easypqp/library` modules with the nf-core/modules equivalents [#473](https://github.com/nf-core/mhcquant/pull/473)
 - Replaced local OpenMS modules (`MzTabExporter`, `MapAlignerIdentification`, `MapRTTransformer`, `FeatureFinderIdentification`, `IDConflictResolver`, `PSMFeatureExtractor`) with the nf-core/modules equivalents [#477](https://github.com/nf-core/mhcquant/pull/477)
-- Bumped MS²Rescore to 4.0.2 and replaced the `mokapot` rescoring engine with MS²Rescore's built-in `ristretto` engine (`--rescoring_engine ristretto`, honours `--fdr_level psm_level_fdrs|peptide_level_fdrs`, `test_mokapot` profile renamed to `test_ristretto`); Percolator remains the default. `--deeplc_calibration_set_size` is now passed to MS²Rescore, the `ionmob` feature generator was removed upstream, and with `--rescoring_engine percolator` samples on which ristretto cannot train (no confident targets) still receive MS²Rescore features [#478](https://github.com/nf-core/mhcquant/pull/478)
+- Bumped MS²Rescore to 4.0.2 and replaced the `mokapot` rescoring engine with MS²Rescore's built-in `ristretto` engine (`--rescoring_engine ristretto`, honours `--fdr_level psm_level_fdrs|peptide_level_fdrs` and `--global_fdr`, keeps the best PSM per peptidoform like Percolator, `test_mokapot` profile renamed to `test_ristretto` and `test_search_presets` switched to ristretto); Percolator remains the default. `--deeplc_calibration_set_size` is now passed to MS²Rescore, the `ionmob` feature generator was removed upstream, and with `--rescoring_engine percolator` samples on which ristretto cannot train (no confident targets) still receive MS²Rescore features [#478](https://github.com/nf-core/mhcquant/pull/478)
 
 ### `Fixed`
 
