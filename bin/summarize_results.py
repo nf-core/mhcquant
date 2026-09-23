@@ -37,6 +37,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--psms",
+    nargs=1,
+    default=None,
+    help="Optional PSM-level TSV (OPENMS_TEXTEXPORTER of all PSMs of FDR-passing peptidoforms); written as <prefix>_psms.tsv."
+)
+
+parser.add_argument(
     "--trafoxml",
     nargs='*',
     default=[],
@@ -122,7 +129,7 @@ def multi_tsv_not_empty(file_path):
     return False
 
 
-def process_file(file, prefix, quantify, keep_cols):
+def process_file(file, prefix, quantify, keep_cols, n_psms_override=None):
     """Extract all the relevant information and write it to a TSV file for the MultiQC report
 
        Args:
@@ -139,6 +146,9 @@ def process_file(file, prefix, quantify, keep_cols):
         # Remove the special character '#' from the first column name
         data.rename(columns={data.columns[0]: data.columns[0].replace('#', '')}, inplace=True)
         n_psms = 0
+    # The PSM table (if given) is the authoritative PSM count in both modes
+    if n_psms_override is not None:
+        n_psms = n_psms_override
 
     # Check if all required columns are present in the DataFrame
     required_columns = ['sequence', 'accessions', 'mz', 'rt', 'score', 'COMET:xcorr']
@@ -149,7 +159,7 @@ def process_file(file, prefix, quantify, keep_cols):
     else:
         with open(f"{prefix}_general_stats.csv", "w") as f:
             f.write(f"Sample,# Peptides,# Modified Peptides,# Proteins,# PSMs\n")
-            f.write(f"{prefix},0,0,0,0\n")
+            f.write(f"{prefix},0,0,0,{n_psms}\n")
         data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
         return
 
@@ -230,6 +240,11 @@ def process_file(file, prefix, quantify, keep_cols):
                 f"{prefix}_deeplc_rt_diff.csv", index=False, header=False
             )
 
+    finalize_table(data, list(keep_cols) if keep_cols else None, f"{prefix}.tsv")
+
+
+def finalize_table(data, keep_cols, out_path, extra_patterns=()):
+    """Add unique_accessions, select/round columns and write the table."""
     # Add a column with unique protein accessions next to accessions
     data.insert(data.columns.get_loc('accessions') + 1, 'unique_accessions',
                 data['accessions'].map(lambda x: ';'.join(dict.fromkeys(x.split(';')))))
@@ -240,8 +255,8 @@ def process_file(file, prefix, quantify, keep_cols):
         if missing_columns:
             logging.warning(f"The following columns do not exist in the DataFrame: {missing_columns}")
             keep_cols = [col for col in keep_cols if col not in missing_columns]
-        # Retain columns matching rt_*, mz_*, intensity_*, and charge_*
-        regex_patterns = [r'^rt_', r'^mz_', r'^intensity_', r'^charge_']
+        # Retain columns matching rt_*, mz_*, intensity_*, and charge_* (plus table-specific patterns)
+        regex_patterns = [r'^rt_', r'^mz_', r'^intensity_', r'^charge_', *extra_patterns]
         for pattern in regex_patterns:
             keep_cols.extend([col for col in data.columns if re.match(pattern, col)])
         # Always include unique_accessions next to accessions
@@ -256,7 +271,28 @@ def process_file(file, prefix, quantify, keep_cols):
     float_cols = data.select_dtypes(include=['float']).columns
     data.loc[:, float_cols] = data.loc[:, float_cols].round(5)
 
-    data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
+    data.to_csv(out_path, sep='\t', index=False)
+
+
+def process_psms(file, prefix, keep_cols):
+    """Write the PSM-level table (all PSMs of FDR-passing peptidoforms) and return the PSM count.
+
+    The `score` column is the rescoring engine's q-value. With Percolator and peptide-level FDR only the
+    best PSM per peptide carries a q-value (all others are 1.0 by PercolatorAdapter); with ristretto every
+    PSM additionally carries `ristretto_psm_qvalue`, `ristretto_psm_pep` and `ristretto_score`.
+    """
+    data = pd.read_csv(file, sep='\t')
+    data.rename(columns={data.columns[0]: data.columns[0].replace('#', '')}, inplace=True)
+    if data.shape[0] == 0:
+        data.to_csv(f"{prefix}_psms.tsv", sep='\t', index=False)
+        return 0
+    data["peptidoform"] = data["sequence"]
+    data["sequence"] = data["sequence"].apply(strip_modifications)
+    if "IM" in data.columns:
+        data.rename(columns={"IM": "ion_mobility"}, inplace=True)
+    finalize_table(data, list(keep_cols) if keep_cols else None, f"{prefix}_psms.tsv",
+                   extra_patterns=(r'^ristretto_', r'^PEP$'))
+    return data.shape[0]
 
 
 def write_aligned_residuals(trafoxml_paths):
@@ -286,10 +322,12 @@ def main():
         cols = args.columns[0]
     else:
         cols = None
+    n_psms = process_psms(args.psms[0], args.out_prefix[0], cols) if args.psms else None
     process_file(args.input[0],
                  args.out_prefix[0],
                  args.quantify,
-                 cols)
+                 cols,
+                 n_psms_override=n_psms)
     if args.trafoxml:
         write_aligned_residuals(args.trafoxml)
 

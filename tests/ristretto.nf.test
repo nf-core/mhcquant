@@ -3,10 +3,10 @@ nextflow_pipeline {
     name "Test pipeline"
     script "../main.nf"
     tag "pipeline"
-    tag "test_mokapot"
-    profile "test_mokapot"
+    tag "test_ristretto"
+    profile "test_ristretto"
 
-    test("-profile test_mokapot") {
+    test("-profile test_ristretto") {
 
         when {
             params {
@@ -18,7 +18,7 @@ nextflow_pipeline {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
-			// Mokapot seems to return non-deterministic results eventhough the random number generator (rng) is fixed
+			// Ristretto (SVM) results are not bit-stable across runs, so TSV contents are excluded
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['*.tsv'])
             assertAll(
                 { assert workflow.success},

@@ -5,12 +5,15 @@ multiqc/multiqc_data/multiqc_data.json
 multiqc/multiqc_data/*.txt
 multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
+multiqc/ms2rescore/*.html
 pipeline_info/*.{html,json,txt,yml}
 intermediate_results/comet/*
 intermediate_results/rescoring/*
 intermediate_results/ion_annotations/*
-global_fdr/global.tsv
+global_fdr/*.tsv
+psms/*.tsv
 spectrum_library/*_speclib.tsv
 *.tsv
 intermediate_results/features/*
+intermediate_results/alignment/*.trafoXML
 *.mzTab

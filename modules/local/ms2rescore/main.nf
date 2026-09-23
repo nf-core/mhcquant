@@ -4,8 +4,8 @@ process MS2RESCORE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ms2rescore:3.1.5--pyhdfd78af_1':
-        'biocontainers/ms2rescore:3.1.5--pyhdfd78af_1' }"
+        'https://depot.galaxyproject.org/singularity/ms2rescore:4.0.2--pyhdfd78af_0':
+        'biocontainers/ms2rescore:4.0.2--pyhdfd78af_0' }"
 
     // userEmulation settings when docker is specified
     containerOptions ( workflow.containerEngine == 'docker' ? '-u $(id -u) -e "HOME=${HOME}" -v /etc/passwd:/etc/passwd:ro -v /etc/shadow:/etc/shadow:ro -v /etc/group:/etc/group:ro -v $HOME:$HOME' : '' )
@@ -17,7 +17,7 @@ process MS2RESCORE {
     tuple val(meta), path("*ms2rescore.idXML") , emit: idxml
     tuple val(meta), path("*feature_names.tsv"), emit: feature_names
     tuple val(meta), path("*.html" )           , optional:true, emit: html
-    tuple val("${task.process}"), val('MS2Rescore'), eval("echo \"\$(ms2rescore --version 2>&1)\" | grep -oP 'MS²Rescore \\(v\\K[^\\)]+'"), topic: versions
+    tuple val("${task.process}"), val('MS2Rescore'), eval('ms2rescore --version 2>/dev/null | tail -n1'), topic: versions
 
     when:
     task.ext.when == null || task.ext.when

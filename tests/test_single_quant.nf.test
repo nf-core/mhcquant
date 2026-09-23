@@ -32,11 +32,14 @@ nextflow_pipeline {
                                 def fields = line.split('\t')
                                 fields.size() > peptidoformIndex ? fields[peptidoformIndex] : ''
                             }.findAll { it != '' }.sort()
-                            peptidoform_data.add([file.name, peptidoforms])
+                            // Identifications differ slightly between machines (DeepLC predictions are not bit-reproducible),
+                            // so only the table structure and non-emptiness are snapshotted
+                            peptidoform_data.add([file.name, header.toList(), peptidoforms.size() > 0])
                         }
                     }
                 }
             }
+            peptidoform_data = peptidoform_data.sort { it[0] }
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(

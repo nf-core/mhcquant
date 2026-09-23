@@ -1,16 +1,19 @@
 {
-    "-profile test_mokapot": {
+    "-profile test_ristretto": {
         "content": [
-            20,
+            21,
             {
                 "MS2RESCORE": {
-                    "MS2Rescore": "3.1.5"
+                    "MS2Rescore": "4.0.2"
                 },
                 "OPENMSTHIRDPARTY_COMETADAPTER": {
                     "Comet": "2024.01 rev. 1",
                     "CometAdapter": "3.5.0"
                 },
                 "OPENMS_DECOYDATABASE": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_IDFILTER_PSMS": {
                     "openms": "3.5.0"
                 },
                 "OPENMS_IDFILTER_Q_VALUE": {
@@ -22,13 +25,13 @@
                 "OPENMS_IDMERGER": {
                     "openms": "3.5.0"
                 },
-                "OPENMS_IDSCORESWITCHER": {
-                    "openms": "3.5.0"
-                },
                 "OPENMS_PEPTIDEINDEXER": {
                     "openms": "3.5.0"
                 },
                 "OPENMS_TEXTEXPORTER": {
+                    "openms": "3.5.0"
+                },
+                "OPENMS_TEXTEXPORTER_PSMS": {
                     "openms": "3.5.0"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
@@ -52,6 +55,7 @@
                 "intermediate_results/rescoring/HepG2_A_pout_filtered.idXML",
                 "multiqc",
                 "multiqc/ms2rescore",
+                "multiqc/ms2rescore/HepG2_A_ms2rescore.report.html",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
@@ -105,13 +109,14 @@
                 "multiqc/multiqc_plots/svg/scores_xcorr.svg",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
-                "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml"
+                "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml",
+                "psms",
+                "psms/HepG2_A_psms.tsv"
             ],
             [
-                
             ]
         ],
-        "timestamp": "2026-06-11T12:17:23.861646548",
+        "timestamp": "2026-09-23T12:28:34.43738143",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
