@@ -26,10 +26,6 @@ include {
 
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_GLOBAL                   } from '../../../modules/nf-core/openms/idmerger/main'
 include {
-    OPENMS_IDSCORESWITCHER ;
-    OPENMS_IDSCORESWITCHER as OPENMS_IDSCORESWITCHER_GLOBAL
-} from '../../../modules/nf-core/openms/idscoreswitcher/main.nf'
-include {
     OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE ;
     OPENMS_IDFILTER as OPENMS_IDFILTER_Q_VALUE_GLOBAL ;
     OPENMS_IDFILTER as OPENMS_IDFILTER_GLOBAL ;
@@ -43,56 +39,15 @@ workflow RESCORE {
     ch_multiqc_files
 
     main:
-    // Compute features via ms2rescore
+    // Compute features via ms2rescore. In ristretto mode the output already carries the
+    // ristretto q-value as main score; in Percolator mode it carries the features for Percolator.
     MS2RESCORE(ch_merged_runs)
 
     if (params.rescoring_engine == 'ristretto') {
-        if (params.fdr_level == 'protein_level_fdrs') {
-            log.warn("Protein-level FDR is not supported by ristretto. Peptide-level q-values will be used instead.")
-        }
-        // Switch comet e-value to ristretto q-value (local, per sample/condition group)
-        OPENMS_IDSCORESWITCHER(MS2RESCORE.out.idxml)
-        ch_rescored_local = OPENMS_IDSCORESWITCHER.out.idxml
-
-        if (params.global_fdr) {
-            // Group by search_preset for global FDR, exactly like the Percolator branch
-            OPENMS_IDMERGER_GLOBAL(
-                MS2RESCORE.out.idxml.map { group_meta, idxml -> [group_meta + [id: group_meta.search_preset ?: 'global'], idxml] }.groupTuple()
-            )
-            // Second MS²Rescore pass: all features are already present, so only ristretto runs, dataset-wide
-            MS2RESCORE_GLOBAL(OPENMS_IDMERGER_GLOBAL.out.idxml.map { meta, idxml -> [meta, idxml, [], []] })
-            OPENMS_IDSCORESWITCHER_GLOBAL(MS2RESCORE_GLOBAL.out.idxml)
-            ch_rescored_runs = OPENMS_IDSCORESWITCHER_GLOBAL.out.idxml
-            // Filter by global ristretto q-value
-            OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map { id, idxml -> [id, idxml, []] })
-            // Backfilter: match each local file with its corresponding preset's global FDR file
-            OPENMS_IDFILTER_GLOBAL(
-                ch_rescored_local.map { group_meta, idxml ->
-                    [group_meta.search_preset ?: 'global', group_meta, idxml]
-                }.combine(
-                    OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered.map { global_meta, idxml -> [global_meta.id, idxml] },
-                    by: 0
-                ).map { preset, group_meta, local_idxml, global_filtered_idxml ->
-                    [group_meta, local_idxml, global_filtered_idxml]
-                }
-            )
-            ch_filter_q_value = OPENMS_IDFILTER_GLOBAL.out.filtered
-            // Save globally merged runs in tsv (one per preset group)
-            OPENMS_TEXTEXPORTER_GLOBAL(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered)
-            ch_global_rescored = ch_rescored_runs
-            ch_global_filtered = OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered
-        }
-        else {
-            ch_rescored_runs = ch_rescored_local
-            // Filter by ristretto q-value
-            OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map { group_meta, idxml -> [group_meta, idxml, []] })
-            ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
-            ch_global_rescored = channel.empty()
-            ch_global_filtered = channel.empty()
-        }
+        ch_rescored_local = MS2RESCORE.out.idxml
+        ch_global_input   = MS2RESCORE.out.idxml
     }
     else {
-        // Extract PSM features for Percolator
         // Read MS2Rescore feature names into meta so the nf-core module stays generic; -extra is set via ext.args
         MS2RESCORE.out.idxml
             .join(MS2RESCORE.out.feature_names)
@@ -107,45 +62,54 @@ workflow RESCORE {
         // Run Percolator with local FDR
         OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
         ch_multiqc_files = ch_multiqc_files.mix(OPENMS_PERCOLATORADAPTER.out.feature_weights.map { meta, feature_weights -> feature_weights })
-        ch_pout = OPENMS_PERCOLATORADAPTER.out.idxml
-        ch_rescored_local = ch_pout
+        ch_rescored_local = OPENMS_PERCOLATORADAPTER.out.idxml
+        ch_global_input   = OPENMS_PSMFEATUREEXTRACTOR.out.idxml.map { meta, idxml -> [meta.findAll { k, _v -> k != 'extra_features' }, idxml] }
+    }
 
-        if (params.global_fdr) {
-            // Group by search_preset for global FDR. Samples without a preset all share
-            // the same params (CLI or defaults), so they correctly group under 'global'.
-            OPENMS_IDMERGER_GLOBAL(
-                OPENMS_PSMFEATUREEXTRACTOR.out.idxml.map { group_meta, idxml -> [group_meta.findAll { k, _v -> k != 'extra_features' } + [id: group_meta.search_preset ?: 'global'], idxml] }.groupTuple()
-            )
+    if (params.global_fdr) {
+        // Group by search_preset for global FDR. Samples without a preset all share
+        // the same params (CLI or defaults), so they correctly group under 'global'.
+        OPENMS_IDMERGER_GLOBAL(
+            ch_global_input.map { group_meta, idxml -> [group_meta + [id: group_meta.search_preset ?: 'global'], idxml] }.groupTuple()
+        )
+
+        if (params.rescoring_engine == 'ristretto') {
+            // Second MS²Rescore pass: all features are already present, so only ristretto runs, dataset-wide
+            MS2RESCORE_GLOBAL(OPENMS_IDMERGER_GLOBAL.out.idxml.map { meta, idxml -> [meta, idxml, [], []] })
+            ch_rescored_runs = MS2RESCORE_GLOBAL.out.idxml
+        }
+        else {
             // Run Percolator with global FDR (one per preset group)
             OPENMS_PERCOLATORADAPTER_GLOBAL(OPENMS_IDMERGER_GLOBAL.out.idxml)
             ch_rescored_runs = OPENMS_PERCOLATORADAPTER_GLOBAL.out.idxml
-            // Filter by global percolator q-value
-            OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map { id, idxml -> [id, idxml, []] })
-            // Backfilter: match each local file with its corresponding preset's global FDR file
-            OPENMS_IDFILTER_GLOBAL(
-                ch_pout.map { group_meta, idxml ->
-                    [group_meta.search_preset ?: 'global', group_meta, idxml]
-                }.combine(
-                    OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered.map { global_meta, idxml -> [global_meta.id, idxml] },
-                    by: 0
-                ).map { preset, group_meta, local_idxml, global_filtered_idxml ->
-                    [group_meta, local_idxml, global_filtered_idxml]
-                }
-            )
-            ch_filter_q_value = OPENMS_IDFILTER_GLOBAL.out.filtered
-            // Save globally merged runs in tsv (one per preset group)
-            OPENMS_TEXTEXPORTER_GLOBAL(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered)
-            ch_global_rescored = ch_rescored_runs
-            ch_global_filtered = OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered
         }
-        else {
-            ch_rescored_runs = ch_pout
-            // Filter by percolator q-value
-            OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map { group_meta, idxml -> [group_meta, idxml, []] })
-            ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
-            ch_global_rescored = channel.empty()
-            ch_global_filtered = channel.empty()
-        }
+
+        // Filter by global q-value
+        OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map { id, idxml -> [id, idxml, []] })
+        // Backfilter: match each local file with its corresponding preset's global FDR file
+        OPENMS_IDFILTER_GLOBAL(
+            ch_rescored_local.map { group_meta, idxml ->
+                [group_meta.search_preset ?: 'global', group_meta, idxml]
+            }.combine(
+                OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered.map { global_meta, idxml -> [global_meta.id, idxml] },
+                by: 0
+            ).map { preset, group_meta, local_idxml, global_filtered_idxml ->
+                [group_meta, local_idxml, global_filtered_idxml]
+            }
+        )
+        ch_filter_q_value = OPENMS_IDFILTER_GLOBAL.out.filtered
+        // Save globally merged runs in tsv (one per preset group)
+        OPENMS_TEXTEXPORTER_GLOBAL(OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered)
+        ch_global_rescored = ch_rescored_runs
+        ch_global_filtered = OPENMS_IDFILTER_Q_VALUE_GLOBAL.out.filtered
+    }
+    else {
+        ch_rescored_runs = ch_rescored_local
+        // Filter by local q-value
+        OPENMS_IDFILTER_Q_VALUE(ch_rescored_runs.map { group_meta, idxml -> [group_meta, idxml, []] })
+        ch_filter_q_value = OPENMS_IDFILTER_Q_VALUE.out.filtered
+        ch_global_rescored = channel.empty()
+        ch_global_filtered = channel.empty()
     }
 
     // PSM-level tables: every PSM of every FDR-passing peptidoform, taken from the pre-filter rescored

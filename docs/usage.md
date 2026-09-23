@@ -134,7 +134,7 @@ The pipeline employs MS²Rescore for comprehensive feature prediction and rescor
 The pipeline supports two rescoring engines:
 
 - **Percolator** (default): Semi-supervised learning tool for rescoring PSMs (`--rescoring_engine percolator`)
-- **Ristretto**: MS²Rescore's built-in lightweight semi-supervised rescoring engine (`--rescoring_engine ristretto`). Supports `--fdr_level psm_level_fdrs` and `peptide_level_fdrs` (protein-level falls back to peptide-level) as well as `--global_fdr`. Like Percolator, only the best PSM per peptidoform is kept in the identification table; all PSMs are reported in `psms/`
+- **Ristretto**: MS²Rescore's built-in lightweight semi-supervised rescoring engine (`--rescoring_engine ristretto`). Supports `--fdr_level psm_level_fdrs` and `peptide_level_fdrs` as well as `--global_fdr`. Like Percolator, only the best PSM per peptidoform is kept in the identification table; all PSMs are reported in `psms/`
 
 > [!NOTE]
 > MS²Rescore creates a comprehensive QC report of the added features used for rescoring. The report can be found in `<OUTDIR>/multiqc/ms2rescore`.

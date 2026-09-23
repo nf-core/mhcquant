@@ -21,12 +21,15 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 # the feature-annotated idXML, so in that mode the ristretto scores are only written as metavalues.
 RESCORING_ENGINES = ("percolator", "ristretto")
 # Pipeline FDR levels mapped onto ristretto rollups. Percolator's "peptide" level is the modified
-# sequence, which corresponds to ristretto's peptidoform rollup. Protein-level FDR is not exposed by
-# MS²Rescore's PSM metadata, so it falls back to the peptidoform level.
-FDR_LEVELS = {"psm_level_fdrs": None, "peptide_level_fdrs": "peptidoform", "protein_level_fdrs": "peptidoform"}
+# sequence, which corresponds to ristretto's peptidoform rollup.
+FDR_LEVELS = {"psm_level_fdrs": None, "peptide_level_fdrs": "peptidoform"}
 FEATURE_GENERATORS = ("basic", "ms2pip", "deeplc", "ms2", "im2deep")
+# In ristretto mode the q-value becomes the idXML main score and the search engine score moves to
+# this metavalue, exactly like OpenMS IDScoreSwitcher `-new_score q-value -old_score expect` did.
+SWITCHED_SCORE_TYPE = "q-value"
+SEARCH_ENGINE_SCORE_METAVALUE = "expect"
 # q-value/PEP are the idXML keys psm_utils writes for psm.qvalue/psm.pep
-LEAKING_METAVALUES = {"q-value", "PEP"}
+LEAKING_METAVALUES = {"q-value", "PEP", SEARCH_ENGINE_SCORE_METAVALUE}
 RISTRETTO_METAVALUES = {
     "ristretto_score",
     "ristretto_psm_qvalue",
@@ -121,14 +124,20 @@ def rescore_idxml(
     reader = IdXMLReader(input_file)
     psm_list = reader.read_file()
 
+    # Input that was already switched by a previous ristretto pass (per-group output merged for global
+    # FDR) has the q-value as main score and carries the search engine score as metavalue.
+    if reader.peptide_ids[0].getScoreType() == SWITCHED_SCORE_TYPE:
+        for psm in psm_list:
+            psm.score = float(psm.rescoring_features.get(SEARCH_ENGINE_SCORE_METAVALUE, psm.score))
+
     # psm_utils treats every numeric metavalue as a rescoring feature. Scores written by a previous
-    # MS²Rescore pass (e.g. per-group output merged for global FDR) must not leak back in as features.
+    # MS²Rescore pass must not leak back in as features.
     for psm in psm_list:
         for key in LEAKING_METAVALUES & set(psm.rescoring_features):
             del psm.rescoring_features[key]
 
-    # Ristretto overwrites the search engine score in place. Remember it so the idXML keeps the
-    # original main score (and its orientation) while ristretto q-value/PEP become metavalues.
+    # Ristretto overwrites the search engine score in place. Remember it so it can be restored as main
+    # score (Percolator mode) or written as metavalue (ristretto mode).
     original_scores = {id(psm): psm.score for psm in psm_list}
     features_before = {id(psm): set(psm.rescoring_features) for psm in psm_list}
 
@@ -181,9 +190,22 @@ def rescore_idxml(
     # Keep only PSMs that were processed by all feature generators (and survived ristretto)
     peptide_ids_filtered = filter_out_artifact_psms(psm_list, reader.peptide_ids, require_pep=rescored)
 
+    if rescoring_engine == "ristretto":
+        switch_main_score_to_qvalue(psm_list, peptide_ids_filtered)
+
     # Write
     writer = IdXMLWriter(output_file, protein_ids=reader.protein_ids, peptide_ids=peptide_ids_filtered)
     writer.write_file(psm_list)
+
+
+def switch_main_score_to_qvalue(psm_list: PSMList, peptide_ids: List[oms.PeptideIdentification]) -> None:
+    """Make the ristretto q-value the idXML main score so OpenMS IDFilter can threshold on it directly."""
+    for psm in psm_list:
+        psm.rescoring_features[SEARCH_ENGINE_SCORE_METAVALUE] = float(psm.score)
+        psm.score = float(psm.qvalue) if psm.qvalue is not None else 1.0
+    for peptide_id in peptide_ids:
+        peptide_id.setScoreType(SWITCHED_SCORE_TYPE)
+        peptide_id.setHigherScoreBetter(False)
 
 
 def collapse_to_best_psm(psm_list: PSMList) -> None:
@@ -212,8 +234,6 @@ def collapse_to_best_psm(psm_list: PSMList) -> None:
 def apply_fdr_level(psm_list: PSMList, fdr_level: str) -> None:
     """Expose ristretto's rollup q-values/PEPs and select the level written as `q-value`/`PEP`."""
     rollup = FDR_LEVELS[fdr_level]
-    if fdr_level == "protein_level_fdrs":
-        logging.warning("Protein-level FDR is not available from ristretto; using peptidoform-level q-values instead.")
     for psm in psm_list:
         if psm.pep is None:  # dropped by ristretto
             continue
