@@ -15,4 +15,5 @@ psms/*.tsv
 spectrum_library/*_speclib.tsv
 *.tsv
 intermediate_results/features/*
+intermediate_results/alignment/*.trafoXML
 *.mzTab
