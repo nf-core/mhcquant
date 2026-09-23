@@ -1,7 +1,7 @@
 {
     "-profile test_ristretto": {
         "content": [
-            22,
+            21,
             {
                 "MS2RESCORE": {
                     "MS2Rescore": "4.0.2"
@@ -23,9 +23,6 @@
                     "openms": "3.4.1"
                 },
                 "OPENMS_IDMERGER": {
-                    "openms": "3.5.0"
-                },
-                "OPENMS_IDSCORESWITCHER": {
                     "openms": "3.5.0"
                 },
                 "OPENMS_PEPTIDEINDEXER": {
@@ -117,11 +114,9 @@
                 "psms/HepG2_A_psms.tsv"
             ],
             [
-                "HepG2_A_ms2rescore.report.html:md5,40f45443508fbf6aff80bbd2c578549a",
-                "HepG2_A_psms.tsv:md5,3c4ee5c8474eccb1f06354f0628b01dc"
             ]
         ],
-        "timestamp": "2026-09-22T20:39:26.833403568",
+        "timestamp": "2026-09-23T12:28:34.43738143",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

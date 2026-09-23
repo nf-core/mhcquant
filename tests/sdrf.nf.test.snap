@@ -114,7 +114,6 @@
                 "sdrf/PXD009752_samplesheet.tsv"
             ],
             [
-                "lc2_1_psms.tsv:md5,96019f36fd47f5c7702cbb5a1f9cafe6",
                 "PXD009752_presets.tsv:md5,3ba3b5c24f71025bfc1799ea87cd0a12",
                 "PXD009752_samplesheet.tsv:md5,4d7d2f1ca8d3def75b05ae8c01c481d8"
             ],

@@ -31,7 +31,8 @@ nextflow_pipeline {
                                 def fields = line.split('\t')
                                 fields.size() > peptidoformIndex ? fields[peptidoformIndex] : ''
                             }.findAll { it != '' }.sort()
-                            peptidoform_data.add([file.name, peptidoforms])
+                            // Compact, still content-sensitive: counts, first entries and an MD5 of the full sorted list
+                            peptidoform_data.add([file.name, peptidoforms.size(), peptidoforms.unique().size(), peptidoforms.take(10), peptidoforms.join('\n').md5()])
                         }
                     }
                 }
