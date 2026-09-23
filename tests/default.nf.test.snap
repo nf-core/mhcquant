@@ -129,47 +129,78 @@
                 "psms/HepG2_A_psms.tsv"
             ],
             [
+                
             ],
             [
                 [
                     "HepG2_A.tsv",
-                    234,
-                    234,
                     [
-                        "AAAAAAHRL",
-                        "AAATVTKKV",
-                        "AAHPNVQKV",
-                        "AAKDPSPSV",
-                        "AAM(Oxidation)SVAKRV",
-                        "AANAQPHKL",
-                        "AANDKLKKM",
-                        "AANPDPKKL",
-                        "AAPPPPAHA",
-                        "AAPRPPPKPM(Oxidation)"
+                        "peptidoform",
+                        "sequence",
+                        "score",
+                        "score_type",
+                        "rt",
+                        "mz",
+                        "charge",
+                        "accessions",
+                        "unique_accessions",
+                        "aa_before",
+                        "aa_after",
+                        "start",
+                        "end",
+                        "COMET:deltaCn",
+                        "COMET:deltaLCn",
+                        "COMET:lnExpect",
+                        "COMET:xcorr",
+                        "rt_diff_best",
+                        "observed_retention_time_best",
+                        "predicted_retention_time_best",
+                        "spec_pearson",
+                        "std_abs_diff",
+                        "rt_diff"
                     ],
-                    "5707247d77ff7e88fc9d2431f8aaf7ef"
+                    true
                 ],
                 [
                     "HepG2_A_psms.tsv",
-                    1296,
-                    234,
                     [
-                        "AAAAAAHRL",
-                        "AAATVTKKV",
-                        "AAHPNVQKV",
-                        "AAKDPSPSV",
-                        "AAM(Oxidation)SVAKRV",
-                        "AANAQPHKL",
-                        "AANDKLKKM",
-                        "AANPDPKKL",
-                        "AAPPPPAHA",
-                        "AAPRPPPKPM(Oxidation)"
+                        "peptidoform",
+                        "sequence",
+                        "score",
+                        "score_type",
+                        "rt",
+                        "mz",
+                        "charge",
+                        "accessions",
+                        "unique_accessions",
+                        "aa_before",
+                        "aa_after",
+                        "start",
+                        "end",
+                        "COMET:deltaCn",
+                        "COMET:deltaLCn",
+                        "COMET:lnExpect",
+                        "COMET:xcorr",
+                        "rt_diff_best",
+                        "observed_retention_time_best",
+                        "predicted_retention_time_best",
+                        "spec_pearson",
+                        "std_abs_diff",
+                        "rt_diff",
+                        "ristretto_peptide_pep",
+                        "ristretto_peptide_qvalue",
+                        "ristretto_peptidoform_pep",
+                        "ristretto_peptidoform_qvalue",
+                        "ristretto_psm_pep",
+                        "ristretto_psm_qvalue",
+                        "ristretto_score",
+                        "PEP"
                     ],
-                    "5707247d77ff7e88fc9d2431f8aaf7ef"
+                    true
                 ]
             ]
         ],
-        "timestamp": "2026-09-23T12:19:01.779168993",
+        "timestamp": "2026-09-23T14:17:22.232851409",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
