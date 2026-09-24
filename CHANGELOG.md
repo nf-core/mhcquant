@@ -3,18 +3,24 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 3.3.0dev
+## 3.3.0 - Favorite - 24/09/26
 
 ### `Added`
 
 - Added MultiQC plot for DeepLC retention time calibration per sample [#461](https://github.com/nf-core/mhcquant/pull/461)
 - Added MultiQC box plot of aligned residuals in the quant workflow [#462](https://github.com/nf-core/mhcquant/pull/462)
+- Added `manifest.diagram` to `nextflow.config` by @ewels [#476](https://github.com/nf-core/mhcquant/pull/476)
 
 ### `Fixed`
 
 - Fixed `UNTAR`, `UNZIP` and `EPICORE` version `eval` crashing on parenthesis-containing tool banners [#455](https://github.com/nf-core/mhcquant/pull/455)
+- Fixed silent per-sample drop from order-dependent `combine(by:)` in QUANT [#460](https://github.com/nf-core/mhcquant/pull/460)
+- Fixed non-reproducible per-replicate column order in quantification output from unsorted `groupTuple()` [#460](https://github.com/nf-core/mhcquant/pull/460)
+- Restored documented samplesheet validation errors for malformed input [#463](https://github.com/nf-core/mhcquant/pull/463)
+- Fixed `Condition` samplesheet validation accepting values with whitespace [#464](https://github.com/nf-core/mhcquant/pull/464)
 - Fixed `FeatureFinderIdentification` (OpenMS 3.5.0) losing all peptide identifications on FAIMS data, which crashed `SUMMARIZE_RESULTS`, by disabling `faims:merge_features` [#474](https://github.com/nf-core/mhcquant/pull/474)
 - Fixed `MapAlignerIdentification` aborting with `no data points for 'linear' model` when a run shares no RT landmarks with its group; the whole sample/condition group is now excluded from quantification, exported with identifications only, and a warning is emitted [#474](https://github.com/nf-core/mhcquant/pull/474)
+- Fixed `test_single_quant` nf-test never running the QUANT subworkflow [#475](https://github.com/nf-core/mhcquant/pull/475)
 - Fixed missing ion mobility for timsTOF `.d` input by bumping `tdf2mzml` to 0.6.1 [#479](https://github.com/nf-core/mhcquant/pull/479)
 
 ### `Changed`
@@ -28,15 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stopped publishing the intermediate `_psm.idXML` and `_ms2rescore.idXML` files to `intermediate_results/rescoring` [#470](https://github.com/nf-core/mhcquant/pull/470)
 - Replaced local `easypqp/convert` and `easypqp/library` modules with the nf-core/modules equivalents [#473](https://github.com/nf-core/mhcquant/pull/473)
 - Replaced local OpenMS modules (`MzTabExporter`, `MapAlignerIdentification`, `MapRTTransformer`, `FeatureFinderIdentification`, `IDConflictResolver`, `PSMFeatureExtractor`) with the nf-core/modules equivalents [#477](https://github.com/nf-core/mhcquant/pull/477)
-
-### `Fixed`
-
-- Restored documented samplesheet validation errors for malformed input [#463](https://github.com/nf-core/mhcquant/pull/463)
-
-### `Fixed`
-
-- Fixed silent per-sample drop from order-dependent `combine(by:)` in QUANT [#460](https://github.com/nf-core/mhcquant/pull/460)
-- Fixed non-reproducible per-replicate column order in quantification output from unsorted `groupTuple()` [#460](https://github.com/nf-core/mhcquant/pull/460)
 
 ### `Dependencies`
 
