@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `UNTAR`, `UNZIP` and `EPICORE` version `eval` crashing on parenthesis-containing tool banners [#455](https://github.com/nf-core/mhcquant/pull/455)
 - Fixed `FeatureFinderIdentification` (OpenMS 3.5.0) losing all peptide identifications on FAIMS data, which crashed `SUMMARIZE_RESULTS`, by disabling `faims:merge_features` [#474](https://github.com/nf-core/mhcquant/pull/474)
 - Fixed `MapAlignerIdentification` aborting with `no data points for 'linear' model` when a run shares no RT landmarks with its group; the whole sample/condition group is now excluded from quantification, exported with identifications only, and a warning is emitted [#474](https://github.com/nf-core/mhcquant/pull/474)
-- Fixed `MS2RESCORE` failing with `MissingValuesError` for `im2deep` on timsTOF `.d` input, and the empty `ion_mobility` column, by bumping `tdf2mzml` to 0.6.1, which writes a PSI-MS conformant ion mobility term [#479](https://github.com/nf-core/mhcquant/pull/479) ([mafreitas/tdf2mzml#32](https://github.com/mafreitas/tdf2mzml/issues/32))
+- Fixed missing ion mobility for timsTOF `.d` input by bumping `tdf2mzml` to 0.6.1 [#479](https://github.com/nf-core/mhcquant/pull/479)
 
 ### `Changed`
 
