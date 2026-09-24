@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `easypqp`  | 0.1.57      | 0.1.59      |
 | `MultiQC`  | 1.33.0      | 1.35.0      |
 | `Nf-core`  | 3.5.1       | 4.1.0       |
-| `tdf2mzml` | 0.5         | 0.6.1       |
+| `tdf2mzml` | 0.5.0       | 0.6.1       |
 
 ## 3.2.0 - Solitude - 20/05/26
 
