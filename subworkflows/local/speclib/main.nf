@@ -3,16 +3,12 @@
  */
 
 //
-// MODULE: Loaded from modules/local/
-//
-
-include { EASYPQP_CONVERT                           } from '../../../modules/local/easypqp/convert'
-include { EASYPQP_LIBRARY                           } from '../../../modules/local/easypqp/library'
-include { EASYPQP_LIBRARY as EASYPQP_LIBRARY_GLOBAL } from '../../../modules/local/easypqp/library'
-
-//
 // MODULE: Installed directly from nf-core/modules
 //
+
+include { EASYPQP_CONVERT                           } from '../../../modules/nf-core/easypqp/convert/main'
+include { EASYPQP_LIBRARY                           } from '../../../modules/nf-core/easypqp/library/main'
+include { EASYPQP_LIBRARY as EASYPQP_LIBRARY_GLOBAL } from '../../../modules/nf-core/easypqp/library/main'
 
 workflow SPECLIB {
     take:

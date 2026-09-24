@@ -38,7 +38,7 @@
                     "pyopenms": "3.4.1"
                 },
                 "Workflow": {
-                    "nf-core/mhcquant": "v3.2.0"
+                    "nf-core/mhcquant": "v3.3.0"
                 }
             },
             [
@@ -49,7 +49,6 @@
                 "intermediate_results/comet/HepG2_rep2_small_pin.tsv",
                 "intermediate_results/comet/HepG2_rep3_small_pin.tsv",
                 "intermediate_results/rescoring",
-                "intermediate_results/rescoring/HepG2_A_ms2rescore.idXML",
                 "intermediate_results/rescoring/HepG2_A_pout_filtered.idXML",
                 "multiqc",
                 "multiqc/ms2rescore",
@@ -60,6 +59,7 @@
                 "multiqc/multiqc_data/multiqc_chromatogram.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
                 "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_deeplc_rt_calibration.txt",
                 "multiqc/multiqc_data/multiqc_general_stats.txt",
                 "multiqc/multiqc_data/multiqc_histogram_mz.txt",
                 "multiqc/multiqc_data/multiqc_histogram_rt.txt",
@@ -73,6 +73,7 @@
                 "multiqc/multiqc_plots/pdf",
                 "multiqc/multiqc_plots/pdf/chromatogram-cnt.pdf",
                 "multiqc/multiqc_plots/pdf/chromatogram-log.pdf",
+                "multiqc/multiqc_plots/pdf/deeplc_rt_calibration.pdf",
                 "multiqc/multiqc_plots/pdf/general_stats.pdf",
                 "multiqc/multiqc_plots/pdf/histogram_mz.pdf",
                 "multiqc/multiqc_plots/pdf/histogram_rt.pdf",
@@ -83,6 +84,7 @@
                 "multiqc/multiqc_plots/png",
                 "multiqc/multiqc_plots/png/chromatogram-cnt.png",
                 "multiqc/multiqc_plots/png/chromatogram-log.png",
+                "multiqc/multiqc_plots/png/deeplc_rt_calibration.png",
                 "multiqc/multiqc_plots/png/general_stats.png",
                 "multiqc/multiqc_plots/png/histogram_mz.png",
                 "multiqc/multiqc_plots/png/histogram_rt.png",
@@ -93,6 +95,7 @@
                 "multiqc/multiqc_plots/svg",
                 "multiqc/multiqc_plots/svg/chromatogram-cnt.svg",
                 "multiqc/multiqc_plots/svg/chromatogram-log.svg",
+                "multiqc/multiqc_plots/svg/deeplc_rt_calibration.svg",
                 "multiqc/multiqc_plots/svg/general_stats.svg",
                 "multiqc/multiqc_plots/svg/histogram_mz.svg",
                 "multiqc/multiqc_plots/svg/histogram_rt.svg",
@@ -108,10 +111,10 @@
                 
             ]
         ],
+        "timestamp": "2026-06-11T12:17:23.861646548",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "25.04.8"
-        },
-        "timestamp": "2026-01-24T12:19:49.496533324"
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
     }
 }

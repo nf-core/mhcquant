@@ -9,7 +9,7 @@ include { OPENMS_IDRIPPER                          } from '../../../modules/nf-c
 include { OPENMS_IDSCORESWITCHER                   } from '../../../modules/nf-core/openms/idscoreswitcher/main'
 include { OPENMS_IDFILTER as OPENMS_IDFILTER_QUANT } from '../../../modules/nf-core/openms/idfilter/main'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_QUANT } from '../../../modules/nf-core/openms/idmerger/main'
-include { OPENMS_MZTABEXPORTER                     } from '../../../modules/local/openms/mztabexporter'
+include { OPENMS_MZTABEXPORTER                     } from '../../../modules/nf-core/openms/mztabexporter/main'
 
 include { MAP_ALIGNMENT                            } from '../map_alignment'
 include { PROCESS_FEATURE                          } from '../process_feature'
@@ -44,8 +44,9 @@ workflow QUANT {
 
         // Manipulate such that [meta_run1, idxml_run1, pout_group1], [meta_run2, idxml_run2, pout_group1] ...
         ch_runs_score_switched
-            // Nextflow can only combine/join on the exact groupKey object, merge_id is not sufficient
             .map { meta, idxml -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count) , meta, idxml] }
+            // Unwrap to plain [id] map: asymmetric GroupKey.equals() makes combine() drop pairs by arrival order (nextflow-io/nextflow#4104)
+            .map { key, meta, idxml -> [key.getGroupTarget(), meta, idxml] }
             .combine(filter_q_value, by:0)
             .map { group_meta, meta, idxml, q_value -> [meta, idxml, q_value] }
             .set { ch_runs_to_filter}
@@ -84,5 +85,7 @@ workflow QUANT {
         OPENMS_MZTABEXPORTER(PROCESS_FEATURE.out.consensusxml)
 
     emit:
-        consensusxml = PROCESS_FEATURE.out.consensusxml
+        consensusxml  = PROCESS_FEATURE.out.consensusxml
+        trafoxml      = MAP_ALIGNMENT.out.trafoxml
+        failed_groups = MAP_ALIGNMENT.out.failed_groups
 }

@@ -1,7 +1,7 @@
 process TDF2MZML {
     tag "$meta.id"
 
-    container "docker.io/mfreitas/tdf2mzml:0.5_noentry"
+    container "docker.io/mfreitas/tdf2mzml:0.6.1_noentry"
 
     input:
     tuple val(meta), path(tdf)

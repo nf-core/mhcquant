@@ -20,7 +20,7 @@
             },
             "Condition": {
                 "type": ["string", "integer"],
-                "anyOf": [{ "type": "string", "pattern": "^\\S+-?" }, { "type": "integer" }],
+                "anyOf": [{ "type": "string", "pattern": "^\\S+$" }, { "type": "integer" }],
                 "errorMessage": "Sample condition must be provided and cannot contain spaces",
                 "meta": ["condition"]
             },

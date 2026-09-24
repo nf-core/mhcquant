@@ -4,9 +4,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PARSESDRF_CONVERT     } from '../../../modules/nf-core/parsesdrf/convert/main'
-include { PRIDEPY_FETCHSDRF     } from '../../../modules/nf-core/pridepy/fetchsdrf/main'
-include { PRIDEPY_DOWNLOAD_FILE } from '../../../modules/local/pridepy/download_file/main'
+include { PARSESDRF_CONVERT    } from '../../../modules/nf-core/parsesdrf/convert/main'
+include { PRIDEPY_FETCHSDRF    } from '../../../modules/nf-core/pridepy/fetchsdrf/main'
+include { PRIDEPY_DOWNLOADFILE } from '../../../modules/nf-core/pridepy/downloadfile/main'
 
 workflow SDRF_TO_SAMPLESHEET {
 
@@ -51,12 +51,12 @@ workflow SDRF_TO_SAMPLESHEET {
     ch_to_download = ch_samplesheet_rows
         .map { meta, filename -> [meta, filename, resolved_accession] }
 
-    PRIDEPY_DOWNLOAD_FILE(ch_to_download)
+    PRIDEPY_DOWNLOADFILE(ch_to_download)
 
     // Write a validated samplesheet with local file paths
-    ch_samplesheet_file = PRIDEPY_DOWNLOAD_FILE.out.downloaded_file
-        .map { meta, downloaded_file ->
-            [meta.id, meta.sample, meta.condition, downloaded_file, meta.search_preset].join('\t')
+    ch_samplesheet_file = PRIDEPY_DOWNLOADFILE.out.file
+        .map { meta, file ->
+            [meta.id, meta.sample, meta.condition, file, meta.search_preset].join('\t')
         }
         .collectFile(name: 'sdrf_samplesheet.tsv', seed: ['ID', 'Sample', 'Condition', 'ReplicateFileName', 'SearchPreset'].join('\t'), newLine: true)
 
