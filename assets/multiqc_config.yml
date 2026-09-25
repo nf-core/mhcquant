@@ -42,10 +42,7 @@ custom_data:
     file_format: "csv"
     section_name: "MS1 Chromatogram"
     description: |
-      An MS1 chromatogram is a plot of the intensity of precursor ions (MS1) detected over time,
-      typically with retention time (RT) on the x-axis and ion intensity on the y-axis.
-      It represents the total ion current (TIC) from the MS1 scan,
-      which is useful for monitoring the overall elution profile of compounds during a chromatographic separation.
+      Total ion current of the MS1 scans over retention time, which shows the elution profile of each run.
     pconfig:
       xlab: "Retention time [min]"
       xmin: 0
@@ -59,19 +56,19 @@ custom_data:
     file_format: "json"
     section_name: "Fragment mass error"
     description: |
-      The fragment mass error describes the differences between observed and theoretical fragment ion masses.
-      It helps assessing the accuracy and calibration of the mass spectrometer by visualizing the error range
-      and potential deviations. Depending on your configurations this error is plotted in Dalton (Da)
-      or parts-per-million (ppm).
+      Deviation of observed from theoretical fragment ion m/z in Da for the identified spectra, one box per run.
+      A narrow box centered on zero indicates a well calibrated instrument.
+      Whiskers reach the last value within 1.5 × IQR of the box, and outliers are not drawn.
     pconfig:
-      xlab: "Mass deviation [Da/ppm]"
+      xlab: "Mass deviation [Da]"
 
   len_plot:
     plot_type: "linegraph"
     file_format: "csv"
     section_name: "Peptide lengths"
     description: |
-      This plot shows the distribution of peptide sequence lengths to assess variability and typical length ranges.
+      Length distribution of the identified peptides. HLA class I ligands typically peak at 9 amino acids,
+      while class II ligands are longer and more spread out.
     pconfig:
       id: "length_dist"
       title: "Distribution of peptide lengths"
@@ -83,8 +80,7 @@ custom_data:
     file_format: "csv"
     section_name: "Mass-to-Charge"
     description: |
-      This plot displays the distribution of precursor ion mass-to-charge (m/z) values detected in the dataset.
-      It helps identify the typical m/z ranges and assess the overall coverage and instrument performance during acquisition.
+      Distribution of the precursor m/z values of the identified peptides.
     pconfig:
       id: "histogram_mz"
       title: "Mass-to-Charge Histogram"
@@ -96,8 +92,7 @@ custom_data:
     file_format: "csv"
     section_name: "Retention time"
     description: |
-      This plot shows the distribution of peptide retention times across the chromatographic gradient.
-      It provides insight into peptide elution profiles and helps assess gradient performance and sample complexity.
+      Distribution of the retention times of the identified peptides across the gradient.
     pconfig:
       id: "histogram_rt"
       title: "Retention time Histogram"
@@ -109,8 +104,8 @@ custom_data:
     file_format: "csv"
     section_name: "Ion Mobility"
     description: |
-      This plot shows the distribution of ion mobility (1/K0) values for identified peptides.
-      Ion mobility data is available when using instruments with ion mobility separation (e.g., timsTOF).
+      Distribution of the ion mobility (1/K0) values of the identified peptides. This plot only appears for data
+      with ion mobility separation, such as timsTOF.
     pconfig:
       id: "histogram_im"
       title: "Ion Mobility Distribution"
@@ -122,8 +117,8 @@ custom_data:
     file_format: "csv"
     section_name: "Q-Value"
     description: |
-      A q-value histogram in Percolator visualizes q-value distributions for PSMs, helping set the FDR threshold (typically 1%).
-      It ensures only high-confidence identifications are retained, with a sharp drop-off beyond the threshold.
+      Distribution of the Percolator q-values of the reported PSMs. All values lie below the FDR threshold
+      (1% by default).
     pconfig:
       id: "histogram_scores"
       title: "Percolator q-value Histogram"
@@ -135,9 +130,9 @@ custom_data:
     file_format: "json"
     section_name: "Xcorr-Value"
     description: |
-      The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality.
-      Higher Xcorr values signify better peptide-spectrum matches.
-      This helps set a threshold to filter out low-confidence identifications.
+      Distribution of the Comet cross-correlation scores (Xcorr) of the reported PSMs, one box per sample and condition.
+      Higher values indicate better peptide-spectrum matches.
+      Whiskers reach the last value within 1.5 × IQR of the box, and outliers are not drawn.
     pconfig:
       id: "scores_xcorr"
       title: "Comet Xcorr Distribution"
@@ -149,8 +144,9 @@ custom_data:
     file_format: "json"
     section_name: "Peptide Intensity"
     description: |
-      Comparison of log2-transformed peptide intensities across samples.
-      Helps assess data consistency and detect potential outliers or batch effects.
+      Distribution of the log2 peptide intensities, one box per sample and condition. A shifted box can point to
+      differences in sample loading or to batch effects.
+      Whiskers reach the last value within 1.5 × IQR of the box, and outliers are not drawn.
     pconfig:
       id: "peptide_intensity"
       title: "Peptide Intensity Distribution"
@@ -161,13 +157,10 @@ custom_data:
     file_format: "json"
     section_name: "DeepLC RT calibration"
     description: |
-      Distribution of the DeepLC retention time prediction error (observed − predicted RT,
-      best model), normalized to percent of the gradient (rt_diff_best ÷ max observed RT × 100),
-      for FDR-filtered target PSMs, one box per sample+condition group. A box centered near zero
-      with tight whiskers indicates good calibration; a shifted or wide box flags groups where
-      DeepLC predictions are less reliable. As orientation, DeepLC is considered well calibrated
-      when the mean absolute error is below ~2% of the gradient (3–5% acceptable, >5% poor);
-      normalization makes these boxes directly comparable across runs and LC setups.
+      Absolute difference between observed and DeepLC-predicted retention time for the FDR-filtered target PSMs,
+      one box per sample and condition. Values are in percent of the gradient (the latest observed retention time),
+      so runs with different LC setups are comparable. Low values mean that DeepLC predicts retention times well.
+      Whiskers reach the last value within 1.5 × IQR of the box, and outliers are not drawn.
     pconfig:
       id: "deeplc_rt_calibration"
       title: "DeepLC RT calibration"
@@ -178,15 +171,11 @@ custom_data:
     file_format: "json"
     section_name: "Aligned residuals"
     description: |
-      Distribution of retention time alignment residuals (reference RT − fitted RT), normalized
-      to percent of the gradient, for the landmark peptides of each run; one box per run within a
-      sample+condition group. A box centered near zero with tight whiskers indicates a run that
-      aligned well; whiskers extend to the most extreme landmark within 1.5 × IQR of the box, and
-      landmarks beyond are not drawn. A wide or shifted box flags a run whose retention times could
-      not be mapped cleanly onto the group reference, which can degrade downstream quantification. As a rule of
-      thumb: spread (SD/IQR) below ~0.5% of gradient is good, 0.5–1% is acceptable, and whiskers
-      approaching ~1% (the match-between-runs tolerance) warrant investigation; a non-zero median
-      suggests the linear alignment model is too simple for that run.
+      Retention time residuals of the alignment landmarks (reference minus fitted retention time) in percent
+      of the gradient, one box per run. A narrow box centered on zero means the run aligned well onto the other
+      runs of its sample and condition. A wide box points to retention time shifts that the linear alignment
+      could not correct, which can cost matches between runs.
+      Whiskers reach the last value within 1.5 × IQR of the box, and outliers are not drawn.
     pconfig:
       id: "aligned_residuals"
       title: "Aligned residuals"
@@ -195,12 +184,12 @@ custom_data:
   epicore_length_distribution:
     file_format: "html"
     section_name: "Epicore length distribution"
-    description: "The histogram visualizes the number and length of the input peptides in the evidence file in grey. The red bars correspond to the number of identified consensus epitopes and their length."
+    description: "Length distribution of the input peptides (grey) and of the identified consensus epitopes (red)."
 
   epicore_intensity_histogram:
     file_format: "html"
     section_name: "Epicore intensity histogram"
-    description: "The histogram visualizes how many peptides contribute to each identified consensus epitope."
+    description: "Number of peptides that contribute to each identified consensus epitope."
 
 sp:
   chromatogram:
