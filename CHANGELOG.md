@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.4.0dev
+
+### `Changed`
+
+- Changed MultiQC box plot whiskers from min/max to Tukey 1.5 × IQR, computed in `SUMMARIZE_RESULTS` without plotting outliers [#482](https://github.com/nf-core/mhcquant/pull/482)
+
 ## 3.3.0 - Favorite - 24/09/26
 
 ### `Added`
