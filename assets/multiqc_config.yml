@@ -160,6 +160,8 @@ custom_data:
       Absolute difference between observed and DeepLC-predicted retention time for the FDR-filtered target PSMs,
       one box per sample and condition. Values are in percent of the gradient (the latest observed retention time),
       so runs with different LC setups are comparable. Low values mean that DeepLC predicts retention times well.
+      As a rule of thumb, DeepLC is well calibrated when the mean absolute error is below ~2% of the gradient.
+      An error of 3–5% is acceptable and above 5% is poor.
       Whiskers reach the last value within 1.5 × IQR of the box, and outliers are not drawn.
     pconfig:
       id: "deeplc_rt_calibration"
@@ -175,6 +177,9 @@ custom_data:
       of the gradient, one box per run. A narrow box centered on zero means the run aligned well onto the other
       runs of its sample and condition. A wide box points to retention time shifts that the linear alignment
       could not correct, which can cost matches between runs.
+      As a rule of thumb, a spread (SD/IQR) below ~0.5% of the gradient is good and 0.5–1% is acceptable.
+      Whiskers approaching ~1% (the match-between-runs tolerance) warrant investigation, and a non-zero median
+      suggests that the linear alignment model is too simple for that run.
       Whiskers reach the last value within 1.5 × IQR of the box, and outliers are not drawn.
     pconfig:
       id: "aligned_residuals"
