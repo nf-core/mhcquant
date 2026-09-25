@@ -17,7 +17,7 @@ report_section_order:
 export_plots: true
 disable_version_detection: true
 
-# Control how outliers are displayed in box plots
+# Box plots receive precomputed Tukey statistics (1.5 × IQR whiskers), so no points are drawn
 boxplot_boxpoints: false
 
 # Modules to run
@@ -56,7 +56,7 @@ custom_data:
   # Mass error plot
   mass_error:
     plot_type: "boxplot"
-    file_format: "tsv"
+    file_format: "json"
     section_name: "Fragment mass error"
     description: |
       The fragment mass error describes the differences between observed and theoretical fragment ion masses.
@@ -132,7 +132,7 @@ custom_data:
 
   scores_plot_xcorr:
     plot_type: "boxplot"
-    file_format: "csv"
+    file_format: "json"
     section_name: "Xcorr-Value"
     description: |
       The Comet Xcorr boxplot visualizes the cross-correlation (Xcorr) score distribution for PSMs, indicating match quality.
@@ -146,7 +146,7 @@ custom_data:
 
   peptide_intensity_plot:
     plot_type: "boxplot"
-    file_format: "csv"
+    file_format: "json"
     section_name: "Peptide Intensity"
     description: |
       Comparison of log2-transformed peptide intensities across samples.
@@ -158,7 +158,7 @@ custom_data:
 
   deeplc_rt_calibration:
     plot_type: "boxplot"
-    file_format: "csv"
+    file_format: "json"
     section_name: "DeepLC RT calibration"
     description: |
       Distribution of the DeepLC retention time prediction error (observed − predicted RT,
@@ -175,14 +175,15 @@ custom_data:
 
   aligned_residuals:
     plot_type: "boxplot"
-    file_format: "csv"
+    file_format: "json"
     section_name: "Aligned residuals"
     description: |
       Distribution of retention time alignment residuals (reference RT − fitted RT), normalized
       to percent of the gradient, for the landmark peptides of each run; one box per run within a
       sample+condition group. A box centered near zero with tight whiskers indicates a run that
-      aligned well; a wide or shifted box flags a run whose retention times could not be mapped
-      cleanly onto the group reference, which can degrade downstream quantification. As a rule of
+      aligned well; whiskers extend to the most extreme landmark within 1.5 × IQR of the box, and
+      landmarks beyond are not drawn. A wide or shifted box flags a run whose retention times could
+      not be mapped cleanly onto the group reference, which can degrade downstream quantification. As a rule of
       thumb: spread (SD/IQR) below ~0.5% of gradient is good, 0.5–1% is acceptable, and whiskers
       approaching ~1% (the match-between-runs tolerance) warrant investigation; a non-zero median
       suggests the linear alignment model is too simple for that run.
@@ -205,7 +206,7 @@ sp:
   chromatogram:
     fn: "*_chrom.csv"
   mass_error:
-    fn: "*frag_mass_err.tsv"
+    fn: "*_frag_mass_err.json"
   stats_table:
     fn: "*_general_stats.csv"
   len_plot:
@@ -219,13 +220,13 @@ sp:
   qvalue_plot:
     fn: "*_histogram_scores.csv"
   scores_plot_xcorr:
-    fn: "*_xcorr_scores.csv"
+    fn: "*_xcorr_scores.json"
   peptide_intensity_plot:
-    fn: "*_peptide_intensity.csv"
+    fn: "*_peptide_intensity.json"
   deeplc_rt_calibration:
-    fn: "*_deeplc_rt_diff.csv"
+    fn: "*_deeplc_rt_diff.json"
   aligned_residuals:
-    fn: "*_aligned_residuals.csv"
+    fn: "*_aligned_residuals.json"
   epicore_length_distribution:
     fn: "epicore_length_distribution.html"
   epicore_intensity_histogram:
