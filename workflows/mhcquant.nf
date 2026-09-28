@@ -111,7 +111,6 @@ workflow MHCQUANT {
 
     // Compute mass errors for multiQC report
     OPENMS_IDMASSACCURACY(PREPARE_SPECTRA.out.mzml.join(OPENMS_PEPTIDEINDEXER.out.indexed_idxml))
-    ch_multiqc_files = ch_multiqc_files.mix(OPENMS_IDMASSACCURACY.out.frag_err.map{ meta, frag_err -> frag_err })
 
     // Save indexed runs for later use to keep meta-run information. Sort based on file id
     OPENMS_PEPTIDEINDEXER.out.indexed_idxml
@@ -203,15 +202,20 @@ workflow MHCQUANT {
     OPENMS_TEXTEXPORTER(ch_output)
 
     // Process the tsv file to facilitate visualization with MultiQC.
-    // Under --quantify, attach each group's per-run trafoXMLs so alignment residuals can be plotted.
-    if (params.quantify) {
-        ch_summarize_input = OPENMS_TEXTEXPORTER.out.tsv
-            .map { meta, tsv -> [meta.id, meta, tsv] }
-            .join( QUANT.out.trafoxml.map { meta, trafoxml -> [meta.id, trafoxml] }, remainder: true )
-            .map { _id, meta, tsv, trafoxml -> [meta, tsv, trafoxml ?: []] }
-    } else {
-        ch_summarize_input = OPENMS_TEXTEXPORTER.out.tsv.map { meta, tsv -> [meta, tsv, []] }
-    }
+    // Attach each group's per-run fragment mass errors and, under --quantify, its per-run trafoXMLs for the box plots.
+    ch_frag_mass_err = OPENMS_IDMASSACCURACY.out.frag_err
+        .map { meta, frag_err -> [groupKey("${meta.sample}_${meta.condition}".toString(), meta.group_count), frag_err] }
+        .groupTuple()
+        .map { key, frag_errs -> [key.toString(), frag_errs] }
+    ch_trafoxml = params.quantify ? QUANT.out.trafoxml.map { meta, trafoxml -> [meta.id.toString(), trafoxml] } : channel.empty()
+
+    ch_summarize_input = OPENMS_TEXTEXPORTER.out.tsv
+        .map { meta, tsv -> [meta.id.toString(), meta, tsv] }
+        .join(ch_frag_mass_err, remainder: true)
+        .join(ch_trafoxml, remainder: true)
+        // Right-only remainders are shorter tuples without a meta, so filter before destructuring
+        .filter { entry -> entry[1] != null }
+        .map { _id, meta, tsv, frag_errs, trafoxml -> [meta, tsv, frag_errs ?: [], trafoxml ?: []] }
     SUMMARIZE_RESULTS(ch_summarize_input)
 
     //
@@ -238,6 +242,7 @@ workflow MHCQUANT {
         SUMMARIZE_RESULTS.out.intensities,
         SUMMARIZE_RESULTS.out.rt_calibration,
         SUMMARIZE_RESULTS.out.aligned_residuals,
+        SUMMARIZE_RESULTS.out.frag_mass_err,
         params.epicore ? EPICORE.out.stats : SUMMARIZE_RESULTS.out.epicore_input.map { meta, tsv, stats -> stats }
     )
 
