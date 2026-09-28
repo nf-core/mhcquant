@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `MapAlignerIdentification` aborting with `no data points for 'linear' model` when a run shares no RT landmarks with its group; the whole sample/condition group is now excluded from quantification, exported with identifications only, and a warning is emitted [#474](https://github.com/nf-core/mhcquant/pull/474)
 - Fixed `test_single_quant` nf-test never running the QUANT subworkflow [#475](https://github.com/nf-core/mhcquant/pull/475)
 - Fixed missing ion mobility for timsTOF `.d` input by bumping `tdf2mzml` to 0.6.1 [#479](https://github.com/nf-core/mhcquant/pull/479)
+- Fixed concurrent OpenMS tools sharing a temporary directory under Singularity/Apptainer, which made `CometAdapter` fail with `result.pep.xml could not be found` [#483](https://github.com/nf-core/mhcquant/pull/483)
 
 ### `Changed`
 
