@@ -55,7 +55,6 @@
                 "intermediate_results/rescoring/HepG2_A_pout.idXML",
                 "intermediate_results/rescoring/HepG2_A_pout_filtered.idXML",
                 "multiqc",
-                "multiqc/ms2rescore",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",

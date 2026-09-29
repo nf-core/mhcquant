@@ -62,7 +62,6 @@
                 "intermediate_results/rescoring/lc2_1_pout_filtered.idXML",
                 "lc2_1.tsv",
                 "multiqc",
-                "multiqc/ms2rescore",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
