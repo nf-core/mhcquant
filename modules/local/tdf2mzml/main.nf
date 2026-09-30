@@ -14,7 +14,7 @@ process TDF2MZML {
     script:
     // Exit if running this module with -profile conda / -profile mamba
     if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        error "TDF2MZML module does not support Conda: tdf2mzml bundles the Bruker SDK and is only distributed as a Docker image. Please use Docker / Singularity / Podman instead."
+        error "TDF2MZML module does not support Conda. Please use Docker / Singularity / Podman instead."
     }
     def prefix = task.ext.prefix ?: "${tdf.simpleName}"
 
@@ -25,7 +25,7 @@ process TDF2MZML {
     stub:
     // Exit if running this module with -profile conda / -profile mamba
     if (workflow.profile.tokenize(',').intersect(['conda', 'mamba']).size() >= 1) {
-        error "TDF2MZML module does not support Conda: tdf2mzml bundles the Bruker SDK and is only distributed as a Docker image. Please use Docker / Singularity / Podman instead."
+        error "TDF2MZML module does not support Conda. Please use Docker / Singularity / Podman instead."
     }
     def prefix = task.ext.prefix ?: "${tdf.simpleName}"
 

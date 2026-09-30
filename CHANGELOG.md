@@ -22,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `MapAlignerIdentification` aborting with `no data points for 'linear' model` when a run shares no RT landmarks with its group; the whole sample/condition group is now excluded from quantification, exported with identifications only, and a warning is emitted [#474](https://github.com/nf-core/mhcquant/pull/474)
 - Fixed `test_single_quant` nf-test never running the QUANT subworkflow [#475](https://github.com/nf-core/mhcquant/pull/475)
 - Fixed missing ion mobility for timsTOF `.d` input by bumping `tdf2mzml` to 0.6.1 [#479](https://github.com/nf-core/mhcquant/pull/479)
-- Fixed the MHCquant2 citation DOI, usage examples and the empty `multiqc/ms2rescore` output folder, and made `TDF2MZML` fail clearly under Conda [#484](https://github.com/nf-core/mhcquant/pull/484)
 
 ### `Changed`
 
