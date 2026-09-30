@@ -268,7 +268,6 @@ nextflow run nf-core/mhcquant \
   --quantify \
   --outdir ./results \
   --feature_generators 'deeplc,ms2pip,im2deep' \
-  --outdir results \
   -profile docker
 ```
 
@@ -299,7 +298,7 @@ nextflow run nf-core/mhcquant -profile docker -params-file params.yaml
 with:
 
 ```yaml title="params.yaml"
-input: './samplesheet.csv'
+input: './samplesheet.tsv'
 outdir: './results/'
 <...>
 ```

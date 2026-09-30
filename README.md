@@ -182,7 +182,7 @@ If you use nf-core/mhcquant for your analysis, please cite the corresponding man
 >
 > Jonas Scheid, Steffen Lemke, Naomi Hoenisch-Gravel, Anna Dengler, Timo Sachsenberg, Arthur Declerq, Ralf Gabriels, Jens Bauer, Marcel Wacker, Leon Bichmann, Lennart Martens, Marissa L. Dubbelaar, Sven Nahnsen & Juliane S. Walz
 >
-> _Genome Biology_ 2025 26 (1), 290. doi: [10.1021/acs.jproteome.9b00313](https://pubs.acs.org/doi/10.1021/acs.jproteome.9b00313)
+> _Genome Biology_ 2025 26 (1), 290. doi: [10.1186/s13059-025-03763-8](https://doi.org/10.1186/s13059-025-03763-8)
 
 > **MHCquant: Automated and Reproducible Data Analysis for Immunopeptidomics**
 >
