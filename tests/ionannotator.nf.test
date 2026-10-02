@@ -32,7 +32,7 @@ nextflow_pipeline {
                                 def fields = line.split('\t')
                                 fields.size() > peptidoformIndex ? fields[peptidoformIndex] : ''
                             }.findAll { it != '' }.sort()
-                            peptidoform_data.add([file.name, peptidoforms])
+                            peptidoform_data.add([file.name, peptidoforms.size(), peptidoforms.join('\n').md5()])
                         }
                     }
                 }
@@ -48,7 +48,7 @@ nextflow_pipeline {
                     stable_name,
                     // All files with stable contents
                     stable_path,
-                    // Peptidoform data from TSV files
+                    // Peptidoform count and md5sum per TSV file
                     peptidoform_data
                 ).match() }
             )
