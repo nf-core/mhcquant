@@ -12,3 +12,5 @@ intermediate_results/ion_annotations/*
 global_fdr/global.tsv
 spectrum_library/*_speclib.tsv
 *.tsv
+intermediate_results/features/*
+*.mzTab

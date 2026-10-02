@@ -4,6 +4,7 @@ nextflow_pipeline {
     script "../main.nf"
     tag "pipeline"
     tag "test_single_quant"
+    profile "test_single_quant"
 
     test("-profile test_single_quant") {
 

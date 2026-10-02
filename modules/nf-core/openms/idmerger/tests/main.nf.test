@@ -14,7 +14,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = channel.of([
+                input[0] = Channel.of([
                             [ id:'test'], // meta map
                             [ file(params.modules_testdata_base_path + 'proteomics/openms/HepG2_rep1_small.idXML', checkIfExists: true),
                               file(params.modules_testdata_base_path + 'proteomics/openms/HepG2_rep2_small.idXML', checkIfExists: true)]
@@ -45,7 +45,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = channel.of([
+                input[0] = Channel.of([
                             [ id:'test'], // meta map
                             [ file(params.modules_testdata_base_path + 'proteomics/openms/HepG2_rep1_small.idXML', checkIfExists: true),
                               file(params.modules_testdata_base_path + 'proteomics/openms/HepG2_rep2_small.idXML', checkIfExists: true)]

@@ -7,7 +7,7 @@
 //
 
 include { MS2RESCORE                                                  } from '../../../modules/local/ms2rescore'
-include { OPENMS_PSMFEATUREEXTRACTOR                                  } from '../../../modules/local/openms/psmfeatureextractor'
+include { OPENMS_PSMFEATUREEXTRACTOR                                  } from '../../../modules/nf-core/openms/psmfeatureextractor/main'
 include {
     OPENMS_PERCOLATORADAPTER ;
     OPENMS_PERCOLATORADAPTER as OPENMS_PERCOLATORADAPTER_GLOBAL
@@ -49,7 +49,16 @@ workflow RESCORE {
     }
     else {
         // Extract PSM features for Percolator
-        OPENMS_PSMFEATUREEXTRACTOR(MS2RESCORE.out.idxml.join(MS2RESCORE.out.feature_names))
+        // Read MS2Rescore feature names into meta so the nf-core module stays generic; -extra is set via ext.args
+        MS2RESCORE.out.idxml
+            .join(MS2RESCORE.out.feature_names)
+            .map { meta, idxml, feature_names ->
+                def extra = feature_names.readLines().drop(1).findAll { it.contains('\t') }.collect { it.split('\t', -1) }.findAll { !it[0].contains('psm_file') }.collect { it[1] }
+                [meta + [extra_features: extra.join(' ')], idxml]
+            }
+            .set { ch_psmfeatureextractor_input }
+
+        OPENMS_PSMFEATUREEXTRACTOR(ch_psmfeatureextractor_input)
 
         // Run Percolator with local FDR
         OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
@@ -60,7 +69,7 @@ workflow RESCORE {
             // Group by search_preset for global FDR. Samples without a preset all share
             // the same params (CLI or defaults), so they correctly group under 'global'.
             OPENMS_IDMERGER_GLOBAL(
-                OPENMS_PSMFEATUREEXTRACTOR.out.idxml.map { group_meta, idxml -> [group_meta + [id: group_meta.search_preset ?: 'global'], idxml] }.groupTuple()
+                OPENMS_PSMFEATUREEXTRACTOR.out.idxml.map { group_meta, idxml -> [group_meta.findAll { k, _v -> k != 'extra_features' } + [id: group_meta.search_preset ?: 'global'], idxml] }.groupTuple()
             )
             // Run Percolator with global FDR (one per preset group)
             OPENMS_PERCOLATORADAPTER_GLOBAL(OPENMS_IDMERGER_GLOBAL.out.idxml)

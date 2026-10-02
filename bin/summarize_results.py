@@ -2,9 +2,11 @@
 
 # Written by Julia Graf and released under MIT license.
 
+import os
+import json
 import pandas as pd
 import numpy as np
-from pyopenms import AASequence
+from pyopenms import AASequence, TransformationXMLFile, TransformationDescription
 from argparse import ArgumentParser
 import re
 from collections import Counter
@@ -33,6 +35,20 @@ parser.add_argument(
     "--quantify",
     action='store_true',
     help="Whether quantification is enabled or not."
+)
+
+parser.add_argument(
+    "--trafoxml",
+    nargs='*',
+    default=[],
+    help="Optional per-run trafoXML files from RT alignment, used to plot aligned residuals."
+)
+
+parser.add_argument(
+    "--frag_mass_err",
+    nargs='*',
+    default=[],
+    help="Optional per-run fragment mass error files from IDMassAccuracy, one value per line."
 )
 
 
@@ -112,6 +128,35 @@ def multi_tsv_not_empty(file_path):
             if line.startswith('PEPTIDE\t') or line.startswith('CONSENSUS\t'):
                 return True
     return False
+
+
+def tukey_box_stats(values, whisker_iqr=1.5):
+    """Box statistics whose whiskers end at the most extreme value within `whisker_iqr` IQRs of the box."""
+    q1, median, q3 = np.percentile(values, [25, 50, 75])
+    lower_fence = q1 - whisker_iqr * (q3 - q1)
+    upper_fence = q3 + whisker_iqr * (q3 - q1)
+    return {
+        "min": float(values[values >= lower_fence].min()),
+        "q1": float(q1),
+        "median": float(median),
+        "q3": float(q3),
+        "max": float(values[values <= upper_fence].max()),
+    }
+
+
+def write_box_stats(values, sample, plot_id, path):
+    """Write Tukey box statistics as MultiQC custom content JSON.
+
+    MultiQC draws whiskers at the data min/max unless every outlier is plotted as a point, so
+    box plots receive precomputed statistics instead of raw values.
+    """
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return
+    stats = {k: float(f"{v:.6g}") for k, v in tukey_box_stats(values).items()}
+    with open(path, "w") as f:
+        json.dump({"id": plot_id, "data": {sample: stats}}, f, indent=4)
 
 
 def process_file(file, prefix, quantify, keep_cols):
@@ -202,15 +247,20 @@ def process_file(file, prefix, quantify, keep_cols):
     # ---------------------------------
     # Box plots
     # ---------------------------------
-    data["COMET:xcorr"].astype(float).to_csv(
-        f"{prefix}_xcorr_scores.csv", index=False, header=False
-    )
+    write_box_stats(data["COMET:xcorr"], prefix, "scores_plot_xcorr", f"{prefix}_xcorr_scores.json")
     if 'intensity_cf' in data.columns:
-        np.log2(data["intensity_cf"].astype(float)).to_csv(
-            f"{prefix}_peptide_intensity.csv",
-            index=False,
-            header=False
-        )
+        with np.errstate(divide='ignore'):
+            log_intensity = np.log2(data["intensity_cf"].astype(float))
+        write_box_stats(log_intensity, prefix, "peptide_intensity_plot", f"{prefix}_peptide_intensity.json")
+
+    # DeepLC RT calibration: prediction error (observed - predicted RT, best model) as
+    # percent of the gradient (rt_diff_best / max observed RT * 100). Normalizing makes the
+    # box comparable across gradients/LC setups. Only emitted when deeplc was run.
+    if 'rt_diff_best' in data.columns and 'observed_retention_time_best' in data.columns:
+        gradient = data["observed_retention_time_best"].astype(float).max()
+        if gradient > 0:
+            write_box_stats(data["rt_diff_best"].astype(float) / gradient * 100, prefix,
+                            "deeplc_rt_calibration", f"{prefix}_deeplc_rt_diff.json")
 
     # Add a column with unique protein accessions next to accessions
     data.insert(data.columns.get_loc('accessions') + 1, 'unique_accessions',
@@ -241,6 +291,33 @@ def process_file(file, prefix, quantify, keep_cols):
     data.to_csv(f"{prefix}.tsv", sep='\t', index=False)
 
 
+def write_aligned_residuals(trafoxml_paths):
+    """Write per-run aligned residual box statistics for the MultiQC box plot.
+
+    For each trafoXML, the residual of a landmark pair is `to - apply(from)`: the deviation
+    of the reference RT from the fitted transformation, normalized to percent of the gradient
+    (max reference RT) so boxes are comparable across runs and LC setups.
+    """
+    for path in trafoxml_paths:
+        td = TransformationDescription()
+        TransformationXMLFile().load(path, td, True)
+        points = td.getDataPoints()
+        gradient = max((pt.second for pt in points), default=0)
+        if gradient <= 0:
+            continue
+        run = os.path.splitext(os.path.basename(path))[0]
+        residuals = [(pt.second - td.apply(pt.first)) / gradient * 100 for pt in points]
+        write_box_stats(residuals, run, "aligned_residuals", f"{run}_aligned_residuals.json")
+
+
+def write_frag_mass_err(frag_mass_err_paths):
+    """Write per-run fragment mass error box statistics for the MultiQC box plot."""
+    for path in frag_mass_err_paths:
+        run = os.path.basename(path).removesuffix("_frag_mass_err.tsv")
+        errors = pd.read_csv(path, header=None).iloc[:, 0] if os.path.getsize(path) else []
+        write_box_stats(errors, run, "mass_error", f"{run}_frag_mass_err.json")
+
+
 def main():
     args = parser.parse_args()
     if args.columns:
@@ -251,6 +328,10 @@ def main():
                  args.out_prefix[0],
                  args.quantify,
                  cols)
+    if args.trafoxml:
+        write_aligned_residuals(args.trafoxml)
+    if args.frag_mass_err:
+        write_frag_mass_err(args.frag_mass_err)
 
 
 if __name__ == '__main__':
