@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- Snapshot peptidoform count and md5sum per result TSV in pipeline nf-tests instead of full peptide lists by @jonasscheid [#PRNUM](https://github.com/nf-core/mhcquant/pull/PRNUM)
+- Snapshot peptidoform count and md5sum per result TSV in pipeline nf-tests instead of full peptide lists by @jonasscheid [#488](https://github.com/nf-core/mhcquant/pull/488)
 
 ## 3.3.0 - Favorite - 29/09/26
 
