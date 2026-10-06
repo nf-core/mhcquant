@@ -55,6 +55,8 @@ workflow MHCQUANT {
     take:
     ch_samplesheet // channel: samplesheet read in from --input
     ch_fasta       // channel: reference database read in from --fasta
+    ch_sdrf        // channel: raw SDRF file, empty for plain samplesheet input
+    ch_accession   //    val: resolved PRIDE accession, '' for plain samplesheet input
     multiqc_config
     multiqc_logo
     multiqc_methods_description
@@ -175,7 +177,7 @@ workflow MHCQUANT {
     // SUBWORKFLOW: QUANT
     //
     if (params.quantify) {
-        QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file)
+        QUANT(merge_meta_map, RESCORE.out.rescored_runs, RESCORE.out.fdr_filtered, ch_clean_mzml_file, ch_sdrf, ch_accession)
         // Samples whose RT alignment failed are exported with identifications only, like empty samples
         ch_alignment_failed = RESCORE.out.fdr_filtered.join(QUANT.out.failed_groups)
         ch_output = QUANT.out.consensusxml.mix(RESCORE.out.fdr_filtered_empty, ch_alignment_failed)

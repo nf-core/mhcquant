@@ -102,6 +102,10 @@ workflow PIPELINE_INITIALISATION {
     //
     def inputType = detectInputType(params.input)
 
+    if (params.qpx_out && (!params.quantify || !(inputType in ['sdrf', 'pride_id']))) {
+        error("--qpx_out requires both --quantify and an SDRF/PRIDE input (--input <SDRF file> or PXD accession).")
+    }
+
     if (inputType == 'sdrf' || inputType == 'pride_id') {
         //
         // SDRF / PRIDE input: samplesheet is produced by a process, so validate lazily.
@@ -121,6 +125,8 @@ workflow PIPELINE_INITIALISATION {
             .flatMap { samplesheet_path ->
                 samplesheetToList(samplesheet_path.toString(), "${projectDir}/assets/schema_input.json")
             }
+        ch_sdrf      = SDRF_TO_SAMPLESHEET.out.sdrf
+        ch_accession = SDRF_TO_SAMPLESHEET.out.accession
 
     } else {
         //
@@ -130,6 +136,8 @@ workflow PIPELINE_INITIALISATION {
         ch_samplesheet_rows = channel.fromList(
             samplesheetToList(params.input, "${projectDir}/assets/schema_input.json")
         )
+        ch_sdrf      = channel.empty()
+        ch_accession = ''
     }
 
     //
@@ -216,6 +224,8 @@ workflow PIPELINE_INITIALISATION {
     emit:
     samplesheet = ch_samplesheet
     fasta       = ch_fasta
+    sdrf        = ch_sdrf        // channel: [ meta, sdrf_file ], empty for plain samplesheet input
+    accession   = ch_accession   //    val: resolved PRIDE accession, '' for plain samplesheet input
 }
 
 /*

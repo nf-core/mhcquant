@@ -1,0 +1,54 @@
+name: qpx_export
+description: Convert mhcquant consensusXML quantification results into a validated qpx/quantms.io parquet dataset
+keywords:
+  - immunopeptidomics
+  - quantms
+  - parquet
+  - quantification
+tools:
+  - qpx:
+      description: |
+        qpx (quantms.io) writes and validates the quantms.io parquet dataset format for
+        proteomics/immunopeptidomics quantification results.
+      homepage: https://quantms.org
+      licence: ["Apache-2.0"]
+      identifier: ""
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'PXD000000' ]
+    - consensusxmls:
+        type: file
+        description: One or more consensusXML files, one per Sample+Condition group, to convert into the qpx dataset
+        pattern: "*.consensusXML"
+    - sdrf:
+        type: file
+        description: SDRF file describing the experimental design, required by qpxc to build the qpx dataset
+        pattern: "*.sdrf.tsv"
+    - accession:
+        type: string
+        description: Project accession, used as the qpx output file name prefix
+output:
+  qpx:
+    - "qpx/**":
+        type: file
+        description: Validated qpx/quantms.io parquet dataset (psm, feature, sample, run, ontology, provenance, dataset)
+        pattern: "qpx/*.parquet"
+        ontologies: []
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - qpx:
+          type: string
+          description: The name of the tool
+      - "qpxc --version | cut -d' ' -f2":
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@jonasscheid"
+maintainers:
+  - "@jonasscheid"

@@ -14,6 +14,7 @@ The directories listed below will be created in the results directory after the 
 - `*.mzTab` (if `--quantify` is specified)
 - `global_fdr/global.tsv` (if `--global_fdr` is specified)
 - `spectrum_library/*_speclib.tsv` (if `--generate_speclib` is specified)
+- `qpx/<accession>.*.parquet` (if `--qpx_out` is specified)
 
 #### TSV
 
@@ -52,6 +53,10 @@ PEP  sequence  accession  best_search_engine_score[1]  retention_time  charge  m
 ```
 
 By default (only identification) the `best_search_engine_score[1]` holds the percolator q-value. If `--quantify` is specified the Comet XCorr of each peptide identification is annotated in the `best_search_engine_score[1]` column and peptide quantities in the `peptide_abundance_study_variable` columns.
+
+#### qpx
+
+When `--qpx_out` is specified (requires `--quantify` and an SDRF input), the `qpx/` directory holds one project-level [qpx / quantms.io](https://quantms.org) dataset: `<accession>.{psm,feature,sample,run,ontology,provenance,dataset}.parquet`. The peptide-level `psm` and `feature` tables carry the identifications and per-run quantities; the remaining tables carry SDRF-derived sample/run metadata. The dataset is validated with `qpxc validate` and is directly consumable by the bigbio/quantms toolchain.
 
 #### Global FDR
 

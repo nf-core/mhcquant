@@ -356,6 +356,13 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Turn on quantification mode"
                 },
+                "qpx_out": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-file-export",
+                    "description": "Emit a validated qpx/quantms.io dataset.",
+                    "help_text": "Requires --quantify and SDRF input."
+                },
                 "max_rt_alignment_shift": {
                     "type": "integer",
                     "fa_icon": "fas fa-align-center",

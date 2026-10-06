@@ -78,7 +78,8 @@
                     "openms/maprttransformer": {
                         "branch": "master",
                         "git_sha": "c1a970a6ad9cbb0b7209a927feb21e1f39c1841a",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/openms/maprttransformer/openms-maprttransformer.diff"
                     },
                     "openms/mztabexporter": {
                         "branch": "master",

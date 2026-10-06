@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added MultiQC plot for DeepLC retention time calibration per sample [#461](https://github.com/nf-core/mhcquant/pull/461)
 - Added MultiQC box plot of aligned residuals in the quant workflow [#462](https://github.com/nf-core/mhcquant/pull/462)
+- Added `--qpx_out` to emit a validated qpx/quantms.io dataset [#467](https://github.com/nf-core/mhcquant/pull/467)
 
 ### `Fixed`
 

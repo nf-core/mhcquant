@@ -1,0 +1,19 @@
+Changes in component 'nf-core/openms/maprttransformer'
+Changes in 'openms/maprttransformer/main.nf':
+--- modules/nf-core/openms/maprttransformer/main.nf
++++ modules/nf-core/openms/maprttransformer/main.nf
+@@ -8,7 +8,7 @@
+         'quay.io/biocontainers/openms:3.5.0--h78fb946_0' }"
+ 
+     input:
+-    tuple val(meta), path(in_file), path(trafoxml)
++    tuple val(meta), path(in_file, stageAs: "input/*"), path(trafoxml)
+ 
+     output:
+     tuple val(meta), path("${prefix}.${in_file.extension}"), emit: aligned
+
+'modules/nf-core/openms/maprttransformer/environment.yml' is unchanged
+'modules/nf-core/openms/maprttransformer/meta.yml' is unchanged
+'modules/nf-core/openms/maprttransformer/tests/main.nf.test' is unchanged
+'modules/nf-core/openms/maprttransformer/tests/main.nf.test.snap' is unchanged
+************************************************************
