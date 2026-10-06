@@ -38,7 +38,7 @@
                     "pyopenms": "3.4.1"
                 },
                 "Workflow": {
-                    "nf-core/mhcquant": "v3.2.0"
+                    "nf-core/mhcquant": "v3.3.0"
                 }
             },
             [
@@ -51,7 +51,6 @@
                 "intermediate_results/rescoring",
                 "intermediate_results/rescoring/HepG2_A_pout_filtered.idXML",
                 "multiqc",
-                "multiqc/ms2rescore",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
