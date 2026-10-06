@@ -3,15 +3,15 @@ process QPX_EXPORT {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/qpx:1.1.4--pyhdfd78af_0' :
-        'biocontainers/qpx:1.1.4--pyhdfd78af_0' }"
+    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
+        ? 'https://depot.galaxyproject.org/singularity/qpx:1.1.5--pyhdfd78af_0'
+        : 'biocontainers/qpx:1.1.5--pyhdfd78af_0'}"
 
     input:
     tuple val(meta), path(consensusxmls), path(sdrf), val(accession)
 
     output:
-    path 'qpx/**'                                                    , emit: qpx
+    path 'qpx/**', emit: qpx
     tuple val("${task.process}"), val('qpx'), eval("qpxc --version | cut -d' ' -f2"), topic: versions
 
     when:
@@ -33,6 +33,6 @@ process QPX_EXPORT {
     stub:
     """
     mkdir -p qpx
-    touch qpx/${accession}.{psm,feature,sample,run,ontology,provenance,dataset}.parquet
+    touch qpx/${accession}.{psm,feature,sample,run,ontology,provenance,dataset}.parquet qpx/${accession}.h5mu
     """
 }

@@ -196,7 +196,7 @@ nextflow run nf-core/mhcquant \
     -profile docker
 ```
 
-A single project-level dataset is written to `qpx/<accession>.{psm,feature,sample,run,ontology,provenance,dataset}.parquet`.
+A single project-level dataset is written to `qpx/<accession>.{psm,feature,sample,run,ontology,provenance,dataset}.parquet`, plus a MuData view `qpx/<accession>.h5mu`.
 
 ## Spectrum Library Generation
 

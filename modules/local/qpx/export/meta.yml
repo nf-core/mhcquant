@@ -34,8 +34,8 @@ output:
   qpx:
     - "qpx/**":
         type: file
-        description: Validated qpx/quantms.io parquet dataset (psm, feature, sample, run, ontology, provenance, dataset)
-        pattern: "qpx/*.parquet"
+        description: Validated qpx/quantms.io parquet dataset (psm, feature, sample, run, ontology, provenance, dataset) and its MuData view
+        pattern: "qpx/*.{parquet,h5mu}"
         ontologies: []
 topics:
   versions:
