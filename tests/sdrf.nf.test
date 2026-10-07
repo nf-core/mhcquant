@@ -10,7 +10,9 @@ nextflow_pipeline {
 
         when {
             params {
-                outdir = "$outputDir"
+                outdir      = "$outputDir"
+                quantify    = true
+                qpx_out     = true
             }
         }
 

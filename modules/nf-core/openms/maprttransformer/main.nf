@@ -8,7 +8,7 @@ process OPENMS_MAPRTTRANSFORMER {
         'quay.io/biocontainers/openms:3.5.0--h78fb946_0' }"
 
     input:
-    tuple val(meta), path(in_file), path(trafoxml)
+    tuple val(meta), path(in_file, stageAs: "input/*"), path(trafoxml)
 
     output:
     tuple val(meta), path("${prefix}.${in_file.extension}"), emit: aligned

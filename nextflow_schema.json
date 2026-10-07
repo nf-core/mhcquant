@@ -349,12 +349,32 @@
             "fa_icon": "fas fa-tally",
             "description": "",
             "default": "",
+            "if": {
+                "properties": { "qpx_out": { "const": true } },
+                "required": ["qpx_out"]
+            },
+            "then": {
+                "properties": {
+                    "quantify": { "const": true, "errorMessage": "--qpx_out requires --quantify" },
+                    "input": {
+                        "pattern": "^(PXD\\d{6,}|\\S+\\.sdrf\\.tsv)$",
+                        "errorMessage": "--qpx_out requires an SDRF file or PXD accession as --input"
+                    }
+                }
+            },
             "properties": {
                 "quantify": {
                     "type": "boolean",
                     "default": false,
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Turn on quantification mode"
+                },
+                "qpx_out": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-file-export",
+                    "description": "Emit a validated qpx/quantms.io dataset.",
+                    "help_text": "Requires --quantify and SDRF input."
                 },
                 "max_rt_alignment_shift": {
                     "type": "integer",

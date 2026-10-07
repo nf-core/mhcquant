@@ -32,6 +32,8 @@ workflow NFCORE_MHCQUANT {
     take:
     samplesheet // channel: samplesheet read in from --input
     fasta       // channel: reference database read in from --fasta
+    sdrf        // channel: raw SDRF file, empty for plain samplesheet input
+    accession   //    val: resolved PRIDE accession, '' for plain samplesheet input
 
     main:
 
@@ -41,6 +43,8 @@ workflow NFCORE_MHCQUANT {
     MHCQUANT (
         samplesheet,
         fasta,
+        sdrf,
+        accession,
         params.multiqc_config,
         params.multiqc_logo,
         params.multiqc_methods_description,
@@ -78,7 +82,9 @@ workflow {
     //
     NFCORE_MHCQUANT (
         PIPELINE_INITIALISATION.out.samplesheet,
-        PIPELINE_INITIALISATION.out.fasta
+        PIPELINE_INITIALISATION.out.fasta,
+        PIPELINE_INITIALISATION.out.sdrf,
+        PIPELINE_INITIALISATION.out.accession
     )
     //
     // SUBWORKFLOW: Run completion tasks
