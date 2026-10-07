@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-- Added `--qpx_out` to export quantification results as a validated qpx dataset [#PR](https://github.com/nf-core/mhcquant/pull/PR)
+- Added `--qpx_out` to export quantification results as a validated qpx dataset [#490](https://github.com/nf-core/mhcquant/pull/490)
 
 ## 3.3.0 - Favorite - 29/09/26
 
