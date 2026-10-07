@@ -349,6 +349,19 @@
             "fa_icon": "fas fa-tally",
             "description": "",
             "default": "",
+            "if": {
+                "properties": { "qpx_out": { "const": true } },
+                "required": ["qpx_out"]
+            },
+            "then": {
+                "properties": {
+                    "quantify": { "const": true, "errorMessage": "--qpx_out requires --quantify" },
+                    "input": {
+                        "pattern": "^(PXD\\d{6,}|\\S+\\.sdrf\\.tsv)$",
+                        "errorMessage": "--qpx_out requires an SDRF file or PXD accession as --input"
+                    }
+                }
+            },
             "properties": {
                 "quantify": {
                     "type": "boolean",
