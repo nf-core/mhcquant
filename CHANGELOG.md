@@ -5,6 +5,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 3.4.0dev
 
+### `Changed`
+
+- Kept peptides shared between proteins in EasyPQP spectral libraries with `--no-proteotypic` [#493](https://github.com/nf-core/mhcquant/pull/493)
+
+### `Dependencies`
+
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+| `easypqp`  | 0.1.59      | 0.1.60      |
+
 ## 3.3.0 - Favorite - 29/09/26
 
 ### `Added`
