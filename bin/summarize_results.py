@@ -177,6 +177,10 @@ def process_file(file, prefix, quantify, keep_cols):
         data.rename(columns={data.columns[0]: data.columns[0].replace('#', '')}, inplace=True)
         n_psms = 0
 
+    # OpenMS >= 3.6 stores the Comet xcorr only under its PSI-MS accession
+    if "COMET:xcorr" not in data.columns:
+        data.rename(columns={"MS:1002252": "COMET:xcorr"}, inplace=True)
+
     # Check if all required columns are present in the DataFrame
     required_columns = ['sequence', 'accessions', 'mz', 'rt', 'score', 'COMET:xcorr']
     missing_columns = set(required_columns) - set(data.columns)
