@@ -7,65 +7,65 @@
                 },
                 "OPENMSTHIRDPARTY_COMETADAPTER": {
                     "Comet": "2024.01 rev. 1",
-                    "CometAdapter": "3.5.0"
+                    "CometAdapter": "3.6.0"
                 },
                 "OPENMS_DECOYDATABASE": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_FEATUREFINDERIDENTIFICATION": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_FILECONVERTER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDCONFLICTRESOLVER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDFILTER_QUANT": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDFILTER_Q_VALUE": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDMASSACCURACY": {
                     "openms": "3.4.1"
                 },
                 "OPENMS_IDMERGER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDMERGER_QUANT": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDRIPPER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDSCORESWITCHER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_MAPALIGNERIDENTIFICATION": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_MAPRTTRANSFORMERIDXML": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_MAPRTTRANSFORMERMZML": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_MZTABEXPORTER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_PEPTIDEINDEXER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_PERCOLATORADAPTER": {
-                    "PercolatorAdapter": "3.5.0-pre-exported-20251212",
-                    "percolator": "3.07.1"
+                    "PercolatorAdapter": "3.6.0",
+                    "percolator": "3.09.0"
                 },
                 "OPENMS_PSMFEATUREEXTRACTOR": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_TEXTEXPORTER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
@@ -105,7 +105,6 @@
                 "multiqc/multiqc_data/llms-full.txt",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
-                "multiqc/multiqc_data/multiqc_aligned_residuals.txt",
                 "multiqc/multiqc_data/multiqc_chromatogram.txt",
                 "multiqc/multiqc_data/multiqc_citations.txt",
                 "multiqc/multiqc_data/multiqc_data.json",
@@ -124,7 +123,6 @@
                 "multiqc/multiqc_data/percolator_plot.txt",
                 "multiqc/multiqc_plots",
                 "multiqc/multiqc_plots/pdf",
-                "multiqc/multiqc_plots/pdf/aligned_residuals.pdf",
                 "multiqc/multiqc_plots/pdf/chromatogram-cnt.pdf",
                 "multiqc/multiqc_plots/pdf/chromatogram-log.pdf",
                 "multiqc/multiqc_plots/pdf/deeplc_rt_calibration.pdf",
@@ -139,7 +137,6 @@
                 "multiqc/multiqc_plots/pdf/percolator_plot-pct.pdf",
                 "multiqc/multiqc_plots/pdf/scores_xcorr.pdf",
                 "multiqc/multiqc_plots/png",
-                "multiqc/multiqc_plots/png/aligned_residuals.png",
                 "multiqc/multiqc_plots/png/chromatogram-cnt.png",
                 "multiqc/multiqc_plots/png/chromatogram-log.png",
                 "multiqc/multiqc_plots/png/deeplc_rt_calibration.png",
@@ -154,7 +151,6 @@
                 "multiqc/multiqc_plots/png/percolator_plot-pct.png",
                 "multiqc/multiqc_plots/png/scores_xcorr.png",
                 "multiqc/multiqc_plots/svg",
-                "multiqc/multiqc_plots/svg/aligned_residuals.svg",
                 "multiqc/multiqc_plots/svg/chromatogram-cnt.svg",
                 "multiqc/multiqc_plots/svg/chromatogram-log.svg",
                 "multiqc/multiqc_plots/svg/deeplc_rt_calibration.svg",
@@ -173,23 +169,23 @@
                 "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml"
             ],
             [
-                "PBMC007_msms29_fdr_filtered.trafoXML:md5,bc85f3bbfba232ad9154cd5bb8267b1a",
-                "PBMC009_msms37_fdr_filtered.trafoXML:md5,3087e500735c5e5e98fd05342df94353"
+                "PBMC007_msms29_fdr_filtered.trafoXML:md5,c129fc3f79bd40bfdd899689599bc25d",
+                "PBMC009_msms37_fdr_filtered.trafoXML:md5,c129fc3f79bd40bfdd899689599bc25d"
             ],
             [
                 [
                     "PBMC007_B.tsv",
-                    2206,
-                    "7d8e4deedde6f67854b7ab91c9d8bf7d"
+                    2138,
+                    "b5e7fb3d89a49c90807c0702ce4aa8b5"
                 ],
                 [
                     "PBMC009_A.tsv",
                     5838,
-                    "e05bda910dd48355f6868561138311b9"
+                    "fb0cf4c8fb988f3752bc4c8dfe9a8862"
                 ]
             ]
         ],
-        "timestamp": "2026-09-16T17:22:24.573099189",
+        "timestamp": "2026-10-13T10:38:09.045885196",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

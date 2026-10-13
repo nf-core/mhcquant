@@ -8,32 +8,32 @@
                 },
                 "OPENMSTHIRDPARTY_COMETADAPTER": {
                     "Comet": "2024.01 rev. 1",
-                    "CometAdapter": "3.5.0"
+                    "CometAdapter": "3.6.0"
                 },
                 "OPENMS_DECOYDATABASE": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDFILTER_Q_VALUE": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_IDMASSACCURACY": {
                     "openms": "3.4.1"
                 },
                 "OPENMS_IDMERGER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_PEPTIDEINDEXER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_PERCOLATORADAPTER": {
-                    "PercolatorAdapter": "3.5.0-pre-exported-20251212",
-                    "percolator": "3.07.1"
+                    "PercolatorAdapter": "3.6.0",
+                    "percolator": "3.09.0"
                 },
                 "OPENMS_PSMFEATUREEXTRACTOR": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "OPENMS_TEXTEXPORTER": {
-                    "openms": "3.5.0"
+                    "openms": "3.6.0"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
                     "pyopenms": "3.4.1"
@@ -136,7 +136,7 @@
                 ]
             ]
         ],
-        "timestamp": "2026-06-11T12:10:54.980833385",
+        "timestamp": "2026-10-13T09:37:11.593167497",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
