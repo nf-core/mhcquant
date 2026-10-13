@@ -5,6 +5,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 3.4.0dev
 
+### `Changed`
+
+- Bumped OpenMS modules to 3.6.0 [#494](https://github.com/nf-core/mhcquant/pull/494)
+
+### `Dependencies`
+
+| Dependency          | Old version | New version |
+| ------------------- | ----------- | ----------- |
+| `OpenMS`            | 3.5.0       | 3.6.0       |
+| `OpenMS-thirdparty` | 3.5.0       | 3.6.0       |
+| `Percolator`        | 3.7.1       | 3.9         |
+
 ## 3.3.0 - Favorite - 29/09/26
 
 ### `Added`
