@@ -21,7 +21,7 @@ The TSV output of MHCquant is a tab-delimited file holding information about FDR
 
 | **Tool** | **Metric**                             | **Description**                                                                                                                                                                       |
 | -------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Comet    | `COMET:xcorr`                          | Cross-correlation score between observed and theoretical spectra; higher scores indicate better matches.                                                                              |
+| Comet    | `Comet:xcorr`                          | Cross-correlation score between observed and theoretical spectra; higher scores indicate better matches.                                                                              |
 | Comet    | `COMET:deltaCn`                        | Normalized difference between the top two XCorr scores; higher values indicate better discrimination between top matches.                                                             |
 | Comet    | `COMET:deltaLCn`                       | Similar to deltaCn but considers the difference between the top match and the best match with a different peptide sequence.                                                           |
 | Comet    | `COMET:lnExpect`                       | Natural logarithm of the Expectation value; lower values suggest more statistically significant matches.                                                                              |

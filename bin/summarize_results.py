@@ -6,7 +6,7 @@ import os
 import json
 import pandas as pd
 import numpy as np
-from pyopenms import AASequence, TransformationXMLFile, TransformationDescription
+from pyopenms import AASequence, ControlledVocabulary, File, TransformationXMLFile, TransformationDescription
 from argparse import ArgumentParser
 import re
 from collections import Counter
@@ -159,6 +159,13 @@ def write_box_stats(values, sample, plot_id, path):
         json.dump({"id": plot_id, "data": {sample: stats}}, f, indent=4)
 
 
+def decode_cv_columns(data):
+    """Rename PSI-MS accession columns (e.g. MS:1002252) to their term names (e.g. Comet:xcorr)"""
+    cv = ControlledVocabulary()
+    cv.loadFromOBO("PSI-MS", File.find("CV/psi-ms.obo", []))
+    data.rename(columns={col: cv.getTerm(col).name for col in data.columns if cv.exists(col)}, inplace=True)
+
+
 def process_file(file, prefix, quantify, keep_cols):
     """Extract all the relevant information and write it to a TSV file for the MultiQC report
 
@@ -177,12 +184,10 @@ def process_file(file, prefix, quantify, keep_cols):
         data.rename(columns={data.columns[0]: data.columns[0].replace('#', '')}, inplace=True)
         n_psms = 0
 
-    # OpenMS >= 3.6 stores the Comet xcorr only under its PSI-MS accession
-    if "COMET:xcorr" not in data.columns:
-        data.rename(columns={"MS:1002252": "COMET:xcorr"}, inplace=True)
+    decode_cv_columns(data)
 
     # Check if all required columns are present in the DataFrame
-    required_columns = ['sequence', 'accessions', 'mz', 'rt', 'score', 'COMET:xcorr']
+    required_columns = ['sequence', 'accessions', 'mz', 'rt', 'score', 'Comet:xcorr']
     missing_columns = set(required_columns) - set(data.columns)
     if data.shape[0] > 0:  # If the DataFrame is not empty
         if missing_columns:
@@ -251,7 +256,7 @@ def process_file(file, prefix, quantify, keep_cols):
     # ---------------------------------
     # Box plots
     # ---------------------------------
-    write_box_stats(data["COMET:xcorr"], prefix, "scores_plot_xcorr", f"{prefix}_xcorr_scores.json")
+    write_box_stats(data["Comet:xcorr"], prefix, "scores_plot_xcorr", f"{prefix}_xcorr_scores.json")
     if 'intensity_cf' in data.columns:
         with np.errstate(divide='ignore'):
             log_intensity = np.log2(data["intensity_cf"].astype(float))
