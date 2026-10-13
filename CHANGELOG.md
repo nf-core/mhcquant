@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- Bumped OpenMS modules to 3.6.0 [#494](https://github.com/nf-core/mhcquant/pull/494)
+- Bumped OpenMS modules to 3.6.0 and renamed `COMET:xcorr` to its PSI-MS term name `Comet:xcorr` in the result TSV [#494](https://github.com/nf-core/mhcquant/pull/494)
 
 ### `Dependencies`
 
