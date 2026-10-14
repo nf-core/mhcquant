@@ -6,7 +6,7 @@ import os
 import json
 import pandas as pd
 import numpy as np
-from pyopenms import AASequence, ControlledVocabulary, File, TransformationXMLFile, TransformationDescription
+from pyopenms import AASequence, ControlledVocabulary, File, TransformationXMLFile
 from argparse import ArgumentParser
 import re
 from collections import Counter
@@ -93,15 +93,6 @@ def parse_multiTSV(file_path):
                 consensus_cols = line.strip().split('\t')[1:]
             elif line.startswith("#UNASSIGNEDPEPTIDE"):
                 unassigned_peptide_cols = line.strip().split('\t')[1:]
-
-    # Workaround for OpenMS 3.5.0 TextExporter bug (https://github.com/OpenMS/OpenMS/issues/9120):
-    # consensusXML export writes a phantom column in data rows between 'end' and 'FFId_category'
-    # that is missing from the header. Remove it to realign columns.
-    for rows, cols in [(peptide_rows, peptide_cols), (unassigned_peptide_rows, unassigned_peptide_cols)]:
-        if rows and len(rows[0]) > len(cols) and 'end' in cols:
-            extra_idx = cols.index('end') + 1
-            for i, row in enumerate(rows):
-                rows[i] = row[:extra_idx] + row[extra_idx + 1:]
 
     peptide_df = pd.DataFrame(peptide_rows, columns=peptide_cols)
     consensus_df = pd.DataFrame(consensus_rows, columns=consensus_cols)
@@ -308,8 +299,7 @@ def write_aligned_residuals(trafoxml_paths):
     (max reference RT) so boxes are comparable across runs and LC setups.
     """
     for path in trafoxml_paths:
-        td = TransformationDescription()
-        TransformationXMLFile().load(path, td, True)
+        td = TransformationXMLFile().load(path, True)
         points = td.getDataPoints()
         gradient = max((pt.second for pt in points), default=0)
         if gradient <= 0:

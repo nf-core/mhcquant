@@ -68,10 +68,10 @@
                     "openms": "3.6.0"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
-                    "pyopenms": "3.4.1"
+                    "pyopenms": "3.6.0"
                 },
                 "SUMMARIZE_RESULTS": {
-                    "pyopenms": "3.4.1"
+                    "pyopenms": "3.6.0"
                 },
                 "THERMORAWFILEPARSER": {
                     "thermorawfileparser": "1.4.5"
@@ -185,7 +185,7 @@
                 ]
             ]
         ],
-        "timestamp": "2026-10-13T19:20:20.145632654",
+        "timestamp": "2026-10-14T11:22:13.719534817",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

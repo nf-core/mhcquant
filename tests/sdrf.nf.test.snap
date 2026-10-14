@@ -41,10 +41,10 @@
                     "pridepy": "0.0.15"
                 },
                 "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
-                    "pyopenms": "3.4.1"
+                    "pyopenms": "3.6.0"
                 },
                 "SUMMARIZE_RESULTS": {
-                    "pyopenms": "3.4.1"
+                    "pyopenms": "3.6.0"
                 },
                 "THERMORAWFILEPARSER": {
                     "thermorawfileparser": "1.4.5"
@@ -140,7 +140,7 @@
                 ]
             ]
         ],
-        "timestamp": "2026-10-13T09:58:03.321740706",
+        "timestamp": "2026-10-14T11:46:05.907774256",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

@@ -143,12 +143,10 @@ def flatten(ls: list) -> list:
 
 def __main__():
     parser, args = parse_arguments()
-    protein_ids = []
-    peptide_ids = []
     # Each peptide ID should only contain one hit in the FDR_filtered idXML
-    IdXMLFile().load(args.filtered_idXML, protein_ids, peptide_ids)
+    protein_ids, peptide_ids = IdXMLFile().load(args.filtered_idXML)
     # Get the list of mzML files that have been merged together by IDmerger previously
-    filenames = [filename.decode("utf-8") for filename in protein_ids[0].getMetaValue("spectra_data")]
+    filenames = protein_ids[0].getMetaValue("spectra_data")
     # Define empty lists that collect all the necessary information, which is comprised in DataFrames
     ions = []
     spectra_mz = []
@@ -172,7 +170,7 @@ def __main__():
         MzMLFile().load(file, exp)
         # Create lookup object for easy spectrum reference.
         spectrum_lookup = SpectrumLookup()
-        spectrum_lookup.readSpectra(exp, "scan=(?<SCAN>\\d+)")
+        spectrum_lookup.readSpectra(exp)
         # Iterate over the FDR filtered peptideIDs
         for peptide_id in peptide_ids:
             # Check if the PeptideHit originates from the current mzML file
@@ -184,19 +182,18 @@ def __main__():
             spectrum_mz, spectrum_intensities = spectrum.get_peaks()
             spectra_mz.append(spectrum_mz)
             spectra_intensities.append(spectrum_intensities)
-            sequence = peptide_id.getHits()[0].getSequence()
+            sequence = peptide_id.getHits()[0].getSequence().toString()
             spectra_peptides.append(np.repeat(sequence, len(spectrum_mz)))
             is_matching_ion_peptide = np.repeat(False, len(spectrum_mz))
             spectra_nativeIDs.append(np.repeat(peptide_id.getMetaValue("spectrum_reference"), len(spectrum_mz)))
             # Generate theoretical spectrum of peptide hit
             theo_spectrum = generate_theoretical_spectrum(peptide_id, args)
             # Align both spectra
-            alignment = []
-            spa.getSpectrumAlignment(alignment, theo_spectrum, spectrum)
+            alignment = spa.getSpectrumAlignment(theo_spectrum, spectrum)
             # Obtain ion annotations from theoretical spectrum if there are at least two matching ions
             if len(alignment) > 1:
                 for theo_idx, obs_idx in alignment:
-                    ion_name = theo_spectrum.getStringDataArrays()[0][theo_idx].decode()
+                    ion_name = theo_spectrum.getStringDataArrays()[0][theo_idx]
                     ion_charge = theo_spectrum.getIntegerDataArrays()[0][theo_idx]
                     obs_mz = spectrum[obs_idx].getMZ()
                     obs_int = spectrum[obs_idx].getIntensity()
