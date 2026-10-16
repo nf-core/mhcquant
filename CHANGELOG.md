@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
-- Fixed duplicated peptides in the result TSV and mzTab and inflated PSM counts with `--quantify` by keeping each peptidoform and charge only on its most intense feature [#PR](https://github.com/nf-core/mhcquant/pull/PR)
+- Fixed duplicated peptides in the result TSV and mzTab and inflated PSM counts with `--quantify` by keeping each peptidoform and charge only on its most intense feature [#495](https://github.com/nf-core/mhcquant/pull/495)
 
 ### `Changed`
 
