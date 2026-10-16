@@ -2,10 +2,11 @@
  * Perform the quantification by extracting the feature intensities and group runs corresponding to the same sample and condition.
  */
 
-include { OPENMS_FEATUREFINDERIDENTIFICATION } from '../../../modules/nf-core/openms/featurefinderidentification/main'
-include { OPENMS_FEATURELINKERUNLABELEDKD    } from '../../../modules/local/openmsthirdparty/featurelinkerunlabeledkd'
-include { OPENMS_IDCONFLICTRESOLVER          } from '../../../modules/nf-core/openms/idconflictresolver/main'
-include { OPENMS_FILECONVERTER               } from '../../../modules/nf-core/openms/fileconverter/main'
+include { OPENMS_FEATUREFINDERIDENTIFICATION               } from '../../../modules/nf-core/openms/featurefinderidentification/main'
+include { OPENMS_FEATURELINKERUNLABELEDKD                  } from '../../../modules/local/openmsthirdparty/featurelinkerunlabeledkd'
+include { OPENMS_IDCONFLICTRESOLVER                        } from '../../../modules/nf-core/openms/idconflictresolver/main'
+include { OPENMS_FILECONVERTER                             } from '../../../modules/nf-core/openms/fileconverter/main'
+include { OPENMS_FILEFILTER as OPENMS_FILEFILTER_ANNOTATED } from '../../../modules/nf-core/openms/filefilter/main'
 
 workflow PROCESS_FEATURE {
     take:
@@ -40,11 +41,14 @@ workflow PROCESS_FEATURE {
     // Single replicate: promote featureXML to consensusXML
     OPENMS_FILECONVERTER(ch_features.single.map { meta, features -> [meta, features[0], "consensusXML"] })
 
-    // Resolve conflicting ids matching to the same feature
+    // Resolve conflicting ids within a feature and keep each peptide/charge only on its most intense feature
     ch_consensus_input = OPENMS_FEATURELINKERUNLABELEDKD.out.consensusxml.mix(OPENMS_FILECONVERTER.out.converted)
 
     OPENMS_IDCONFLICTRESOLVER(ch_consensus_input)
 
+    // Drop the features that lost their identification to a more intense feature of the same peptide/charge
+    OPENMS_FILEFILTER_ANNOTATED(OPENMS_IDCONFLICTRESOLVER.out.resolved)
+
     emit:
-    consensusxml = OPENMS_IDCONFLICTRESOLVER.out.resolved
+    consensusxml = OPENMS_FILEFILTER_ANNOTATED.out.consensusxml
 }

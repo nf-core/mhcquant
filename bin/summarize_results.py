@@ -73,17 +73,21 @@ def parse_multiTSV(file_path):
 
     Returns:
         DataFrame: Contains all relevant information for further processing
+        int: The number of distinct PSMs
     """
     peptide_rows = []
     consensus_rows = []
     unassigned_peptide_rows = []
+    consensus_row = None
 
     with open(file_path, 'r') as file:
         for line in file:
             if line.startswith("PEPTIDE"):
+                # Pair each PEPTIDE row with the CONSENSUS row it belongs to
                 peptide_rows.append(line.strip().split('\t')[1:])
+                consensus_rows.append(consensus_row)
             elif line.startswith("CONSENSUS"):
-                consensus_rows.append(line.strip().split('\t')[1:])
+                consensus_row = line.strip().split('\t')[1:]
             elif line.startswith("UNASSIGNEDPEPTIDE"):
                 unassigned_peptide_rows.append(line.strip().split('\t')[1:])
             # Extract the header information for all TSV files
@@ -98,11 +102,12 @@ def parse_multiTSV(file_path):
     consensus_df = pd.DataFrame(consensus_rows, columns=consensus_cols)
     # Concatenate CONSENSUS and PEPTIDE columns
     df = pd.concat([peptide_df, consensus_df], axis=1)
-    # Add an additional PSM column
+    # Each run of a group holds a copy of all PSMs of the group, so count each spectrum of a run only once
     unassigned_peptide_df = pd.DataFrame(unassigned_peptide_rows, columns=unassigned_peptide_cols)
-    psm = unassigned_peptide_df.loc[:, "sequence"].value_counts()
-    df["psm"] = df["sequence"].map(psm)
-    return df
+    psm_key = [col for col in ("id_merge_index", "spectrum_reference") if col in peptide_df.columns]
+    psms = pd.concat([peptide_df, unassigned_peptide_df]).drop_duplicates(psm_key)
+    df["psm"] = df["sequence"].map(psms["sequence"].value_counts())
+    return df, len(psms)
 
 def strip_modifications(seq_with_mods: str) -> str:
     try:
@@ -174,8 +179,7 @@ def process_file(file, prefix, quantify, keep_cols):
            keep_cols (list): Set of columns to keep from the original set of columns
        """
     if quantify and multi_tsv_not_empty(file):
-        data = parse_multiTSV(file)
-        n_psms = np.sum(data["psm"])
+        data, n_psms = parse_multiTSV(file)
     else:
         data = pd.read_csv(file, sep='\t')
         # Remove the special character '#' from the first column name

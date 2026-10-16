@@ -40,7 +40,7 @@ The TSV output of MHCquant is a tab-delimited file holding information about FDR
 | Epicore  | `consensus_epitope_intensity`          | Sum of intensities of all peptides belonging to the epicore group.                                                                                                                    |
 | Epicore  | `relative_consensus_epitope_intensity` | Relative epicore group intensity (core_epitope_intensity divided by the total intensity of peptides in output file).                                                                  |
 
-The TSV file in quantification mode (by using `--quantify`) additionally holds the columns `rt_cf|0|1|..`, `mz_cf|0|1|..`, `intensity_cf|0|1|..`, and `charge_cf|0|1|..`, where `cf` (consensus feature) represents the aggregated value of the individual MS runs (`0|1|..`) that are part of the `<Sample>_<Condition>` group in the input samplesheet. Use e.g. the individual intensities of MS runs to compare two groups and conduct a differential-presentation analysis.
+The TSV file in quantification mode (by using `--quantify`) additionally holds the columns `rt_cf|0|1|..`, `mz_cf|0|1|..`, `intensity_cf|0|1|..`, and `charge_cf|0|1|..`, where `cf` (consensus feature) represents the aggregated value of the individual MS runs (`0|1|..`) that are part of the `<Sample>_<Condition>` group in the input samplesheet. Use e.g. the individual intensities of MS runs to compare two groups and conduct a differential-presentation analysis. Each peptidoform and charge state is reported once, with the consensus feature of the highest intensity. The `psm` column holds the number of PSMs of the peptidoform in the group.
 
 #### mzTab
 
