@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- Bumped OpenMS and pyOpenMS modules to 3.6.0, renamed `COMET:xcorr` to its PSI-MS term name `Comet:xcorr` in the result TSV added a `USI` column (`--usi_dataset_id`) to the result TSV and fixed the ion annotator ignoring `--remove_precursor_peak false` [#494](https://github.com/nf-core/mhcquant/pull/494)
+- Bumped OpenMS and pyOpenMS modules to 3.6.0, renamed `COMET:xcorr` to its PSI-MS term name `Comet:xcorr` in the result TSV added a `USI` column (`--usi_dataset_id`) to the result TSV and fixed the ion annotator ignoring `--remove_precursor_peak false` and samples without PSMs after FDR filtering crashing `--quantify` [#494](https://github.com/nf-core/mhcquant/pull/494)
 
 ### `Dependencies`
 
