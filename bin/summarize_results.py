@@ -158,10 +158,8 @@ def decode_cv_columns(data):
 
 
 def format_usi(data):
-    """Use the original run name (without .mzML) in USIs and keep them only for Thermo scan numbers"""
-    is_thermo_scan = data["spectrum_reference"].astype(str).str.startswith("controllerType=0 controllerNumber=1 scan=")
-    run_without_ext = data["USI"].astype(str).str.replace(r"\.mzML(?=:scan:)", "", regex=True, flags=re.IGNORECASE)
-    data["USI"] = run_without_ext.where(is_thermo_scan, "")
+    """Use the original run name (without .mzML) in USIs"""
+    data["USI"] = data["USI"].fillna("").astype(str).str.replace(r"\.mzML(?=:(?:scan|index|nativeId):)", "", regex=True, flags=re.IGNORECASE)
 
 
 def process_file(file, prefix, quantify, keep_cols):
@@ -183,7 +181,7 @@ def process_file(file, prefix, quantify, keep_cols):
         n_psms = 0
 
     decode_cv_columns(data)
-    if "USI" in data.columns and "spectrum_reference" in data.columns:
+    if "USI" in data.columns:
         format_usi(data)
 
     # Check if all required columns are present in the DataFrame
