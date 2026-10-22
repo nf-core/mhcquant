@@ -37,6 +37,7 @@ nextflow_pipeline {
                     }
                 }
             }
+            peptidoform_data.sort { it[0] }
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(

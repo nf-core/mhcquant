@@ -5,6 +5,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 3.4.0dev
 
+### `Added`
+
+- Added a `USI` column to the result TSV [#494](https://github.com/nf-core/mhcquant/pull/494)
+
+### `Fixed`
+
+- Fixed `--remove_precursor_peak false` enabling the option and `--quantify` crashing on samples without PSMs [#494](https://github.com/nf-core/mhcquant/pull/494)
+
+### `Changed`
+
+- Bumped OpenMS and pyOpenMS modules to 3.6.0 and renamed `COMET:xcorr` to its PSI-MS term name `Comet:xcorr` in the result TSV [#494](https://github.com/nf-core/mhcquant/pull/494)
+
+### `Dependencies`
+
+| Dependency          | Old version | New version |
+| ------------------- | ----------- | ----------- |
+| `OpenMS`            | 3.5.0       | 3.6.0       |
+| `OpenMS-thirdparty` | 3.5.0       | 3.6.0       |
+| `Percolator`        | 3.7.1       | 3.9.0       |
+| `pyOpenMS`          | 3.4.1       | 3.6.0       |
+
 ## 3.3.0 - Favorite - 29/09/26
 
 ### `Added`

@@ -6,7 +6,7 @@ import os
 import json
 import pandas as pd
 import numpy as np
-from pyopenms import AASequence, TransformationXMLFile, TransformationDescription
+from pyopenms import AASequence, ControlledVocabulary, File, TransformationXMLFile
 from argparse import ArgumentParser
 import re
 from collections import Counter
@@ -94,15 +94,6 @@ def parse_multiTSV(file_path):
             elif line.startswith("#UNASSIGNEDPEPTIDE"):
                 unassigned_peptide_cols = line.strip().split('\t')[1:]
 
-    # Workaround for OpenMS 3.5.0 TextExporter bug (https://github.com/OpenMS/OpenMS/issues/9120):
-    # consensusXML export writes a phantom column in data rows between 'end' and 'FFId_category'
-    # that is missing from the header. Remove it to realign columns.
-    for rows, cols in [(peptide_rows, peptide_cols), (unassigned_peptide_rows, unassigned_peptide_cols)]:
-        if rows and len(rows[0]) > len(cols) and 'end' in cols:
-            extra_idx = cols.index('end') + 1
-            for i, row in enumerate(rows):
-                rows[i] = row[:extra_idx] + row[extra_idx + 1:]
-
     peptide_df = pd.DataFrame(peptide_rows, columns=peptide_cols)
     consensus_df = pd.DataFrame(consensus_rows, columns=consensus_cols)
     # Concatenate CONSENSUS and PEPTIDE columns
@@ -159,6 +150,18 @@ def write_box_stats(values, sample, plot_id, path):
         json.dump({"id": plot_id, "data": {sample: stats}}, f, indent=4)
 
 
+def decode_cv_columns(data):
+    """Rename PSI-MS accession columns (e.g. MS:1002252) to their term names (e.g. Comet:xcorr)"""
+    cv = ControlledVocabulary()
+    cv.loadFromOBO("PSI-MS", File.find("CV/psi-ms.obo", []))
+    data.rename(columns={col: cv.getTerm(col).name for col in data.columns if cv.exists(col)}, inplace=True)
+
+
+def format_usi(data):
+    """Use the original run name (without .mzML) in USIs"""
+    data["USI"] = data["USI"].fillna("").astype(str).str.replace(r"\.mzML(?=:(?:scan|index|nativeId):)", "", regex=True, flags=re.IGNORECASE)
+
+
 def process_file(file, prefix, quantify, keep_cols):
     """Extract all the relevant information and write it to a TSV file for the MultiQC report
 
@@ -177,8 +180,12 @@ def process_file(file, prefix, quantify, keep_cols):
         data.rename(columns={data.columns[0]: data.columns[0].replace('#', '')}, inplace=True)
         n_psms = 0
 
+    decode_cv_columns(data)
+    if "USI" in data.columns:
+        format_usi(data)
+
     # Check if all required columns are present in the DataFrame
-    required_columns = ['sequence', 'accessions', 'mz', 'rt', 'score', 'COMET:xcorr']
+    required_columns = ['sequence', 'accessions', 'mz', 'rt', 'score', 'Comet:xcorr']
     missing_columns = set(required_columns) - set(data.columns)
     if data.shape[0] > 0:  # If the DataFrame is not empty
         if missing_columns:
@@ -247,7 +254,7 @@ def process_file(file, prefix, quantify, keep_cols):
     # ---------------------------------
     # Box plots
     # ---------------------------------
-    write_box_stats(data["COMET:xcorr"], prefix, "scores_plot_xcorr", f"{prefix}_xcorr_scores.json")
+    write_box_stats(data["Comet:xcorr"], prefix, "scores_plot_xcorr", f"{prefix}_xcorr_scores.json")
     if 'intensity_cf' in data.columns:
         with np.errstate(divide='ignore'):
             log_intensity = np.log2(data["intensity_cf"].astype(float))
@@ -299,8 +306,7 @@ def write_aligned_residuals(trafoxml_paths):
     (max reference RT) so boxes are comparable across runs and LC setups.
     """
     for path in trafoxml_paths:
-        td = TransformationDescription()
-        TransformationXMLFile().load(path, td, True)
+        td = TransformationXMLFile().load(path, True)
         points = td.getDataPoints()
         gradient = max((pt.second for pt in points), default=0)
         if gradient <= 0:
