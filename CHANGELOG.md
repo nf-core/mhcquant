@@ -5,9 +5,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 3.4.0dev
 
+### `Added`
+
+- Added a `USI` column to the result TSV (`--usi_dataset_id`) [#494](https://github.com/nf-core/mhcquant/pull/494)
+
+### `Fixed`
+
+- Fixed `--remove_precursor_peak false` enabling the option and `--quantify` crashing on samples without PSMs [#494](https://github.com/nf-core/mhcquant/pull/494)
+
 ### `Changed`
 
-- Bumped OpenMS and pyOpenMS modules to 3.6.0, renamed `COMET:xcorr` to its PSI-MS term name `Comet:xcorr` in the result TSV added a `USI` column (`--usi_dataset_id`) to the result TSV and fixed the ion annotator ignoring `--remove_precursor_peak false` and samples without PSMs after FDR filtering crashing `--quantify` [#494](https://github.com/nf-core/mhcquant/pull/494)
+- Bumped OpenMS and pyOpenMS modules to 3.6.0 and renamed `COMET:xcorr` to its PSI-MS term name `Comet:xcorr` in the result TSV [#494](https://github.com/nf-core/mhcquant/pull/494)
 
 ### `Dependencies`
 
@@ -15,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | ------------------- | ----------- | ----------- |
 | `OpenMS`            | 3.5.0       | 3.6.0       |
 | `OpenMS-thirdparty` | 3.5.0       | 3.6.0       |
-| `Percolator`        | 3.7.1       | 3.9         |
+| `Percolator`        | 3.7.1       | 3.9.0       |
 | `pyOpenMS`          | 3.4.1       | 3.6.0       |
 
 ## 3.3.0 - Favorite - 29/09/26
