@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-- Added a `USI` column to the result TSV (`--usi_dataset_id`) [#494](https://github.com/nf-core/mhcquant/pull/494)
+- Added a `USI` column to the result TSV [#494](https://github.com/nf-core/mhcquant/pull/494)
 
 ### `Fixed`
 

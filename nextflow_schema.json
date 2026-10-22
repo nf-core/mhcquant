@@ -438,13 +438,6 @@
                     "fa_icon": "fas fa-tags",
                     "description": "Create tsv files containing information about the MS2 ion annotations after processing.",
                     "help_text": "The resulting tsv files should aid in spectrum validation downstream analyses"
-                },
-                "usi_dataset_id": {
-                    "type": "string",
-                    "default": "local",
-                    "fa_icon": "fas fa-fingerprint",
-                    "description": "Dataset identifier (e.g. a ProteomeXchange accession such as PXD000561) used in the USI column of the result TSV.",
-                    "help_text": "The Universal Spectrum Identifier (USI) references each PSM as `mzspec:<dataset>:<run>:scan:<scan>:<peptide>/<charge>`. Keep the default `local` for unpublished data and set the ProteomeXchange accession once the raw data is deposited. For timsTOF data, the scan number is the spectrum position in the converted mzML, not a Bruker frame/scan ID."
                 }
             }
         },
