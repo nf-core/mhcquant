@@ -36,6 +36,7 @@ nextflow_pipeline {
                     }
                 }
             }
+            peptidoform_data.sort { it[0] }
             assertAll(
                 { assert snapshot(
                     // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
