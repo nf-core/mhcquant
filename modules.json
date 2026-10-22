@@ -7,12 +7,12 @@
                 "nf-core": {
                     "easypqp/convert": {
                         "branch": "master",
-                        "git_sha": "fab9e45e452a3087c9647f036437b7df35a43700",
+                        "git_sha": "3d9dfe558d8b92cd7bd381b3b8b8b42926893f5b",
                         "installed_by": ["modules"]
                     },
                     "easypqp/library": {
                         "branch": "master",
-                        "git_sha": "86eb20853edff4bc85fa21104c87920270eac92e",
+                        "git_sha": "3d9dfe558d8b92cd7bd381b3b8b8b42926893f5b",
                         "installed_by": ["modules"]
                     },
                     "gunzip": {
