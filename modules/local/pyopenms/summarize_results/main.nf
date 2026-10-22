@@ -2,8 +2,8 @@ process SUMMARIZE_RESULTS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pyopenms:3.4.1--py312h6b06db6_2' :
-        'biocontainers/pyopenms:3.4.1--py312h6b06db6_2' }"
+        'https://depot.galaxyproject.org/singularity/pyopenms:3.6.0--py312hb2d0698_0' :
+        'biocontainers/pyopenms:3.6.0--py312hb2d0698_0' }"
 
     input:
     tuple val(meta), path(file), path(frag_mass_errs), path(trafoxmls)

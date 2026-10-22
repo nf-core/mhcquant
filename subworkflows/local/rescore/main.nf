@@ -101,9 +101,8 @@ workflow RESCORE {
 
     ch_filter_q_value
         .map { meta, file -> [[id: meta.id], file] }
-        .branch {
-            // Empty FDR-filtered idXML (no peptides) is ~120 lines of OpenMS scaffolding.
-            non_empty: it[1].countLines() > 130
+        .branch { _meta, idxml ->
+            non_empty: hasPeptideIdentification(idxml)
             empty:     true
         }
         .set { ch_fdr_branched }
@@ -113,4 +112,17 @@ workflow RESCORE {
     fdr_filtered       = ch_fdr_branched.non_empty
     fdr_filtered_empty = ch_fdr_branched.empty
     multiqc_files      = ch_multiqc_files
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    FUNCTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+// True if the idXML holds at least one PSM; stops reading at the first one
+def hasPeptideIdentification(idxml) {
+    idxml.withReader { reader ->
+        reader.lines().anyMatch { line -> line.contains('<PeptideIdentification ') }
+    }
 }
