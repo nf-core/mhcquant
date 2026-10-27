@@ -5,9 +5,129 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
+                    "easypqp/convert": {
+                        "branch": "master",
+                        "git_sha": "3d9dfe558d8b92cd7bd381b3b8b8b42926893f5b",
+                        "installed_by": ["modules"]
+                    },
+                    "easypqp/library": {
+                        "branch": "master",
+                        "git_sha": "3d9dfe558d8b92cd7bd381b3b8b8b42926893f5b",
+                        "installed_by": ["modules"]
+                    },
+                    "gunzip": {
+                        "branch": "master",
+                        "git_sha": "0902eac3012baaf4f9ab6513c8c55acc9353c96c",
+                        "installed_by": ["modules"]
+                    },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "98403d15b0e50edae1f3fec5eae5e24982f1fade",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/decoydatabase": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/featurefinderidentification": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/fileconverter": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/filefilter": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/idconflictresolver": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/idfilter": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/idmerger": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/idripper": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/idscoreswitcher": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/mapaligneridentification": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/maprttransformer": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/mztabexporter": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/peakpickerhires": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/peptideindexer": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/psmfeatureextractor": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openms/textexporter": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "openmsthirdparty/cometadapter": {
+                        "branch": "master",
+                        "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
+                        "installed_by": ["modules"]
+                    },
+                    "parsesdrf/convert": {
+                        "branch": "master",
+                        "git_sha": "978985a5e3285076fc86fb2b3b3593792872d789",
+                        "installed_by": ["modules"]
+                    },
+                    "pridepy/downloadfile": {
+                        "branch": "master",
+                        "git_sha": "e49c41bed2a652f2859a3309e6609160408c321e",
+                        "installed_by": ["modules"]
+                    },
+                    "pridepy/fetchsdrf": {
+                        "branch": "master",
+                        "git_sha": "8fd246251924e27b78ef8e06fc2eb47531ed4ae1",
+                        "installed_by": ["modules"]
+                    },
+                    "thermorawfileparser": {
+                        "branch": "master",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     }
                 }
