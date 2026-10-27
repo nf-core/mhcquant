@@ -1,0 +1,59 @@
+{
+    "proteomics - mzML": {
+        "content": [
+            [
+                [
+                    "OPENMS_PEAKPICKERHIRES",
+                    "openms",
+                    "3.6.0"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-12T06:59:08.800443801",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    },
+    "proteomics - mzML - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "test_stub.mzML:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "OPENMS_PEAKPICKERHIRES",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ],
+                "mzml": [
+                    [
+                        {
+                            "id": "test_stub"
+                        },
+                        "test_stub.mzML:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_openms": [
+                    [
+                        "OPENMS_PEAKPICKERHIRES",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-12T06:59:20.398972515",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}

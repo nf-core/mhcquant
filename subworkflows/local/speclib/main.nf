@@ -1,0 +1,49 @@
+/*
+ * Generates spectrum library for DIA-based searches
+ */
+
+//
+// MODULE: Installed directly from nf-core/modules
+//
+
+include { EASYPQP_CONVERT                           } from '../../../modules/nf-core/easypqp/convert/main'
+include { EASYPQP_LIBRARY                           } from '../../../modules/nf-core/easypqp/library/main'
+include { EASYPQP_LIBRARY as EASYPQP_LIBRARY_GLOBAL } from '../../../modules/nf-core/easypqp/library/main'
+
+workflow SPECLIB {
+    take:
+    fdrfiltered_comet_idxml
+    mzml
+
+    main:
+    // Load unimod tables (Future:)
+    unimod = file("${projectDir}/assets/250120_unimod_tables.xml", checkIfExists: true)
+
+    // Convert psms and spectra to pickle files
+    EASYPQP_CONVERT(fdrfiltered_comet_idxml.join(mzml), unimod)
+
+    EASYPQP_CONVERT.out.psmpkl
+        .map { meta, psmpkl -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), psmpkl] }
+        .groupTuple()
+        .set { ch_psmpkl }
+    EASYPQP_CONVERT.out.peakpkl
+        .map { meta, peakpkl -> [groupKey([id: "${meta.sample}_${meta.condition}"], meta.group_count), peakpkl] }
+        .groupTuple()
+        .set { ch_peakpkl }
+
+    // Generate spectrum library for each sample-condition pair
+    EASYPQP_LIBRARY(ch_psmpkl.join(ch_peakpkl))
+
+    // Generate spectrum library for all MSruns in the samplesheet
+    if (params.global_fdr) {
+        EASYPQP_CONVERT.out.psmpkl
+            .map { meta, psmpkl -> [[id: meta.search_preset ?: 'global'], psmpkl] }
+            .groupTuple()
+            .set { ch_global_psmpkl }
+        EASYPQP_CONVERT.out.peakpkl
+            .map { meta, peakpkl -> [[id: meta.search_preset ?: 'global'], peakpkl] }
+            .groupTuple()
+            .set { ch_global_peakpkl }
+        EASYPQP_LIBRARY_GLOBAL(ch_global_psmpkl.join(ch_global_peakpkl))
+    }
+}

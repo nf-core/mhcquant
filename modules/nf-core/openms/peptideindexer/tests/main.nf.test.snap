@@ -1,0 +1,84 @@
+{
+    "proteomics - refresh_idxml": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_indexed.idXML:md5,0ea90f7f688df1c302f08a1586b7b75d"
+                    ]
+                ],
+                "1": [
+                    [
+                        "OPENMS_PEPTIDEINDEXER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ],
+                "indexed_idxml": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_indexed.idXML:md5,0ea90f7f688df1c302f08a1586b7b75d"
+                    ]
+                ],
+                "versions_openms": [
+                    [
+                        "OPENMS_PEPTIDEINDEXER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-12T06:59:51.129510397",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    },
+    "proteomics - refresh_idxml - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_indexed.idXML:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "OPENMS_PEPTIDEINDEXER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ],
+                "indexed_idxml": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_indexed.idXML:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_openms": [
+                    [
+                        "OPENMS_PEPTIDEINDEXER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-12T07:00:12.6282592",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}

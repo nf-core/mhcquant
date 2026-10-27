@@ -1,0 +1,194 @@
+{
+    "-profile test_single_quant": {
+        "content": [
+            {
+                "MS2RESCORE": {
+                    "MS2Rescore": "3.1.5"
+                },
+                "OPENMSTHIRDPARTY_COMETADAPTER": {
+                    "Comet": "2024.01 rev. 1",
+                    "CometAdapter": "3.6.0"
+                },
+                "OPENMS_DECOYDATABASE": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_FEATUREFINDERIDENTIFICATION": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_FILECONVERTER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_IDCONFLICTRESOLVER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_IDFILTER_QUANT": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_IDFILTER_Q_VALUE": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_IDMASSACCURACY": {
+                    "openms": "3.4.1"
+                },
+                "OPENMS_IDMERGER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_IDMERGER_QUANT": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_IDRIPPER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_IDSCORESWITCHER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_MAPALIGNERIDENTIFICATION": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_MAPRTTRANSFORMERIDXML": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_MAPRTTRANSFORMERMZML": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_MZTABEXPORTER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_PEPTIDEINDEXER": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_PERCOLATORADAPTER": {
+                    "PercolatorAdapter": "3.6.0",
+                    "percolator": "3.09.0"
+                },
+                "OPENMS_PSMFEATUREEXTRACTOR": {
+                    "openms": "3.6.0"
+                },
+                "OPENMS_TEXTEXPORTER": {
+                    "openms": "3.6.0"
+                },
+                "PYOPENMS_CHROMATOGRAMEXTRACTOR": {
+                    "pyopenms": "3.6.0"
+                },
+                "SUMMARIZE_RESULTS": {
+                    "pyopenms": "3.6.0"
+                },
+                "THERMORAWFILEPARSER": {
+                    "thermorawfileparser": "1.4.5"
+                },
+                "Workflow": {
+                    "nf-core/mhcquant": "v3.3.0"
+                }
+            },
+            [
+                "PBMC007_B.mzTab",
+                "PBMC007_B.tsv",
+                "PBMC009_A.mzTab",
+                "PBMC009_A.tsv",
+                "intermediate_results",
+                "intermediate_results/alignment",
+                "intermediate_results/alignment/PBMC007_msms29_fdr_filtered.trafoXML",
+                "intermediate_results/alignment/PBMC009_msms37_fdr_filtered.trafoXML",
+                "intermediate_results/comet",
+                "intermediate_results/comet/PBMC007_msms29_pin.tsv",
+                "intermediate_results/comet/PBMC009_msms37_pin.tsv",
+                "intermediate_results/features",
+                "intermediate_results/features/1_PBMC009_A.featureXML",
+                "intermediate_results/features/6_PBMC007_B.featureXML",
+                "intermediate_results/rescoring",
+                "intermediate_results/rescoring/PBMC007_B_pout.idXML",
+                "intermediate_results/rescoring/PBMC007_B_pout_filtered.idXML",
+                "intermediate_results/rescoring/PBMC009_A_pout.idXML",
+                "intermediate_results/rescoring/PBMC009_A_pout_filtered.idXML",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_chromatogram.txt",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_deeplc_rt_calibration.txt",
+                "multiqc/multiqc_data/multiqc_general_stats.txt",
+                "multiqc/multiqc_data/multiqc_histogram_mz.txt",
+                "multiqc/multiqc_data/multiqc_histogram_rt.txt",
+                "multiqc/multiqc_data/multiqc_histogram_scores.txt",
+                "multiqc/multiqc_data/multiqc_length_dist.txt",
+                "multiqc/multiqc_data/multiqc_mass_error.txt",
+                "multiqc/multiqc_data/multiqc_peptide_intensity.txt",
+                "multiqc/multiqc_data/multiqc_percolator_barplot.txt",
+                "multiqc/multiqc_data/multiqc_scores_xcorr.txt",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_data/percolator_plot.txt",
+                "multiqc/multiqc_plots",
+                "multiqc/multiqc_plots/pdf",
+                "multiqc/multiqc_plots/pdf/chromatogram-cnt.pdf",
+                "multiqc/multiqc_plots/pdf/chromatogram-log.pdf",
+                "multiqc/multiqc_plots/pdf/deeplc_rt_calibration.pdf",
+                "multiqc/multiqc_plots/pdf/general_stats.pdf",
+                "multiqc/multiqc_plots/pdf/histogram_mz.pdf",
+                "multiqc/multiqc_plots/pdf/histogram_rt.pdf",
+                "multiqc/multiqc_plots/pdf/histogram_scores.pdf",
+                "multiqc/multiqc_plots/pdf/length_dist.pdf",
+                "multiqc/multiqc_plots/pdf/mass_error.pdf",
+                "multiqc/multiqc_plots/pdf/peptide_intensity.pdf",
+                "multiqc/multiqc_plots/pdf/percolator_plot-cnt.pdf",
+                "multiqc/multiqc_plots/pdf/percolator_plot-pct.pdf",
+                "multiqc/multiqc_plots/pdf/scores_xcorr.pdf",
+                "multiqc/multiqc_plots/png",
+                "multiqc/multiqc_plots/png/chromatogram-cnt.png",
+                "multiqc/multiqc_plots/png/chromatogram-log.png",
+                "multiqc/multiqc_plots/png/deeplc_rt_calibration.png",
+                "multiqc/multiqc_plots/png/general_stats.png",
+                "multiqc/multiqc_plots/png/histogram_mz.png",
+                "multiqc/multiqc_plots/png/histogram_rt.png",
+                "multiqc/multiqc_plots/png/histogram_scores.png",
+                "multiqc/multiqc_plots/png/length_dist.png",
+                "multiqc/multiqc_plots/png/mass_error.png",
+                "multiqc/multiqc_plots/png/peptide_intensity.png",
+                "multiqc/multiqc_plots/png/percolator_plot-cnt.png",
+                "multiqc/multiqc_plots/png/percolator_plot-pct.png",
+                "multiqc/multiqc_plots/png/scores_xcorr.png",
+                "multiqc/multiqc_plots/svg",
+                "multiqc/multiqc_plots/svg/chromatogram-cnt.svg",
+                "multiqc/multiqc_plots/svg/chromatogram-log.svg",
+                "multiqc/multiqc_plots/svg/deeplc_rt_calibration.svg",
+                "multiqc/multiqc_plots/svg/general_stats.svg",
+                "multiqc/multiqc_plots/svg/histogram_mz.svg",
+                "multiqc/multiqc_plots/svg/histogram_rt.svg",
+                "multiqc/multiqc_plots/svg/histogram_scores.svg",
+                "multiqc/multiqc_plots/svg/length_dist.svg",
+                "multiqc/multiqc_plots/svg/mass_error.svg",
+                "multiqc/multiqc_plots/svg/peptide_intensity.svg",
+                "multiqc/multiqc_plots/svg/percolator_plot-cnt.svg",
+                "multiqc/multiqc_plots/svg/percolator_plot-pct.svg",
+                "multiqc/multiqc_plots/svg/scores_xcorr.svg",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_mhcquant_software_mqc_versions.yml"
+            ],
+            [
+                "PBMC007_msms29_fdr_filtered.trafoXML:md5,c129fc3f79bd40bfdd899689599bc25d",
+                "PBMC009_msms37_fdr_filtered.trafoXML:md5,c129fc3f79bd40bfdd899689599bc25d"
+            ],
+            [
+                [
+                    "PBMC007_B.tsv",
+                    2149,
+                    "6a0c85155dd1194564203c6a7e24f578"
+                ],
+                [
+                    "PBMC009_A.tsv",
+                    5838,
+                    "fb0cf4c8fb988f3752bc4c8dfe9a8862"
+                ]
+            ]
+        ],
+        "timestamp": "2026-10-14T11:22:13.719534817",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}

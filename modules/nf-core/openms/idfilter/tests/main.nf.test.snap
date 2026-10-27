@@ -1,0 +1,84 @@
+{
+    "proteomics - filter - idxml - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.idXML:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        "OPENMS_IDFILTER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ],
+                "filtered": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.idXML:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_openms": [
+                    [
+                        "OPENMS_IDFILTER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-12T06:54:41.676201288",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    },
+    "proteomics - filter - idxml": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.idXML:md5,336992f7531351328ab293ff99d16682"
+                    ]
+                ],
+                "1": [
+                    [
+                        "OPENMS_IDFILTER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ],
+                "filtered": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.idXML:md5,336992f7531351328ab293ff99d16682"
+                    ]
+                ],
+                "versions_openms": [
+                    [
+                        "OPENMS_IDFILTER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-12T06:54:28.028007886",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}

@@ -1,0 +1,96 @@
+{
+    "proteomics - split - idxml": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        [
+                            "HepG2_rep1_small.idXML:md5,983f169dfe2a6f47e2a672f11678875d",
+                            "HepG2_rep2_small.idXML:md5,9ae046dd7eb06f87d041c65f3f0c3eda"
+                        ]
+                    ]
+                ],
+                "1": [
+                    [
+                        "OPENMS_IDRIPPER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ],
+                "idxmls": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        [
+                            "HepG2_rep1_small.idXML:md5,983f169dfe2a6f47e2a672f11678875d",
+                            "HepG2_rep2_small.idXML:md5,9ae046dd7eb06f87d041c65f3f0c3eda"
+                        ]
+                    ]
+                ],
+                "versions_openms": [
+                    [
+                        "OPENMS_IDRIPPER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-12T06:55:39.47778435",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    },
+    "proteomics - split - idxml - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        [
+                            "test_1.idXML:md5,d41d8cd98f00b204e9800998ecf8427e",
+                            "test_2.idXML:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        ]
+                    ]
+                ],
+                "1": [
+                    [
+                        "OPENMS_IDRIPPER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ],
+                "idxmls": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        [
+                            "test_1.idXML:md5,d41d8cd98f00b204e9800998ecf8427e",
+                            "test_2.idXML:md5,d41d8cd98f00b204e9800998ecf8427e"
+                        ]
+                    ]
+                ],
+                "versions_openms": [
+                    [
+                        "OPENMS_IDRIPPER",
+                        "openms",
+                        "3.6.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-12T06:55:57.818739814",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}

@@ -1,0 +1,125 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/mhcquant/master/assets/schema_search_presets.json",
+    "title": "nf-core/mhcquant pipeline - params.search_presets schema",
+    "description": "Schema for the search parameter presets file provided with params.search_presets",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "PresetName": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_]+$",
+                "errorMessage": "PresetName must contain only alphanumeric characters and underscores",
+                "meta": ["preset_name"]
+            },
+            "PeptideMinLength": {
+                "type": "integer",
+                "minimum": 1,
+                "errorMessage": "PeptideMinLength must be a positive integer",
+                "meta": ["peptide_min_length"]
+            },
+            "PeptideMaxLength": {
+                "type": "integer",
+                "minimum": 1,
+                "errorMessage": "PeptideMaxLength must be a positive integer",
+                "meta": ["peptide_max_length"]
+            },
+            "PrecursorMassRange": {
+                "type": "string",
+                "pattern": "^\\d+:\\d+$",
+                "errorMessage": "PrecursorMassRange must be in format 'min:max' (e.g., '800:2500')",
+                "meta": ["digest_mass_range"]
+            },
+            "PrecursorCharge": {
+                "type": "string",
+                "pattern": "^\\d+:\\d+$",
+                "errorMessage": "PrecursorCharge must be in format 'min:max' (e.g., '2:3')",
+                "meta": ["prec_charge"]
+            },
+            "PrecursorMassTolerance": {
+                "type": "number",
+                "minimum": 0,
+                "errorMessage": "PrecursorMassTolerance must be a non-negative number",
+                "meta": ["precursor_mass_tolerance"]
+            },
+            "PrecursorErrorUnit": {
+                "type": "string",
+                "enum": ["ppm", "Da"],
+                "errorMessage": "PrecursorErrorUnit must be either 'ppm' or 'Da'",
+                "meta": ["precursor_error_units"]
+            },
+            "FragmentMassTolerance": {
+                "type": "number",
+                "minimum": 0,
+                "errorMessage": "FragmentMassTolerance must be a non-negative number",
+                "meta": ["fragment_mass_tolerance"]
+            },
+            "FragmentBinOffset": {
+                "type": "number",
+                "minimum": 0,
+                "errorMessage": "FragmentBinOffset must be a non-negative number",
+                "meta": ["fragment_bin_offset"]
+            },
+            "MS2PIPModel": {
+                "type": "string",
+                "enum": [
+                    "Immuno-HCD",
+                    "timsTOF",
+                    "CIDch2",
+                    "HCD",
+                    "CID",
+                    "ITMS",
+                    "iTRAQ",
+                    "iTRAQphospho",
+                    "TMT",
+                    "HCDch2"
+                ],
+                "errorMessage": "MS2PIPModel must be a valid MS2PIP model name",
+                "meta": ["ms2pip_model"]
+            },
+            "ActivationMethod": {
+                "type": "string",
+                "enum": ["ALL", "CID", "HCD", "ETD", "ECD", "EThcD", "ETciD"],
+                "errorMessage": "ActivationMethod must be one of: ALL, CID, HCD, ETD, ECD, EThcD, ETciD",
+                "meta": ["activation_method"]
+            },
+            "Instrument": {
+                "type": "string",
+                "enum": ["high_res", "low_res"],
+                "errorMessage": "Instrument must be either 'high_res' or 'low_res'",
+                "meta": ["instrument"]
+            },
+            "NumberMods": {
+                "type": "integer",
+                "minimum": 0,
+                "errorMessage": "NumberMods must be a non-negative integer",
+                "meta": ["number_mods"]
+            },
+            "FixedMods": {
+                "type": "string",
+                "errorMessage": "FixedMods must be a comma-separated list of UNIMOD modification names",
+                "meta": ["fixed_mods"]
+            },
+            "VariableMods": {
+                "type": "string",
+                "errorMessage": "VariableMods must be a comma-separated list of UNIMOD modification names",
+                "meta": ["variable_mods"]
+            }
+        },
+        "required": [
+            "PresetName",
+            "PeptideMinLength",
+            "PeptideMaxLength",
+            "PrecursorMassRange",
+            "PrecursorCharge",
+            "PrecursorMassTolerance",
+            "FragmentMassTolerance",
+            "FragmentBinOffset",
+            "MS2PIPModel",
+            "ActivationMethod",
+            "Instrument",
+            "NumberMods"
+        ]
+    }
+}
