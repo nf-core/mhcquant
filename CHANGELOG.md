@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bumped OpenMS and pyOpenMS modules to 3.6.0 and renamed `COMET:xcorr` to its PSI-MS term name `Comet:xcorr` in the result TSV [#494](https://github.com/nf-core/mhcquant/pull/494)
 - Kept peptides shared between proteins in EasyPQP spectral libraries with `--no-proteotypic` [#493](https://github.com/nf-core/mhcquant/pull/493)
-- Updated to nf-core template 4.2.2 [#500](https://github.com/nf-core/mhcquant/pull/500)
 
 ### `Dependencies`
 
