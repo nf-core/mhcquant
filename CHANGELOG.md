@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | Dependency          | Old version | New version |
 | ------------------- | ----------- | ----------- |
 | `easypqp`           | 0.1.59      | 0.1.60      |
+| `Nf-core`           | 4.1.0       | 4.2.2       |
 | `OpenMS`            | 3.5.0       | 3.6.0       |
 | `OpenMS-thirdparty` | 3.5.0       | 3.6.0       |
 | `Percolator`        | 3.7.1       | 3.9.0       |
