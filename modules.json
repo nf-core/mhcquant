@@ -110,6 +110,11 @@
                         "git_sha": "580647c817abec76fbb780e1ea537504c7543a99",
                         "installed_by": ["modules"]
                     },
+                    "openmsthirdparty/percolatoradapter": {
+                        "branch": "master",
+                        "git_sha": "fadc5dc15d34bafe16d465685a2c9b782f9708bc",
+                        "installed_by": ["modules"]
+                    },
                     "parsesdrf/convert": {
                         "branch": "master",
                         "git_sha": "978985a5e3285076fc86fb2b3b3593792872d789",
