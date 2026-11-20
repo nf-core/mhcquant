@@ -8,15 +8,15 @@
 
 include { MS2RESCORE                                                  } from '../../../modules/local/ms2rescore'
 include { OPENMS_PSMFEATUREEXTRACTOR                                  } from '../../../modules/nf-core/openms/psmfeatureextractor/main'
-include {
-    OPENMS_PERCOLATORADAPTER ;
-    OPENMS_PERCOLATORADAPTER as OPENMS_PERCOLATORADAPTER_GLOBAL
-} from '../../../modules/local/openmsthirdparty/percolatoradapter'
 include { OPENMS_TEXTEXPORTER as OPENMS_TEXTEXPORTER_GLOBAL           } from '../../../modules/nf-core/openms/textexporter/main'
 //
 // MODULE: Installed directly from nf-core/modules
 //
 
+include {
+    OPENMSTHIRDPARTY_PERCOLATORADAPTER ;
+    OPENMSTHIRDPARTY_PERCOLATORADAPTER as OPENMSTHIRDPARTY_PERCOLATORADAPTER_GLOBAL
+} from '../../../modules/nf-core/openmsthirdparty/percolatoradapter/main'
 include { OPENMS_IDMERGER as OPENMS_IDMERGER_GLOBAL                   } from '../../../modules/nf-core/openms/idmerger/main'
 include { OPENMS_IDSCORESWITCHER                                      } from '../../../modules/nf-core/openms/idscoreswitcher/main.nf'
 include {
@@ -61,9 +61,9 @@ workflow RESCORE {
         OPENMS_PSMFEATUREEXTRACTOR(ch_psmfeatureextractor_input)
 
         // Run Percolator with local FDR
-        OPENMS_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
-        ch_multiqc_files = ch_multiqc_files.mix(OPENMS_PERCOLATORADAPTER.out.feature_weights.map { meta, feature_weights -> feature_weights })
-        ch_pout = OPENMS_PERCOLATORADAPTER.out.idxml
+        OPENMSTHIRDPARTY_PERCOLATORADAPTER(OPENMS_PSMFEATUREEXTRACTOR.out.idxml)
+        ch_multiqc_files = ch_multiqc_files.mix(OPENMSTHIRDPARTY_PERCOLATORADAPTER.out.feature_weights.map { meta, feature_weights -> feature_weights })
+        ch_pout = OPENMSTHIRDPARTY_PERCOLATORADAPTER.out.idxml
 
         if (params.global_fdr) {
             // Group by search_preset for global FDR. Samples without a preset all share
@@ -72,8 +72,8 @@ workflow RESCORE {
                 OPENMS_PSMFEATUREEXTRACTOR.out.idxml.map { group_meta, idxml -> [group_meta.findAll { k, _v -> k != 'extra_features' } + [id: group_meta.search_preset ?: 'global'], idxml] }.groupTuple()
             )
             // Run Percolator with global FDR (one per preset group)
-            OPENMS_PERCOLATORADAPTER_GLOBAL(OPENMS_IDMERGER_GLOBAL.out.idxml)
-            ch_rescored_runs = OPENMS_PERCOLATORADAPTER_GLOBAL.out.idxml
+            OPENMSTHIRDPARTY_PERCOLATORADAPTER_GLOBAL(OPENMS_IDMERGER_GLOBAL.out.idxml)
+            ch_rescored_runs = OPENMSTHIRDPARTY_PERCOLATORADAPTER_GLOBAL.out.idxml
             // Filter by global percolator q-value
             OPENMS_IDFILTER_Q_VALUE_GLOBAL(ch_rescored_runs.map { id, idxml -> [id, idxml, []] })
             // Backfilter: match each local file with its corresponding preset's global FDR file

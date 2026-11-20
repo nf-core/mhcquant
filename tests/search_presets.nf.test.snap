@@ -9,6 +9,10 @@
                     "Comet": "2024.01 rev. 1",
                     "CometAdapter": "3.6.0"
                 },
+                "OPENMSTHIRDPARTY_PERCOLATORADAPTER": {
+                    "PercolatorAdapter": "3.6.0",
+                    "percolator": "3.09.0"
+                },
                 "OPENMS_DECOYDATABASE": {
                     "openms": "3.6.0"
                 },
@@ -23,10 +27,6 @@
                 },
                 "OPENMS_PEPTIDEINDEXER": {
                     "openms": "3.6.0"
-                },
-                "OPENMS_PERCOLATORADAPTER": {
-                    "PercolatorAdapter": "3.6.0",
-                    "percolator": "3.09.0"
                 },
                 "OPENMS_PSMFEATUREEXTRACTOR": {
                     "openms": "3.6.0"
